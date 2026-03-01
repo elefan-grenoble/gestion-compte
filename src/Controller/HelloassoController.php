@@ -12,6 +12,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
 
@@ -92,7 +93,7 @@ class HelloassoController extends AbstractController
      * @Route("/browser/{formType}/{slug}", name="helloasso_campaign_details", methods={"GET"})
      * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
-    public function helloassoCampaignDetailsAction(Request $request, HelloassoClient $helloassoClient, string $formType, string $slug)
+    public function helloassoCampaignDetailsAction(Request $request, HelloassoClient $helloassoClient, string $formType, string $slug): Response
     {
         $currentPage = $request->get('page', 1);
         try {

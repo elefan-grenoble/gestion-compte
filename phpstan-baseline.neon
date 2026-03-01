@@ -421,24 +421,6 @@ parameters:
 			path: src/Command/SendMassMailCommand.php
 
 		-
-			message: '#^Parameter \#1 \.\.\.\$addresses of method Symfony\\Component\\Mime\\Email\:\:bcc\(\) expects string\|Symfony\\Component\\Mime\\Address, list given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Command/SendMassMailCommand.php
-
-		-
-			message: '#^Parameter \#1 \.\.\.\$addresses of method Symfony\\Component\\Mime\\Email\:\:from\(\) expects string\|Symfony\\Component\\Mime\\Address, array\<string, bool\|int\|string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Command/SendMassMailCommand.php
-
-		-
-			message: '#^Parameter \#1 \.\.\.\$addresses of method Symfony\\Component\\Mime\\Email\:\:to\(\) expects string\|Symfony\\Component\\Mime\\Address, array\<string, bool\|int\|string\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Command/SendMassMailCommand.php
-
-		-
 			message: '#^Property App\\Command\\SendMassMailCommand\:\:\$em has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -583,38 +565,8 @@ parameters:
 			path: src/Command/UpdateHelloAssoPaymentsCommand.php
 
 		-
-			message: '#^Method App\\Command\\UpdateHelloAssoPaymentsCommand\:\:processEntry\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Command/UpdateHelloAssoPaymentsCommand.php
-
-		-
-			message: '#^Method App\\Command\\UpdateHelloAssoPaymentsCommand\:\:processEntry\(\) has parameter \$entry with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Command/UpdateHelloAssoPaymentsCommand.php
-
-		-
 			message: '#^Method App\\Command\\UpdateHelloAssoPaymentsCommand\:\:processPage\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Command/UpdateHelloAssoPaymentsCommand.php
-
-		-
-			message: '#^Method App\\Command\\UpdateHelloAssoPaymentsCommand\:\:processPage\(\) has parameter \$resources with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/Command/UpdateHelloAssoPaymentsCommand.php
-
-		-
-			message: '#^Property App\\Command\\UpdateHelloAssoPaymentsCommand\:\:\$em has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: src/Command/UpdateHelloAssoPaymentsCommand.php
-
-		-
-			message: '#^Property App\\Command\\UpdateHelloAssoPaymentsCommand\:\:\$event_dispatcher has no type specified\.$#'
-			identifier: missingType.property
 			count: 1
 			path: src/Command/UpdateHelloAssoPaymentsCommand.php
 
@@ -1825,12 +1777,6 @@ parameters:
 			path: src/Controller/DefaultController.php
 
 		-
-			message: '#^Method App\\Controller\\DefaultController\:\:helloassoNotify\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Controller/DefaultController.php
-
-		-
 			message: '#^Method App\\Controller\\DefaultController\:\:indexAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1844,12 +1790,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Event\>, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Controller/DefaultController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:HelloassoPayment\>, string given\.$#'
 			identifier: argument.type
 			count: 2
 			path: src/Controller/DefaultController.php
@@ -2139,7 +2079,7 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:HelloassoPayment\>, string given\.$#'
 			identifier: argument.type
-			count: 3
+			count: 1
 			path: src/Controller/HelloassoController.php
 
 		-
@@ -2899,12 +2839,6 @@ parameters:
 			path: src/Controller/ShiftController.php
 
 		-
-			message: '#^Parameter \#1 \.\.\.\$addresses of method Symfony\\Component\\Mime\\Email\:\:bcc\(\) expects string\|Symfony\\Component\\Mime\\Address, list given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/ShiftController.php
-
-		-
 			message: '#^Parameter \#2 \$beneficiary of method App\\Service\\ShiftService\:\:isShiftBookable\(\) expects App\\Entity\\Beneficiary\|null, App\:Beneficiary given\.$#'
 			identifier: argument.type
 			count: 1
@@ -3061,12 +2995,6 @@ parameters:
 			path: src/Controller/SwipeCardController.php
 
 		-
-			message: '#^Parameter \#1 \$beneficiary of method App\\Entity\\SwipeCard\:\:setBeneficiary\(\) expects App\\Entity\\Beneficiary\|null, App\:Beneficiary\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/SwipeCardController.php
-
-		-
 			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Beneficiary\>, string given\.$#'
 			identifier: argument.type
 			count: 3
@@ -3076,12 +3004,6 @@ parameters:
 			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:SwipeCard\>, string given\.$#'
 			identifier: argument.type
 			count: 9
-			path: src/Controller/SwipeCardController.php
-
-		-
-			message: '#^Parameter \#1 \$enable of method App\\Entity\\SwipeCard\:\:setEnable\(\) expects bool\|null, int given\.$#'
-			identifier: argument.type
-			count: 1
 			path: src/Controller/SwipeCardController.php
 
 		-
@@ -3099,7 +3021,7 @@ parameters:
 		-
 			message: '#^Parameter \#2 \$values of method Symfony\\Component\\HttpFoundation\\ResponseHeaderBag\:\:set\(\) expects array\<string\>\|string\|null, int\<0, max\> given\.$#'
 			identifier: argument.type
-			count: 2
+			count: 1
 			path: src/Controller/SwipeCardController.php
 
 		-
@@ -4279,10 +4201,16 @@ parameters:
 			path: src/Entity/Formation.php
 
 		-
-			message: '#^Property App\\Entity\\Formation\:\:\$roles has no type specified\.$#'
-			identifier: missingType.property
+			message: '#^Property App\\Entity\\Formation\:\:\$roles type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
 			count: 1
 			path: src/Entity/Formation.php
+
+		-
+			message: '#^Method App\\Entity\\HelloassoPayment\:\:createFromPayementObject\(\) has parameter \$paymentObject with no type specified\.$#'
+			identifier: missingType.parameter
+			count: 1
+			path: src/Entity/HelloassoPayment.php
 
 		-
 			message: '#^Method App\\Entity\\HelloassoPayment\:\:fromPaymentObj\(\) has no return type specified\.$#'
@@ -6817,24 +6745,6 @@ parameters:
 			path: src/EventListener/EmailingEventListener.php
 
 		-
-			message: '#^Parameter \#1 \.\.\.\$addresses of method Symfony\\Component\\Mime\\Email\:\:replyTo\(\) expects string\|Symfony\\Component\\Mime\\Address, array\<string\> given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/EventListener/EmailingEventListener.php
-
-		-
-			message: '#^Parameter \#1 \.\.\.\$addresses of method Symfony\\Component\\Mime\\Email\:\:to\(\) expects string\|Symfony\\Component\\Mime\\Address, array given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/EventListener/EmailingEventListener.php
-
-		-
-			message: '#^Parameter \#1 \.\.\.\$addresses of method Symfony\\Component\\Mime\\Email\:\:to\(\) expects string\|Symfony\\Component\\Mime\\Address, array\<string\> given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/EventListener/EmailingEventListener.php
-
-		-
 			message: '#^Property App\\EventListener\\EmailingEventListener\:\:\$container has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -8347,12 +8257,6 @@ parameters:
 			path: src/Helper/SwipeCard.php
 
 		-
-			message: '#^Property App\\Helper\\SwipeCard\:\:\$container has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: src/Helper/SwipeCard.php
-
-		-
 			message: '#^Call to function is_object\(\) with App\\Entity\\User will always evaluate to true\.$#'
 			identifier: function.alreadyNarrowedType
 			count: 1
@@ -8411,6 +8315,48 @@ parameters:
 			identifier: missingType.iterableValue
 			count: 1
 			path: src/Monolog/ToggleableHandler.php
+
+		-
+			message: '#^Method App\\Providers\\Helloasso\\HelloassoClient\:\:getFormPayments\(\) has parameter \$params with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Providers/Helloasso/HelloassoClient.php
+
+		-
+			message: '#^Method App\\Providers\\Helloasso\\HelloassoClient\:\:getForms\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Providers/Helloasso/HelloassoClient.php
+
+		-
+			message: '#^Method App\\Providers\\Helloasso\\HelloassoNotificationRequest\:\:__construct\(\) has parameter \$data with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Providers/Helloasso/HelloassoNotificationRequest.php
+
+		-
+			message: '#^Property App\\Providers\\Helloasso\\HelloassoNotificationRequest\:\:\$data type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Providers/Helloasso/HelloassoNotificationRequest.php
+
+		-
+			message: '#^Method App\\Providers\\Helloasso\\HelloassoPaymentHandler\:\:savePayments\(\) has parameter \$payments with no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Providers/Helloasso/HelloassoPaymentHandler.php
+
+		-
+			message: '#^Method App\\Providers\\Helloasso\\HelloassoPaymentHandler\:\:savePayments\(\) return type has no value type specified in iterable type array\.$#'
+			identifier: missingType.iterableValue
+			count: 1
+			path: src/Providers/Helloasso/HelloassoPaymentHandler.php
+
+		-
+			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
+			identifier: arguments.count
+			count: 1
+			path: src/Providers/Helloasso/HelloassoPaymentHandler.php
 
 		-
 			message: '#^Class App\\Repository\\AddressRepository extends generic class Doctrine\\ORM\\EntityRepository but does not specify its types\: TEntityClass$#'
@@ -8971,8 +8917,8 @@ parameters:
 			path: src/Repository/ShiftRepository.php
 
 		-
-			message: '#^Method App\\Repository\\ShiftRepository\:\:findShiftsForBeneficiaries\(\) has parameter \$beneficiaries with no type specified\.$#'
-			identifier: missingType.parameter
+			message: '#^Method App\\Repository\\ShiftRepository\:\:findShiftsForBeneficiaries\(\) has parameter \$beneficiaries with generic interface Doctrine\\Common\\Collections\\Collection but does not specify its types\: TKey, T$#'
+			identifier: missingType.generics
 			count: 1
 			path: src/Repository/ShiftRepository.php
 
@@ -9019,6 +8965,12 @@ parameters:
 			path: src/Repository/ShiftRepository.php
 
 		-
+			message: '#^Method App\\Repository\\ShiftRepository\:\:functionsResultCache\(\) has no return type specified\.$#'
+			identifier: missingType.return
+			count: 1
+			path: src/Repository/ShiftRepository.php
+
+		-
 			message: '#^Method App\\Repository\\ShiftRepository\:\:getBeneficiaryShiftCount\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -9045,6 +8997,12 @@ parameters:
 		-
 			message: '#^Method App\\Repository\\ShiftRepository\:\:getYears\(\) has no return type specified\.$#'
 			identifier: missingType.return
+			count: 1
+			path: src/Repository/ShiftRepository.php
+
+		-
+			message: '#^Property App\\Repository\\ShiftRepository\:\:\$functions_result_cache has no type specified\.$#'
+			identifier: missingType.property
 			count: 1
 			path: src/Repository/ShiftRepository.php
 
@@ -10869,12 +10827,6 @@ parameters:
 		-
 			message: '#^Property App\\Twig\\Extension\\AppExtension\:\:\$localCurrencyName has no type specified\.$#'
 			identifier: missingType.property
-			count: 1
-			path: src/Twig/Extension/AppExtension.php
-
-		-
-			message: '#^Property App\\Twig\\Extension\\AppExtension\:\:\$localCurrencyName is never read, only written\.$#'
-			identifier: property.onlyWritten
 			count: 1
 			path: src/Twig/Extension/AppExtension.php
 

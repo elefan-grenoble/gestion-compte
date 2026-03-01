@@ -4,9 +4,10 @@ namespace App\EventListener;
 
 use App\Event\ShiftAlertsMattermostEvent;
 use Doctrine\ORM\EntityManagerInterface;
+use GuzzleHttp\Client;
+use GuzzleHttp\RequestOptions;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
-use Symfony\Component\HttpClient\HttpClient;
 
 class MattermostEventListener
 {
@@ -47,9 +48,12 @@ class MattermostEventListener
                 array('alerts' => $alerts, 'date' => $date)
             );
 
-            $client = HttpClient::create();
-            $response = $client->request('POST', $event->getMattermostHookUrl(), [
-                'json' => ['text' => $content]
+            (new Client([
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                ],
+            ]))->request('POST', $event->getMattermostHookUrl(), [
+                RequestOptions::JSON => ['text' => $content]
             ]);
         }
     }

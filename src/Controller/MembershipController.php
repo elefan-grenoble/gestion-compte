@@ -48,6 +48,7 @@ use Symfony\Component\HttpFoundation\Request;
 use DateTime;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Validator\Validator\ValidatorInterface;
 use Twig\Sandbox\SecurityError;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -308,14 +309,14 @@ class MembershipController extends AbstractController
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
-    public function newBeneficiary(Request $request, Membership $member, EventDispatcherInterface $event_dispatcher)
+    public function newBeneficiary(Request $request, Membership $member, EventDispatcherInterface $event_dispatcher, ValidatorInterface $validator)
     {
         $session = new Session();
         $this->denyAccessUnlessGranted(MembershipVoter::BENEFICIARY_ADD, $member);
 
         //check if member can host
         $beneficiaryCanHostConstraint = new BeneficiaryCanHost();
-        $violations = $this->get('validator')->validate(
+        $violations = $validator->validate(
             $member->getMainBeneficiary(),
             $beneficiaryCanHostConstraint
         );

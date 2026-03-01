@@ -3,19 +3,16 @@
 namespace App\Controller;
 
 use App\Entity\BookedShift;
-use App\Entity\Code;
-use App\Entity\HelloassoPayment;
-use App\Entity\Membership;
 use App\Entity\SwipeCard;
 use App\Event\SwipeCardEvent;
 use App\Event\ShiftValidatedEvent;
 use App\Service\MembershipService;
 use App\Service\ShiftService;
+use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
@@ -89,7 +86,7 @@ class CardReaderController extends AbstractController
         // validate beneficiary ongoing shift(s)
         $now = new \Datetime('now');
         $now_plus_ten = new \Datetime('now +10 minutes');
-        $ongoingShifts = $em->getRepository('App:Shift')->findShiftsForBeneficiaries([$beneficiary], null, null, $now_plus_ten, $now);
+        $ongoingShifts = $em->getRepository('App:Shift')->findShiftsForBeneficiaries(new ArrayCollection([$beneficiary]), null, null, $now_plus_ten, $now);
         $ongoingShiftsValidated = 0;
         if ($ongoingShifts) {
             foreach ($ongoingShifts as $shift) {

@@ -373,6 +373,7 @@ services:
       $logger: "@logger"
       $container: "@service_container"
       $mailer: "@mailer"
+      $swipeCardHelper: '@App\Helper\SwipeCard'
     tags:
       - { name: kernel.event_listener, event: shift.reserved, method: onShiftReserved }
       - { name: kernel.event_listener, event: shift.booked, method: onShiftBooked }

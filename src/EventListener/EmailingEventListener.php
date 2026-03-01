@@ -18,6 +18,7 @@ use App\Event\ShiftBookedEvent;
 use App\Event\ShiftFreedEvent;
 use App\Event\ShiftReminderEvent;
 use App\Event\ShiftDeletedEvent;
+use App\Helper\SwipeCard;
 use Doctrine\ORM\EntityManagerInterface;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
@@ -37,9 +38,11 @@ class EmailingEventListener
     protected $shift_email;
     protected $wiki_keys_url;
     protected $reserve_new_shift_to_prior_shifter_delay;
+    private SwipeCard $swipeCardHelper;
 
-    public function __construct(EntityManagerInterface $entityManager, Logger $logger, Container $container, MailerInterface $mailer)
+    public function __construct(EntityManagerInterface $entityManager, Logger $logger, Container $container, MailerInterface $mailer, SwipeCard $swipeCardHelper)
     {
+        $this->swipeCardHelper = $swipeCardHelper;
         $this->em = $entityManager;
         $this->logger = $logger;
         $this->container = $container;
@@ -68,9 +71,9 @@ class EmailingEventListener
 
         $router = $this->container->get('router');
         if (!$event->getAnonymousBeneficiary()->getJoinTo()) {
-            $url = $router->generate('member_new', array('code' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($emailTo)), UrlGeneratorInterface::ABSOLUTE_URL);
+            $url = $router->generate('member_new', array('code' => $this->swipeCardHelper->vigenereEncode($emailTo)), UrlGeneratorInterface::ABSOLUTE_URL);
         } else {
-            $url = $router->generate('member_add_beneficiary', array('code' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($emailTo)), UrlGeneratorInterface::ABSOLUTE_URL);
+            $url = $router->generate('member_add_beneficiary', array('code' => $this->swipeCardHelper->vigenereEncode($emailTo)), UrlGeneratorInterface::ABSOLUTE_URL);
         }
 
         $email = (new Email())
@@ -486,7 +489,7 @@ class EmailingEventListener
             $email = (new Email())
                 ->subject($emailObject)
                 ->from(new Address($this->shift_email['address'], $this->shift_email['from_name']))
-                ->to($emailTo)
+                ->to(...$emailTo)
                 ->html(
                     $this->container->get('twig')->render(
                         $template,
@@ -600,8 +603,8 @@ class EmailingEventListener
 
         // send mail to owner (the one who will vote)
         $emailObject = '[' . $proxy->getEvent()->getTitle() . '] procuration';
-        $emailTo = [$ownerBeneficiary->getEmail() => $ownerBeneficiary->getFirstname() . ' ' . $ownerBeneficiary->getLastname()];
-        $emailReplyTo = [$giverMainBeneficiary->getEmail() => $giverMainBeneficiary->getFirstname() . ' ' . $giverMainBeneficiary->getLastname()];
+        $emailTo = $ownerBeneficiary->getEmail();
+        $emailReplyTo = $giverMainBeneficiary->getEmail();
 
         $email = (new Email())
             ->subject($emailObject)
@@ -623,8 +626,8 @@ class EmailingEventListener
 
         // send mail to giver (the one who cannot come to the event)
         $emailObject = '[' . $proxy->getEvent()->getTitle() . '] ta procuration';
-        $emailTo = [$giverMainBeneficiary->getEmail() => $giverMainBeneficiary->getFirstname() . ' ' . $giverMainBeneficiary->getLastname()];
-        $emailReplyTo = [$ownerBeneficiary->getEmail() => $ownerBeneficiary->getFirstname() . ' ' . $ownerBeneficiary->getLastname()];
+        $emailTo = $giverMainBeneficiary->getEmail();
+        $emailReplyTo = $ownerBeneficiary->getEmail();
 
         $email = (new Email())
             ->subject($emailObject)
