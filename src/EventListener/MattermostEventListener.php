@@ -48,7 +48,11 @@ class MattermostEventListener
                 array('alerts' => $alerts, 'date' => $date)
             );
 
-            (new Client())->request('POST', $event->getMattermostHookUrl(), [
+            (new Client([
+                'headers' => [
+                    'Content-Type' => 'application/json',
+                ],
+            ]))->request('POST', $event->getMattermostHookUrl(), [
                 RequestOptions::JSON => ['text' => $content]
             ]);
         }
