@@ -2,23 +2,20 @@
 
 namespace App\Controller;
 
-use App\Entity\HelloassoPayment;
 use App\Entity\Membership;
-use App\Event\HelloassoEvent;
-use App\Helloasso\HelloassoClient;
-use App\Helloasso\HelloassoPaymentHandler;
-use App\Helloasso\HelloassoNotificationRequest;
+use App\Providers\Helloasso\HelloassoClient;
+use App\Providers\Helloasso\HelloassoNotificationRequest;
+use App\Providers\Helloasso\HelloassoPaymentHandler;
 use App\Service\MembershipService;
 use App\Service\ShiftService;
 use App\Twig\Extension\AppExtension;
 use Psr\Http\Client\ClientExceptionInterface;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 
 class DefaultController extends AbstractController

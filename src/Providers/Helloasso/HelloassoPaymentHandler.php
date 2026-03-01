@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Helloasso;
+namespace App\Providers\Helloasso;
 
 use App\Entity\HelloassoPayment;
 use App\Event\HelloassoEvent;
