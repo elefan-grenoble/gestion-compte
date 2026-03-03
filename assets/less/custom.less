@@ -1,0 +1,510 @@
+/*
+ * Globals
+ */
+@import "../fonts/blackjack/stylesheet.css";
+@import "../fonts/raleway/stylesheet.css";
+@import "material-icons.less";
+
+@import "shift";
+@import "card";
+@import "update";
+
+@bluelelefan: #51CAE9;
+@light-green: #8bc34a;
+@red: #F44336;
+@orange: #ff9800;
+
+h1, h2, h3, h4, h5, h6 {
+  //font-family: 'Amatic SC', cursive; //Amatic+SC
+  //font-family: 'Neucha', cursive; // Neucha
+  font-family: 'Raleway', sans-serif;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+h3.header, h4, h4.header {
+  font-family: 'black_jackregular';
+  text-transform: none;
+  font-weight: normal;
+}
+
+html {
+  font-family: 'Raleway', sans-serif;
+}
+
+body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+}
+
+main {
+  flex: 1 0 auto;
+}
+
+.impersonate {
+  background: black;
+
+  .brand-logo {
+    margin-left: 10px;
+  }
+}
+
+#logo-container {
+  font-family: 'black_jackregular';
+}
+
+/* Links */
+.card .card-action {
+  a.btn {
+    color: white;
+    overflow: hidden;
+    white-space: nowrap;
+    width: 100%;
+  }
+
+  button.btn {
+    overflow: hidden;
+    white-space: nowrap;
+    width: 100%;
+  }
+}
+
+.btn, .btn-large {
+  color: #fff;
+  margin-bottom: 5px;
+}
+
+.breadcrumbs {
+  font-size: 12px;
+  padding: 5px;
+
+  .col {
+    height: 15px;
+  }
+
+  i.material-icons {
+    font-size: 15px;
+    vertical-align: top;
+  }
+
+  a, span {
+    display: inline-block;
+    height: 15px;
+    line-height: 15px;
+    vertical-align: top;
+  }
+
+  a {
+    color: gray;
+  }
+}
+
+.teal.success, .teal.error, .teal.warning {
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.teal.success {
+  background-color: @light-green !important;
+}
+
+.teal.error {
+  background-color: @red !important;
+}
+
+.teal.warning {
+  background-color: @orange !important;
+}
+
+/* Custom default button */
+.btn-secondary,
+.btn-secondary:hover,
+.btn-secondary:focus {
+  color: #333;
+  text-shadow: none; /* Prevent inheritance from `body` */
+  background-color: #fff;
+  border: .05rem solid #fff;
+}
+
+
+/*
+ * Base structure
+ */
+.collapsible-body.new_registration_form {
+  padding: 10px;
+}
+
+
+/* Extra markup and styles for table-esque vertical and horizontal centering */
+.site-wrapper {
+  display: table;
+  width: 100%;
+  height: 100%; /* For at least Firefox */
+  min-height: 100%;
+  -webkit-box-shadow: inset 0 0 5rem rgba(0, 0, 0, .5);
+  box-shadow: inset 0 0 5rem rgba(0, 0, 0, .5);
+}
+
+.site-wrapper-inner {
+  display: table-cell;
+  vertical-align: top;
+}
+
+.cover-container {
+  margin-right: auto;
+  margin-left: auto;
+}
+
+/* Padding for spacing */
+.inner {
+  padding: 2rem;
+}
+
+
+/*
+ * Header
+ */
+
+.masthead {
+  margin-bottom: 2rem;
+}
+
+.masthead-brand {
+  margin-bottom: 0;
+}
+
+.nav-masthead .nav-link {
+  padding: .25rem 0;
+  font-weight: bold;
+  color: rgba(255, 255, 255, .5);
+  background-color: transparent;
+  border-bottom: .25rem solid transparent;
+}
+
+.nav-masthead .nav-link:hover,
+.nav-masthead .nav-link:focus {
+  border-bottom-color: rgba(255, 255, 255, .25);
+}
+
+.nav-masthead .nav-link + .nav-link {
+  margin-left: 1rem;
+}
+
+.nav-masthead .active {
+  color: #fff;
+  border-bottom-color: #fff;
+}
+
+@media (min-width: 48em) {
+  .masthead-brand {
+    float: left;
+  }
+
+  .nav-masthead {
+    float: right;
+  }
+}
+
+
+/*
+ * Cover
+ */
+
+.cover {
+  padding: 0 1.5rem;
+}
+
+.cover .btn-lg {
+  padding: .75rem 1.25rem;
+  font-weight: bold;
+}
+
+
+/*
+ * Footer
+ */
+
+.mastfoot {
+  color: rgba(255, 255, 255, .5);
+}
+
+
+/*
+ * Affix and center
+ */
+
+@media (min-width: 40em) {
+  /* Pull out the header and footer */
+  .masthead {
+    position: fixed;
+    top: 0;
+  }
+
+  .mastfoot {
+    position: fixed;
+    bottom: 0;
+  }
+
+  /* Start the vertical centering */
+  .site-wrapper-inner {
+    vertical-align: middle;
+  }
+
+  /* Handle the widths */
+  .masthead,
+  .mastfoot,
+  .cover-container {
+    width: 100%; /* Must be percentage or pixels for horizontal alignment */
+  }
+}
+
+@media (min-width: 62em) {
+  .masthead,
+  .mastfoot,
+  .cover-container {
+    width: 42rem;
+  }
+}
+
+input:not([type]):focus:not([readonly]), input[type=text]:not(.browser-default):focus:not([readonly]), input[type=password]:not(.browser-default):focus:not([readonly]), input[type=email]:not(.browser-default):focus:not([readonly]), input[type=url]:not(.browser-default):focus:not([readonly]), input[type=time]:not(.browser-default):focus:not([readonly]), input[type=date]:not(.browser-default):focus:not([readonly]), input[type=datetime]:not(.browser-default):focus:not([readonly]), input[type=datetime-local]:not(.browser-default):focus:not([readonly]), input[type=tel]:not(.browser-default):focus:not([readonly]), input[type=number]:not(.browser-default):focus:not([readonly]), input[type=search]:not(.browser-default):focus:not([readonly]), textarea.materialize-textarea:focus:not([readonly]) {
+  border-bottom: 1px solid @bluelelefan;
+  -webkit-box-shadow: 0 1px 0 0 @bluelelefan;
+  box-shadow: 0 1px 0 0 @bluelelefan;
+}
+
+.input-field .prefix.active {
+  color: @bluelelefan;
+}
+
+form .errors {
+  ul li {
+    color: darkred;
+  }
+}
+
+strong {
+  font-weight: bold;
+}
+
+.swiftcard_exemple {
+  position: relative;
+  text-align: center;
+
+  img {
+    margin-bottom: 5px;
+  }
+
+  .focus {
+    position: absolute;
+    bottom: -10px;
+    left: 50%;
+    width: 300px; //fixed by dom
+    margin-left: -170px;
+  }
+}
+
+.CodeMirror, .CodeMirror-scroll {
+  min-height: 100px;
+}
+
+.simplemde-container.error {
+  .CodeMirror {
+    border-color: @red;
+  }
+
+  .editor-statusbar {
+    .error-message {
+      color: @red;
+      float: left;
+      font-weight: bold;
+    }
+  }
+}
+
+.badge_card {
+  width: 300px;
+  text-align: center;
+  padding: 50px 0;
+  border-radius: 5px;
+  box-shadow: 2px 2px 5px gray;
+  max-width: 100%;
+
+  img {
+    max-width: 90%;
+  }
+}
+
+.homebox {
+  border: 1px solid;
+  padding-bottom: 10px !important;
+  margin-bottom: 30px;
+  margin-top: 10px;
+
+  & > h5:first-child {
+    margin-top: -15px;
+
+    span {
+      padding: 0 5px;
+    }
+  }
+
+  .row {
+    margin: 0 5px;
+  }
+}
+
+.card.mini-shift .card-content .card-title {
+  font-size: 20px;
+}
+
+.process-update-list {
+  .last-shift {
+    border-top: 1px solid @bluelelefan;
+    border-bottom: 1px solid @bluelelefan;
+    background: lighten(@bluelelefan, 30%);
+  }
+
+  tr.new {
+    & > td > a {
+      font-weight: bold;
+    }
+  }
+
+  tr:not(.new) {
+
+  }
+}
+
+.btn {
+  .bubble_counter {
+    display: block;
+    position: absolute;
+    top: -13px;
+    left: -13px;
+    width: 26px;
+    height: 26px;
+    line-height: 26px;
+    text-align: center;
+    padding: 0;
+    overflow: hidden;
+    border-radius: 13px;
+    background: black;
+    font-weight: bold;
+    z-index: 999;
+  }
+}
+
+.event {
+  .card-image {
+    img {
+      max-height: 250px;
+    }
+  }
+}
+
+.gauge_container {
+  height: 210px;
+  overflow: hidden;
+}
+
+.show-on-xl-only {
+  display: none;
+}
+
+@media only screen and (min-width: 1200px) {
+  a, span, i, p, small {
+    &.show-on-xl-only {
+      display: inline !important;
+    }
+  }
+
+  div {
+    &.show-on-xl-only {
+      display: block !important;
+    }
+  }
+}
+
+.nav-wrapper {
+  ul#nav-desktop {
+    li a {
+      font-size: 75%;
+    }
+
+    li.highlight {
+      a {
+        background: #00000055;
+        position: relative;
+
+        &:hover {
+          background: #ffffff55;
+
+          &::before, &:after {
+            border-right: 4px solid #00000055;
+          }
+
+          color: black;
+
+          i.material-icons {
+            color: black;
+          }
+        }
+      }
+
+      a::before, a:after {
+        content: '';
+        display: block;
+        height: 100%;
+        position: absolute;
+        border-right: 4px solid white;
+      }
+
+      a::before {
+        bottom: 0;
+        left: 0;
+      }
+
+      a:after {
+        top: 0;
+        right: 0;
+      }
+    }
+  }
+}
+
+.solo-logo {
+  margin: 30px 0 20px 0;
+}
+
+.hover-toggle-text-icon {
+  a {
+    display: block;
+    height: 24px;
+
+    i {
+      display: none;
+    }
+
+    span {
+      display: inline-block;
+      line-height: 1;
+    }
+
+    &:hover {
+      i {
+        display: inline-block;
+      }
+
+      span {
+        display: none;
+      }
+    }
+  }
+}
+
+ul.list-unstyled {
+  list-style: none;
+	margin-left: 0;
+	padding-left: 0;
+}

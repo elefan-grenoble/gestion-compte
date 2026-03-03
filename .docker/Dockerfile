@@ -1,5 +1,9 @@
 FROM php:7.4
 
+COPY --link \
+    --from=ghcr.io/symfony-cli/symfony-cli:latest \
+    /usr/local/bin/symfony /usr/local/bin/symfony
+
 # Paramétrage de l'heure du conteneur
 ENV TZ=Europe/Paris
 RUN ln -snf /usr/share/zoneinfo/$TZ /etc/localtime && echo $TZ > /etc/timezone
@@ -20,6 +24,8 @@ RUN sed -i 's/# fr_FR.UTF-8 UTF-8/fr_FR.UTF-8 UTF-8/' /etc/locale.gen && locale-
 
 # Installation de Composer
 COPY --from=composer:2.2 /usr/bin/composer /usr/bin/composer
+
+COPY php.ini usr/local/etc/php/php.ini
 
 # Configuration de gd avec FreeType
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
