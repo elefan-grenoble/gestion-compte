@@ -293,3 +293,10 @@ jobs:
         with:
           name: logs
           path: var/log
+
+      - name: publish screenshots
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: cypress/screenshots
