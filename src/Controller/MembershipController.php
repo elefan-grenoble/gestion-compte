@@ -866,7 +866,7 @@ class MembershipController extends AbstractController
      * @return Response
      * @throws
      */
-    public function addBeneficiaryAction(Request $request, EventDispatcherInterface $event_dispatcher, SwipeCardHelper $swipeCardHelper)
+    public function addBeneficiaryAction(Request $request, EventDispatcherInterface $event_dispatcher, SwipeCardHelper $swipeCardHelper, ValidatorInterface $validator)
     {
         $session = new Session();
 
@@ -894,7 +894,7 @@ class MembershipController extends AbstractController
         $member = $a_beneficiary->getJoinTo()->getMembership();
 
         $beneficiaryCanHostConstraint = new BeneficiaryCanHost();
-        $violations = $this->get('validator')->validate(
+        $violations = $validator->validate(
             $member->getMainBeneficiary(),
             $beneficiaryCanHostConstraint
         );

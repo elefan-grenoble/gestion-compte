@@ -4,6 +4,7 @@ namespace App\Controller;
 
 use App\Entity\Code;
 use App\Event\CodeNewEvent;
+use App\Helper\SwipeCard as SwipeCardHelper;
 use App\Security\CodeVoter;
 use Psr\Log\LoggerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -234,7 +235,7 @@ class CodeController extends AbstractController
      *
      * @Route("/close_all", name="code_change_done", methods={"GET"})
      */
-    public function closeAllButMineAction(Request $request)
+    public function closeAllButMineAction(Request $request, SwipeCardHelper $swipeCardHelper)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -248,7 +249,7 @@ class CodeController extends AbstractController
             $this->logger->info('CODE : confirm code change (logged in)',array('username'=>$current_app_user->getUsername()));
         }else{
             $token = $request->get('token');
-            $username = explode(',',$this->get('App\Helper\SwipeCard')->vigenereDecode($token))[0];
+            $username = explode(',',$swipeCardHelper->vigenereDecode($token))[0];
             $current_app_user = $em->getRepository('App:User')->findOneBy(array('username'=>$username));
             if ($current_app_user){
                 $previousToken = $this->get("security.token_storage")->getToken();

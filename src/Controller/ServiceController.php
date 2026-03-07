@@ -6,6 +6,7 @@ namespace App\Controller;
 use App\Entity\Service;
 use App\Entity\Task;
 use App\Form\ServiceType;
+use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Filesystem\Exception\IOException;
@@ -160,13 +161,12 @@ class ServiceController extends AbstractController
      * @param Service $service
      * @return string
      */
-    protected function resolveLogo(Service $service)
+    protected function resolveLogo(Service $service, CacheManager $cacheManager)
     {
         $helper = $this->container->get('vich_uploader.templating.helper.uploader_helper');
         $path = $helper->asset($service, 'logoFile');
-        $imagineCacheManager = $this->get('liip_imagine.cache.manager');
-        $resolvedPath = $imagineCacheManager->getBrowserPath($path, 'service_logo');
-        return $resolvedPath;
+
+        return $cacheManager->getBrowserPath($path, 'service_logo');
     }
 
     private function getErrorMessages(Form $form)
