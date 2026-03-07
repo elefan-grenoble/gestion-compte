@@ -109,6 +109,18 @@
     "ornicar/gravatar-bundle": {
         "version": "1.3.0"
     },
+    "php-cs-fixer/shim": {
+        "version": "3.94",
+        "recipe": {
+            "repo": "github.com/symfony/recipes",
+            "branch": "main",
+            "version": "3.0",
+            "ref": "6cf95ac1baa3d6f5816dd4db7281997912f239a6"
+        },
+        "files": [
+            ".php-cs-fixer.dist.php"
+        ]
+    },
     "phpstan/phpstan": {
         "version": "1.10",
         "recipe": {
