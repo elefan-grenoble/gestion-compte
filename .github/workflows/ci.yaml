@@ -73,7 +73,7 @@ jobs:
           name: vendor-dir
           path: vendor/
 
-  phpStan:
+  codeQuality:
       needs: setup
       runs-on: ubuntu-22.04
       steps:
@@ -100,6 +100,12 @@ jobs:
 #         RUN PHPSTAN ----------------
         - name: Run PHPStan
           run: ./vendor/bin/phpstan analyse src
+
+        - name: Set executable permissions for php-cs-fixer
+          run: chmod +x ./vendor/bin/php-cs-fixer
+
+        - name: Run php-cs-fixer
+          run: ./vendor/bin/php-cs-fixer check
 
 
   symfony-tests:
