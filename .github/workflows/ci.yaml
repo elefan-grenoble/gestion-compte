@@ -94,6 +94,9 @@ jobs:
             tools: composer:2.2
             extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, iconv, json
 
+        - name: Clear cache
+          run: ./bin/console cache:clear
+
         - name: Set executable permissions for PHPStan
           run: chmod +x ./vendor/bin/phpstan
 
@@ -150,6 +153,9 @@ jobs:
             echo 'Waiting for MySQL...'
             sleep 1
           done
+
+      - name: Clear cache
+        run: ./bin/console cache:clear
 
 #       RUN MIGRATIONS ----------------
       - name: Run migrations
@@ -222,6 +228,9 @@ jobs:
             echo 'Waiting for MySQL...'
             sleep 1
           done
+
+      - name: Clear cache
+        run: ./bin/console cache:clear
 
       - name: Start Symfony server
         run: symfony server:start --no-tls -d --port=8000
