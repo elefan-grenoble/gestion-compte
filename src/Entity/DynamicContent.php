@@ -5,10 +5,12 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Dynamic Content (CMS)
+ * Dynamic Content (CMS).
  *
  * @ORM\Table(name="dynamic_content")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\DynamicContentRepository")
  */
 class DynamicContent
@@ -17,7 +19,9 @@ class DynamicContent
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
@@ -33,7 +37,6 @@ class DynamicContent
      * @var string
      *
      * @ORM\Column(name="type", type="string", length=64, options={"default" : "general"})
-     *
      */
     protected $type;
 
@@ -41,7 +44,6 @@ class DynamicContent
      * @var string
      *
      * @ORM\Column(name="name", type="string", length=64)
-     *
      */
     protected $name;
 
@@ -49,7 +51,6 @@ class DynamicContent
      * @var string
      *
      * @ORM\Column(name="description", type="text")
-     *
      */
     protected $description;
 
@@ -69,6 +70,7 @@ class DynamicContent
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
      */
     private $createdBy;
@@ -82,16 +84,15 @@ class DynamicContent
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="updated_by_id", referencedColumnName="id")
      */
     private $updatedBy;
 
     /**
-     * Constructor
+     * Constructor.
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function __toString()
     {
@@ -110,6 +111,7 @@ class DynamicContent
 
     /**
      * @ORM\PrePersist
+     *
      * @ORM\PreUpdate
      */
     public function setUpdatedAtValue()
@@ -118,7 +120,7 @@ class DynamicContent
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -127,24 +129,18 @@ class DynamicContent
         return $this->id;
     }
 
-    /**
-     * @return string
-     */
     public function getCode(): string
     {
         return $this->code;
     }
 
-    /**
-     * @param string $code
-     */
     public function setCode(string $code): void
     {
         $this->code = $code;
     }
 
     /**
-     * Set type
+     * Set type.
      *
      * @param string $type
      *
@@ -158,20 +154,19 @@ class DynamicContent
     }
 
     /**
-     * Get type
-     *
-     * @return string
+     * Get type.
      */
     public function getType(): string
     {
         if ($this->type == 'general') {
             return 'Général';
         }
+
         return $this->type;
     }
 
     /**
-     * Set name
+     * Set name.
      *
      * @param string $name
      *
@@ -185,7 +180,7 @@ class DynamicContent
     }
 
     /**
-     * Get name
+     * Get name.
      *
      * @return string
      */
@@ -202,32 +197,23 @@ class DynamicContent
         return $this->content;
     }
 
-    /**
-     * @param string $content
-     */
     public function setContent(?string $content): void
     {
         $this->content = $content;
     }
 
-    /**
-     * @return string
-     */
     public function getDescription(): string
     {
         return $this->description;
     }
 
-    /**
-     * @param string $description
-     */
     public function setDescription(string $description): void
     {
         $this->description = $description;
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */
@@ -237,13 +223,11 @@ class DynamicContent
     }
 
     /**
-     * Set createdBy
-     *
-     * @param \App\Entity\User $user
+     * Set createdBy.
      *
      * @return DynamicContent
      */
-    public function setCreatedBy(\App\Entity\User $user = null)
+    public function setCreatedBy(?User $user = null)
     {
         $this->createdBy = $user;
 
@@ -251,9 +235,9 @@ class DynamicContent
     }
 
     /**
-     * Get createdBy
+     * Get createdBy.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getCreatedBy()
     {
@@ -261,7 +245,7 @@ class DynamicContent
     }
 
     /**
-     * Get updatedAt
+     * Get updatedAt.
      *
      * @return \DateTime
      */
@@ -271,13 +255,11 @@ class DynamicContent
     }
 
     /**
-     * Set updatedBy
-     *
-     * @param \App\Entity\User $user
+     * Set updatedBy.
      *
      * @return DynamicContent
      */
-    public function setUpdatedBy(\App\Entity\User $user = null)
+    public function setUpdatedBy(?User $user = null)
     {
         $this->updatedBy = $user;
 
@@ -285,9 +267,9 @@ class DynamicContent
     }
 
     /**
-     * Get updatedBy
+     * Get updatedBy.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getUpdatedBy()
     {

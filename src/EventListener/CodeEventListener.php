@@ -2,12 +2,12 @@
 
 namespace App\EventListener;
 
-use App\Entity\User;
-use App\Entity\Code;
 use App\Event\CodeNewEvent;
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
+use Doctrine\ORM\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 
 class CodeEventListener
 {
@@ -23,15 +23,13 @@ class CodeEventListener
     }
 
     /**
-     * @param CodeNewEvent $event
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function onCodeNew(CodeNewEvent $event)
     {
-        $this->logger->info("Code Listener: onCodeNew");
-//        $code = $event->getCode();
-//        $display = $event->getDisplay();
+        $this->logger->info('Code Listener: onCodeNew');
+        //        $code = $event->getCode();
+        //        $display = $event->getDisplay();
     }
-
 }

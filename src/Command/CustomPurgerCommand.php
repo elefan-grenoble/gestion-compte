@@ -10,7 +10,6 @@ use Symfony\Component\Console\Output\OutputInterface;
 
 class CustomPurgerCommand extends Command
 {
-
     protected static $defaultName = 'app:custom-purge';
 
     private $entityManager;
@@ -27,7 +26,8 @@ class CustomPurgerCommand extends Command
     {
         $this
             ->setDescription('Purges the database with a custom purger.')
-            ->setHelp('This command allows you to purge the database while excluding specific tables (migration_versions, dynamic_content)');
+            ->setHelp('This command allows you to purge the database while excluding specific tables (migration_versions, dynamic_content)')
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -39,5 +39,4 @@ class CustomPurgerCommand extends Command
 
         return 0;
     }
-
 }

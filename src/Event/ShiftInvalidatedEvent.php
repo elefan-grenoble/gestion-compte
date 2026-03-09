@@ -5,11 +5,10 @@ namespace App\Event;
 use App\Entity\Membership;
 use App\Entity\Beneficiary;
 use App\Entity\Shift;
-use Symfony\Component\EventDispatcher\Event;
 
 class ShiftInvalidatedEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
-    const NAME = 'shift.invalidated';
+    public const NAME = 'shift.invalidated';
 
     private $shift;
     private $beneficiary;

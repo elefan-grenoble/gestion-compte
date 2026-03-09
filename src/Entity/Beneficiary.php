@@ -6,13 +6,15 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OrderBy;
 use Symfony\Component\Validator\Constraints as Assert;
-
+use Doctrine\Common\Collections\Collection;
 
 /**
- * Beneficiary
+ * Beneficiary.
  *
  * @ORM\Table(name="beneficiary")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\BeneficiaryRepository")
  */
 class Beneficiary
@@ -21,7 +23,9 @@ class Beneficiary
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -30,6 +34,7 @@ class Beneficiary
      * @var string
      *
      * @ORM\Column(name="lastname", type="string", length=255)
+     *
      * @Assert\NotBlank(message="Le nom du bénéficiaire est requis")
      */
     private $lastname;
@@ -38,6 +43,7 @@ class Beneficiary
      * @var string
      *
      * @ORM\Column(name="firstname", type="string", length=255)
+     *
      * @Assert\NotBlank(message="Le prénom du bénéficiaire est requis")
      */
     private $firstname;
@@ -51,10 +57,14 @@ class Beneficiary
 
     /**
      * @var Address
-     * One Beneficiary has One Address.
+     *              One Beneficiary has One Address
+     *
      * @ORM\OneToOne(targetEntity="Address", inversedBy="beneficiary", cascade={"persist", "remove"})
+     *
      * @ORM\JoinColumn(name="address_id", referencedColumnName="id")
+     *
      * @Assert\NotNull
+     *
      * @Assert\Valid
      */
     private $address;
@@ -68,33 +78,41 @@ class Beneficiary
 
     /**
      * @ORM\OneToOne(targetEntity="User", inversedBy="beneficiary", cascade={"persist", "remove"})
+     *
      * @ORM\JoinColumn(name="user_id", referencedColumnName="id",nullable=false)
+     *
      * @Assert\NotNull
+     *
      * @Assert\Valid
      */
     private $user;
 
     /**
      * @var Membership
+     *
      * @ORM\ManyToOne(targetEntity="Membership", inversedBy="beneficiaries", cascade={"persist"})
+     *
      * @ORM\JoinColumn(name="membership_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $membership;
 
     /**
      * @ORM\Column(name="openid", type="string", length=255)
-     * @var string $openid
+     *
+     * @var string
      */
     protected $openid;
 
     /**
      * @ORM\Column(name="openid_member_number", type="string", length=255)
-     * @var string $openid_member_number
+     *
+     * @var string
      */
     protected $openid_member_number;
 
     /**
      * @ORM\OneToMany(targetEntity="Shift", mappedBy="shifter", cascade={"remove"})
+     *
      * @OrderBy({"start" = "DESC"})
      */
     private $shifts;
@@ -111,32 +129,39 @@ class Beneficiary
 
     /**
      * @ORM\OneToMany(targetEntity="SwipeCard", mappedBy="beneficiary", cascade={"remove"})
+     *
      * @OrderBy({"number" = "DESC"})
      */
     private $swipe_cards;
 
     /**
      * @ORM\ManyToOne(targetEntity="Commission", inversedBy="owners")
+     *
      * @ORM\JoinColumn(name="commission_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $own;
 
     /**
      * Many Beneficiary have Many Commissions.
+     *
      * @ORM\ManyToMany(targetEntity="Commission", inversedBy="beneficiaries")
+     *
      * @ORM\JoinTable(name="beneficiaries_commissions")
      */
     private $commissions;
 
     /**
      * Many Beneficiary have Many Tasks.
+     *
      * @ORM\ManyToMany(targetEntity="Task", mappedBy="owners")
      */
     private $tasks;
 
     /**
      * Many Beneficiary have Many Formations.
+     *
      * @ORM\ManyToMany(targetEntity="Formation", inversedBy="beneficiaries")
+     *
      * @ORM\JoinTable(name="beneficiaries_formations")
      */
     private $formations;
@@ -154,7 +179,7 @@ class Beneficiary
     private $createdAt;
 
     /**
-     * Constructor
+     * Constructor.
      */
     public function __construct()
     {
@@ -179,7 +204,7 @@ class Beneficiary
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -189,20 +214,22 @@ class Beneficiary
     }
 
     /**
-     * Get membernumber
+     * Get membernumber.
      *
      * @return int
      */
     public function getMemberNumber()
     {
         $membership = $this->getMembership();
-        if (!$membership)
+        if (!$membership) {
             return null;
+        }
+
         return $membership->getMemberNumber();
     }
 
     /**
-     * Get firstname
+     * Get firstname.
      *
      * @return string
      */
@@ -212,7 +239,7 @@ class Beneficiary
     }
 
     /**
-     * Set firstname
+     * Set firstname.
      *
      * @param string $firstname
      *
@@ -226,7 +253,7 @@ class Beneficiary
     }
 
     /**
-     * Set lastname
+     * Set lastname.
      *
      * @param string $lastname
      *
@@ -240,7 +267,7 @@ class Beneficiary
     }
 
     /**
-     * Get lastname
+     * Get lastname.
      *
      * @return string
      */
@@ -255,7 +282,7 @@ class Beneficiary
     }
 
     /**
-     * /!\ DO NOT MODIFY /!\
+     * /!\ DO NOT MODIFY /!\.
      *
      * Such a method is also used for autocomplete. If you want to
      * change it, you HAVE to adapt the methods used in data
@@ -278,7 +305,7 @@ class Beneficiary
     }
 
     /**
-     * Set email
+     * Set email.
      *
      * @param string $email
      *
@@ -292,7 +319,7 @@ class Beneficiary
     }
 
     /**
-     * Get email
+     * Get email.
      *
      * @return string
      */
@@ -300,47 +327,47 @@ class Beneficiary
     {
         if ($this->getUser()) {
             return $this->getUser()->getEmail();
-        } else {
-            return null;
         }
+
+        return null;
+
     }
 
     /**
      * @return string
      */
-    public function getOpenId() {
+    public function getOpenId()
+    {
         return $this->openid;
     }
 
     /**
-     * @param string $id
      * @return $this
      */
-    public function setOpenId(string $id) : Beneficiary
+    public function setOpenId(string $id): Beneficiary
     {
         $this->openid = $id;
+
         return $this;
     }
-    /**
-     * @return string
-     */
-    public function getOpenIdMemberNumber() : ?string
+
+    public function getOpenIdMemberNumber(): ?string
     {
         return $this->openid_member_number;
     }
 
     /**
-     * @param string $number
      * @return $this
      */
-    public function setOpenIdMemberNumber(string $number) : Beneficiary
+    public function setOpenIdMemberNumber(string $number): Beneficiary
     {
         $this->openid_member_number = $number;
+
         return $this;
     }
 
     /**
-     * Set phone
+     * Set phone.
      *
      * @param string $phone
      *
@@ -354,7 +381,7 @@ class Beneficiary
     }
 
     /**
-     * Get phone
+     * Get phone.
      *
      * @return string
      */
@@ -364,13 +391,11 @@ class Beneficiary
     }
 
     /**
-     * Set user
-     *
-     * @param \App\Entity\User $user
+     * Set user.
      *
      * @return Beneficiary
      */
-    public function setUser(\App\Entity\User $user = null)
+    public function setUser(?User $user = null)
     {
         $this->user = $user;
 
@@ -378,9 +403,9 @@ class Beneficiary
     }
 
     /**
-     * Get user
+     * Get user.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getUser()
     {
@@ -393,13 +418,11 @@ class Beneficiary
     }
 
     /**
-     * Add commission
-     *
-     * @param \App\Entity\Commission $commission
+     * Add commission.
      *
      * @return Beneficiary
      */
-    public function addCommission(\App\Entity\Commission $commission)
+    public function addCommission(Commission $commission)
     {
         $this->commissions[] = $commission;
 
@@ -407,19 +430,17 @@ class Beneficiary
     }
 
     /**
-     * Remove commission
-     *
-     * @param \App\Entity\Commission $commission
+     * Remove commission.
      */
-    public function removeCommission(\App\Entity\Commission $commission)
+    public function removeCommission(Commission $commission)
     {
         $this->commissions->removeElement($commission);
     }
 
     /**
-     * Get commissions
+     * Get commissions.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getCommissions()
     {
@@ -434,13 +455,11 @@ class Beneficiary
     }
 
     /**
-     * Add formation
-     *
-     * @param \App\Entity\Formation $formation
+     * Add formation.
      *
      * @return Beneficiary
      */
-    public function addFormation(\App\Entity\Formation $formation)
+    public function addFormation(Formation $formation)
     {
         $this->formations[] = $formation;
 
@@ -448,19 +467,17 @@ class Beneficiary
     }
 
     /**
-     * Remove formation
-     *
-     * @param \App\Entity\Formation $formation
+     * Remove formation.
      */
-    public function removeFormation(\App\Entity\Formation $formation)
+    public function removeFormation(Formation $formation)
     {
         $this->formations->removeElement($formation);
     }
 
     /**
-     * Get formations
+     * Get formations.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getFormations()
     {
@@ -468,13 +485,11 @@ class Beneficiary
     }
 
     /**
-     * Set own
-     *
-     * @param \App\Entity\Commission $own
+     * Set own.
      *
      * @return Beneficiary
      */
-    public function setOwn(\App\Entity\Commission $own = null)
+    public function setOwn(?Commission $own = null)
     {
         $this->own = $own;
 
@@ -482,9 +497,9 @@ class Beneficiary
     }
 
     /**
-     * Get own
+     * Get own.
      *
-     * @return \App\Entity\Commission
+     * @return Commission
      */
     public function getOwn()
     {
@@ -492,13 +507,11 @@ class Beneficiary
     }
 
     /**
-     * Add shift
-     *
-     * @param \App\Entity\Shift $shift
+     * Add shift.
      *
      * @return Beneficiary
      */
-    public function addShift(\App\Entity\Shift $shift)
+    public function addShift(Shift $shift)
     {
         $this->shifts[] = $shift;
 
@@ -506,19 +519,17 @@ class Beneficiary
     }
 
     /**
-     * Remove shift
-     *
-     * @param \App\Entity\Shift $shift
+     * Remove shift.
      */
-    public function removeShift(\App\Entity\Shift $shift)
+    public function removeShift(Shift $shift)
     {
         $this->shifts->removeElement($shift);
     }
 
     /**
-     * Get shifts
+     * Get shifts.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getShifts()
     {
@@ -526,13 +537,11 @@ class Beneficiary
     }
 
     /**
-     * Add task
-     *
-     * @param \App\Entity\Task $task
+     * Add task.
      *
      * @return Beneficiary
      */
-    public function addTask(\App\Entity\Task $task)
+    public function addTask(Task $task)
     {
         $this->tasks[] = $task;
 
@@ -540,19 +549,17 @@ class Beneficiary
     }
 
     /**
-     * Remove task
-     *
-     * @param \App\Entity\Task $task
+     * Remove task.
      */
-    public function removeTask(\App\Entity\Task $task)
+    public function removeTask(Task $task)
     {
         $this->tasks->removeElement($task);
     }
 
     /**
-     * Get tasks
+     * Get tasks.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getTasks()
     {
@@ -560,13 +567,11 @@ class Beneficiary
     }
 
     /**
-     * Add receivedProxy
-     *
-     * @param \App\Entity\Proxy $receivedProxy
+     * Add receivedProxy.
      *
      * @return Beneficiary
      */
-    public function addReceivedProxy(\App\Entity\Proxy $receivedProxy)
+    public function addReceivedProxy(Proxy $receivedProxy)
     {
         $this->received_proxies[] = $receivedProxy;
 
@@ -574,19 +579,17 @@ class Beneficiary
     }
 
     /**
-     * Remove receivedProxy
-     *
-     * @param \App\Entity\Proxy $receivedProxy
+     * Remove receivedProxy.
      */
-    public function removeReceivedProxy(\App\Entity\Proxy $receivedProxy)
+    public function removeReceivedProxy(Proxy $receivedProxy)
     {
         $this->received_proxies->removeElement($receivedProxy);
     }
 
     /**
-     * Get receivedProxies
+     * Get receivedProxies.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getReceivedProxies()
     {
@@ -594,13 +597,11 @@ class Beneficiary
     }
 
     /**
-     * Add reservedShift
-     *
-     * @param \App\Entity\Shift $reservedShift
+     * Add reservedShift.
      *
      * @return Beneficiary
      */
-    public function addReservedShift(\App\Entity\Shift $reservedShift)
+    public function addReservedShift(Shift $reservedShift)
     {
         $this->reservedShifts[] = $reservedShift;
 
@@ -608,19 +609,17 @@ class Beneficiary
     }
 
     /**
-     * Remove reservedShift
-     *
-     * @param \App\Entity\Shift $reservedShift
+     * Remove reservedShift.
      */
-    public function removeReservedShift(\App\Entity\Shift $reservedShift)
+    public function removeReservedShift(Shift $reservedShift)
     {
         $this->reservedShifts->removeElement($reservedShift);
     }
 
     /**
-     * Get reservedShifts
+     * Get reservedShifts.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getReservedShifts()
     {
@@ -628,9 +627,9 @@ class Beneficiary
     }
 
     /**
-     * Get periodPositions
+     * Get periodPositions.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getPeriodPositions()
     {
@@ -638,13 +637,11 @@ class Beneficiary
     }
 
     /**
-     * Add swipeCard
-     *
-     * @param \App\Entity\SwipeCard $swipeCard
+     * Add swipeCard.
      *
      * @return Beneficiary
      */
-    public function addSwipeCard(\App\Entity\SwipeCard $swipeCard)
+    public function addSwipeCard(SwipeCard $swipeCard)
     {
         $this->swipe_cards[] = $swipeCard;
 
@@ -652,21 +649,19 @@ class Beneficiary
     }
 
     /**
-     * Remove swipeCard
+     * Remove swipeCard.
      *
-     * @param \App\Entity\SwipeCard $swipeCard
-     *
-     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
+     * @return bool TRUE if this collection contained the specified element, FALSE otherwise
      */
-    public function removeSwipeCard(\App\Entity\SwipeCard $swipeCard)
+    public function removeSwipeCard(SwipeCard $swipeCard)
     {
         return $this->swipe_cards->removeElement($swipeCard);
     }
 
     /**
-     * Get swipeCards
+     * Get swipeCards.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getSwipeCards()
     {
@@ -674,9 +669,9 @@ class Beneficiary
     }
 
     /**
-     * Get enabled swipeCards
+     * Get enabled swipeCards.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getEnabledSwipeCards()
     {
@@ -717,22 +712,18 @@ class Beneficiary
         $this->address = $address;
     }
 
-    /**
-     * @return bool
-     */
-    public function isFlying(): ?bool {
+    public function isFlying(): ?bool
+    {
         return $this->flying;
     }
 
-    /**
-     * @param bool $flying
-     */
-    public function setFlying(?bool $flying): void {
+    public function setFlying(?bool $flying): void
+    {
         $this->flying = $flying;
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */
@@ -744,7 +735,7 @@ class Beneficiary
     /**
      * Simple method to detect new beneficiaires.
      * TODO: move to Membership? Look at registration data instead?
-     * 
+     *
      * @return bool
      */
     public function isNew()

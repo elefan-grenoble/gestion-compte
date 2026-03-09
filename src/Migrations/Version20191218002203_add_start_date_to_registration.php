@@ -12,12 +12,12 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20191218002203_add_start_date_to_registration extends AbstractMigration
 {
-    public function getDescription() : string
+    public function getDescription(): string
     {
         return 'Add start_date to registration abstract view';
     }
 
-    public function up(Schema $schema) : void
+    public function up(Schema $schema): void
     {
         $this->addSql('DROP VIEW IF EXISTS view_abstract_registration');
 
@@ -32,7 +32,7 @@ final class Version20191218002203_add_start_date_to_registration extends Abstrac
 
     }
 
-    public function down(Schema $schema) : void
+    public function down(Schema $schema): void
     {
         $this->addSql('DROP VIEW IF EXISTS view_abstract_registration');
 

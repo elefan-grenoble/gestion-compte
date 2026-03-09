@@ -13,7 +13,7 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\Validator\Constraints\DateTime;
+use Symfony\Component\Form\FormInterface;
 
 /**
  * Job controller.
@@ -29,30 +29,31 @@ class JobController extends AbstractController
     {
         // default values
         $res = [
-            "enabled" => 0,
+            'enabled' => 0,
         ];
 
         // filter creation ----------------------
-        $res["form"] = $this->createFormBuilder()
+        $res['form'] = $this->createFormBuilder()
             ->setAction($this->generateUrl('job_list'))
-            ->add('enabled', ChoiceType::class, array(
+            ->add('enabled', ChoiceType::class, [
                 'label' => 'Poste activé ?',
                 'required' => false,
                 'choices' => [
                     'activé' => 2,
                     'désactivé' => 1,
-                ]
-            ))
-            ->add('filter', SubmitType::class, array(
+                ],
+            ])
+            ->add('filter', SubmitType::class, [
                 'label' => 'Filtrer',
-                'attr' => array('class' => 'btn', 'value' => 'filtrer')
-            ))
-            ->getForm();
+                'attr' => ['class' => 'btn', 'value' => 'filtrer'],
+            ])
+            ->getForm()
+        ;
 
-        $res["form"]->handleRequest($request);
+        $res['form']->handleRequest($request);
 
-        if ($res["form"]->isSubmitted() && $res["form"]->isValid()) {
-            $res["enabled"] = $res["form"]->get("enabled")->getData();
+        if ($res['form']->isSubmitted() && $res['form']->isValid()) {
+            $res['enabled'] = $res['form']->get('enabled')->getData();
         }
 
         return $res;
@@ -62,6 +63,7 @@ class JobController extends AbstractController
      * Lists all jobs.
      *
      * @Route("/", name="job_list", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function listAction(Request $request)
@@ -69,26 +71,27 @@ class JobController extends AbstractController
         $em = $this->getDoctrine()->getManager();
 
         $filter = $this->filterFormFactory($request);
-        $findByFilter = array();
+        $findByFilter = [];
         $sort = 'name';
         $order = 'ASC';
 
-        if($filter["enabled"] > 0) {
-            $findByFilter["enabled"] = $filter["enabled"]-1;
+        if ($filter['enabled'] > 0) {
+            $findByFilter['enabled'] = $filter['enabled'] - 1;
         }
 
-        $jobs = $em->getRepository(Job::class)->findBy($findByFilter, array($sort => $order));
+        $jobs = $em->getRepository(Job::class)->findBy($findByFilter, [$sort => $order]);
 
-        return $this->render('admin/job/list.html.twig', array(
+        return $this->render('admin/job/list.html.twig', [
             'jobs' => $jobs,
-            "filter_form" => $filter['form']->createView(),
-        ));
+            'filter_form' => $filter['form']->createView(),
+        ]);
     }
 
     /**
      * add new job.
      *
      * @Route("/new", name="job_new", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
@@ -110,18 +113,20 @@ class JobController extends AbstractController
             $em->flush();
 
             $session->getFlashBag()->add('success', 'Le nouveau poste a été créé !');
+
             return $this->redirectToRoute('job_list');
         }
 
-        return $this->render('admin/job/new.html.twig', array(
-            'form' => $form->createView()
-        ));
+        return $this->render('admin/job/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     /**
      * Edit job.
      *
      * @Route("/{id}/edit", name="job_edit", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function editAction(Request $request, Job $job)
@@ -138,24 +143,26 @@ class JobController extends AbstractController
             $em->flush();
 
             $session->getFlashBag()->add('success', 'Le poste a bien été édité !');
+
             return $this->redirectToRoute('job_list');
         }
 
         $delete_form = $this->getDeleteForm($job);
 
-        return $this->render('admin/job/edit.html.twig', array(
+        return $this->render('admin/job/edit.html.twig', [
             'form' => $form->createView(),
-            'delete_form' => $delete_form->createView()
-        ));
+            'delete_form' => $delete_form->createView(),
+        ]);
     }
 
     /**
      * Delete job.
      *
      * @Route("/{id}", name="job_delete", methods={"DELETE"})
+     *
      * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
-    public function deleteAction(Request $request,Job $job)
+    public function deleteAction(Request $request, Job $job)
     {
         $session = new Session();
 
@@ -173,53 +180,55 @@ class JobController extends AbstractController
     }
 
     /**
-     * Job shifts widget generator
+     * Job shifts widget generator.
      *
      * @Route("/widget_generator", name="job_widget_generator", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function widgetGeneratorAction(Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('job', EntityType::class, array(
+            ->add('job', EntityType::class, [
                 'label' => 'Quel poste ?',
                 'class' => 'App:Job',
                 'choice_label' => 'name',
                 'multiple' => false,
-                'required' => true
-            ))
-            ->add('display_end', CheckboxType::class, array('required' => false, 'label' => 'Afficher l\'heure de fin ?'))
-            ->add('display_on_empty', CheckboxType::class, array('required' => false, 'label' => 'Afficher les créneaux vides ?'))
-            ->add('title', CheckboxType::class, array('required' => false, 'data' => true, 'label' => 'Afficher le titre du widget ?'))
-            ->add('generate', SubmitType::class, array('label' => 'Générer'))
-            ->getForm();
+                'required' => true,
+            ])
+            ->add('display_end', CheckboxType::class, ['required' => false, 'label' => 'Afficher l\'heure de fin ?'])
+            ->add('display_on_empty', CheckboxType::class, ['required' => false, 'label' => 'Afficher les créneaux vides ?'])
+            ->add('title', CheckboxType::class, ['required' => false, 'data' => true, 'label' => 'Afficher le titre du widget ?'])
+            ->add('generate', SubmitType::class, ['label' => 'Générer'])
+            ->getForm()
+        ;
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $data = $form->getData();
 
-            $widgetQueryString = 'job_id='.$data['job']->getId().'&display_end='.($data['display_end'] ? 1 : 0).'&display_on_empty='.($data['display_on_empty'] ? 1 : 0).'&title='.($data['title'] ? 1 : 0);
+            $widgetQueryString = 'job_id=' . $data['job']->getId() . '&display_end=' . ($data['display_end'] ? 1 : 0) . '&display_on_empty=' . ($data['display_on_empty'] ? 1 : 0) . '&title=' . ($data['title'] ? 1 : 0);
 
-            return $this->render('admin/job/widget_generator.html.twig', array(
+            return $this->render('admin/job/widget_generator.html.twig', [
                 'form' => $form->createView(),
-                'query_string' => $widgetQueryString
-            ));
+                'query_string' => $widgetQueryString,
+            ]);
         }
 
-        return $this->render('admin/job/widget_generator.html.twig', array(
+        return $this->render('admin/job/widget_generator.html.twig', [
             'form' => $form->createView(),
-        ));
+        ]);
     }
 
     /**
-     * @param Job $job
-     * @return \Symfony\Component\Form\FormInterface
+     * @return FormInterface
      */
     protected function getDeleteForm(Job $job)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('job_delete', array('id' => $job->getId())))
+            ->setAction($this->generateUrl('job_delete', ['id' => $job->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 }

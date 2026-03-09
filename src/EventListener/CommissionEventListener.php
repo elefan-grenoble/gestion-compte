@@ -2,13 +2,12 @@
 
 namespace App\EventListener;
 
-use App\Entity\User;
-use App\Entity\Code;
-use App\Event\CodeNewEvent;
 use App\Event\CommissionJoinOrLeaveEvent;
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
+use Doctrine\ORM\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 
 class CommissionEventListener
 {
@@ -24,17 +23,16 @@ class CommissionEventListener
     }
 
     /**
-     * @param CommissionJoinOrLeaveEvent $event
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function onLeave(CommissionJoinOrLeaveEvent $event)
     {
-        $this->logger->info("Commission Listener: onLeave");
+        $this->logger->info('Commission Listener: onLeave');
         $beneficiary = $event->getBeneficiary();
         $commission = $event->getCommission();
 
-        if ($commission->getOwners()->contains($beneficiary)){
+        if ($commission->getOwners()->contains($beneficiary)) {
             $beneficiary->setOwn(null);
             $this->em->persist($beneficiary);
             $this->em->flush();
@@ -42,13 +40,11 @@ class CommissionEventListener
     }
 
     /**
-     * @param CommissionJoinOrLeaveEvent $event
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function onJoin(CommissionJoinOrLeaveEvent $event)
     {
-        $this->logger->info("Commission Listener: onJoin");
+        $this->logger->info('Commission Listener: onJoin');
     }
-
 }

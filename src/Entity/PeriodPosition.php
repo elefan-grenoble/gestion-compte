@@ -3,12 +3,15 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
 
 /**
- * PeriodRoom
+ * PeriodRoom.
  *
  * @ORM\Table(name="period_position")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\PeriodPositionRepository")
  */
 class PeriodPosition
@@ -17,38 +20,46 @@ class PeriodPosition
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
      * One Period has One Formation.
+     *
      * @ORM\ManyToOne(targetEntity="Formation", fetch="EAGER")
+     *
      * @ORM\JoinColumn(name="formation_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $formation;
 
     /**
      * @ORM\ManyToOne(targetEntity="Period", inversedBy="positions", fetch="EAGER")
+     *
      * @ORM\JoinColumn(name="period_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $period;
 
     /**
      * @var string
+     *
      * @ORM\Column(name="week_cycle", type="string", length=1, nullable=true)
      */
     private $weekCycle;
 
     /**
      * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="periodPositions")
+     *
      * @ORM\JoinColumn(name="shifter_id", referencedColumnName="id")
      */
     private $shifter;
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="booker_id", referencedColumnName="id")
      */
     private $booker;
@@ -79,6 +90,7 @@ class PeriodPosition
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
      */
     private $createdBy;
@@ -92,19 +104,18 @@ class PeriodPosition
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="updated_by_id", referencedColumnName="id")
      */
     private $updatedBy;
 
     /**
-     * Constructor
+     * Constructor.
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
-     * Example: "Epicerie/Livraison - Lundi - 09:30 à 12:30 (Semaine D) (sans formation)"
+     * Example: "Epicerie/Livraison - Lundi - 09:30 à 12:30 (Semaine D) (sans formation)".
      */
     public function __toString()
     {
@@ -115,6 +126,7 @@ class PeriodPosition
         if ($this->getFormation()) {
             $name .= ' (' . $this->getFormation()->getName() . ')';
         }
+
         return $name;
     }
 
@@ -130,6 +142,7 @@ class PeriodPosition
 
     /**
      * @ORM\PrePersist
+     *
      * @ORM\PreUpdate
      */
     public function setUpdatedAtValue()
@@ -138,7 +151,7 @@ class PeriodPosition
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -148,13 +161,11 @@ class PeriodPosition
     }
 
     /**
-     * Set period
-     *
-     * @param \App\Entity\Period $period
+     * Set period.
      *
      * @return PeriodPosition
      */
-    public function setPeriod(\App\Entity\Period $period = null)
+    public function setPeriod(?Period $period = null)
     {
         $this->period = $period;
 
@@ -162,7 +173,7 @@ class PeriodPosition
     }
 
     /**
-     * Get period
+     * Get period.
      *
      * @return Period
      */
@@ -172,13 +183,11 @@ class PeriodPosition
     }
 
     /**
-     * Set formation
-     *
-     * @param \App\Entity\Formation $formation
+     * Set formation.
      *
      * @return PeriodPosition
      */
-    public function setFormation(\App\Entity\Formation $formation = null)
+    public function setFormation(?Formation $formation = null)
     {
         $this->formation = $formation;
 
@@ -186,9 +195,9 @@ class PeriodPosition
     }
 
     /**
-     * Get formation
+     * Get formation.
      *
-     * @return \App\Entity\Formation
+     * @return Formation
      */
     public function getFormation()
     {
@@ -196,7 +205,7 @@ class PeriodPosition
     }
 
     /**
-     * Set weekCycle
+     * Set weekCycle.
      *
      * @param string $weekCycle
      *
@@ -210,7 +219,7 @@ class PeriodPosition
     }
 
     /**
-     * Get weekCycle
+     * Get weekCycle.
      *
      * @return array
      */
@@ -220,13 +229,11 @@ class PeriodPosition
     }
 
     /**
-     * Set shifter
-     *
-     * @param \App\Entity\Beneficiary $shifter
+     * Set shifter.
      *
      * @return PeriodPosition
      */
-    public function setShifter(\App\Entity\Beneficiary $shifter = null)
+    public function setShifter(?Beneficiary $shifter = null)
     {
         $this->shifter = $shifter;
 
@@ -234,9 +241,9 @@ class PeriodPosition
     }
 
     /**
-     * Get shifter
+     * Get shifter.
      *
-     * @return \App\Entity\Beneficiary
+     * @return Beneficiary
      */
     public function getShifter()
     {
@@ -244,13 +251,11 @@ class PeriodPosition
     }
 
     /**
-     * Set booker
-     *
-     * @param \App\Entity\User $booker
+     * Set booker.
      *
      * @return BookedShift
      */
-    public function setBooker(\App\Entity\User $booker = null)
+    public function setBooker(?User $booker = null)
     {
         $this->booker = $booker;
 
@@ -258,9 +263,9 @@ class PeriodPosition
     }
 
     /**
-     * Get booker
+     * Get booker.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getBooker()
     {
@@ -268,7 +273,7 @@ class PeriodPosition
     }
 
     /**
-     * Set bookedTime
+     * Set bookedTime.
      *
      * @param \DateTime $bookedTime
      *
@@ -282,7 +287,7 @@ class PeriodPosition
     }
 
     /**
-     * Get bookedTime
+     * Get bookedTime.
      *
      * @return \DateTime
      */
@@ -292,19 +297,17 @@ class PeriodPosition
     }
 
     /**
-     * Get shifts
+     * Get shifts.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getShifts()
     {
-        $shifts = $this->shifts;
-
-        return $shifts;
+        return $this->shifts;
     }
 
     /**
-     * Set createdAt
+     * Set createdAt.
      *
      * @param \DateTime $date
      *
@@ -318,7 +321,7 @@ class PeriodPosition
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */
@@ -328,9 +331,9 @@ class PeriodPosition
     }
 
     /**
-     * Get createdBy
+     * Get createdBy.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getCreatedBy()
     {
@@ -338,13 +341,11 @@ class PeriodPosition
     }
 
     /**
-     * Set createdBy
-     *
-     * @param \App\Entity\User $user
+     * Set createdBy.
      *
      * @return PeriodPosition
      */
-    public function setCreatedBy(\App\Entity\User $user = null)
+    public function setCreatedBy(?User $user = null)
     {
         $this->createdBy = $user;
 
@@ -352,7 +353,7 @@ class PeriodPosition
     }
 
     /**
-     * Get updatedAt
+     * Get updatedAt.
      *
      * @return \DateTime
      */
@@ -362,9 +363,9 @@ class PeriodPosition
     }
 
     /**
-     * Get updatedBy
+     * Get updatedBy.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getUpdatedBy()
     {
@@ -372,13 +373,11 @@ class PeriodPosition
     }
 
     /**
-     * Set updatedBy
-     *
-     * @param \App\Entity\User $user
+     * Set updatedBy.
      *
      * @return PeriodPosition
      */
-    public function setUpdatedBy(\App\Entity\User $user = null)
+    public function setUpdatedBy(?User $user = null)
     {
         $this->updatedBy = $user;
 
@@ -386,15 +385,16 @@ class PeriodPosition
     }
 
     /**
-     * free
+     * free.
      *
-     * @return \App\Entity\PeriodPosition
+     * @return PeriodPosition
      */
     public function free()
     {
         $this->setBooker(null);
         $this->setBookedTime(null);
         $this->setShifter(null);
+
         return $this;
     }
 }

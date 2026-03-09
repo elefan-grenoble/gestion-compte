@@ -1,8 +1,9 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace app\Migrations;
 
-use App\Entity\Job;
 use Doctrine\DBAL\Schema\Schema;
 use Doctrine\Migrations\AbstractMigration;
 use Symfony\Component\DependencyInjection\ContainerAwareInterface;
@@ -13,10 +14,9 @@ use Symfony\Component\DependencyInjection\ContainerAwareTrait;
  */
 final class Version20190218130524_job_id_not_null extends AbstractMigration implements ContainerAwareInterface
 {
-
     use ContainerAwareTrait;
 
-    public function up(Schema $schema) : void
+    public function up(Schema $schema): void
     {
 
         $connection = $this->container->get('doctrine.orm.entity_manager')->getConnection();
@@ -30,8 +30,8 @@ final class Version20190218130524_job_id_not_null extends AbstractMigration impl
         }
 
 
-        $this->addSql('UPDATE period SET job_id = '.$jobId.' WHERE job_id IS NULL');
-        $this->addSql('UPDATE shift SET job_id = '.$jobId.' WHERE job_id IS NULL');
+        $this->addSql('UPDATE period SET job_id = ' . $jobId . ' WHERE job_id IS NULL');
+        $this->addSql('UPDATE shift SET job_id = ' . $jobId . ' WHERE job_id IS NULL');
 
         $this->addSql('ALTER TABLE shift DROP FOREIGN KEY FK_A50B3B45BE04EA9');
         $this->addSql('ALTER TABLE shift CHANGE job_id job_id INT NOT NULL;');
@@ -42,7 +42,7 @@ final class Version20190218130524_job_id_not_null extends AbstractMigration impl
         $this->addSql('ALTER TABLE period ADD CONSTRAINT FK_C5B81ECEBE04EA9 FOREIGN KEY (job_id) REFERENCES job (id)');
     }
 
-    public function down(Schema $schema) : void
+    public function down(Schema $schema): void
     {
 
         $this->addSql('ALTER TABLE shift DROP FOREIGN KEY FK_A50B3B45BE04EA9');

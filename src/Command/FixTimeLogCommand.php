@@ -2,12 +2,9 @@
 
 namespace App\Command;
 
-use App\Entity\Membership;
 use App\Service\MembershipService;
 use App\Entity\Shift;
-use App\Entity\TimeLog;
 use App\Service\TimeLogService;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -23,8 +20,7 @@ class FixTimeLogCommand extends Command
         EntityManagerInterface $em,
         MembershipService $membership_service,
         TimeLogService $time_log_service
-    )
-    {
+    ) {
         $this->em = $em;
         $this->membership_service = $membership_service;
         $this->time_log_service = $time_log_service;
@@ -37,7 +33,8 @@ class FixTimeLogCommand extends Command
         $this
             ->setName('app:user:fix_time_log')
             ->setDescription('Fix time logs data')
-            ->setHelp('This command allows you to fix time logs data');
+            ->setHelp('This command allows you to fix time logs data')
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -54,13 +51,13 @@ class FixTimeLogCommand extends Command
 
                 foreach ($shifts as $shift) {
                     $logs = $member->getTimeLogs()->filter(function ($log) use ($shift) {
-                        return ($log->getShift() && $log->getShift()->getId() == $shift->getId());
+                        return $log->getShift() && $log->getShift()->getId() == $shift->getId();
                     });
                     // Insert log if it doesn't exist fot this shift
                     if ($logs->count() == 0) {
-                        $log = $this->time_log_service->initShiftValidatedTimeLog($shift, $shift->getStart(), "Créneau réalisé");
+                        $log = $this->time_log_service->initShiftValidatedTimeLog($shift, $shift->getStart(), 'Créneau réalisé');
                         $this->em->persist($log);
-                        $countShiftLogs++;
+                        ++$countShiftLogs;
                     }
                 }
             }

@@ -38,11 +38,11 @@ class HelloassoClient
         return new Client([
             'base_uri' => $this->helloAssoApiBaseUrl,
             'headers' => [
-                'Authorization' => 'Bearer '.$this->authenticator->getToken(
-                        $this->helloAssoApiAuthUrl,
-                        $this->helloAssoClientId,
-                        $this->helloAssoClientSecret,
-                    )
+                'Authorization' => 'Bearer ' . $this->authenticator->getToken(
+                    $this->helloAssoApiAuthUrl,
+                    $this->helloAssoClientId,
+                    $this->helloAssoClientSecret,
+                ),
             ],
         ]);
     }
@@ -59,7 +59,7 @@ class HelloassoClient
             ),
         );
 
-        return json_decode((string)$result->getBody())->data;
+        return json_decode((string) $result->getBody())->data;
     }
 
     /**
@@ -79,7 +79,7 @@ class HelloassoClient
             ],
         );
 
-        return json_decode((string)$result->getBody());
+        return json_decode((string) $result->getBody());
     }
 
     /**
@@ -96,7 +96,7 @@ class HelloassoClient
             ),
         );
 
-        return json_decode((string)$result->getBody());
+        return json_decode((string) $result->getBody());
     }
 
     /**
@@ -111,6 +111,6 @@ class HelloassoClient
             ),
         );
 
-        return json_decode((string)$result->getBody());
+        return json_decode((string) $result->getBody());
     }
 }

@@ -11,7 +11,7 @@ use Symfony\Contracts\Cache\ItemInterface;
 
 class CacheOauthAuthenticatorDecorator implements OauthAuthenticatorInterface
 {
-    const CACHE_DEFAULT_TTL = 600;
+    public const CACHE_DEFAULT_TTL = 600;
 
     private OauthAuthenticatorInterface $authenticator;
     private CacheInterface $cache;

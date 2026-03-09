@@ -7,7 +7,6 @@ use App\Entity\Registration;
 use App\Entity\User;
 use App\Event\HelloassoEvent;
 use Doctrine\ORM\EntityManager;
-use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -32,32 +31,33 @@ class HelloassoEventListener
     public function onPaymentAfterSave(HelloassoEvent $event)
     {
         $payment = $event->getPayment();
-        $user = $this->em->getRepository('App:User')->findOneBy(array('email' => strtolower($payment->getEmail())));
-        if ($user){
-            $this->linkPaymentToUser($user,$payment);
+        $user = $this->em->getRepository('App:User')->findOneBy(['email' => strtolower($payment->getEmail())]);
+        if ($user) {
+            $this->linkPaymentToUser($user, $payment);
         } else {
-            $url = $this->container->get('router')->generate('helloasso_resolve_orphan', array(
+            $url = $this->container->get('router')->generate('helloasso_resolve_orphan', [
                 'id' => $payment->getId(),
-                'code' => urlencode($this->container->get('App\Helper\SwipeCard')->vigenereEncode($payment->getEmail()))
-                ),UrlGeneratorInterface::ABSOLUTE_URL);
+                'code' => urlencode($this->container->get('App\Helper\SwipeCard')->vigenereEncode($payment->getEmail())),
+            ], UrlGeneratorInterface::ABSOLUTE_URL);
 
             $needInfo = (new Email())
-                ->subject('Merci '.$payment->getPayerFirstName().', mais qui es-tu ?')
+                ->subject('Merci ' . $payment->getPayerFirstName() . ', mais qui es-tu ?')
                 ->from(new Address($this->member_email['address'], $this->member_email['from_name']))
                 ->to($payment->getEmail())
                 ->html(
                     $this->renderView(
                         'emails/helloasso_wrong_email.html.twig',
-                        array(
+                        [
                             'firstname' => $payment->getPayerFirstName(),
                             'email' => $payment->getEmail(),
                             'project_name' => $this->container->getParameter('project_name'),
-                            'url' => $url
-                        )
+                            'url' => $url,
+                        ]
                     )
-                );
+                )
+            ;
             $this->mailer->send($needInfo);
-            //throw new \LogicException('user not found');
+            // throw new \LogicException('user not found');
         }
     }
 
@@ -73,13 +73,14 @@ class HelloassoEventListener
     /**
      * Returns a rendered view.
      *
-     * @param string $view The view name
-     * @param array $parameters An array of parameters to pass to the view
+     * @param string $view       The view name
+     * @param array  $parameters An array of parameters to pass to the view
      *
      * @return string The rendered view
+     *
      * @throws \Exception
      */
-    protected function renderView($view, array $parameters = array())
+    protected function renderView($view, array $parameters = [])
     {
         if ($this->container->has('templating')) {
             return $this->container->get('templating')->render($view, $parameters);
@@ -92,28 +93,28 @@ class HelloassoEventListener
         return $this->container->get('twig')->render($view, $parameters);
     }
 
-    protected function linkPaymentToUser(User $user,HelloassoPayment $payment){
+    protected function linkPaymentToUser(User $user, HelloassoPayment $payment)
+    {
         $beneficiary = $user->getBeneficiary();
         if ($beneficiary) {
             $membership = $beneficiary->getMembership();
             if (!$this->container->get('membership_service')->canRegister($membership)) {
-                //throw new \LogicException('user cannot register yet');
-                $this->container->get('event_dispatcher')->dispatch(HelloassoEvent::TOO_EARLY,new HelloassoEvent($payment,$user));
+                // throw new \LogicException('user cannot register yet');
+                $this->container->get('event_dispatcher')->dispatch(HelloassoEvent::TOO_EARLY, new HelloassoEvent($payment, $user));
             } else {
                 $registration = new Registration();
                 $registration->setAmount($payment->getAmount());
-                $registration->setCreatedAt($payment->getDate()); //created at payment date
+                $registration->setCreatedAt($payment->getDate()); // created at payment date
 
-                if ($membership->getLastRegistration()){
+                if ($membership->getLastRegistration()) {
                     $expire = clone $this->container->get('membership_service')->getExpire($membership);
-                    if ($expire >= $payment->getDate()) // not yet expired
-                    {
+                    if ($expire >= $payment->getDate()) { // not yet expired
                         $expire->modify('+1 day');
                         $registration->setDate($expire);
                     } else {
                         $registration->setDate($payment->getDate());
                     }
-                }else{ //first registration
+                } else { // first registration
                     $registration->setDate($payment->getDate());
                 }
 
@@ -133,7 +134,7 @@ class HelloassoEventListener
 
                 $this->em->flush();
 
-                $this->container->get('event_dispatcher')->dispatch(HelloassoEvent::RE_REGISTRATION_SUCCESS,new HelloassoEvent($payment,$beneficiary->getUser()));
+                $this->container->get('event_dispatcher')->dispatch(HelloassoEvent::RE_REGISTRATION_SUCCESS, new HelloassoEvent($payment, $beneficiary->getUser()));
             }
         } else {
             throw new \LogicException('user without beneficiary');

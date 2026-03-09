@@ -32,7 +32,7 @@ class ShiftFreeLogService
         $current_user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
         $request = $this->requestStack->getCurrentRequest();
 
-        $log = new ShiftFreeLog;
+        $log = new ShiftFreeLog();
         $log->setShift($shift);
         $log->setShiftString($this->generateShiftString($shift));
         $log->setBeneficiary($beneficiary);

@@ -3,12 +3,15 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
 
 /**
- * Shift
+ * Shift.
  *
  * @ORM\Table(name="shift")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\ShiftRepository")
  */
 class Shift
@@ -17,7 +20,9 @@ class Shift
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -52,39 +57,48 @@ class Shift
 
     /**
      * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="shifts")
+     *
      * @ORM\JoinColumn(name="shifter_id", referencedColumnName="id")
      */
     private $shifter;
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="booker_id", referencedColumnName="id")
      */
     private $booker;
 
     /**
      * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="reservedShifts")
+     *
      * @ORM\JoinColumn(name="last_shifter_id", referencedColumnName="id")
      */
     private $lastShifter;
 
     /**
      * One Shift has one Formation.
+     *
      * @ORM\ManyToOne(targetEntity="Formation")
+     *
      * @ORM\JoinColumn(name="formation_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $formation;
 
     /**
      * One Shift has One Job.
+     *
      * @ORM\ManyToOne(targetEntity="Job", inversedBy="shifts", fetch="EAGER")
+     *
      * @ORM\JoinColumn(name="job_id", referencedColumnName="id", nullable=false)
      */
     private $job;
 
     /**
      * One Shift may have been created from One PeriodPosition.
+     *
      * @ORM\ManyToOne(targetEntity="PeriodPosition", inversedBy="shifts")
+     *
      * @ORM\JoinColumn(name="position_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $position;
@@ -122,6 +136,7 @@ class Shift
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
      */
     private $createdBy;
@@ -132,11 +147,11 @@ class Shift
     }
 
     /**
-     * Example: "vendredi 22 juillet de 09:30 à 12:30 [#0001 Prénom NOM]"
+     * Example: "vendredi 22 juillet de 09:30 à 12:30 [#0001 Prénom NOM]".
      */
     public function __toString()
     {
-        return strftime("%A %e %B", $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi') . ' [' . $this->getShifter() . ']';
+        return strftime('%A %e %B', $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\hi') . ' à ' . $this->getEnd()->format('G\hi') . ' [' . $this->getShifter() . ']';
     }
 
     /**
@@ -150,7 +165,7 @@ class Shift
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -160,7 +175,7 @@ class Shift
     }
 
     /**
-     * Set start
+     * Set start.
      *
      * @param \DateTime $start
      *
@@ -174,7 +189,7 @@ class Shift
     }
 
     /**
-     * Get start
+     * Get start.
      *
      * @return \DateTime
      */
@@ -184,7 +199,7 @@ class Shift
     }
 
     /**
-     * Set end
+     * Set end.
      *
      * @param \DateTime $end
      *
@@ -198,7 +213,7 @@ class Shift
     }
 
     /**
-     * Get end
+     * Get end.
      *
      * @return \DateTime
      */
@@ -208,7 +223,7 @@ class Shift
     }
 
     /**
-     * Set bookedTime
+     * Set bookedTime.
      *
      * @param \DateTime $bookedTime
      *
@@ -222,7 +237,7 @@ class Shift
     }
 
     /**
-     * Get bookedTime
+     * Get bookedTime.
      *
      * @return \DateTime
      */
@@ -232,9 +247,9 @@ class Shift
     }
 
     /**
-     * Set wasCarriedOut
+     * Set wasCarriedOut.
      *
-     * @param boolean $wasCarriedOut
+     * @param bool $wasCarriedOut
      *
      * @return BookedShift
      */
@@ -246,7 +261,7 @@ class Shift
     }
 
     /**
-     * Get wasCarriedOut
+     * Get wasCarriedOut.
      *
      * @return bool
      */
@@ -256,7 +271,7 @@ class Shift
     }
 
     /**
-     * Validate shift participation
+     * Validate shift participation.
      *
      * @return BookedShift
      */
@@ -268,7 +283,7 @@ class Shift
     }
 
     /**
-     * Invalidate shift participation
+     * Invalidate shift participation.
      *
      * @return BookedShift
      */
@@ -280,13 +295,11 @@ class Shift
     }
 
     /**
-     * Set booker
-     *
-     * @param \App\Entity\User $booker
+     * Set booker.
      *
      * @return BookedShift
      */
-    public function setBooker(\App\Entity\User $booker = null)
+    public function setBooker(?User $booker = null)
     {
         $this->booker = $booker;
 
@@ -294,9 +307,9 @@ class Shift
     }
 
     /**
-     * Get booker
+     * Get booker.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getBooker()
     {
@@ -304,13 +317,11 @@ class Shift
     }
 
     /**
-     * Set shifter
-     *
-     * @param \App\Entity\Beneficiary $shifter
+     * Set shifter.
      *
      * @return BookedShift
      */
-    public function setShifter(\App\Entity\Beneficiary $shifter = null)
+    public function setShifter(?Beneficiary $shifter = null)
     {
         $this->shifter = $shifter;
 
@@ -318,35 +329,35 @@ class Shift
     }
 
     /**
-     * Get shifter
+     * Get shifter.
      *
-     * @return \App\Entity\Beneficiary
+     * @return Beneficiary
      */
     public function getShifter()
     {
         return $this->shifter;
     }
 
-
     public function getDuration()
     {
         $diff = date_diff($this->start, $this->end);
+
         return $diff->h * 60 + $diff->i;
     }
 
     public function getIntervalCode()
     {
-        return $this->start->format("H-i") . $this->end->format("H-i");
+        return $this->start->format('H-i') . $this->end->format('H-i');
     }
 
     /**
-     * Set formation
+     * Set formation.
      *
-     * @param \App\Entity\Formation formation
+     * @param Formation formation
      *
      * @return Shift
      */
-    public function setFormation(\App\Entity\Formation $formation = null)
+    public function setFormation(?Formation $formation = null)
     {
         $this->formation = $formation;
 
@@ -354,9 +365,9 @@ class Shift
     }
 
     /**
-     * Get formation
+     * Get formation.
      *
-     * @return \App\Entity\Formation
+     * @return Formation
      */
     public function getFormation()
     {
@@ -364,13 +375,11 @@ class Shift
     }
 
     /**
-     * Set job
-     *
-     * @param \App\Entity\Job $job
+     * Set job.
      *
      * @return Shift
      */
-    public function setJob(\App\Entity\Job $job = null)
+    public function setJob(?Job $job = null)
     {
         $this->job = $job;
 
@@ -378,9 +387,9 @@ class Shift
     }
 
     /**
-     * Get job
+     * Get job.
      *
-     * @return \App\Entity\Job
+     * @return Job
      */
     public function getJob()
     {
@@ -388,9 +397,9 @@ class Shift
     }
 
     /**
-     * free // unbook
+     * free // unbook.
      *
-     * @return \App\Entity\Shift
+     * @return Shift
      */
     public function free()
     {
@@ -398,45 +407,48 @@ class Shift
         $this->setBookedTime(null);
         $this->setShifter(null);
         $this->setFixe(false);
+
         return $this;
     }
 
     /**
-     * Return true if the shift is in the past
+     * Return true if the shift is in the past.
      *
-     * @return boolean
+     * @return bool
      */
     public function getIsPast()
     {
         $now = new \DateTime('now');
+
         return $this->end < $now;
     }
 
     /**
-     * Return true if the shift is now
+     * Return true if the shift is now.
      *
-     * @return boolean
+     * @return bool
      */
     public function getIsCurrent()
     {
         $now = new \DateTime('now');
+
         return ($this->start < $now) && ($now < $this->end);
     }
 
     /**
-     * Return true if the shift is now or in the past
+     * Return true if the shift is now or in the past.
      *
-     * @return boolean
+     * @return bool
      */
     public function getIsPastOrCurrent()
     {
-        return ($this->getIsPast() or $this->getIsCurrent());
+        return $this->getIsPast() or $this->getIsCurrent();
     }
 
     /**
-     * Return true if the shift is in the future
+     * Return true if the shift is in the future.
      *
-     * @return boolean
+     * @return bool
      */
     public function getIsFuture()
     {
@@ -444,9 +456,9 @@ class Shift
     }
 
     /**
-     * Return true if the shift is not in the past, not current, and close enough
+     * Return true if the shift is not in the past, not current, and close enough.
      *
-     * @return boolean
+     * @return bool
      */
     public function getIsUpcoming()
     {
@@ -454,27 +466,26 @@ class Shift
     }
 
     /**
-     * Return true if the shift starts before the duration given as parameter
+     * Return true if the shift starts before the duration given as parameter.
      *
      * @param string $duration
      *
-     * @return boolean
+     * @return bool
      */
     public function isBefore($duration)
     {
         $futureDate = new \DateTime($duration);
         $futureDate->setTime(23, 59, 59);
+
         return $this->getIsFuture() && ($this->start < $futureDate);
     }
 
     /**
-     * Set lastShifter
-     *
-     * @param \App\Entity\Beneficiary $lastShifter
+     * Set lastShifter.
      *
      * @return Shift
      */
-    public function setLastShifter(\App\Entity\Beneficiary $lastShifter = null)
+    public function setLastShifter(?Beneficiary $lastShifter = null)
     {
         $this->lastShifter = $lastShifter;
 
@@ -482,9 +493,9 @@ class Shift
     }
 
     /**
-     * Get lastShifter
+     * Get lastShifter.
      *
-     * @return \App\Entity\Beneficiary
+     * @return Beneficiary
      */
     public function getLastShifter()
     {
@@ -492,13 +503,11 @@ class Shift
     }
 
     /**
-     * Add timeLog
-     *
-     * @param \App\Entity\TimeLog $timeLog
+     * Add timeLog.
      *
      * @return Shift
      */
-    public function addTimeLog(\App\Entity\TimeLog $timeLog)
+    public function addTimeLog(TimeLog $timeLog)
     {
         $this->timeLogs[] = $timeLog;
 
@@ -506,65 +515,49 @@ class Shift
     }
 
     /**
-     * Remove timeLog
-     *
-     * @param \App\Entity\TimeLog $timeLog
+     * Remove timeLog.
      */
-    public function removeTimeLog(\App\Entity\TimeLog $timeLog)
+    public function removeTimeLog(TimeLog $timeLog)
     {
         $this->timeLogs->removeElement($timeLog);
     }
 
     /**
-     * Get timeLogs
+     * Get timeLogs.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getTimeLogs()
     {
         return $this->timeLogs;
     }
 
-    /**
-     * @return bool
-     */
     public function isLocked(): ?bool
     {
         return $this->locked;
     }
 
-    /**
-     * @param bool $locked
-     */
     public function setLocked(?bool $locked): void
     {
         $this->locked = $locked;
     }
 
-    /**
-     * @return bool
-     */
     public function isFixe(): ?bool
     {
         return $this->fixe;
     }
 
-    /**
-     * @param bool $fixe
-     */
     public function setFixe(?bool $fixe): void
     {
         $this->fixe = $fixe;
     }
 
     /**
-     * Set position
-     *
-     * @param \App\Entity\PeriodPosition $position
+     * Set position.
      *
      * @return Shift
      */
-    public function setPosition(\App\Entity\PeriodPosition $position = null)
+    public function setPosition(?PeriodPosition $position = null)
     {
         $this->position = $position;
 
@@ -572,7 +565,7 @@ class Shift
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */
@@ -584,11 +577,9 @@ class Shift
     /**
      * Set createdBy.
      *
-     * @param \App\Entity\User $createBy
-     *
      * @return Shift
      */
-    public function setCreatedBy(\App\Entity\User $createdBy = null)
+    public function setCreatedBy(?User $createdBy = null)
     {
         $this->createdBy = $createdBy;
 
@@ -598,7 +589,7 @@ class Shift
     /**
      * Get createdBy.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getCreatedBy()
     {
@@ -606,7 +597,7 @@ class Shift
     }
 
     /**
-     * Return true if this is the first ever shift by the shifter
+     * Return true if this is the first ever shift by the shifter.
      *
      * @return bool
      */
@@ -618,11 +609,14 @@ class Shift
                 return true;
             }
         }
+
         return false;
     }
 
     /**
-     * Generate token from key
+     * Generate token from key.
+     *
+     * @param mixed $key
      */
     public function getTmpToken($key = '')
     {
@@ -630,34 +624,34 @@ class Shift
     }
 
     /**
-     * Example: "22/07/2022 - 9h30 à 12h30"
+     * Example: "22/07/2022 - 9h30 à 12h30".
      */
     public function getDisplayDateSeperateTime()
     {
-        return $this->getStart()->format('d/m/Y') . ' - ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
+        return $this->getStart()->format('d/m/Y') . ' - ' . $this->getStart()->format('G\hi') . ' à ' . $this->getEnd()->format('G\hi');
     }
 
     /**
-     * Example: "22/07/2022 de 9h30 à 12h30"
+     * Example: "22/07/2022 de 9h30 à 12h30".
      */
     public function getDisplayDateWithTime()
     {
-        return $this->getStart()->format('d/m/Y') . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
+        return $this->getStart()->format('d/m/Y') . ' de ' . $this->getStart()->format('G\hi') . ' à ' . $this->getEnd()->format('G\hi');
     }
 
     /**
-     * Example: "vendredi 22 juillet de 9h30 à 12h30"
+     * Example: "vendredi 22 juillet de 9h30 à 12h30".
      */
     public function getDisplayDateLongWithTime()
     {
-        return strftime("%A %e %B", $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
+        return strftime('%A %e %B', $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\hi') . ' à ' . $this->getEnd()->format('G\hi');
     }
 
     /**
-     * Example: "vendredi 22 juillet 2022 de 9h30 à 12h30"
+     * Example: "vendredi 22 juillet 2022 de 9h30 à 12h30".
      */
     public function getDisplayDateFullWithTime()
     {
-        return strftime("%A %e %B %Y", $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
+        return strftime('%A %e %B %Y', $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\hi') . ' à ' . $this->getEnd()->format('G\hi');
     }
 }

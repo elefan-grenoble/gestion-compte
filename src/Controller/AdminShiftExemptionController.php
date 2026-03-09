@@ -8,6 +8,7 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
+use Symfony\Component\Form\Form;
 
 /**
  * Admin Shiftexemption controller.
@@ -20,6 +21,7 @@ class AdminShiftExemptionController extends AbstractController
      * Lists all shiftExemption entities.
      *
      * @Route("/", name="admin_shiftexemption_index", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function indexAction(Request $request)
@@ -28,15 +30,16 @@ class AdminShiftExemptionController extends AbstractController
 
         $shiftExemptions = $em->getRepository('App:ShiftExemption')->findAll();
 
-        return $this->render('admin/shiftexemption/index.html.twig', array(
+        return $this->render('admin/shiftexemption/index.html.twig', [
             'shiftExemptions' => $shiftExemptions,
-        ));
+        ]);
     }
 
     /**
      * Creates a new shiftExemption entity.
      *
      * @Route("/new", name="admin_shiftexemption_new", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
@@ -44,7 +47,7 @@ class AdminShiftExemptionController extends AbstractController
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
-        $shiftExemption = new Shiftexemption();
+        $shiftExemption = new ShiftExemption();
         $form = $this->createForm('App\Form\ShiftExemptionType', $shiftExemption);
         $form->handleRequest($request);
 
@@ -53,19 +56,21 @@ class AdminShiftExemptionController extends AbstractController
             $em->flush();
 
             $session->getFlashBag()->add('success', 'Le nouveau motif d\'exemption a été créé !');
+
             return $this->redirectToRoute('admin_shiftexemption_index');
         }
 
-        return $this->render('admin/shiftexemption/new.html.twig', array(
+        return $this->render('admin/shiftexemption/new.html.twig', [
             'shiftExemption' => $shiftExemption,
             'form' => $form->createView(),
-        ));
+        ]);
     }
 
     /**
      * Displays a form to edit an existing shiftExemption entity.
      *
      * @Route("/{id}/edit", name="admin_shiftexemption_edit", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function editAction(Request $request, ShiftExemption $shiftExemption)
@@ -80,20 +85,22 @@ class AdminShiftExemptionController extends AbstractController
             $em->flush();
 
             $session->getFlashBag()->add('success', 'Le motif d\'exemption a bien été édité !');
+
             return $this->redirectToRoute('admin_shiftexemption_index');
         }
 
-        return $this->render('admin/shiftexemption/edit.html.twig', array(
+        return $this->render('admin/shiftexemption/edit.html.twig', [
             'shiftExemption' => $shiftExemption,
             'form' => $form->createView(),
             'delete_form' => $this->getDeleteForm($shiftExemption)->createView(),
-        ));
+        ]);
     }
 
     /**
      * Deletes a shiftExemption entity.
      *
      * @Route("/{id}", name="admin_shiftexemption_delete", methods={"DELETE"})
+     *
      * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function deleteAction(Request $request, ShiftExemption $shiftExemption)
@@ -119,13 +126,14 @@ class AdminShiftExemptionController extends AbstractController
      *
      * @param ShiftExemption $shiftExemption The shiftExemption entity
      *
-     * @return \Symfony\Component\Form\Form The form
+     * @return Form The form
      */
     private function getDeleteForm(ShiftExemption $shiftExemption)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('admin_shiftexemption_delete', array('id' => $shiftExemption->getId())))
+            ->setAction($this->generateUrl('admin_shiftexemption_delete', ['id' => $shiftExemption->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 }

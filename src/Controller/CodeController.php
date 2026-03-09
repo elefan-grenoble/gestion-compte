@@ -10,15 +10,13 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
-use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
-use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
-use Symfony\Component\Validator\Constraints\DateTime;
+use Symfony\Component\Form\FormInterface;
 
 /**
  * Code controller.
@@ -38,18 +36,19 @@ class CodeController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $codes = $em->getRepository('App:Code')->findBy(array('closed' => 0), array('createdAt' => 'DESC'));
+        $codes = $em->getRepository('App:Code')->findBy(['closed' => 0], ['createdAt' => 'DESC']);
         if (!$codes) {
             $codes[] = new Code();
         }
 
-        return $this->render('default/code/home_dashboard.html.twig', array('codes' => $codes));
+        return $this->render('default/code/home_dashboard.html.twig', ['codes' => $codes]);
     }
 
     /**
      * Lists all codes.
      *
      * @Route("/", name="codes_list", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_USER')")
      */
     public function listAction(Request $request)
@@ -57,33 +56,35 @@ class CodeController extends AbstractController
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
-        $this->logger->info('CODE : codes_list',array('username'=>$this->getUser()->getUsername()));
+        $this->logger->info('CODE : codes_list', ['username' => $this->getUser()->getUsername()]);
 
-        if ($this->getUser()->hasRole('ROLE_ADMIN')){
-            $codes = $em->getRepository('App:Code')->findBy(array(),array('createdAt'=>'DESC'),100);
+        if ($this->getUser()->hasRole('ROLE_ADMIN')) {
+            $codes = $em->getRepository('App:Code')->findBy([], ['createdAt' => 'DESC'], 100);
             $old_codes =  null;
-        }else{
-            $codes = $em->getRepository('App:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'),10);
-            $old_codes = $em->getRepository('App:Code')->findBy(array('closed'=>1),array('createdAt'=>'DESC'),3);
+        } else {
+            $codes = $em->getRepository('App:Code')->findBy(['closed' => 0], ['createdAt' => 'DESC'], 10);
+            $old_codes = $em->getRepository('App:Code')->findBy(['closed' => 1], ['createdAt' => 'DESC'], 3);
         }
 
-        if (!count($codes)){
+        if (!count($codes)) {
             $session->getFlashBag()->add('warning', 'aucun code à lire');
+
             return $this->redirectToRoute('homepage');
         }
 
-        $this->denyAccessUnlessGranted('view',$codes[0]);
+        $this->denyAccessUnlessGranted('view', $codes[0]);
 
-        return $this->render('default/code/list.html.twig', array(
+        return $this->render('default/code/list.html.twig', [
             'codes' => $codes,
-            'old_codes' => $old_codes
-        ));
+            'old_codes' => $old_codes,
+        ]);
     }
 
     /**
      * add new code.
      *
      * @Route("/new", name="code_edit", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_USER')")
      */
     public function newAction(Request $request)
@@ -94,12 +95,13 @@ class CodeController extends AbstractController
         $codeform = $this->createFormBuilder()
             ->setAction($this->generateUrl('code_edit'))
             ->setMethod('POST')
-            ->add('code', TextType::class, array('label' => 'code', 'required' => true))
-            ->add('close_old_codes', CheckboxType::class, array(
+            ->add('code', TextType::class, ['label' => 'code', 'required' => true])
+            ->add('close_old_codes', CheckboxType::class, [
                 'label' => 'fermer les anciens codes ?',
                 'required' => false,
-                'attr' => array('class' => 'filled-in')))
-            ->getForm();
+                'attr' => ['class' => 'filled-in']])
+            ->getForm()
+        ;
 
         $codeform->handleRequest($request);
 
@@ -113,13 +115,13 @@ class CodeController extends AbstractController
             $em->persist($code);
 
             if ($codeform->get('close_old_codes')->getData()) {
-                //close old codes
-                $open_codes = $em->getRepository('App:Code')->findBy(array('closed' => 0));
+                // close old codes
+                $open_codes = $em->getRepository('App:Code')->findBy(['closed' => 0]);
                 foreach ($open_codes as $open_code) {
                     $open_code->setClosed(true);
                     $em->persist($code);
                 }
-                //$session->getFlashBag()->add('success', 'Anciens codes fermés.');
+                // $session->getFlashBag()->add('success', 'Anciens codes fermés.');
             }
 
             $em->flush();
@@ -129,15 +131,16 @@ class CodeController extends AbstractController
             return $this->redirectToRoute('codes_list');
         }
 
-        return $this->render('default/code/new.html.twig', array(
-            'form' => $codeform->createView()
-        ));
+        return $this->render('default/code/new.html.twig', [
+            'form' => $codeform->createView(),
+        ]);
     }
 
     /**
      * generate new code.
      *
      * @Route("/generate", name="code_generate", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_USER')")
      */
     public function generateAction(Request $request, EventDispatcherInterface $event_dispatcher)
@@ -146,42 +149,44 @@ class CodeController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
-        $my_open_codes = $em->getRepository('App:Code')->findBy(array('closed'=>0,'registrar'=>$current_app_user),array('createdAt'=>'DESC'));
-        $old_codes = $em->getRepository('App:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'));
+        $my_open_codes = $em->getRepository('App:Code')->findBy(['closed' => 0, 'registrar' => $current_app_user], ['createdAt' => 'DESC']);
+        $old_codes = $em->getRepository('App:Code')->findBy(['closed' => 0], ['createdAt' => 'DESC']);
 
         $granted = false;
-        foreach ($old_codes as $code){
-            $granted = $granted || $this->isGranted('view',$code);
+        foreach ($old_codes as $code) {
+            $granted = $granted || $this->isGranted('view', $code);
         }
-        if (!$granted){
-            throw $this->createAccessDeniedException('Oups, les anciens codes ne peuvent pas être lu par '.$current_app_user->getBeneficiary()->getFirstName());
+        if (!$granted) {
+            throw $this->createAccessDeniedException('Oups, les anciens codes ne peuvent pas être lu par ' . $current_app_user->getBeneficiary()->getFirstName());
         }
 
-        if (count($my_open_codes)){
-            $this->logger->info('CODE : code_new make change screen',array('username'=>$current_app_user->getUsername()));
-            if (count($old_codes) > 1){
-                return $this->render('default/code/generate.html.twig', array(
+        if (count($my_open_codes)) {
+            $this->logger->info('CODE : code_new make change screen', ['username' => $current_app_user->getUsername()]);
+            if (count($old_codes) > 1) {
+                return $this->render('default/code/generate.html.twig', [
                     'display' =>  true,
                     'code' => $my_open_codes[0],
                     'old_codes' => $old_codes,
-                ));
-            } else {
-                return $this->render('default/code/generate.html.twig', array(
-                    'display' =>  true,
-                    'code' => $my_open_codes[0],
-                    'old_codes' => $my_open_codes,
-                ));
+                ]);
             }
+
+            return $this->render('default/code/generate.html.twig', [
+                'display' =>  true,
+                'code' => $my_open_codes[0],
+                'old_codes' => $my_open_codes,
+            ]);
+
         }
 
         // no code open for this user
 
-        if ($request->get('generate') === null){ // first visit
-            $this->logger->info('CODE : code_new create screen',array('username'=>$current_app_user->getUsername()));
+        if ($request->get('generate') === null) { // first visit
+            $this->logger->info('CODE : code_new create screen', ['username' => $current_app_user->getUsername()]);
+
             return $this->render('default/code/generate.html.twig');
         }
 
-        $value = rand(0,9999); // code aléatoire à 4 chiffres
+        $value = rand(0, 9999); // code aléatoire à 4 chiffres
         $code = new Code();
         $code->setValue($value);
         $code->setClosed(false);
@@ -190,23 +195,24 @@ class CodeController extends AbstractController
         $em->persist($code);
         $em->flush();
 
-        $this->logger->info('CODE : code_new created',array('username'=>$this->getUser()->getUsername()));
+        $this->logger->info('CODE : code_new created', ['username' => $this->getUser()->getUsername()]);
 
         $event_dispatcher->dispatch(new CodeNewEvent($code, $old_codes), CodeNewEvent::NAME);
 
-        $session->getFlashBag()->add('success','🎉 Bravo ! Note bien les deux codes ci-dessous ! <br>Tu peux aussi retrouver ces infos dans tes mails.');
+        $session->getFlashBag()->add('success', '🎉 Bravo ! Note bien les deux codes ci-dessous ! <br>Tu peux aussi retrouver ces infos dans tes mails.');
 
-        return $this->render('default/code/generate.html.twig', array(
+        return $this->render('default/code/generate.html.twig', [
             'generate' =>  true,
             'code' => $code,
             'old_codes' => $old_codes,
-        ));
+        ]);
     }
 
     /**
-     * toggle code 
+     * toggle code.
      *
      * @Route("/{id}/toggle", name="code_toggle", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_USER')")
      */
     public function toggleAction(Request $request, Code $code)
@@ -214,17 +220,18 @@ class CodeController extends AbstractController
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
-        if ($code->getClosed())
-            $this->denyAccessUnlessGranted('open',$code);
-        else
-            $this->denyAccessUnlessGranted('close',$code);
+        if ($code->getClosed()) {
+            $this->denyAccessUnlessGranted('open', $code);
+        } else {
+            $this->denyAccessUnlessGranted('close', $code);
+        }
 
         $code->setClosed(!$code->getClosed());
 
         $em->persist($code);
         $em->flush();
 
-        $session->getFlashBag()->add('success', 'Le code a bien été marqué '.(($code->getClosed())?'fermé':'ouvert').' !');
+        $session->getFlashBag()->add('success', 'Le code a bien été marqué ' . (($code->getClosed()) ? 'fermé' : 'ouvert') . ' !');
 
         return $this->redirectToRoute('codes_list');
     }
@@ -245,30 +252,30 @@ class CodeController extends AbstractController
 
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-            $this->logger->info('CODE : confirm code change (logged in)',array('username'=>$current_app_user->getUsername()));
-        }else{
+            $this->logger->info('CODE : confirm code change (logged in)', ['username' => $current_app_user->getUsername()]);
+        } else {
             $token = $request->get('token');
-            $username = explode(',',$this->get('App\Helper\SwipeCard')->vigenereDecode($token))[0];
-            $current_app_user = $em->getRepository('App:User')->findOneBy(array('username'=>$username));
-            if ($current_app_user){
-                $previousToken = $this->get("security.token_storage")->getToken();
+            $username = explode(',', $this->get('App\Helper\SwipeCard')->vigenereDecode($token))[0];
+            $current_app_user = $em->getRepository('App:User')->findOneBy(['username' => $username]);
+            if ($current_app_user) {
+                $previousToken = $this->get('security.token_storage')->getToken();
                 $logged_out = true;
-                $token = new UsernamePasswordToken($current_app_user, null, "main", $current_app_user->getRoles());
-                $this->get("security.token_storage")->setToken($token);
-                $this->logger->info('CODE : confirm code change (logged out)',array('username'=>$current_app_user->getUsername()));
-            }else{
-                //mute
+                $token = new UsernamePasswordToken($current_app_user, null, 'main', $current_app_user->getRoles());
+                $this->get('security.token_storage')->setToken($token);
+                $this->logger->info('CODE : confirm code change (logged out)', ['username' => $current_app_user->getUsername()]);
+            } else {
+                // mute
                 return $this->redirectToRoute('homepage');
             }
         }
 
-        $my_open_codes = $em->getRepository('App:Code')->findBy(array('closed'=>0,'registrar'=>$current_app_user),array('createdAt'=>'DESC'));
+        $my_open_codes = $em->getRepository('App:Code')->findBy(['closed' => 0, 'registrar' => $current_app_user], ['createdAt' => 'DESC']);
         $myLastCode = $my_open_codes[0];
-        $codes = $em->getRepository('App:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'));
-        foreach ($codes as $code){
-            if ($myLastCode->getCreatedAt()>$code->getCreatedAt()){ // only older than mine
-                if ($code->getRegistrar() != $current_app_user){ // not mine
-                    if ($securityContext->isGranted(CodeVoter::VIEW, $code)) { //only the ones I can see
+        $codes = $em->getRepository('App:Code')->findBy(['closed' => 0], ['createdAt' => 'DESC']);
+        foreach ($codes as $code) {
+            if ($myLastCode->getCreatedAt() > $code->getCreatedAt()) { // only older than mine
+                if ($code->getRegistrar() != $current_app_user) { // not mine
+                    if ($securityContext->isGranted(CodeVoter::VIEW, $code)) { // only the ones I can see
                         $code->setClosed(true);
                         $em->persist($code);
                     }
@@ -277,8 +284,8 @@ class CodeController extends AbstractController
         }
         $em->flush();
 
-        if ($logged_out){
-            $this->get("security.token_storage")->setToken($previousToken);
+        if ($logged_out) {
+            $this->get('security.token_storage')->setToken($previousToken);
         }
 
         $session->getFlashBag()->add('success', 'Bien enregistré, merci !');
@@ -286,9 +293,8 @@ class CodeController extends AbstractController
         return $this->redirectToRoute('homepage');
     }
 
-
     /**
-     * delete code
+     * delete code.
      *
      * @Route("/{id}", name="code_delete", methods={"DELETE"})
      */
@@ -308,22 +314,25 @@ class CodeController extends AbstractController
 
             $session->getFlashBag()->add('success', 'Le code a bien été supprimé !');
         }
+
         return $this->redirectToRoute('codes_list');
     }
 
     /**
-     * @param Code $code
-     * @return \Symfony\Component\Form\FormInterface
+     * @return FormInterface
      */
-    protected function getDeleteForm(Code $code) {
+    protected function getDeleteForm(Code $code)
+    {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('code_delete', array('id' => $code->getId())))
+            ->setAction($this->generateUrl('code_delete', ['id' => $code->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 
-    private function getErrorMessages(Form $form) {
-        $errors = array();
+    private function getErrorMessages(Form $form)
+    {
+        $errors = [];
 
         foreach ($form->getErrors() as $key => $error) {
             if ($form->isRoot()) {
@@ -342,5 +351,4 @@ class CodeController extends AbstractController
 
         return $errors;
     }
-
 }

@@ -3,8 +3,6 @@
 namespace App\Form;
 
 use App\Entity\Service;
-use Doctrine\Common\Collections\ArrayCollection;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
@@ -24,9 +22,6 @@ class ServiceType extends AbstractType
         $this->tokenStorage = $tokenStorage;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         // grab the user, do a quick sanity check that one exists
@@ -37,46 +32,39 @@ class ServiceType extends AbstractType
             );
         }
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user): void {
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event): void {
             $form = $event->getForm();
             $userData = $event->getData();
 
-            $form->add('name',TextType::class,array('label'=>'nom','required' => true,))
-                ->add('description',TextType::class,array('label'=>'Description'))
-                ->add('slug',TextType::class,array('label'=>'nom court','required' => true))
-                ->add('icon',TextType::class,array('label'=>'Icon name','required' => false))
-                ->add('url',TextType::class,array('label'=>'Adresse web','required' => false));
-            $form->add('logoFile', VichImageType::class, array(
+            $form->add('name', TextType::class, ['label' => 'nom', 'required' => true])
+                ->add('description', TextType::class, ['label' => 'Description'])
+                ->add('slug', TextType::class, ['label' => 'nom court', 'required' => true])
+                ->add('icon', TextType::class, ['label' => 'Icon name', 'required' => false])
+                ->add('url', TextType::class, ['label' => 'Adresse web', 'required' => false])
+            ;
+            $form->add('logoFile', VichImageType::class, [
                 'required' => false,
                 'allow_delete' => true,
                 'download_link' => true,
-            ));
-            $form->add('public', CheckboxType::class, array(
+            ]);
+            $form->add('public', CheckboxType::class, [
                 'required' => false,
-                'label'=>'Visible sur le menu ?',
-                'attr' => array('class' => 'filled-in')
-            ));
+                'label' => 'Visible sur le menu ?',
+                'attr' => ['class' => 'filled-in'],
+            ]);
         });
 
     }
-    
-    /**
-     * {@inheritdoc}
-     */
+
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
-            'data_class' => Service::class
-        ));
+        $resolver->setDefaults([
+            'data_class' => Service::class,
+        ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlockPrefix()
     {
         return 'App_service';
     }
-
-
 }

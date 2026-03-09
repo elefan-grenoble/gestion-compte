@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\DynamicContent;
 use App\Entity\ProcessUpdate;
 use App\Entity\Shift;
 use App\Form\ProcessUpdateType;
@@ -13,79 +12,83 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Component\Validator\Constraints\Date;
+use Symfony\Component\Form\FormInterface;
 
 /**
  * Process update controller. Correspond to the pages
- * "Gérer les nouveautés" -> Liste des procédures / nouveautés
+ * "Gérer les nouveautés" -> Liste des procédures / nouveautés.
  *
  * @Route("process/updates")
  */
 class ProcessUpdateController extends AbstractController
 {
-
     /**
      * Lists all process updates.
      *
      * @Route("/", name="process_update_list", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_USER')")
      */
     public function listAction(Request $request)
     {
-        //todo paginate
+        // todo paginate
 
         $em = $this->getDoctrine()->getManager();
-        $processUpdates = $em->getRepository('App:ProcessUpdate')->findBy(array(),array('date'=>'DESC'));
+        $processUpdates = $em->getRepository('App:ProcessUpdate')->findBy([], ['date' => 'DESC']);
 
-        $delete_forms = array();
-        foreach ($processUpdates as $update){
+        $delete_forms = [];
+        foreach ($processUpdates as $update) {
             $delete_forms[$update->getId()] = $this->createDeleteForm($update)->createView();
         }
 
         $lastShiftDate = null;
         $nbOfNew = null;
-        if ($beneficiary = $this->getUser()->getBeneficiary()){
+        if ($beneficiary = $this->getUser()->getBeneficiary()) {
             $lastShift = $em->getRepository(Shift::class)->findLastShifted($beneficiary);
             $lastShiftDate = $this->getUser()->getLastLogin();
-            if ($lastShift){
+            if ($lastShift) {
                 $lastShiftDate = $lastShift->getStart();
             }
             $nbOfNew = $em->getRepository(ProcessUpdate::class)->countFrom($lastShiftDate);
         }
 
 
-        return $this->render('process/list.html.twig', array(
+        return $this->render('process/list.html.twig', [
             'processUpdates' => $processUpdates,
             'deleteForms' => $delete_forms,
             'lastShiftDate' => $lastShiftDate,
             'nbOfNew' => $nbOfNew,
-        ));
+        ]);
     }
 
     /**
      * @Route("/count_unread", name="process_update_count_unread", methods={"POST"})
-     * @param Request $request
-     * @return Response | JsonResponse
+     *
+     * @return JsonResponse|Response
+     *
      * @throws
+     *
      * @Security("is_granted('ROLE_USER')")
      */
     public function countUnreadAction(Request $request)
     {
         if ($request->isXMLHttpRequest()) {
             $date = trim($request->get('date'));
-            $date = \DateTime::createFromFormat(\DateTimeInterface::W3C,$date);
+            $date = \DateTime::createFromFormat(\DateTimeInterface::W3C, $date);
             $em = $this->getDoctrine()->getManager();
             $nbOfNew = $em->getRepository(ProcessUpdate::class)->countFrom($date);
 
-            return new JsonResponse(array('count' => $nbOfNew,'date' => $date->format(\DateTimeInterface::W3C)));
+            return new JsonResponse(['count' => $nbOfNew, 'date' => $date->format(\DateTimeInterface::W3C)]);
         }
+
         return new Response('This is not ajax!', 400);
     }
 
     /**
-     * Create a process update
+     * Create a process update.
      *
      * @Route("/new", name="process_update_new", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function newAction(Request $request)
@@ -103,20 +106,22 @@ class ProcessUpdateController extends AbstractController
             $em = $this->getDoctrine()->getManager();
             $em->persist($emailTemplate);
             $em->flush();
-            $session->getFlashBag()->add('success', "Mise à jour de procédure créée");
+            $session->getFlashBag()->add('success', 'Mise à jour de procédure créée');
+
             return $this->redirectToRoute('process_update_list');
 
         }
 
-        return $this->render('process/new.html.twig', array(
-            'form' => $form->createView()
-        ));
+        return $this->render('process/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     /**
-     * Edit a process update
+     * Edit a process update.
      *
      * @Route("/{id}/edit", name="process_update_edit", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function editAction(Request $request, ProcessUpdate $processUpdate)
@@ -132,13 +137,14 @@ class ProcessUpdateController extends AbstractController
             $em->persist($processUpdate);
             $em->flush();
             $session->getFlashBag()->add('success', 'Mise à jour de procédure éditée');
+
             return $this->redirectToRoute('process_update_list');
 
         }
 
-        return $this->render('process/edit.html.twig', array(
-            'form' => $form->createView()
-        ));
+        return $this->render('process/edit.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     /**
@@ -146,14 +152,15 @@ class ProcessUpdateController extends AbstractController
      *
      * @param ProcessUpdate $processUpdate the entity
      *
-     * @return \Symfony\Component\Form\FormInterface The form
+     * @return FormInterface The form
      */
     private function createDeleteForm(ProcessUpdate $processUpdate)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('process_update_delete', array('id' => $processUpdate->getId())))
+            ->setAction($this->generateUrl('process_update_delete', ['id' => $processUpdate->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 
     /**
@@ -179,5 +186,4 @@ class ProcessUpdateController extends AbstractController
 
         return $this->redirectToRoute('process_update_list');
     }
-
 }

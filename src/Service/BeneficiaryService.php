@@ -3,14 +3,7 @@
 namespace App\Service;
 
 use App\Entity\Beneficiary;
-use App\Entity\Membership;
-use App\Entity\Registration;
-use App\Entity\Shift;
-use App\Entity\ShiftBucket;
-use App\Service\MembershipService;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\Common\Collections\ArrayCollection;
-use phpDocumentor\Reflection\Types\Array_;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class BeneficiaryService
@@ -31,11 +24,11 @@ class BeneficiaryService
     }
 
     /**
-     * Return autocomplete information
+     * Return autocomplete information.
      */
     public function getAutocompleteBeneficiaries()
     {
-        $returnArray = array();
+        $returnArray = [];
         $beneficiaries = $this->em->getRepository('App:Beneficiary')->findAllActive();
 
         foreach ($beneficiaries as $beneficiary) {
@@ -57,6 +50,7 @@ class BeneficiaryService
         foreach ($shifts as $shift) {
             $counter += $shift->getDuration();
         }
+
         return $counter;
     }
 
@@ -65,11 +59,12 @@ class BeneficiaryService
         $label = '#' . $beneficiary->getMemberNumber();
         $label .= ' ' . $this->getStatusIcon($beneficiary);
         $label .=  ' ' . $beneficiary->getDisplayName();
+
         return $label;
     }
 
     /**
-     * Return true if the beneficiary is in a "warning" status
+     * Return true if the beneficiary is in a "warning" status.
      */
     public function hasWarningStatus(Beneficiary $beneficiary): bool
     {
@@ -78,21 +73,20 @@ class BeneficiaryService
         if ($this->use_fly_and_fixed && $this->fly_and_fixed_entity_flying == 'Beneficiary') {
             $hasWarningStatus = $hasWarningStatus || $beneficiary->isFlying();
         }
-        
+
         return $hasWarningStatus;
     }
 
     /**
      * Return a string with emoji between brackets depending on the
      * beneficiary status, if she/he is inactive (withdrawn), frozen or flying
-     * or an empty string if none of those
+     * or an empty string if none of those.
      *
-     * @param bool $includeLeadingSpace if true add a space at the beginning
      * @return string with ether emoji(s) for the beneficiary's status or empty
      */
     public function getStatusIcon(Beneficiary $beneficiary): string
     {
-        $symbols = array();
+        $symbols = [];
 
         if ($beneficiary->getMembership()->getWithdrawn()) {
             $symbols[] = $this->container->getParameter('member_withdrawn_icon');
@@ -102,10 +96,10 @@ class BeneficiaryService
         }
         if ($this->use_fly_and_fixed) {
             if ($this->fly_and_fixed_entity_flying == 'Beneficiary' && $beneficiary->isFlying()) {
-                $symbols[] = $this->container->getParameter('beneficiary_flying_icon');;
+                $symbols[] = $this->container->getParameter('beneficiary_flying_icon');
             }
             if ($this->fly_and_fixed_entity_flying == 'Membership' && $beneficiary->getMembership()->isFlying()) {
-                $symbols[] = $this->container->getParameter('member_flying_icon');;
+                $symbols[] = $this->container->getParameter('member_flying_icon');
             }
         }
         if ($beneficiary->getMembership()->isCurrentlyExemptedFromShifts()) {
@@ -116,8 +110,9 @@ class BeneficiaryService
         }
 
         if (count($symbols)) {
-            return '[' . implode("/", $symbols) . ']';
+            return '[' . implode('/', $symbols) . ']';
         }
-        return "";
+
+        return '';
     }
 }

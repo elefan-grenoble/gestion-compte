@@ -19,7 +19,8 @@ class UserAdminType extends UserType
     {
         parent::buildForm($builder, $options);
         $builder
-            ->add('username', TextType::class, array('label' => "Nom d'utilisateur"))
-            ->add('password', PasswordType::class, array('label' => "Mot de passe", 'constraints' => [new NotBlank()]));
+            ->add('username', TextType::class, ['label' => "Nom d'utilisateur"])
+            ->add('password', PasswordType::class, ['label' => 'Mot de passe', 'constraints' => [new NotBlank()]])
+        ;
     }
 }

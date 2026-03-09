@@ -2,26 +2,16 @@
 
 namespace App\Controller;
 
-use App\Entity\Address;
-use App\Entity\Beneficiary;
 use App\Entity\Membership;
-use App\Entity\Client;
 use App\Entity\Note;
-use App\Entity\Registration;
-use App\Entity\Shift;
-use App\Entity\TimeLog;
-use App\Entity\User;
 use App\Form\NoteType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
-use DateTime;
-use Symfony\Component\Validator\Constraints\NotBlank;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Twig\Sandbox\SecurityError;
+use Symfony\Component\Form\FormInterface;
 
 /**
  * Note controller.
@@ -37,13 +27,15 @@ class NoteController extends AbstractController
         if (!$this->_current_app_user) {
             $this->_current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         }
+
         return $this->_current_app_user;
     }
 
     /**
-     * reply to a note
+     * reply to a note.
      *
      * @Route("/note/{id}/reply", name="note_reply", methods={"POST"})
+     *
      * @Security("is_granted('ROLE_USER_VIEWER')")
      */
     public function noteReplyAction(Request $request, Note $note)
@@ -63,15 +55,17 @@ class NoteController extends AbstractController
             $em->flush();
             if ($new_note->getSubject()) {
                 $session->getFlashBag()->add('success', 'réponse enregistrée');
+
                 return $this->redirectToShow($note->getSubject());
             }
             $session->getFlashBag()->add('success', 'Post-it réponse enregistré');
         }
+
         return $this->redirectToRoute('user_office_tools');
     }
 
     /**
-     * edit a note
+     * edit a note.
      *
      * @Route("/note/{id}/edit", name="note_edit", methods={"GET","POST"})
      */
@@ -89,10 +83,12 @@ class NoteController extends AbstractController
             $em->flush();
             if ($note->getSubject()) {
                 $session->getFlashBag()->add('success', 'note éditée');
+
                 return $this->redirectToShow($note->getSubject());
             }
             $session->getFlashBag()->add('success', 'Post-it édité');
         }
+
         return $this->redirectToRoute('user_office_tools');
     }
 
@@ -101,14 +97,15 @@ class NoteController extends AbstractController
      *
      * @param Note $note the note entity
      *
-     * @return \Symfony\Component\Form\FormInterface The form
+     * @return FormInterface The form
      */
     private function createNoteDeleteForm(Note $note)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('note_delete', array('id' => $note->getId())))
+            ->setAction($this->generateUrl('note_delete', ['id' => $note->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 
     /**
@@ -130,12 +127,13 @@ class NoteController extends AbstractController
             $em = $this->getDoctrine()->getManager();
             $em->remove($note);
             $em->flush();
-            $session->getFlashBag()->add('success', "la note a bien été supprimée");
+            $session->getFlashBag()->add('success', 'la note a bien été supprimée');
         }
 
         if ($member) {
             return $this->redirectToShow($member);
         }
+
         return $this->redirectToRoute('user_office_tools');
     }
 
@@ -143,9 +141,10 @@ class NoteController extends AbstractController
     {
         $user = $member->getMainBeneficiary()->getUser(); // FIXME
         $session = new Session();
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
-        else
-            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+            return $this->redirectToRoute('member_show', ['member_number' => $member->getMemberNumber()]);
+        }
+
+        return $this->redirectToRoute('member_show', ['member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())]);
     }
 }

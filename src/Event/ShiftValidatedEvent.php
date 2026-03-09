@@ -3,11 +3,10 @@
 namespace App\Event;
 
 use App\Entity\Shift;
-use Symfony\Component\EventDispatcher\Event;
 
 class ShiftValidatedEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
-    const NAME = 'shift.validated';
+    public const NAME = 'shift.validated';
 
     private $shift;
 

@@ -6,10 +6,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * OpeningHour
+ * OpeningHour.
  *
  * @ORM\Table(name="opening_hour")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\OpeningHourRepository")
  */
 class OpeningHour
@@ -18,7 +20,9 @@ class OpeningHour
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -53,13 +57,14 @@ class OpeningHour
 
     /**
      * @ORM\ManyToOne(targetEntity="OpeningHourKind", inversedBy="openingHours", fetch="EAGER")
+     *
      * @ORM\JoinColumn(name="opening_hour_kind_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $kind;
 
     /**
      * @var \DateTime
-     * 
+     *
      * @ORM\Column(name="created_at", type="datetime")
      */
     private $createdAt;
@@ -75,7 +80,7 @@ class OpeningHour
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -85,9 +90,9 @@ class OpeningHour
     }
 
     /**
-     * Set dayOfWeek
+     * Set dayOfWeek.
      *
-     * @param integer $dayOfWeek
+     * @param int $dayOfWeek
      *
      * @return Period
      */
@@ -99,7 +104,7 @@ class OpeningHour
     }
 
     /**
-     * Get dayOfWeek
+     * Get dayOfWeek.
      *
      * @return int
      */
@@ -109,17 +114,17 @@ class OpeningHour
     }
 
     /**
-     * Get dayOfWeekString
+     * Get dayOfWeekString.
      *
      * @return int
      */
     public function getDayOfWeekString()
     {
-        return strftime("%A", strtotime("Monday + {$this->dayOfWeek} days"));
+        return strftime('%A', strtotime("Monday + {$this->dayOfWeek} days"));
     }
 
     /**
-     * Set start
+     * Set start.
      *
      * @param \DateTime $start
      *
@@ -133,7 +138,7 @@ class OpeningHour
     }
 
     /**
-     * Get start
+     * Get start.
      *
      * @return \DateTime
      */
@@ -143,7 +148,7 @@ class OpeningHour
     }
 
     /**
-     * Set end
+     * Set end.
      *
      * @param \DateTime $end
      *
@@ -157,7 +162,7 @@ class OpeningHour
     }
 
     /**
-     * Get end
+     * Get end.
      *
      * @return \DateTime
      */
@@ -174,13 +179,14 @@ class OpeningHour
         if (!$this->closed) {
             return $this->start < $this->end;
         }
+
         return true;
     }
 
     /**
-     * Set closed
+     * Set closed.
      *
-     * @param boolean $closed
+     * @param bool $closed
      *
      * @return OpeningHour
      */
@@ -192,7 +198,7 @@ class OpeningHour
     }
 
     /**
-     * Get closed
+     * Get closed.
      *
      * @return bool
      */
@@ -202,13 +208,11 @@ class OpeningHour
     }
 
     /**
-     * Set kind
-     *
-     * @param \App\Entity\OpeningHourKind $openingHourKind
+     * Set kind.
      *
      * @return Event
      */
-    public function setKind(\App\Entity\OpeningHourKind $openingHourKind = null)
+    public function setKind(?OpeningHourKind $openingHourKind = null)
     {
         $this->kind = $openingHourKind;
 
@@ -216,7 +220,7 @@ class OpeningHour
     }
 
     /**
-     * Get kind
+     * Get kind.
      *
      * @return OpeningHourKind
      */
@@ -226,7 +230,7 @@ class OpeningHour
     }
 
     /**
-     * Set createdAt
+     * Set createdAt.
      *
      * @param \DateTime $date
      *
@@ -240,7 +244,7 @@ class OpeningHour
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */

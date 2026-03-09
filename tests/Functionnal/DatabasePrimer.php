@@ -3,12 +3,16 @@
 namespace App\Tests\Functionnal;
 
 use App\DataFixtures\Purger\CustomPurger;
-use Doctrine\Common\DataFixtures\Purger\ORMPurger;
 use Doctrine\DBAL\Exception;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Bundle\FrameworkBundle\Test\WebTestCase;
 use Symfony\Component\Console\Input\ArrayInput;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class DatabasePrimer extends WebTestCase
 {
     /**
@@ -29,7 +33,7 @@ class DatabasePrimer extends WebTestCase
     /**
      * @throws \Exception
      */
-    public function loadFixturesWithGroups(array $group = null): void
+    public function loadFixturesWithGroups(?array $group = null): void
     {
 
         $client = static::createClient();
@@ -54,7 +58,3 @@ class DatabasePrimer extends WebTestCase
 
     }
 }
-
-
-
-

@@ -6,7 +6,6 @@ use App\Entity\Beneficiary;
 use App\Entity\Membership;
 use App\Entity\Shift;
 use App\Entity\User;
-use App\Repository\ShiftRepository;
 use App\Service\BeneficiaryService;
 use App\Service\MembershipService;
 use App\Service\ShiftService;
@@ -14,9 +13,13 @@ use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\TestCase;
-use \Datetime;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class ShiftServiceTest extends TestCase
 {
     /**
@@ -51,7 +54,8 @@ class ShiftServiceTest extends TestCase
         // Mock the ContainerInterface
         $this->container = $this
             ->getMockBuilder(ContainerInterface::class)
-            ->getMock();
+            ->getMock()
+        ;
 
         // set parameters for the container
         $this->container->method('getParameter')
@@ -59,83 +63,101 @@ class ShiftServiceTest extends TestCase
                 switch ($parameter) {
                     case 'registration_duration':
                         return $this->registration_duration;
+
                     case 'registration_every_civil_year':
                         return $this->registration_every_civil_year;
+
                     case 'cycle_type':
                         return $this->cycle_type;
+
                     case 'due_duration_by_cycle':
                         return $this->due_duration_by_cycle;
+
                     case 'min_shift_duration':
                         return $this->min_shift_duration;
+
                     case 'new_users_start_as_beginner':
                         return $this->new_users_start_as_beginner;
+
                     case 'allow_extra_shifts':
                         return $this->allow_extra_shifts;
+
                     case 'max_time_in_advance_to_book_extra_shifts':
                         return $this->max_time_in_advance_to_book_extra_shifts;
+
                     case 'forbid_shift_overlap_time':
                         return $this->forbid_shift_overlap_time;
+
                     case 'use_fly_and_fixed':
                         return $this->use_fly_and_fixed;
+
                     case 'fly_and_fixed_allow_fixed_shift_free':
                         return $this->fly_and_fixed_allow_fixed_shift_free;
+
                     case 'use_time_log_saving':
                         return $this->use_time_log_saving;
+
                     case 'time_log_saving_shift_free_min_time_in_advance_days':
                         return $this->time_log_saving_shift_free_min_time_in_advance_days;
+
                     case 'time_log_saving_shift_free_allow_only_if_enough_saving':
                         return $this->time_log_saving_shift_free_allow_only_if_enough_saving;
+
                     default:
                         return null;
                 }
-            }));
+            }))
+        ;
 
         // Mock the EntityManager
         $this->em = $this
             ->getMockBuilder(EntityManager::class)
             ->disableOriginalConstructor()
-            ->getMock();
+            ->getMock()
+        ;
 
         // Mock the shift repository
         $shiftRepositoryMock = $this->getMockBuilder(EntityRepository::class)
             ->disableOriginalConstructor()
             ->setMethods(['findShiftsForBeneficiary'])
-            ->getMock();
+            ->getMock()
+        ;
 
         // Define the behavior of the findShiftsForBeneficiary() method
         $shiftRepositoryMock->method('findShiftsForBeneficiary')
             ->willReturn(
                 new ArrayCollection()
-            );
+            )
+        ;
 
         // Mock the getRepository() method of the EntityManager
         $this->em->expects($this->any())
             ->method('getRepository')
             ->with('App:Shift')
-            ->willReturn($shiftRepositoryMock);
+            ->willReturn($shiftRepositoryMock)
+        ;
 
         $membershipService = new MembershipService($this->container, $this->em);
         $beneficiaryService = new BeneficiaryService($this->container, $this->em, $membershipService);
         $this->shiftService = new ShiftService(
-            $this->em, 
-            $beneficiaryService, 
-            $membershipService, 
-            $this->due_duration_by_cycle, 
-            $this->min_shift_duration, 
-            $this->new_users_start_as_beginner, 
-            $this->allow_extra_shifts, 
-            $this->max_time_in_advance_to_book_extra_shifts, 
+            $this->em,
+            $beneficiaryService,
+            $membershipService,
+            $this->due_duration_by_cycle,
+            $this->min_shift_duration,
+            $this->new_users_start_as_beginner,
+            $this->allow_extra_shifts,
+            $this->max_time_in_advance_to_book_extra_shifts,
             $this->forbid_shift_overlap_time,
             $this->use_fly_and_fixed,
             $this->fly_and_fixed_allow_fixed_shift_free,
             $this->use_time_log_saving,
             $this->time_log_saving_shift_free_min_time_in_advance_days,
-            $this->time_log_saving_shift_free_allow_only_if_enough_saving 
+            $this->time_log_saving_shift_free_allow_only_if_enough_saving
         );
     }
-    /*
-     * Test if the beneficiary can book a shift on the first cycle when no flying
-     */
+
+    // Test if the beneficiary can book a shift on the first cycle when no flying
     public function testShiftTimeByCycle()
     {
         $member = new Membership();
@@ -147,7 +169,7 @@ class ShiftServiceTest extends TestCase
     }
 
     /**
-     * Call to isShiftBookable for an empty shift and a user with correct rights
+     * Call to isShiftBookable for an empty shift and a user with correct rights.
      */
     public function testIsShiftBookableWithEmptyShiftAndBeginner()
     {
@@ -155,7 +177,7 @@ class ShiftServiceTest extends TestCase
     }
 
     /**
-     * Call to isShiftBookable for an empty shift and a user without rights (eg : a beginner)
+     * Call to isShiftBookable for an empty shift and a user without rights (eg : a beginner).
      */
     public function testIsShiftBookableWithEmptyShiftAndNotABeginner()
     {
@@ -164,7 +186,7 @@ class ShiftServiceTest extends TestCase
 
     /**
      * Call to isShiftBookable for a non-empty shift and a user without rights to book an empty shift
-     * It should return true because it's not an empty shift
+     * It should return true because it's not an empty shift.
      */
     public function testIsShiftBookableWithNotEmptyShiftAndBeginner()
     {
@@ -172,8 +194,8 @@ class ShiftServiceTest extends TestCase
     }
 
     /**
-     * @param $beginner
      * @param $emptyShift boolean
+     *
      * @return mixed
      */
     private function doIsShiftBookableTest($beginner, bool $emptyShift)
@@ -187,12 +209,15 @@ class ShiftServiceTest extends TestCase
 
         $shift = $this
             ->getMockBuilder(Shift::class)
-            ->getMock();
+            ->getMock()
+        ;
         $shift->method('getStart')
-             ->willReturn(new Datetime());
+            ->willReturn(new \Datetime())
+        ;
         $shift->expects($this->any())
             ->method('getIsPast')
-            ->will($this->returnValue(false));
+            ->will($this->returnValue(false))
+        ;
         $membershipService = new MembershipService($this->container, $this->em);
         $beneficiaryService = new BeneficiaryService($this->container, $this->em, $membershipService);
         $shiftService = $this
@@ -213,19 +238,23 @@ class ShiftServiceTest extends TestCase
                     $this->fly_and_fixed_allow_fixed_shift_free,
                     $this->use_time_log_saving,
                     $this->time_log_saving_shift_free_min_time_in_advance_days,
-                    $this->time_log_saving_shift_free_allow_only_if_enough_saving
+                    $this->time_log_saving_shift_free_allow_only_if_enough_saving,
                 ]
             )
-            ->getMock();
+            ->getMock()
+        ;
         $shiftService->expects($this->any())
             ->method('isShiftEmpty')
-            ->willReturn($emptyShift);
+            ->willReturn($emptyShift)
+        ;
         $shiftService->expects($this->any())
             ->method('canBookDuration')
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
         $shiftService->expects($this->any())
             ->method('isBeginner')
-            ->willReturn($beginner);
+            ->willReturn($beginner)
+        ;
 
         return $shiftService->isShiftBookable($shift, $beneficiary);
     }
@@ -274,35 +303,36 @@ class ShiftServiceTest extends TestCase
                 $this->fly_and_fixed_allow_fixed_shift_free,
                 $this->use_time_log_saving,
                 $this->time_log_saving_shift_free_min_time_in_advance_days,
-                $this->time_log_saving_shift_free_allow_only_if_enough_saving
+                $this->time_log_saving_shift_free_allow_only_if_enough_saving,
             ])
             ->getMock()
         ;
 
         $shiftService->expects($this->any())
             ->method('hasPreviousValidShifts')
-            ->willReturn(!$beginner);
+            ->willReturn(!$beginner)
+        ;
 
         return $shiftService->isBeginner($beneficiary);
     }
 
     public function testHasPreviousValidShiftsWithShift()
     {
-        $date = new \DateTime();
+        $date = new \Datetime();
         $date->sub(new \DateInterval('P10D'));
         $this->assertTrue($this->doTestHasPreviousValidShifts($date));
     }
 
     public function testHasPreviousValidShiftsWithShiftInTheFuture()
     {
-        $date = new \DateTime();
+        $date = new \Datetime();
         $date->add(new \DateInterval('P10D'));
         $this->assertFalse($this->doTestHasPreviousValidShifts($date));
     }
 
     public function testHasPreviousValidShiftsWithDismissedShift()
     {
-        $date = new \DateTime();
+        $date = new \Datetime();
         $date->add(new \DateInterval('P10D'));
         $this->assertFalse($this->doTestHasPreviousValidShifts($date));
     }
@@ -316,8 +346,7 @@ class ShiftServiceTest extends TestCase
     {
         $shifts = new ArrayCollection();
 
-        if ($shiftDate)
-        {
+        if ($shiftDate) {
             $shift = new Shift();
             $shift->setStart($shiftDate);
             $shifts->add($shift);
@@ -326,7 +355,8 @@ class ShiftServiceTest extends TestCase
         $beneficiary = $this->getMockBuilder(Beneficiary::class)->getMock();
         $beneficiary->expects($this->any())
             ->method('getShifts')
-            ->willReturn($shifts);
+            ->willReturn($shifts)
+        ;
 
         $shiftService = $this
             ->getMockBuilder(ShiftService::class)

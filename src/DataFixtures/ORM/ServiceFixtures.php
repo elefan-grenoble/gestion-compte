@@ -1,6 +1,5 @@
 <?php
 
-
 namespace App\DataFixtures\ORM;
 
 use App\DataFixtures\FixturesConstants;
@@ -12,7 +11,6 @@ use Doctrine\Persistence\ObjectManager;
 
 class ServiceFixtures extends Fixture implements FixtureGroupInterface, OrderedFixtureInterface
 {
-
     public function load(ObjectManager $manager)
     {
 
@@ -22,13 +20,13 @@ class ServiceFixtures extends Fixture implements FixtureGroupInterface, OrderedF
         $serviceNames = FixturesConstants::SERVICE_NAMES;
         $serviceDescriptions = FixturesConstants::SERVICE_DESCRIPTIONS;
 
-        for ($i = 0; $i < $serviceCounts; $i++) {
+        for ($i = 0; $i < $serviceCounts; ++$i) {
 
             $service = new Service();
             $service->setName($serviceNames[$i]);
             $service->setDescription($serviceDescriptions[$i]);
-            $service->setIcon( $serviceIcons[$i]);
-            $service->setUrl("http://mattermost.com");
+            $service->setIcon($serviceIcons[$i]);
+            $service->setUrl('http://mattermost.com');
             $service->setSlug($serviceSlugs[$i]);
             $service->setPublic(rand(0, 1));
 
@@ -52,5 +50,4 @@ class ServiceFixtures extends Fixture implements FixtureGroupInterface, OrderedF
     {
         return 4;
     }
-
 }

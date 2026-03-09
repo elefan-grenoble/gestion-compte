@@ -3,7 +3,6 @@
 namespace App\Form\DataTransformer;
 
 use App\Entity\Beneficiary;
-use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
@@ -18,11 +17,12 @@ class BeneficiaryToStringTransformer implements DataTransformerInterface
     }
 
     /**
-    * Transforms an object (Beneficiary) to a string.
-    *
-    * @param  Beneficiary|null $beneficiary
-    * @return string
-    */
+     * Transforms an object (Beneficiary) to a string.
+     *
+     * @param null|Beneficiary $beneficiary
+     *
+     * @return string
+     */
     public function transform($beneficiary)
     {
         if ($beneficiary === null) {
@@ -35,8 +35,10 @@ class BeneficiaryToStringTransformer implements DataTransformerInterface
     /**
      * Transforms a string to an object (Beneficiary).
      *
-     * @param  string $autocomplete
+     * @param string $autocomplete
+     *
      * @return Beneficiary
+     *
      * @throws TransformationFailedException if object (Beneficiary) is not found
      */
     public function reverseTransform($autocomplete)
@@ -47,7 +49,8 @@ class BeneficiaryToStringTransformer implements DataTransformerInterface
 
         $beneficiary = $this->entityManager
             ->getRepository(Beneficiary::class)
-            ->findOneFromAutoComplete($autocomplete);
+            ->findOneFromAutoComplete($autocomplete)
+        ;
 
         if ($beneficiary === null) {
             throw new TransformationFailedException(sprintf(

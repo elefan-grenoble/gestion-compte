@@ -3,11 +3,10 @@
 namespace App\Event;
 
 use App\Entity\Beneficiary;
-use Symfony\Component\EventDispatcher\Event;
 
 class BeneficiaryCreatedEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
-    const NAME = 'beneficiary.created';
+    public const NAME = 'beneficiary.created';
 
     private $beneficiary;
 
@@ -23,5 +22,4 @@ class BeneficiaryCreatedEvent extends \Symfony\Contracts\EventDispatcher\Event
     {
         return $this->beneficiary;
     }
-
 }
