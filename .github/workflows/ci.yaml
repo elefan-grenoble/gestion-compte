@@ -94,6 +94,9 @@ jobs:
             tools: composer:2.2
             extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, iconv, json
 
+        - name: Clear cache
+          run: ./bin/console cache:clear
+
         - name: Set executable permissions for PHPStan
           run: chmod +x ./vendor/bin/phpstan
 
@@ -150,6 +153,9 @@ jobs:
             echo 'Waiting for MySQL...'
             sleep 1
           done
+
+      - name: Clear cache
+        run: ./bin/console cache:clear
 
 #       RUN MIGRATIONS ----------------
       - name: Run migrations
@@ -223,6 +229,9 @@ jobs:
             sleep 1
           done
 
+      - name: Clear cache
+        run: ./bin/console cache:clear
+
       - name: Start Symfony server
         run: symfony server:start --no-tls -d --port=8000
 
@@ -247,7 +256,6 @@ jobs:
 #       RUN CYPRESS TESTS ----------------
       - name: Run Cypress tests
         run: CYPRESS_BASE_URL=http://localhost:8000 npm run cy:test:main
-
 
 #       CHANGE ENV VARIABLES ----------------
       - name: Set up test environment variables
@@ -279,3 +287,16 @@ jobs:
       - name: Run Cypress tests
         run: CYPRESS_BASE_URL=http://localhost:8000 CYPRESS_KEYCLOAK_URL=http://localhost:8080 npm run cy:test:oidc
 
+      - name: publish logs
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: logs
+          path: var/log
+
+      - name: publish screenshots
+        if: ${{ failure() }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: screenshots
+          path: cypress/screenshots
