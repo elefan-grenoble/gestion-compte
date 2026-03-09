@@ -19,6 +19,7 @@ use App\Form\MembershipType;
 use App\Form\NoteType;
 use App\Form\RegistrationType;
 use App\Form\TimeLogType;
+use App\Helper\SwipeCard as SwipeCardHelper;
 use App\Security\MembershipVoter;
 use App\Service\MailerService;
 use App\Service\MembershipService;
@@ -748,7 +749,7 @@ class MembershipController extends AbstractController
      *
      * @Route("/new", name="member_new", methods={"GET","POST"})
      */
-    public function newAction(Request $request, EventDispatcherInterface $event_dispatcher)
+    public function newAction(Request $request, EventDispatcherInterface $event_dispatcher, SwipeCardHelper $swipeCardHelper)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
@@ -758,7 +759,7 @@ class MembershipController extends AbstractController
         $code = $request->query->get('code');
 
         if ($code) {
-            $email = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
+            $email = $swipeCardHelper->vigenereDecode($code);
             if ($email) {
                 $a_beneficiary = $em->getRepository('App:AnonymousBeneficiary')->findOneBy(['email' => $email]);
             }
@@ -884,7 +885,7 @@ class MembershipController extends AbstractController
      *
      * @throws
      */
-    public function addBeneficiaryAction(Request $request, EventDispatcherInterface $event_dispatcher)
+    public function addBeneficiaryAction(Request $request, EventDispatcherInterface $event_dispatcher, SwipeCardHelper $swipeCardHelper, ValidatorInterface $validator)
     {
         $session = new Session();
 
@@ -892,7 +893,7 @@ class MembershipController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $a_beneficiary = null;
         if ($code) {
-            $email = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
+            $email = $swipeCardHelper->vigenereDecode($code);
             if ($email) {
                 $a_beneficiary = $em->getRepository('App:AnonymousBeneficiary')->findOneBy(['email' => $email]);
             }
@@ -914,7 +915,7 @@ class MembershipController extends AbstractController
         $member = $a_beneficiary->getJoinTo()->getMembership();
 
         $beneficiaryCanHostConstraint = new BeneficiaryCanHost();
-        $violations = $this->get('validator')->validate(
+        $violations = $validator->validate(
             $member->getMainBeneficiary(),
             $beneficiaryCanHostConstraint
         );
@@ -1303,6 +1304,7 @@ class MembershipController extends AbstractController
                 'data' => ($shift->getWasCarriedOut() ? 0 : 1),
             ])
             ->setMethod('POST')
-            ->getForm();
+            ->getForm()
+        ;
     }
 }

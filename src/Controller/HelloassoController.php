@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\HelloassoPayment;
 use App\Event\HelloassoEvent;
 use App\Form\AutocompleteBeneficiaryType;
+use App\Helper\SwipeCard as SwipeCardHelper;
 use App\Providers\Helloasso\HelloassoClient;
 use App\Providers\Helloasso\HelloassoPaymentHandler;
 use Psr\Http\Client\ClientExceptionInterface;
@@ -264,10 +265,10 @@ class HelloassoController extends AbstractController
      *
      * @param mixed $code
      */
-    public function resolveOrphan(HelloassoPayment $payment, $code)
+    public function resolveOrphan(HelloassoPayment $payment, $code, SwipeCardHelper $swipeCardHelper)
     {
         $code = urldecode($code);
-        $email = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
+        $email = $swipeCardHelper->vigenereDecode($code);
         $session = new Session();
         if ($email == $payment->getEmail()) {
             if ($payment->getRegistration()) {
@@ -294,10 +295,10 @@ class HelloassoController extends AbstractController
      *
      * @param mixed $code
      */
-    public function confirmOrphan(HelloassoPayment $payment, $code, EventDispatcherInterface $event_dispatcher)
+    public function confirmOrphan(HelloassoPayment $payment, $code, EventDispatcherInterface $event_dispatcher, SwipeCardHelper $swipeCardHelper)
     {
         $code = urldecode($code);
-        $email = $this->get('App\Helper\SwipeCard')->vigenereDecode($code);
+        $email = $swipeCardHelper->vigenereDecode($code);
         $session = new Session();
         if ($email == $payment->getEmail()) {
             $session->getFlashBag()->add('success', 'Merci !');
