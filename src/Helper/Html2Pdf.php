@@ -14,7 +14,7 @@ class Html2Pdf
     }
 
     /**
-     * @var \Spipu\Html2Pdf\Html2Pdf;
+     * @var \Spipu\Html2Pdf\Html2Pdf
      */
     private $_pdf;
 

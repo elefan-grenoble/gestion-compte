@@ -643,7 +643,7 @@ parameters:
 			path: src/Controller/MembershipController.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\)\: Unexpected token "\\n     ", expected type at offset 247 on line 7$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\)\: Unexpected token "\\n     ", expected type at offset 230 on line 8$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: src/Controller/MembershipController.php
@@ -673,7 +673,7 @@ parameters:
 			path: src/Controller/ProcessUpdateController.php
 
 		-
-			message: '#^PHPDoc tag @throws has invalid value \(\)\: Unexpected token "\\n     \* ", expected type at offset 173 on line 5$#'
+			message: '#^PHPDoc tag @throws has invalid value \(\)\: Unexpected token "\\n     \*", expected type at offset 154 on line 6$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: src/Controller/ProcessUpdateController.php
@@ -895,52 +895,10 @@ parameters:
 			path: src/Controller/WidgetController.php
 
 		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$createBy$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Entity/ClosingException.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$date$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Entity/Event.php
-
-		-
 			message: '#^Property App\\Entity\\Event\:\:\$imgFile has unknown class App\\Entity\\File as its type\.$#'
 			identifier: class.notFound
 			count: 1
 			path: src/Entity/Event.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$createBy$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Entity/Formation.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$createdAt$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Entity/HelloassoPayment.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$createBy$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Entity/Job.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$createBy$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Entity/Membership.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$createBy$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Entity/MembershipShiftExemption.php
 
 		-
 			message: '#^Binary operation "\." between '' \- Semaine '' and non\-empty\-array results in an error\.$#'
@@ -959,12 +917,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Entity/PeriodPosition.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$createdAt$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Entity/Registration.php
 
 		-
 			message: '#^Property App\\Entity\\Service\:\:\$logoFile has unknown class App\\Entity\\File as its type\.$#'
@@ -1009,34 +961,16 @@ parameters:
 			path: src/Entity/Shift.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(\\App\\Entity\\Formation formation\)\: Unexpected token "formation", expected variable at offset 68 on line 4$#'
+			message: '#^PHPDoc tag @param has invalid value \(Formation formation\)\: Unexpected token "formation", expected variable at offset 57 on line 4$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: src/Entity/Shift.php
 
 		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$createBy$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Entity/Shift.php
-
-		-
-			message: '#^PHPDoc tag @param has invalid value \(\\DateTime\? \$disabledAt\)\: Unexpected token "\?", expected variable at offset 56 on line 4$#'
+			message: '#^PHPDoc tag @param has invalid value \(\\DateTime\? \$disabledAt\)\: Unexpected token "\?", expected variable at offset 57 on line 4$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: src/Entity/SwipeCard.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$createBy$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Entity/TimeLog.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$created_at$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Entity/TimeLog.php
 
 		-
 			message: '#^PHPDoc tag @param for parameter \$client with type FOS\\OAuthServerBundle\\Model\\ClientInterface is not subtype of native type App\\Entity\\Client\.$#'
@@ -1063,42 +997,6 @@ parameters:
 			path: src/Form/DataTransformer/MembershipToStringTransformer.php
 
 		-
-			message: '#^Anonymous function has an unused use \$user\.$#'
-			identifier: closure.unusedUse
-			count: 1
-			path: src/Form/EventType.php
-
-		-
-			message: '#^Anonymous function has an unused use \$options\.$#'
-			identifier: closure.unusedUse
-			count: 1
-			path: src/Form/MembershipType.php
-
-		-
-			message: '#^Anonymous function has an unused use \$options\.$#'
-			identifier: closure.unusedUse
-			count: 1
-			path: src/Form/PeriodPositionType.php
-
-		-
-			message: '#^Anonymous function has an unused use \$user\.$#'
-			identifier: closure.unusedUse
-			count: 1
-			path: src/Form/ServiceType.php
-
-		-
-			message: '#^Anonymous function has an unused use \$user\.$#'
-			identifier: closure.unusedUse
-			count: 1
-			path: src/Form/SocialNetworkType.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$delay$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Repository/MembershipRepository.php
-
-		-
 			message: '#^Cannot call method toArray\(\) on array\.$#'
 			identifier: method.nonObject
 			count: 1
@@ -1111,7 +1009,7 @@ parameters:
 			path: src/Repository/ShiftRepository.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(Membership\)\: Unexpected token "\\n     \* ", expected variable at offset 85 on line 3$#'
+			message: '#^PHPDoc tag @param has invalid value \(Membership\)\: Unexpected token "\\n     \* ", expected variable at offset 93 on line 4$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: src/Repository/ShiftRepository.php
@@ -1153,20 +1051,8 @@ parameters:
 			path: src/Security/UserVoter.php
 
 		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$includeLeadingSpace$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Service/BeneficiaryService.php
-
-		-
 			message: '#^Binary operation "/" between non\-falsy\-string and 28 results in an error\.$#'
 			identifier: binaryOp.invalid
-			count: 1
-			path: src/Service/MembershipService.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$cycleIndex$#'
-			identifier: parameter.notFound
 			count: 1
 			path: src/Service/MembershipService.php
 
@@ -1183,12 +1069,6 @@ parameters:
 			path: src/Service/ShiftService.php
 
 		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$end_before$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Service/ShiftService.php
-
-		-
 			message: '#^Parameter \$start_after of method App\\Service\\ShiftService\:\:isBeneficiaryHasShifts\(\) has invalid type App\\Service\\Datetime\.$#'
 			identifier: class.notFound
 			count: 1
@@ -1199,12 +1079,6 @@ parameters:
 			identifier: class.notFound
 			count: 1
 			path: src/Service/ShiftService.php
-
-		-
-			message: '#^PHPDoc tag @param references unknown parameter\: \$shift$#'
-			identifier: parameter.notFound
-			count: 1
-			path: src/Service/TimeLogService.php
 
 		-
 			message: '#^Access to constant HIGH on an unknown class Endroid\\QrCode\\ErrorCorrectionLevel\.$#'
@@ -1225,7 +1099,7 @@ parameters:
 			path: src/Twig/Extension/AppExtension.php
 
 		-
-			message: '#^PHPDoc tag @param has invalid value \(\: \\DateTime\|\\DateTimeImmutable \$date\)\: Unexpected token "\:", expected type at offset 72 on line 4$#'
+			message: '#^PHPDoc tag @param has invalid value \(\: \\DateTime\|\\DateTimeImmutable \$date\)\: Unexpected token "\:", expected type at offset 73 on line 4$#'
 			identifier: phpDoc.parseError
 			count: 1
 			path: src/Twig/Extension/AppExtension.php
