@@ -16,6 +16,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\DateTime;
+use Vich\UploaderBundle\Templating\Helper\UploaderHelper;
 
 
 /**
@@ -25,6 +26,15 @@ use Symfony\Component\Validator\Constraints\DateTime;
  */
 class ServiceController extends AbstractController
 {
+    private CacheManager $cacheManager;
+    private UploaderHelper $uploaderHelper;
+
+    public function __construct(CacheManager $cacheManager, UploaderHelper $uploaderHelper)
+    {
+        $this->uploaderHelper = $uploaderHelper;
+        $this->cacheManager = $cacheManager;
+    }
+
     /**
      * Lists all services.
      *
@@ -161,12 +171,11 @@ class ServiceController extends AbstractController
      * @param Service $service
      * @return string
      */
-    protected function resolveLogo(Service $service, CacheManager $cacheManager)
+    protected function resolveLogo(Service $service)
     {
-        $helper = $this->container->get('vich_uploader.templating.helper.uploader_helper');
-        $path = $helper->asset($service, 'logoFile');
+        $path = $this->uploaderHelper->asset($service, 'logoFile');
 
-        return $cacheManager->getBrowserPath($path, 'service_logo');
+        return $this->cacheManager->getBrowserPath($path, 'service_logo');
     }
 
     private function getErrorMessages(Form $form)
