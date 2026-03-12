@@ -212,7 +212,7 @@ class AdminMembershipShiftExemptionController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $today = new \Datetime('now');
+            $today = new \DateTime('now');
             $today->setTime(0, 0, 0);
             if (($membershipShiftExemption->getStart() < $today) && !$current_user->hasRole('ROLE_SUPER_ADMIN')) {
                 $session->getFlashBag()->add('warning', 'Vous n\'avez pas les droits pour supprimer une exemption déjà commencée');
@@ -239,6 +239,7 @@ class AdminMembershipShiftExemptionController extends AbstractController
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('admin_membershipshiftexemption_delete', ['id' => $membershipShiftExemption->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 }

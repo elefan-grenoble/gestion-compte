@@ -523,6 +523,7 @@ class AdminEventController extends AbstractController
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('admin_event_proxy_delete', ['id' => $proxy->getEvent()->getId(), 'proxy' => $proxy->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 }

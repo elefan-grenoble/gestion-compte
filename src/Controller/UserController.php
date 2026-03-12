@@ -182,6 +182,8 @@ class UserController extends AbstractController
      *
      * @Security("is_granted('ROLE_ADMIN')")
      *
+     * @param mixed $role
+     *
      * @return RedirectResponse
      */
     public function removeRoleAction(User $user, $role)
@@ -218,6 +220,8 @@ class UserController extends AbstractController
      * @Route("/{id}/addRole/{role}", name="user_add_role", methods={"GET"})
      *
      * @Security("is_granted('ROLE_ADMIN')")
+     *
+     * @param mixed $role
      *
      * @return RedirectResponse
      */

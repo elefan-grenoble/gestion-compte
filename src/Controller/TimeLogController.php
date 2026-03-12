@@ -75,6 +75,8 @@ class TimeLogController extends AbstractController
      *
      * @Security("is_granted('ROLE_SUPER_ADMIN')")
      *
+     * @param mixed $timelog_id
+     *
      * @return RedirectResponse
      */
     public function timelogDeleteAction(Membership $member, $timelog_id)

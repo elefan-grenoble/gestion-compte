@@ -574,6 +574,7 @@ class AdminPeriodController extends AbstractController
         return $this->get('form.factory')->createNamedBuilder('positions_delete_forms_' . $position->getId())
             ->setAction($this->generateUrl('admin_periodposition_delete', ['id' => $period->getId(), 'position' => $position->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 }

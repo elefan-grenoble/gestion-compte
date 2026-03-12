@@ -858,7 +858,8 @@ class ShiftController extends AbstractController
     /**
      * Create a form to contact co shifters.
      *
-     * @param Shift $shift The shift entity
+     * @param Shift      $shift      The shift entity
+     * @param null|mixed $coShifters
      *
      * @return Form The form
      */
@@ -877,6 +878,7 @@ class ShiftController extends AbstractController
             ])
             ->setAction($this->generateUrl('shift_contact_form', ['id' => $shift->getId()]))
             ->setMethod('POST')
-            ->getForm();
+            ->getForm()
+        ;
     }
 }
