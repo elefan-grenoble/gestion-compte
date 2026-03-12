@@ -2683,12 +2683,6 @@ parameters:
 			path: src/Controller/ShiftController.php
 
 		-
-			message: '#^Method App\\Controller\\ShiftController\:\:createShiftContactForm\(\) has parameter \$coShifters with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Controller/ShiftController.php
-
-		-
 			message: '#^Method App\\Controller\\ShiftController\:\:createShiftContactForm\(\) should return Symfony\\Component\\Form\\Form but returns Symfony\\Component\\Form\\FormInterface\<mixed\>\.$#'
 			identifier: return.type
 			count: 1
@@ -3073,12 +3067,6 @@ parameters:
 			path: src/Controller/TimeLogController.php
 
 		-
-			message: '#^Method App\\Controller\\TimeLogController\:\:timelogDeleteAction\(\) has parameter \$timelog_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Controller/TimeLogController.php
-
-		-
 			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:TimeLog\>, string given\.$#'
 			identifier: argument.type
 			count: 1
@@ -3093,12 +3081,6 @@ parameters:
 		-
 			message: '#^If condition is always true\.$#'
 			identifier: if.alwaysTrue
-			count: 1
-			path: src/Controller/UserController.php
-
-		-
-			message: '#^Method App\\Controller\\UserController\:\:addRoleAction\(\) has parameter \$role with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: src/Controller/UserController.php
 
@@ -3165,12 +3147,6 @@ parameters:
 		-
 			message: '#^Method App\\Controller\\UserController\:\:removeClientUserAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Controller/UserController.php
-
-		-
-			message: '#^Method App\\Controller\\UserController\:\:removeRoleAction\(\) has parameter \$role with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: src/Controller/UserController.php
 
