@@ -1,32 +1,33 @@
 <?php
+
 // src/App/Security/UserVoter.php
+
 namespace App\Security;
 
 use App\Helper\PlaceIP;
 use App\Entity\Membership;
 use App\Entity\User;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class MembershipVoter extends Voter
 {
-    const ACCESS_TOOLS = 'access_tools';
-    const CREATE = 'create';
-    const VIEW = 'view';
-    const EDIT = 'edit';
-    const BOOK = 'book';
-    const OPEN = 'open';
-    const CLOSE = 'close';
-    const FREEZE = 'freeze';
-    const FREEZE_CHANGE = 'freeze_change';
-    const FLYING = 'flying';
-    const ROLE_REMOVE = 'role_remove';
-    const ROLE_ADD = 'role_add';
-    const ANNOTATE = 'annotate';
-    const BENEFICIARY_ADD = 'beneficiary_add';
+    public const ACCESS_TOOLS = 'access_tools';
+    public const CREATE = 'create';
+    public const VIEW = 'view';
+    public const EDIT = 'edit';
+    public const BOOK = 'book';
+    public const OPEN = 'open';
+    public const CLOSE = 'close';
+    public const FREEZE = 'freeze';
+    public const FREEZE_CHANGE = 'freeze_change';
+    public const FLYING = 'flying';
+    public const ROLE_REMOVE = 'role_remove';
+    public const ROLE_ADD = 'role_add';
+    public const ANNOTATE = 'annotate';
+    public const BENEFICIARY_ADD = 'beneficiary_add';
 
     private $decisionManager;
     private $container;
@@ -40,7 +41,9 @@ class MembershipVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(
+        if (!in_array(
+            $attribute,
+            [
                 self::VIEW,
                 self::EDIT,
                 self::BOOK,
@@ -54,7 +57,7 @@ class MembershipVoter extends Voter
                 self::CREATE,
                 self::ANNOTATE,
                 self::ACCESS_TOOLS,
-                self::BENEFICIARY_ADD)
+                self::BENEFICIARY_ADD]
         )) {
             return false;
         }
@@ -76,18 +79,17 @@ class MembershipVoter extends Voter
             return false;
         }
 
-        if (!$this->container->getParameter("oidc_enable"))
-        {
+        if (!$this->container->getParameter('oidc_enable')) {
             // ROLE_SUPER_ADMIN can do anything! The power!
-            if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
+            if ($this->decisionManager->decide($token, ['ROLE_SUPER_ADMIN'])) {
                 return true;
             }
             // on user ROLE_ADMIN can do anything! The power!
-            if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+            if ($this->decisionManager->decide($token, ['ROLE_ADMIN'])) {
                 return true;
             }
             // on user ROLE_USER_MANAGER can do anything! The power!
-            if ($this->decisionManager->decide($token, array('ROLE_USER_MANAGER'))) {
+            if ($this->decisionManager->decide($token, ['ROLE_USER_MANAGER'])) {
                 return true;
             }
         }
@@ -98,14 +100,18 @@ class MembershipVoter extends Voter
             case self::BENEFICIARY_ADD:
             case self::CREATE:
                 return $this->container->get(PlaceIP::class)->isLocationOk();
+
             case self::VIEW:
             case self::ANNOTATE:
                 return $this->canView($subject, $token);
+
             case self::BOOK:
             case self::FREEZE_CHANGE:
                 if ($user->getBeneficiary() && $user->getBeneficiary()->getMembership() === $subject) {
                     return true;
                 }
+
+                // no break
             case self::FREEZE:
             case self::OPEN:
             case self::CLOSE:
@@ -113,6 +119,7 @@ class MembershipVoter extends Voter
             case self::ROLE_REMOVE:
             case self::EDIT:
                 return $this->canEdit($subject, $token);
+
             case self::FLYING:
                 return $this->canEdit($subject, $token);
         }
@@ -136,13 +143,13 @@ class MembershipVoter extends Voter
 
     private function canEdit(Membership $subject, TokenInterface $token)
     {
-        if ($this->container->getParameter("oidc_enable")){
+        if ($this->container->getParameter('oidc_enable')) {
             return false;
         }
 
         $user = $token->getUser();
 
-        if ($user->getBeneficiary()->getMembership()->getId() === $subject->getId()) { //beneficiaries can edit there own membership
+        if ($user->getBeneficiary()->getMembership()->getId() === $subject->getId()) { // beneficiaries can edit there own membership
             return true;
         }
 
@@ -152,7 +159,7 @@ class MembershipVoter extends Voter
 
         $session = $this->container->get('request_stack')->getCurrentRequest()->getSession();
         $token = $this->container->get('request_stack')->getCurrentRequest()->get('token');
-        if ($token && $token == $subject->getTmpToken($session->get('token_key') . $user->getUsername())){
+        if ($token && $token == $subject->getTmpToken($session->get('token_key') . $user->getUsername())) {
             return true;
         }
 

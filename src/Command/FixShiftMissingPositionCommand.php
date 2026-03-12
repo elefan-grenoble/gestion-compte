@@ -17,8 +17,7 @@ class FixShiftMissingPositionCommand extends Command
     public function __construct(
         EntityManagerInterface $em,
         ContainerBagInterface $params
-    )
-    {
+    ) {
         $this->em = $em;
         $this->params = $params;
 
@@ -31,7 +30,8 @@ class FixShiftMissingPositionCommand extends Command
             ->setName('app:shift:fix_missing_position')
             ->setDescription('Fix shifts without position (find and attach corresponding position)')
             ->setHelp('This command allows you to fix missing shift position data (most likely deleted by the migration Version20211223205749')
-            ->addOption('dry_run', null, InputOption::VALUE_NONE, 'Dry run');
+            ->addOption('dry_run', null, InputOption::VALUE_NONE, 'Dry run')
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -43,13 +43,14 @@ class FixShiftMissingPositionCommand extends Command
             $output->writeln("<comment>Dry run: won't impact the database</comment>");
         }
 
-        $shifts_without_position = $this->em->getRepository('App:Shift')->findBy(array('position' => null), array('start' => 'ASC'));
-        $output->writeln(count($shifts_without_position) . ' créneau' . ((count($shifts_without_position)>1) ? 'x':'') . ' sans poste type trouvé' . ((count($shifts_without_position)>1) ? 's':'') . '...');
+        $shifts_without_position = $this->em->getRepository('App:Shift')->findBy(['position' => null], ['start' => 'ASC']);
+        $output->writeln(count($shifts_without_position) . ' créneau' . ((count($shifts_without_position) > 1) ? 'x' : '') . ' sans poste type trouvé' . ((count($shifts_without_position) > 1) ? 's' : '') . '...');
 
         if ($cycle_type == 'abcd') {
             // TODO : add filter on weekCycle
             // what if the cycle changed ?
             $output->writeln('<error>Currently only works for coops without cycle_type.</error>');
+
             return 1;
         }
 
@@ -63,7 +64,8 @@ class FixShiftMissingPositionCommand extends Command
                 ->createQueryBuilder('pp')
                 ->leftJoin('pp.period', 'p')->addSelect('p')
                 ->getQuery()
-                ->getResult();
+                ->getResult()
+            ;
             $output->writeln('Boucle sur chacun des ' . count($period_positions) . ' postes types');
 
             foreach ($period_positions as $period_position) {
@@ -85,7 +87,8 @@ class FixShiftMissingPositionCommand extends Command
                     ->setParameter('formation', $period_position->getFormation())
                     ->orderBy('s.start')
                     ->getQuery()
-                    ->getResult();
+                    ->getResult()
+                ;
 
                 if (count($period_position_shifts_without_position)) {
                     $output->writeln('Poste ' . $period_position->getId());
@@ -93,9 +96,9 @@ class FixShiftMissingPositionCommand extends Command
                     $output->writeln('Nombre de créneau correspondants : ' . count($period_position_shifts_without_position));
                     // we only want 1 shift per week
                     // why ? period can have identical positions, which generate identical shifts...
-                    $period_position_shifts_without_position_unique_days = array();
-                    $period_position_shifts_without_position_filtered = array();
-                    foreach($period_position_shifts_without_position as $s) {
+                    $period_position_shifts_without_position_unique_days = [];
+                    $period_position_shifts_without_position_filtered = [];
+                    foreach ($period_position_shifts_without_position as $s) {
                         if (!in_array($s->getStart()->format('Y-m-d'), $period_position_shifts_without_position_unique_days)) {
                             array_push($period_position_shifts_without_position_unique_days, $s->getStart()->format('Y-m-d'));
                             array_push($period_position_shifts_without_position_filtered, $s);
@@ -103,17 +106,18 @@ class FixShiftMissingPositionCommand extends Command
                     }
 
                     if (!$dry_run) {
-                        $this->em->createQuery("UPDATE App:Shift s SET s.position = :position WHERE s.id in (:ids)")
+                        $this->em->createQuery('UPDATE App:Shift s SET s.position = :position WHERE s.id in (:ids)')
                             ->setParameter('position', $period_position)
                             ->setParameter('ids', $period_position_shifts_without_position_filtered)
-                            ->execute();
+                            ->execute()
+                        ;
                     }
                     $shifts_without_position_fixed += count($period_position_shifts_without_position_filtered);
                 }
             }
 
             if (!$dry_run) {
-                $output->writeln('<info>' . $shifts_without_position_fixed . ' créneau' . (($shifts_without_position_fixed>1) ? 'x':'') . ' réparé' . (($shifts_without_position_fixed>1) ? 's':'') . '</info>');
+                $output->writeln('<info>' . $shifts_without_position_fixed . ' créneau' . (($shifts_without_position_fixed > 1) ? 'x' : '') . ' réparé' . (($shifts_without_position_fixed > 1) ? 's' : '') . '</info>');
             }
         }
 

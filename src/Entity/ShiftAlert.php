@@ -2,17 +2,13 @@
 
 namespace App\Entity;
 
-use App\Entity\ShiftBucket;
-
 /**
- * Shift Alert
- *
+ * Shift Alert.
  */
 class ShiftAlert
 {
-
-    var $bucket;
-    var $issue;
+    public $bucket;
+    public $issue;
 
     public function __construct(ShiftBucket $bucket, string $issue)
     {
@@ -35,5 +31,4 @@ class ShiftAlert
     {
         return $this->issue;
     }
-
 }

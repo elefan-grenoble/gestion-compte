@@ -5,35 +5,39 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * TimeLog
+ * TimeLog.
  *
  * @ORM\Table(name="time_log")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\TimeLogRepository")
  */
 class TimeLog
 {
-    const TYPE_CUSTOM = 0;
+    public const TYPE_CUSTOM = 0;
 
-    const TYPE_SHIFT_VALIDATED = 1;
-    const TYPE_SHIFT_INVALIDATED = 10;
-    const TYPE_SHIFT_FREED_SAVING = 21;
+    public const TYPE_SHIFT_VALIDATED = 1;
+    public const TYPE_SHIFT_INVALIDATED = 10;
+    public const TYPE_SHIFT_FREED_SAVING = 21;
 
-    const TYPE_CYCLE_END = 2;
-    const TYPE_CYCLE_END_FROZEN = 3;
-    const TYPE_CYCLE_END_EXPIRED_REGISTRATION = 4;
-    const TYPE_CYCLE_END_EXEMPTED = 6;
-    const TYPE_CYCLE_END_SAVING = 7;
+    public const TYPE_CYCLE_END = 2;
+    public const TYPE_CYCLE_END_FROZEN = 3;
+    public const TYPE_CYCLE_END_EXPIRED_REGISTRATION = 4;
+    public const TYPE_CYCLE_END_EXEMPTED = 6;
+    public const TYPE_CYCLE_END_SAVING = 7;
 
-    const TYPE_REGULATE_OPTIONAL_SHIFTS = 5;
+    public const TYPE_REGULATE_OPTIONAL_SHIFTS = 5;
 
-    const TYPE_SAVING = 20;
+    public const TYPE_SAVING = 20;
 
     /**
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -47,6 +51,7 @@ class TimeLog
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
      */
     private $createdBy;
@@ -74,12 +79,14 @@ class TimeLog
 
     /**
      * @ORM\ManyToOne(targetEntity="Membership", inversedBy="timeLogs")
+     *
      * @ORM\JoinColumn(name="membership_id", referencedColumnName="id", onDelete="CASCADE", nullable=false)
      */
     private $membership;
 
     /**
      * @ORM\ManyToOne(targetEntity="Shift", inversedBy="timeLogs")
+     *
      * @ORM\JoinColumn(name="shift_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $shift;
@@ -102,7 +109,7 @@ class TimeLog
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -112,7 +119,7 @@ class TimeLog
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */
@@ -122,13 +129,11 @@ class TimeLog
     }
 
     /**
-     * Set createdBy
-     *
-     * @param \App\Entity\User $createBy
+     * Set createdBy.
      *
      * @return TimeLog
      */
-    public function setCreatedBy(\App\Entity\User $user = null)
+    public function setCreatedBy(?User $user = null)
     {
         $this->createdBy = $user;
 
@@ -136,9 +141,9 @@ class TimeLog
     }
 
     /**
-     * Get createdBy
+     * Get createdBy.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getCreatedBy()
     {
@@ -146,9 +151,9 @@ class TimeLog
     }
 
     /**
-     * Set time
+     * Set time.
      *
-     * @param integer $time
+     * @param int $time
      *
      * @return TimeLog
      */
@@ -160,7 +165,7 @@ class TimeLog
     }
 
     /**
-     * Get time
+     * Get time.
      *
      * @return int
      */
@@ -170,7 +175,7 @@ class TimeLog
     }
 
     /**
-     * Set description
+     * Set description.
      *
      * @param string $description
      *
@@ -184,7 +189,7 @@ class TimeLog
     }
 
     /**
-     * Get description
+     * Get description.
      *
      * @return string
      */
@@ -194,13 +199,11 @@ class TimeLog
     }
 
     /**
-     * Set shift
-     *
-     * @param \App\Entity\Shift $shift
+     * Set shift.
      *
      * @return TimeLog
      */
-    public function setShift(\App\Entity\Shift $shift = null)
+    public function setShift(?Shift $shift = null)
     {
         $this->shift = $shift;
 
@@ -208,9 +211,9 @@ class TimeLog
     }
 
     /**
-     * Get shift
+     * Get shift.
      *
-     * @return \App\Entity\Shift
+     * @return Shift
      */
     public function getShift()
     {
@@ -233,18 +236,15 @@ class TimeLog
         $this->membership = $membership;
     }
 
-    /**
-     * @return int
-     */
     public function getType(): int
     {
         return $this->type;
     }
 
     /**
-     * Set created_at
+     * Set created_at.
      *
-     * @param \DateTime $created_at
+     * @param mixed $date
      *
      * @return TimeLog
      */
@@ -255,9 +255,6 @@ class TimeLog
         return $this;
     }
 
-    /**
-     * @param int $type
-     */
     public function setType(int $type): void
     {
         $this->type = $type;
@@ -275,47 +272,56 @@ class TimeLog
         return $this;
     }
 
-    /**
-     * @return string
-     */
     public function getTypeDisplay(): string
     {
         switch ($this->type) {
             case self::TYPE_CUSTOM:
                 return $this->description;
+
             case self::TYPE_SHIFT_VALIDATED:
-                return "Créneau validé";
+                return 'Créneau validé';
+
             case self::TYPE_SHIFT_INVALIDATED:
-                return "Créneau invalidé";
+                return 'Créneau invalidé';
+
             case self::TYPE_SHIFT_FREED_SAVING:
-                return "Créneau libéré et compteur temps incrémenté (grâce au compteur épargne)";
+                return 'Créneau libéré et compteur temps incrémenté (grâce au compteur épargne)';
+
             case self::TYPE_CYCLE_END:
-                return "Début de cycle";
+                return 'Début de cycle';
+
             case self::TYPE_CYCLE_END_FROZEN:
-                return "Début de cycle (compte gelé)";
+                return 'Début de cycle (compte gelé)';
+
             case self::TYPE_CYCLE_END_EXPIRED_REGISTRATION:
-                return "Début de cycle (compte expiré)";
+                return 'Début de cycle (compte expiré)';
+
             case self::TYPE_CYCLE_END_EXEMPTED:
-                return "Début de cycle (compte exempté de créneau - exemption n°" . join(",", $this->membership->getMembershipShiftExemptions()->filter(function($membershipShiftExemption) {
+                return 'Début de cycle (compte exempté de créneau - exemption n°' . join(',', $this->membership->getMembershipShiftExemptions()->filter(function ($membershipShiftExemption) {
                     return $membershipShiftExemption->isCurrent($this->createdAt);
-                })->map(function($element) {
+                })->map(function ($element) {
                     return $element->getId();
-                })->toArray()) . ")";
+                })->toArray()) . ')';
+
             case self::TYPE_CYCLE_END_SAVING:
                 if ($this->getTime() > 0) {
-                    return "Début de cycle (compteur temps incrémenté grâce au compteur épargne)";
-                } else {
-                    return "Début de cycle " . $this->description;
+                    return 'Début de cycle (compteur temps incrémenté grâce au compteur épargne)';
                 }
+
+                return 'Début de cycle ' . $this->description;
+
             case self::TYPE_REGULATE_OPTIONAL_SHIFTS:
-                return "Régulation du bénévolat facultatif";
+                return 'Régulation du bénévolat facultatif';
+
             case self::TYPE_SAVING:
                 if ($this->getTime() >= 0) {
-                    return "Compteur épargne incrémenté";
-                } else {
-                    return "Compteur épargne décrémenté";
+                    return 'Compteur épargne incrémenté';
                 }
+
+                return 'Compteur épargne décrémenté';
+
         }
-        return "Type de log de temps inconnu : " . $this->type;
+
+        return 'Type de log de temps inconnu : ' . $this->type;
     }
 }

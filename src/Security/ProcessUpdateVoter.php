@@ -2,7 +2,6 @@
 
 namespace App\Security;
 
-use App\Entity\EmailTemplate;
 use App\Entity\ProcessUpdate;
 use App\Entity\User;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
@@ -11,9 +10,9 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class ProcessUpdateVoter extends Voter
 {
-    const VIEW = 'view';
-    const EDIT = 'edit';
-    const DELETE = 'delete';
+    public const VIEW = 'view';
+    public const EDIT = 'edit';
+    public const DELETE = 'delete';
 
     private $decisionManager;
 
@@ -25,7 +24,7 @@ class ProcessUpdateVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::EDIT, self::VIEW, self::DELETE))) {
+        if (!in_array($attribute, [self::EDIT, self::VIEW, self::DELETE])) {
             return false;
         }
 
@@ -46,7 +45,6 @@ class ProcessUpdateVoter extends Voter
             return false;
         }
 
-        return $this->decisionManager->decide($token, array('ROLE_PROCESS_MANAGER'));
+        return $this->decisionManager->decide($token, ['ROLE_PROCESS_MANAGER']);
     }
-
 }

@@ -3,45 +3,43 @@
 namespace App\EventListener;
 
 use App\Entity\Beneficiary;
-use App\Entity\Membership;
 use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Event\LifecycleEventArgs;
-use FOS\UserBundle\Event\FormEvent;
 use FOS\UserBundle\Event\UserEvent;
 use Symfony\Bundle\FrameworkBundle\Routing\Router;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpKernel\Event\FilterResponseEvent;
-use Symfony\Component\HttpKernel\Event\GetResponseEvent;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\HttpKernel\Event\RequestEvent;
 
-class SetFirstPasswordListener{
-
-    const  ROLE_PASSWORD_TO_SET  = 'ROLE_PASSWORD_TO_SET';
+class SetFirstPasswordListener
+{
+    public const ROLE_PASSWORD_TO_SET  = 'ROLE_PASSWORD_TO_SET';
 
     /**
      * @var EntityManagerInterface
      */
     private $em;
+
     /**
      * @var TokenStorage
      */
     private $token_storage;
+
     /**
      * @var Router
      */
     private $router;
 
-
-    public function __construct(EntityManagerInterface $entity_manager, TokenStorageInterface $token_storage,Router $router)
+    public function __construct(EntityManagerInterface $entity_manager, TokenStorageInterface $token_storage, Router $router)
     {
         $this->em = $entity_manager;
         $this->token_storage = $token_storage;
         $this->router = $router;
     }
 
-    function prePersist(LifecycleEventArgs $args)
+    public function prePersist(LifecycleEventArgs $args)
     {
         $entity = $args->getObject();
 
@@ -56,7 +54,7 @@ class SetFirstPasswordListener{
         }
     }
 
-    function onPasswordChanged(UserEvent $event)
+    public function onPasswordChanged(UserEvent $event)
     {
         $user = $event->getUser();
         $user->removeRole(self::ROLE_PASSWORD_TO_SET);
@@ -64,15 +62,15 @@ class SetFirstPasswordListener{
         $this->em->flush();
     }
 
-    function forcePasswordChange(\Symfony\Component\HttpKernel\Event\RequestEvent $event)
+    public function forcePasswordChange(RequestEvent $event)
     {
         $token = $this->token_storage->getToken();
-        if ($token){
+        if ($token) {
             $currentUser = $token->getUser();
-            if($currentUser instanceof User){
-                if($currentUser->hasRole(self::ROLE_PASSWORD_TO_SET)){
+            if ($currentUser instanceof User) {
+                if ($currentUser->hasRole(self::ROLE_PASSWORD_TO_SET)) {
                     $route = $event->getRequest()->get('_route');
-                    if ($route && $route != 'user_change_password'){
+                    if ($route && $route != 'user_change_password') {
                         $changePassword = $this->router->generate('user_change_password');
                         $event->setResponse(new RedirectResponse($changePassword));
                     }

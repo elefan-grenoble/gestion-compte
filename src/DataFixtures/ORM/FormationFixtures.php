@@ -1,19 +1,16 @@
 <?php
 
-
 namespace App\DataFixtures\ORM;
 
 use App\DataFixtures\FixturesConstants;
 use App\Entity\Formation;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
-use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
 class FormationFixtures extends Fixture implements OrderedFixtureInterface, FixtureGroupInterface
 {
-
     public function load(ObjectManager $manager)
     {
 
@@ -21,7 +18,7 @@ class FormationFixtures extends Fixture implements OrderedFixtureInterface, Fixt
         $formation_descriptions = FixturesConstants::FORMATION_DESCRIPTIONS;
         $formations_count = FixturesConstants::FORMATIONS_COUNT;
 
-        for ($i = 0; $i < $formations_count; $i++) {
+        for ($i = 0; $i < $formations_count; ++$i) {
 
             $formation = new Formation();
 
@@ -29,11 +26,11 @@ class FormationFixtures extends Fixture implements OrderedFixtureInterface, Fixt
             $formation->setName($formation_names[$i]);
 
             // add beneficiary
-            $beneficiary = $this->getReference('beneficiary_' . ($i+1));
+            $beneficiary = $this->getReference('beneficiary_' . ($i + 1));
             $formation->addBeneficiary($beneficiary);
             $beneficiary->addFormation($formation);
 
-            $this->setReference('formation_' . ($i+1), $formation);
+            $this->setReference('formation_' . ($i + 1), $formation);
 
             $manager->persist($formation);
             $manager->persist($beneficiary);
@@ -41,7 +38,7 @@ class FormationFixtures extends Fixture implements OrderedFixtureInterface, Fixt
 
         $manager->flush();
 
-        echo $formations_count." formations created\n";
+        echo $formations_count . " formations created\n";
 
     }
 
@@ -54,6 +51,4 @@ class FormationFixtures extends Fixture implements OrderedFixtureInterface, Fixt
     {
         return 10;
     }
-
-
 }

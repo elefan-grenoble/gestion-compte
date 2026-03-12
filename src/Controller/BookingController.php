@@ -3,11 +3,9 @@
 namespace App\Controller;
 
 use DateTime;
-use Exception;
 use App\Entity\Beneficiary;
 use App\Entity\Job;
 use App\Entity\Shift;
-use App\Entity\ShiftBucket;
 use App\Event\ShiftDeletedEvent;
 use App\Form\AutocompleteBeneficiaryType;
 use App\Form\RadioChoiceType;
@@ -24,16 +22,15 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\Form\Extension\Core\Type\RadioType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormInterface;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Form\Form;
 
 /**
  * Booking controller.
@@ -43,7 +40,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 class BookingController extends AbstractController
 {
     /**
-     * @var boolean
+     * @var bool
      */
     private $use_fly_and_fixed;
     private $display_name_shifters;
@@ -54,17 +51,11 @@ class BookingController extends AbstractController
         $this->display_name_shifters = $display_name_shifters;
     }
 
-    /**
-     * @return Response
-     */
     public function homepageDashboardAction(): Response
     {
         return $this->render('booking/home_dashboard.html.twig');
     }
 
-    /**
-     * @return Response
-     */
     public function homepageShiftsAction(MembershipService $membership_service): Response
     {
         $em = $this->getDoctrine()->getManager();
@@ -83,15 +74,16 @@ class BookingController extends AbstractController
             }
         }
 
-        return $this->render('booking/home_booked_shifts.html.twig', array(
+        return $this->render('booking/home_booked_shifts.html.twig', [
             'period_positions' => $period_positions,
             'shifts_by_cycle' => $shifts_by_cycle,
             'shift_free_forms' => $shiftFreeForms,
-        ));
+        ]);
     }
 
     /**
      * @Route("/", name="booking", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_USER')")
      */
     public function indexAction(Request $request, MembershipService $membership_service, ShiftService $shift_service)
@@ -102,37 +94,41 @@ class BookingController extends AbstractController
         $mode = null;
         if ($this->getUser()->getBeneficiary() == null) {
             $session->getFlashBag()->add('error', 'Oups, tu n\'as pas de bénéficiaire enregistré ! MODE ADMIN');
+
             return $this->redirectToRoute('booking_admin');
-        } else {
-            if (!$membership_service->isUptodate($this->getUser()->getBeneficiary()->getMembership())) {
-+               $remainder = $membership_service->getRemainder($this->getUser()->getBeneficiary()->getMembership());
-                $session->getFlashBag()->add('warning', 'Oups, ton adhésion a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer pour effectuer ton bénévolat !');
-                return $this->redirectToRoute('homepage');
-            }
-            if ($this->getUser()->getBeneficiary()->getMembership()->getFrozen()){
-                $session->getFlashBag()->add('warning', 'Oups, ton compte est gelé ❄️ !<br />Dégel pour réserver 😉');
-                return $this->redirectToRoute('homepage');
-            }
         }
+        if (!$membership_service->isUptodate($this->getUser()->getBeneficiary()->getMembership())) {
+            +               $remainder = $membership_service->getRemainder($this->getUser()->getBeneficiary()->getMembership());
+            $session->getFlashBag()->add('warning', 'Oups, ton adhésion a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer pour effectuer ton bénévolat !');
+
+            return $this->redirectToRoute('homepage');
+        }
+        if ($this->getUser()->getBeneficiary()->getMembership()->getFrozen()) {
+            $session->getFlashBag()->add('warning', 'Oups, ton compte est gelé ❄️ !<br />Dégel pour réserver 😉');
+
+            return $this->redirectToRoute('homepage');
+        }
+
 
         $beneficiaries = $this->getUser()->getBeneficiary()->getMembership()->getBeneficiaries();
 
         $beneficiaryForm = $this->createFormBuilder()
             ->setAction($this->generateUrl('booking'))
             ->setMethod('POST')
-            ->add('beneficiary', EntityType::class, array(
+            ->add('beneficiary', EntityType::class, [
                 'label' => 'Réserver un créneau pour',
                 'required' => true,
                 'class' => 'App:Beneficiary',
                 'choices' => $beneficiaries,
                 'choice_label' => 'firstname',
                 'multiple' => false,
-            ))
-            ->getForm();
+            ])
+            ->getForm()
+        ;
 
         $beneficiaryForm->handleRequest($request);
 
-        //beneficiary selected, or only one beneficiary
+        // beneficiary selected, or only one beneficiary
         if ($beneficiaryForm->isSubmitted() || $beneficiaries->count() == 1) {
             if ($beneficiaries->count() > 1) {
                 $beneficiary = $beneficiaryForm->get('beneficiary')->getData();
@@ -143,8 +139,8 @@ class BookingController extends AbstractController
             $shifts = $em->getRepository('App:Shift')->findFutures(null, null, $this->display_name_shifters);
             $bucketsByDay = $shift_service->generateShiftBucketsByDayAndJob($shifts);
 
-            $hours = array();
-            for ($i = 6; $i < 22; $i++) { //todo put this in conf
+            $hours = [];
+            for ($i = 6; $i < 22; ++$i) { // todo put this in conf
                 $hours[] = $i;
             }
 
@@ -152,20 +148,21 @@ class BookingController extends AbstractController
                 'bucketsByDay' => $bucketsByDay,
                 'hours' => $hours,
                 'beneficiary' => $beneficiary,
-                'jobs' => $em->getRepository(Job::class)->findByEnabled(true)
+                'jobs' => $em->getRepository(Job::class)->findByEnabled(true),
             ]);
 
-        } else { // no beneficiary selected
-            return $this->render('booking/index.html.twig', [
-                'beneficiary_form' => $beneficiaryForm->createView(),
-            ]);
-        }
+        }   // no beneficiary selected
+
+        return $this->render('booking/index.html.twig', [
+            'beneficiary_form' => $beneficiaryForm->createView(),
+        ]);
+
 
     }
 
     /**
      * Build the filter form for the admin main page (route /booking/admin)
-     * and rerun an array with the form object and the date range and the action
+     * and rerun an array with the form object and the date range and the action.
      *
      * the return object :
      * array(
@@ -175,47 +172,49 @@ class BookingController extends AbstractController
      *      "job" => Job|null,
      *      "filling" => str|null,
      *      )
+     *
+     * @param mixed $em
      */
     private function adminFilterFormFactory($em, Request $request): array
     {
         // default values
-        $defaultFrom = new DateTime();
+        $defaultFrom = new \DateTime();
         $defaultFrom->setTimestamp(strtotime('last monday', strtotime('tomorrow')));
         $defaultTo = null;
-        $defaultWeek = (new DateTime())->format('W');
-        $defaultYear = (new DateTime())->format('Y');
+        $defaultWeek = (new \DateTime())->format('W');
+        $defaultYear = (new \DateTime())->format('Y');
         $years = $em->getRepository(Shift::class)->getYears();
 
         $filterForm = $this->createFormBuilder()
             ->setAction($this->generateUrl('booking_admin'))
-            ->add('type', ChoiceType::class, array(
+            ->add('type', ChoiceType::class, [
                 'label' => 'Type de filtre',
                 'required' => true,
-                'data' => "Date",
-                'choices' => array(
-                    'Date' => "date",
-                    'Semaine' => "week",
-                ),
-            ))
-            ->add('from', TextType::class, array(
+                'data' => 'Date',
+                'choices' => [
+                    'Date' => 'date',
+                    'Semaine' => 'week',
+                ],
+            ])
+            ->add('from', TextType::class, [
                 'label' => 'A partir de',
                 'required' => true,
                 'data' => $defaultFrom->format('Y-m-d'),
-                'attr' => array('class' => 'datepicker'),
-            ))
-            ->add('to', TextType::class, array(
+                'attr' => ['class' => 'datepicker'],
+            ])
+            ->add('to', TextType::class, [
                 'label' => 'Jusqu\'à',
                 'required' => false,
-                'attr' => array('class' => 'datepicker'),
-            ))
-            ->add('year', ChoiceType::class, array(
+                'attr' => ['class' => 'datepicker'],
+            ])
+            ->add('year', ChoiceType::class, [
                 'required' => false,
                 'choices' => array_combine($years, $years),
                 'label' => 'Année',
                 'data' => $defaultYear,
                 'placeholder' => false,
-            ))
-            ->add('week', IntegerType::class, array(
+            ])
+            ->add('week', IntegerType::class, [
                 'required' => false,
                 'label' => 'Numéro de semaine',
                 'scale' => 0,
@@ -224,35 +223,38 @@ class BookingController extends AbstractController
                     'min' => 1,
                     'max' => 52,
                 ],
-            ))
-            ->add('job', EntityType::class, array(
+            ])
+            ->add('job', EntityType::class, [
                 'label' => 'Type de créneau',
                 'class' => 'App:Job',
                 'choice_label' => 'name',
                 'multiple' => false,
                 'required' => false,
-                'query_builder' => function(JobRepository $repository) {
+                'query_builder' => function (JobRepository $repository) {
                     $qb = $repository->createQueryBuilder('j');
+
                     return $qb
                         ->where($qb->expr()->eq('j.enabled', '?1'))
                         ->setParameter('1', '1')
-                        ->orderBy('j.name', 'ASC');
-                }
-            ))
-            ->add('filling', ChoiceType::class, array(
+                        ->orderBy('j.name', 'ASC')
+                    ;
+                },
+            ])
+            ->add('filling', ChoiceType::class, [
                 'label' => 'Remplissage',
                 'required' => false,
-                'choices' => array(
+                'choices' => [
                     'Complet' => 'full',
                     'Partiel' => 'partial',
                     'Vide' => 'empty',
-                ),
-            ))
-            ->add('filter', SubmitType::class, array(
+                ],
+            ])
+            ->add('filter', SubmitType::class, [
                 'label' => 'Filtrer',
-                'attr' => array('class' => 'btn', 'value' => 'filtrer')
-            ))
-            ->getForm();
+                'attr' => ['class' => 'btn', 'value' => 'filtrer'],
+            ])
+            ->getForm()
+        ;
 
         $filterForm->handleRequest($request);
         $from = $defaultFrom;
@@ -262,46 +264,47 @@ class BookingController extends AbstractController
 
         try {
             if ($filterForm->isSubmitted() && $filterForm->isValid()) {
-                $job = $filterForm->get("job")->getData();
-                $filling = $filterForm->get("filling")->getData();
+                $job = $filterForm->get('job')->getData();
+                $filling = $filterForm->get('filling')->getData();
 
                 // selection mode based on dates
-                if ($filterForm->get("type")->getData() == "date") {
-                    $from = new DateTime($filterForm->get('from')->getData());
+                if ($filterForm->get('type')->getData() == 'date') {
+                    $from = new \DateTime($filterForm->get('from')->getData());
                     $to = $filterForm->get('to')->getData();
                     if ($to) {
-                        $to = new DateTime($to);
+                        $to = new \DateTime($to);
                     }
-                // selection mode based on week number
+                    // selection mode based on week number
                 } else {
-                    $week = $filterForm->get("week")->getData();
-                    $year = $filterForm->get("year")->getData();
-                    $from = new DateTime();
+                    $week = $filterForm->get('week')->getData();
+                    $year = $filterForm->get('year')->getData();
+                    $from = new \DateTime();
                     $from->setISODate($year, $week, 1);
-                    $from->setTime(0,0);
+                    $from->setTime(0, 0);
                     $to = clone $from;
                     $to->modify('+6 days');
                 }
             }
-        } catch (Exception $ex) {
+        } catch (\Exception $ex) {
             $from = $defaultFrom;
             $to = $defaultTo;
             $job = null;
         }
 
-        return array(
-            "form" => $filterForm,
-            "from" => $from,
-            "to" => $to,
-            "job" => $job,
-            "filling" => $filling,
-        );
+        return [
+            'form' => $filterForm,
+            'from' => $from,
+            'to' => $to,
+            'job' => $job,
+            'filling' => $filling,
+        ];
     }
 
     /**
-     * main administration page for booking shift
+     * main administration page for booking shift.
      *
      * @Route("/admin", name="booking_admin", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function adminAction(Request $request, ShiftService $shift_service): Response
@@ -309,18 +312,19 @@ class BookingController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $filter = $this->adminFilterFormFactory($em, $request);
 
-        $shifts = $em->getRepository(Shift::class)->findFrom($filter["from"], $filter["to"], $filter["job"], true);
+        $shifts = $em->getRepository(Shift::class)->findFrom($filter['from'], $filter['to'], $filter['job'], true);
         $bucketsByDay = $shift_service->generateShiftBucketsByDayAndJob($shifts);
-        $bucketsByDay = $shift_service->filterBucketsByDayAndJobByFilling($bucketsByDay, $filter["filling"]);
+        $bucketsByDay = $shift_service->filterBucketsByDayAndJobByFilling($bucketsByDay, $filter['filling']);
 
         return $this->render('admin/booking/index.html.twig', [
-            'filterForm' => $filter["form"]->createView(),
+            'filterForm' => $filter['form']->createView(),
             'bucketsByDay' => $bucketsByDay,
         ]);
     }
 
     /**
      * @Route("/bucket/{id}/show", name="bucket_show", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function showBucketAction(Request $request, Shift $bucket)
@@ -358,23 +362,24 @@ class BookingController extends AbstractController
      * When the user click on the 'edit' button on the bucket popup.
      *
      * @Route("/bucket/{id}/edit", name="bucket_edit", methods={"GET", "POST"})
+     *
      * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
-    public function editBucketAction(Request $request,Shift $shift)
+    public function editBucketAction(Request $request, Shift $shift)
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $form = $this->createForm(ShiftType::class, $shift);
         // Keep a record of the shift before update
-        $bucket = clone($shift);
+        $bucket = clone $shift;
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
             $shifts = $em->getRepository('App:Shift')->findBy([
                 'job' => $bucket->getJob(),
                 'start' => $bucket->getStart(),
-                'end' => $bucket->getEnd()
+                'end' => $bucket->getEnd(),
             ]);
             foreach ($shifts as $s) {
                 $s->setStart($form->get('start')->getData());
@@ -385,13 +390,14 @@ class BookingController extends AbstractController
             $em->flush();
 
             $session->getFlashBag()->add('success', 'Le créneau a bien été édité !');
+
             return $this->redirectToRoute('booking_admin');
         }
 
-        return $this->render('admin/shift/edit.html.twig', array(
-            "form" => $form->createView(),
-            "shift" => $shift
-        ));
+        return $this->render('admin/shift/edit.html.twig', [
+            'form' => $form->createView(),
+            'shift' => $shift,
+        ]);
     }
 
     /**
@@ -399,6 +405,7 @@ class BookingController extends AbstractController
      * on the bucket popup.
      *
      * @Route("/bucket/{id}/lock", name="bucket_lock_unlock", methods={"POST"})
+     *
      * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function lockUnlockBucketAction(Request $request, Shift $shift, ShiftService $shift_service)
@@ -417,13 +424,13 @@ class BookingController extends AbstractController
             $current = $bucket->getFirst()->isLocked() == 1;
             if ($lock == $current) {
                 $success = false;
-                $message = "Le créneau a déjà été " . ($lock ? "verrouillé" : "déverrouillé");
+                $message = 'Le créneau a déjà été ' . ($lock ? 'verrouillé' : 'déverrouillé');
             } else {
                 foreach ($bucket->getShifts() as $s) {
                     $s->setLocked($lock);
                 }
                 $em->flush();
-                $message = "Le créneau a été " . ($lock ? "verrouillé" : "déverrouillé");
+                $message = 'Le créneau a été ' . ($lock ? 'verrouillé' : 'déverrouillé');
                 $success = true;
             }
         } else {
@@ -433,30 +440,34 @@ class BookingController extends AbstractController
 
         if ($request->isXmlHttpRequest()) {
             if ($success) {
-                $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
+                $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', [
                     'bucket' => $bucket,
                     'start' => 6,
                     'end' => 22,
                     'line' => 0,
-                ));
+                ]);
                 $modal = $this->forward('App\Controller\BookingController::showBucketAction', [
-                    'bucket' => $bucket->getShiftWithMinId()
+                    'bucket' => $bucket->getShiftWithMinId(),
                 ])->getContent();
-                return new JsonResponse(array('message'=>$message, 'card' => $card, 'modal' => $modal), 200);
-            } else {
-                return new JsonResponse(array('message'=>$message), 400);
+
+                return new JsonResponse(['message' => $message, 'card' => $card, 'modal' => $modal], 200);
             }
-        } else {
-            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
-            return $this->redirectToRoute('booking_admin');
+
+            return new JsonResponse(['message' => $message], 400);
+
         }
+        $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+
+        return $this->redirectToRoute('booking_admin');
+
     }
 
     /**
      * delete all shifts in bucket
-     * (used when the user clicks on the 'supprimer' button in the bucket popup)
+     * (used when the user clicks on the 'supprimer' button in the bucket popup).
      *
      * @Route("/bucket/{id}", name="bucket_delete", methods={"DELETE"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function deleteBucketAction(Request $request, Shift $bucket, EventDispatcherInterface $event_dispatcher)
@@ -472,29 +483,30 @@ class BookingController extends AbstractController
             $shifts = $em->getRepository('App:Shift')->findBy([
                 'job' => $bucket->getJob(),
                 'start' => $bucket->getStart(),
-                'end' => $bucket->getEnd()
+                'end' => $bucket->getEnd(),
             ]);
             $count = 0;
             foreach ($shifts as $shift) {
                 $beneficiary = $shift->getShifter();
                 $event_dispatcher->dispatch(new ShiftDeletedEvent($shift, $beneficiary), ShiftDeletedEvent::NAME);
                 $em->remove($shift);
-                $count++;
+                ++$count;
             }
             $em->flush();
             $success = true;
-            $message = $count . (($count > 1) ? " créneaux ont été supprimés" : " créneau a été supprimé") . " !";
+            $message = $count . (($count > 1) ? ' créneaux ont été supprimés' : ' créneau a été supprimé') . ' !';
         } else {
             $success = false;
             $message = "Une erreur s'est produite... Impossible de supprimer le créneau. " . (string) $form->getErrors(true, false);
         }
         if ($request->isXmlHttpRequest()) {
-            return new JsonResponse(array('message'=>$message), $success ? 200 : 400);
-        } else {
-            $session = new Session();
-            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
-            return $this->redirectToRoute('booking_admin');
+            return new JsonResponse(['message' => $message], $success ? 200 : 400);
         }
+        $session = new Session();
+        $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+
+        return $this->redirectToRoute('booking_admin');
+
     }
 
     /**
@@ -502,17 +514,18 @@ class BookingController extends AbstractController
      *
      * @param Shift $bucket One shift of the bucket
      *
-     * @return \Symfony\Component\Form\Form The form
+     * @return Form The form
      */
     private function createBucketLockUnlockForm(Shift $bucket)
     {
         return $this->get('form.factory')->createNamedBuilder('bucket_lock_unlock_form')
-            ->setAction($this->generateUrl('bucket_lock_unlock', array('id' => $bucket->getId())))
+            ->setAction($this->generateUrl('bucket_lock_unlock', ['id' => $bucket->getId()]))
             ->add('lock', HiddenType::class, [
                 'data'  => ($bucket->isLocked() ? 0 : 1),
             ])
             ->setMethod('POST')
-            ->getForm();
+            ->getForm()
+        ;
     }
 
     /**
@@ -520,7 +533,7 @@ class BookingController extends AbstractController
      *
      * @param Shift $bucket One shift of the bucket
      *
-     * @return \Symfony\Component\Form\Form The form
+     * @return Form The form
      */
     private function createBucketShiftAddForm(Shift $bucket)
     {
@@ -528,10 +541,11 @@ class BookingController extends AbstractController
             'bucket_shift_add_form',
             ShiftType::class,
             $bucket,
-            array(
+            [
                 'action' => $this->generateUrl('shift_new'),
                 'only_add_formation' => true,
-            ));
+            ]
+        );
     }
 
     /**
@@ -539,14 +553,15 @@ class BookingController extends AbstractController
      *
      * @param Shift $bucket One shift of the bucket
      *
-     * @return \Symfony\Component\Form\Form The form
+     * @return Form The form
      */
     private function createBucketDeleteForm(Shift $bucket)
     {
         return $this->get('form.factory')->createNamedBuilder('bucket_delete_form')
-            ->setAction($this->generateUrl('bucket_delete', array('id' => $bucket->getId())))
+            ->setAction($this->generateUrl('bucket_delete', ['id' => $bucket->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 
     /**
@@ -555,13 +570,14 @@ class BookingController extends AbstractController
      *
      * @param Shift $shift The shift entity
      *
-     * @return \Symfony\Component\Form\Form The form
+     * @return Form The form
      */
     private function createShiftBookAdminForm(Shift $shift)
     {
         $form = $this->get('form.factory')->createNamedBuilder('shift_book_forms_' . $shift->getId())
-            ->setAction($this->generateUrl('shift_book_admin', array('id' => $shift->getId())))
-            ->add('shifter', AutocompleteBeneficiaryType::class, array('label' => 'Numéro d\'adhérent ou nom du membre', 'required' => true));
+            ->setAction($this->generateUrl('shift_book_admin', ['id' => $shift->getId()]))
+            ->add('shifter', AutocompleteBeneficiaryType::class, ['label' => 'Numéro d\'adhérent ou nom du membre', 'required' => true])
+        ;
 
         if ($this->use_fly_and_fixed) {
             $form = $form->add('fixe', RadioChoiceType::class, [
@@ -569,11 +585,11 @@ class BookingController extends AbstractController
                     'Volant' => 0,
                     'Fixe' => 1,
                 ],
-                'data' => 0
+                'data' => 0,
             ]);
         } else {
             $form = $form->add('fixe', HiddenType::class, [
-                'data' => 0
+                'data' => 0,
             ]);
         }
 
@@ -586,14 +602,15 @@ class BookingController extends AbstractController
      *
      * @param Shift $shift The shift entity
      *
-     * @return \Symfony\Component\Form\Form The form
+     * @return Form The form
      */
     private function createShiftDeleteForm(Shift $shift)
     {
         return $this->get('form.factory')->createNamedBuilder('shift_delete_forms_' . $shift->getId())
-            ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
+            ->setAction($this->generateUrl('shift_delete', ['id' => $shift->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 
     /**
@@ -605,10 +622,11 @@ class BookingController extends AbstractController
     private function createShiftFreeForm(Shift $shift): FormInterface
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
-            ->add('reason', TextareaType::class, array('required' => false, 'label' => 'Justification éventuelle', 'attr' => array('class' => 'materialize-textarea')))
+            ->setAction($this->generateUrl('shift_free', ['id' => $shift->getId()]))
+            ->add('reason', TextareaType::class, ['required' => false, 'label' => 'Justification éventuelle', 'attr' => ['class' => 'materialize-textarea']])
             ->setMethod('POST')
-            ->getForm();
+            ->getForm()
+        ;
     }
 
     /**
@@ -617,15 +635,16 @@ class BookingController extends AbstractController
      *
      * @param Shift $shift The shift entity
      *
-     * @return \Symfony\Component\Form\Form The form
+     * @return Form The form
      */
     private function createShiftFreeAdminForm(Shift $shift)
     {
         return $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
-            ->setAction($this->generateUrl('shift_free_admin', array('id' => $shift->getId())))
-            ->add('reason', TextareaType::class, array('required' => false, 'label' => 'Justification éventuelle', 'attr' => array('class' => 'materialize-textarea')))
+            ->setAction($this->generateUrl('shift_free_admin', ['id' => $shift->getId()]))
+            ->add('reason', TextareaType::class, ['required' => false, 'label' => 'Justification éventuelle', 'attr' => ['class' => 'materialize-textarea']])
             ->setMethod('POST')
-            ->getForm();
+            ->getForm()
+        ;
     }
 
     /**
@@ -634,16 +653,17 @@ class BookingController extends AbstractController
      *
      * @param Shift $shift The shift entity
      *
-     * @return \Symfony\Component\Form\Form The form
+     * @return Form The form
      */
     private function createShiftValidateInvalidateAdminForm(Shift $shift)
     {
         return $this->get('form.factory')->createNamedBuilder('shift_validate_invalidate_forms_' . $shift->getId())
-            ->setAction($this->generateUrl('shift_validate_admin', array('id' => $shift->getId())))
+            ->setAction($this->generateUrl('shift_validate_admin', ['id' => $shift->getId()]))
             ->add('validate', HiddenType::class, [
                 'data' => ($shift->getWasCarriedOut() ? 0 : 1),
             ])
             ->setMethod('POST')
-            ->getForm();
+            ->getForm()
+        ;
     }
 }

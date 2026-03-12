@@ -16,6 +16,7 @@ class EventExtension extends AbstractExtension
      * @var EventService
      */
     private $eventService;
+
     /**
      * @var TokenStorageInterface
      */
@@ -29,10 +30,10 @@ class EventExtension extends AbstractExtension
 
     public function getFilters()
     {
-        return array(
-            new TwigFilter('givenProxy', array($this, 'givenProxy')),
-            new TwigFilter('receivedProxies', array($this, 'receivedProxies')),
-        );
+        return [
+            new TwigFilter('givenProxy', [$this, 'givenProxy']),
+            new TwigFilter('receivedProxies', [$this, 'receivedProxies']),
+        ];
     }
 
     public function givenProxy(Event $event): ?Proxy
@@ -42,6 +43,7 @@ class EventExtension extends AbstractExtension
         if (!$user) {
             return null;
         }
+
         return $this->eventService->getGivenProxyOfMembershipForAnEvent($event, $user->getBeneficiary()->getMembership());
     }
 
@@ -52,6 +54,7 @@ class EventExtension extends AbstractExtension
         if (!$user) {
             return null;
         }
+
         return $this->eventService->getReceivedProxiesOfBeneficiaryForAnEvent($event, $user->getBeneficiary());
     }
 }

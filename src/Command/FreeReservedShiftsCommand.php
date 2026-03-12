@@ -1,5 +1,7 @@
 <?php
+
 // src/App/Command/FreeReservedShiftsCommand.php
+
 namespace App\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
@@ -21,8 +23,7 @@ class FreeReservedShiftsCommand extends Command
     public function __construct(
         EntityManagerInterface $em,
         ContainerBagInterface $params
-    )
-    {
+    ) {
         $this->em = $em;
         $this->params = $params;
 
@@ -44,28 +45,30 @@ class FreeReservedShiftsCommand extends Command
         $reserve_new_shift_to_prior_shifter = $this->params->get('reserve_new_shift_to_prior_shifter');
         if (!$reserve_new_shift_to_prior_shifter) {
             $output->writeln('<fg=red;> reserve_new_shift_to_prior_shifter parameter must be true </>');
+
             return 1;
         }
 
         $date_given = $input->getArgument('date');
-        $date = date_create_from_format('Y-m-d',$date_given);
-        if (!$date || $date->format('Y-m-d') != $date_given){
+        $date = date_create_from_format('Y-m-d', $date_given);
+        if (!$date || $date->format('Y-m-d') != $date_given) {
             $output->writeln('<fg=red;> wrong date format. Use Y-m-d </>');
+
             return 2;
         }
-        $date->setTime(0,0);
-        $output->writeln('<fg=cyan;>'.$date->format('d M Y').'</>');
+        $date->setTime(0, 0);
+        $output->writeln('<fg=cyan;>' . $date->format('d M Y') . '</>');
 
         $count = 0;
         $shifts = $this->em->getRepository('App:Shift')->findReservedAt($date);
         foreach ($shifts as $shift) {
             $shift->setLastShifter(null);
             $this->em->persist($shift);
-            $count++;
+            ++$count;
         }
         $this->em->flush();
 
-        $message = $count.' créneau'.(($count>1) ? 'x':'').' libéré'.(($count>1) ? 's':'');
+        $message = $count . ' créneau' . (($count > 1) ? 'x' : '') . ' libéré' . (($count > 1) ? 's' : '');
         $output->writeln($message);
 
         return 0;

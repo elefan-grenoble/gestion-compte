@@ -21,21 +21,24 @@ class EmailTemplateController extends AbstractController
      * Lists all email templates.
      *
      * @Route("/", name="email_template_list", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function listAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
         $emailTemplates = $em->getRepository('App:EmailTemplate')->findAll();
-        return $this->render('admin/mail/template/list.html.twig', array(
+
+        return $this->render('admin/mail/template/list.html.twig', [
             'emailTemplates' => $emailTemplates,
-        ));
+        ]);
     }
 
     /**
-     * Create an email template
+     * Create an email template.
      *
      * @Route("/new", name="email_template_new", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function newAction(Request $request)
@@ -54,18 +57,20 @@ class EmailTemplateController extends AbstractController
             $em->flush();
 
             $session->getFlashBag()->add('success', "Modèle d'email créé");
+
             return $this->redirectToRoute('email_template_list');
         }
 
-        return $this->render('admin/mail/template/new.html.twig', array(
-            'form' => $form->createView()
-        ));
+        return $this->render('admin/mail/template/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     /**
-     * Edit an email template
+     * Edit an email template.
      *
      * @Route("/{id}/edit", name="email_template_edit", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function editAction(Request $request, EmailTemplate $emailTemplate)
@@ -85,12 +90,13 @@ class EmailTemplateController extends AbstractController
             $em->flush();
 
             $session->getFlashBag()->add('success', "Modèle d'email édité");
+
             return $this->redirectToRoute('email_template_list');
         }
 
-        return $this->render('admin/mail/template/edit.html.twig', array(
+        return $this->render('admin/mail/template/edit.html.twig', [
             'form' => $form->createView(),
             'emailTemplate' => $emailTemplate,
-        ));
+        ]);
     }
 }

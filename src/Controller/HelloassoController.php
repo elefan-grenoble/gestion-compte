@@ -16,6 +16,8 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Form\Form;
+use Symfony\Component\Form\FormInterface;
 
 /**
  * Helloasso controller.
@@ -24,11 +26,11 @@ use Symfony\Component\Routing\Annotation\Route;
  */
 class HelloassoController extends AbstractController
 {
-
     /**
-     * Helloasso payments list
+     * Helloasso payments list.
      *
      * @Route("/payments", name="helloasso_payments", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_FINANCE_MANAGER')")
      */
     public function helloassoPaymentsAction(Request $request)
@@ -40,7 +42,8 @@ class HelloassoController extends AbstractController
         $max = $this->getDoctrine()->getManager()->createQueryBuilder()->from('App\Entity\HelloassoPayment', 'n')
             ->select('count(n.id)')
             ->getQuery()
-            ->getSingleScalarResult();
+            ->getSingleScalarResult()
+        ;
 
         $page_count = intval($max / $limit);
         if ($max > 0) {
@@ -49,32 +52,36 @@ class HelloassoController extends AbstractController
 
         $payments = $this->getDoctrine()->getManager()
             ->getRepository('App:HelloassoPayment')
-            ->findBy(array(), array('createdAt' => 'DESC', 'date' => 'DESC'), $limit, ($currentPage - 1) * $limit);
+            ->findBy([], ['createdAt' => 'DESC', 'date' => 'DESC'], $limit, ($currentPage - 1) * $limit)
+        ;
 
-        $delete_forms = array();
+        $delete_forms = [];
         foreach ($payments as $payment) {
             $delete_forms[$payment->getId()] = $this->getPaymentDeleteForm($payment)->createView();
         }
 
-        $campaigns = array();
-        $campaign_ids = array_unique(array_map(function($payment) { return $payment->getCampaignId(); }, $payments));
+        $campaigns = [];
+        $campaign_ids = array_unique(array_map(function ($payment) {
+            return $payment->getCampaignId();
+        }, $payments));
         foreach ($campaign_ids as $id) {
-            $campaigns[intval($id)] = ["url" => null, "name" => null];
+            $campaigns[intval($id)] = ['url' => null, 'name' => null];
         }
 
-        return $this->render('admin/helloasso/payments.html.twig', array(
+        return $this->render('admin/helloasso/payments.html.twig', [
             'payments' => $payments,
             'campaigns' => $campaigns,
             'delete_forms' => $delete_forms,
             'current_page' => $currentPage,
-            'page_count' => $page_count
-        ));
+            'page_count' => $page_count,
+        ]);
     }
 
     /**
-     * Helloasso browser
+     * Helloasso browser.
      *
      * @Route("/browser", name="helloasso_browser", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_FINANCE_MANAGER')")
      */
     public function helloassoBrowserAction(HelloassoClient $helloassoClient)
@@ -83,7 +90,8 @@ class HelloassoController extends AbstractController
             $campaigns = $helloassoClient->getForms();
         } catch (ClientExceptionInterface $e) {
             $session = new Session();
-            $session->getFlashBag()->add('error','Connexion à helloasso impossible');
+            $session->getFlashBag()->add('error', 'Connexion à helloasso impossible');
+
             return $this->redirectToRoute('admin');
         }
 
@@ -92,17 +100,20 @@ class HelloassoController extends AbstractController
 
     /**
      * @Route("/browser/{formType}/{slug}", name="helloasso_campaign_details", methods={"GET"})
+     *
      * @Security("has_role('ROLE_FINANCE_MANAGER')")
      */
     public function helloassoCampaignDetailsAction(Request $request, HelloassoClient $helloassoClient, string $formType, string $slug): Response
     {
         $currentPage = $request->get('page', 1);
+
         try {
             $payments = $helloassoClient->getFormPayments($formType, $slug, ['page' => $currentPage]);
             $details = $helloassoClient->getFormDetails($formType, $slug);
         } catch (ClientExceptionInterface $e) {
             $session = new Session();
-            $session->getFlashBag()->add('error','campaign not found');
+            $session->getFlashBag()->add('error', 'campaign not found');
+
             return $this->redirectToRoute('helloasso_browser');
         }
 
@@ -115,9 +126,10 @@ class HelloassoController extends AbstractController
     }
 
     /**
-     * Helloasso manual paiement add
+     * Helloasso manual paiement add.
      *
      * @Route("/manualPaimentAdd/{paymentId}", name="helloasso_manual_paiement_add", methods={"POST"})
+     *
      * @Security("is_granted('ROLE_FINANCE_MANAGER')")
      */
     public function helloassoManualPaimentAddAction(Request $request, HelloassoClient $helloassoClient, HelloassoPaymentHandler $paymentHandler, string $paymentId)
@@ -128,8 +140,8 @@ class HelloassoController extends AbstractController
             $payment = $helloassoClient->getPayment($paymentId);
         } catch (ClientExceptionInterface $e) {
             $session->getFlashBag()->add('error', 'Impossible de récupérer les informations depuis helloasso');
-            $formType = $request->get("formType");
-            $slug = $request->get("slug");
+            $formType = $request->get('formType');
+            $slug = $request->get('slug');
             if (is_string($formType) && is_string($slug)) {
                 return $this->redirectToRoute('helloasso_campaign_details', ['formType' => $formType, 'slug' => $slug]);
             }
@@ -149,9 +161,10 @@ class HelloassoController extends AbstractController
     }
 
     /**
-     * remove payment
+     * remove payment.
      *
      * @Route("/payments/{id}", name="helloasso_payment_remove", methods={"DELETE"})
+     *
      * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function removePaymentAction(Request $request, HelloassoPayment $payment)
@@ -165,6 +178,7 @@ class HelloassoController extends AbstractController
             $em = $this->getDoctrine()->getManager();
             if ($payment->getRegistration()) {
                 $session->getFlashBag()->add('error', 'ce paiement est lié à une adhésion');
+
                 return $this->redirectToRoute('helloasso_payments');
             }
             $em->remove($payment);
@@ -176,9 +190,10 @@ class HelloassoController extends AbstractController
     }
 
     /**
-     * edit payment
+     * edit payment.
      *
      * @Route("/payment/{id}/edit", name="helloasso_payment_edit", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_FINANCE_MANAGER')")
      */
     public function editPaymentAction(Request $request, HelloassoPayment $payment, EventDispatcherInterface $event_dispatcher)
@@ -190,11 +205,12 @@ class HelloassoController extends AbstractController
 
         if ($payment->getRegistration()) {
             $session->getFlashBag()->add('error', 'Désolé, cette adhésion est déjà associée à un membre valide');
+
             return $this->redirectToRoute('helloasso_payments');
         }
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $beneficiary = $form->get("subscriber")->getData();
+            $beneficiary = $form->get('subscriber')->getData();
 
             $event_dispatcher->dispatch(
                 new HelloassoEvent($payment, $beneficiary->getUser()),
@@ -202,6 +218,7 @@ class HelloassoController extends AbstractController
             );
 
             $session->getFlashBag()->add('success', "L'adhésion a été mise à jour avec succès pour " . $beneficiary);
+
             return $this->redirectToRoute('helloasso_payments');
         }
 
@@ -212,15 +229,15 @@ class HelloassoController extends AbstractController
     }
 
     /**
-     * @param HelloassoPayment $payment
-     * @return \Symfony\Component\Form\FormInterface
+     * @return FormInterface
      */
     protected function getPaymentDeleteForm(HelloassoPayment $payment)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('helloasso_payment_remove', array('id' => $payment->getId())))
+            ->setAction($this->generateUrl('helloasso_payment_remove', ['id' => $payment->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 
     /**
@@ -228,47 +245,58 @@ class HelloassoController extends AbstractController
      *
      * @param HelloassoPayment $payment The payment entity
      *
-     * @return \Symfony\Component\Form\Form
+     * @return Form
      */
     private function createPaymentEditForm(HelloassoPayment $payment)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('helloasso_payment_edit', array('id' => $payment->getId())))
-            ->add('subscriber', AutocompleteBeneficiaryType::class, array('label' => 'Numéro d\'adhérent ou nom du membre', 'required' => true))
-            ->getForm();
+            ->setAction($this->generateUrl('helloasso_payment_edit', ['id' => $payment->getId()]))
+            ->add('subscriber', AutocompleteBeneficiaryType::class, ['label' => 'Numéro d\'adhérent ou nom du membre', 'required' => true])
+            ->getForm()
+        ;
     }
 
     /**
-     * resolve orphan payment
+     * resolve orphan payment.
      *
      * @Route("/payment/{id}/resolve_orphan/{code}", name="helloasso_resolve_orphan", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_USER')")
+     *
+     * @param mixed $code
      */
-    public function resolveOrphan(HelloassoPayment $payment,$code, SwipeCardHelper $swipeCardHelper){
+    public function resolveOrphan(HelloassoPayment $payment, $code, SwipeCardHelper $swipeCardHelper)
+    {
         $code = urldecode($code);
         $email = $swipeCardHelper->vigenereDecode($code);
         $session = new Session();
-        if ($email == $payment->getEmail()){
-            if ($payment->getRegistration()){
+        if ($email == $payment->getEmail()) {
+            if ($payment->getRegistration()) {
                 $session->getFlashBag()->add('error', 'Le paiement helloasso que tu cherches à corriger n\'a plus besoin de ton aide !');
-            }else{
+            } else {
                 return $this->render(
                     'user/helloasso_resolve_orphan.html.twig',
-                    array('payment' => $payment));
+                    ['payment' => $payment]
+                );
             }
-        }else{
+        } else {
             $session->getFlashBag()->add('error', 'Oups, ce lien ne semble pas fonctionner !');
         }
+
         return $this->redirectToRoute('homepage');
     }
 
     /**
-     * confirm resolve orphan payment
+     * confirm resolve orphan payment.
      *
      * @Route("/payment/{id}/confirm_resolve_orphan/{code}", name="helloasso_confirm_resolve_orphan", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_USER')")
+     *
+     * @param mixed $code
      */
-    public function confirmOrphan(HelloassoPayment $payment, $code, EventDispatcherInterface $event_dispatcher, SwipeCardHelper $swipeCardHelper){
+    public function confirmOrphan(HelloassoPayment $payment, $code, EventDispatcherInterface $event_dispatcher, SwipeCardHelper $swipeCardHelper)
+    {
         $code = urldecode($code);
         $email = $swipeCardHelper->vigenereDecode($code);
         $session = new Session();
@@ -278,21 +306,27 @@ class HelloassoController extends AbstractController
                 new HelloassoEvent($payment, $this->getUser()),
                 HelloassoEvent::ORPHAN_SOLVE
             );
-        }else{
+        } else {
             $session->getFlashBag()->add('error', 'Oups, ce lien ne semble pas fonctionner !');
         }
+
         return $this->redirectToRoute('homepage');
     }
 
     /**
-     * exit app and redirect to resolve
+     * exit app and redirect to resolve.
      *
      * @Route("/payment/{id}/orphan_exit_and_back/{code}", name="helloasso_orphan_exit_and_back", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_USER')")
+     *
+     * @param mixed $code
      */
-    public function orphanExitAndConfirm(Request $request,HelloassoPayment $payment,$code){
+    public function orphanExitAndConfirm(Request $request, HelloassoPayment $payment, $code)
+    {
         $this->get('security.token_storage')->setToken(null);
         $request->getSession()->invalidate();
-        return $this->redirectToRoute('helloasso_resolve_orphan',array('id'=>$payment->getId(),'code'=>$code));
+
+        return $this->redirectToRoute('helloasso_resolve_orphan', ['id' => $payment->getId(), 'code' => $code]);
     }
 }

@@ -1,26 +1,22 @@
 <?php
 
-
 namespace App\DataFixtures\ORM;
 
 use App\DataFixtures\FixturesConstants;
 use App\Entity\Client;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
-use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 
-
 class ClientFixtures extends Fixture implements FixtureGroupInterface, OrderedFixtureInterface
 {
-
     public function load(ObjectManager $manager)
     {
 
         $clientCounts = FixturesConstants::CLIENTS_COUNT;
 
-        for ($i = 1; $i <= $clientCounts; $i++) {
+        for ($i = 1; $i <= $clientCounts; ++$i) {
             $client = new Client();
             $client->setRandomId('client_id_' . $i);
             $client->setSecret('secret_' . $i);
@@ -49,5 +45,4 @@ class ClientFixtures extends Fixture implements FixtureGroupInterface, OrderedFi
     {
         return 7;
     }
-
 }

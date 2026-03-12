@@ -9,19 +9,20 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-
+use Symfony\Component\Form\FormInterface;
 
 /**
- * AdminEventKind controller
+ * AdminEventKind controller.
  *
  * @Route("admin/events/kinds")
  */
 class AdminEventKindController extends AbstractController
 {
     /**
-     * Lists all event kinds
+     * Lists all event kinds.
      *
      * @Route("/", name="admin_event_kind_list", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function listAction()
@@ -30,15 +31,16 @@ class AdminEventKindController extends AbstractController
 
         $eventKinds = $em->getRepository('App:EventKind')->findAll();
 
-        return $this->render('admin/event/kind/list.html.twig', array(
+        return $this->render('admin/event/kind/list.html.twig', [
             'eventKinds' => $eventKinds,
-        ));
+        ]);
     }
 
     /**
-     * Add new event kind
+     * Add new event kind.
      *
      * @Route("/new", name="admin_event_kind_new", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function newAction(Request $request)
@@ -55,18 +57,20 @@ class AdminEventKindController extends AbstractController
             $em->flush();
 
             $session->getFlashBag()->add('success', 'Le type d\'événement a bien été créé !');
+
             return $this->redirectToRoute('admin_event_kind_list');
         }
 
-        return $this->render('admin/event/kind/new.html.twig', array(
+        return $this->render('admin/event/kind/new.html.twig', [
             'form' => $form->createView(),
-        ));
+        ]);
     }
 
     /**
-     * Edit event kind
+     * Edit event kind.
      *
      * @Route("/{id}/edit", name="admin_event_kind_edit", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function editAction(Request $request, EventKind $eventKind)
@@ -82,20 +86,22 @@ class AdminEventKindController extends AbstractController
             $em->flush();
 
             $session->getFlashBag()->add('success', 'Le type d\'événement a bien été édité !');
+
             return $this->redirectToRoute('admin_event_kind_list');
         }
 
-        return $this->render('admin/event/kind/edit.html.twig', array(
+        return $this->render('admin/event/kind/edit.html.twig', [
             'form' => $form->createView(),
             'eventKind' => $eventKind,
             'delete_form' => $this->getDeleteForm($eventKind)->createView(),
-        ));
+        ]);
     }
 
     /**
-     * Delete event kind
+     * Delete event kind.
      *
      * @Route("/{id}", name="admin_event_kind_delete", methods={"DELETE"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function deleteAction(Request $request, EventKind $eventKind)
@@ -117,14 +123,14 @@ class AdminEventKindController extends AbstractController
     }
 
     /**
-     * @param EventKind $eventKind
-     * @return \Symfony\Component\Form\FormInterface
+     * @return FormInterface
      */
     protected function getDeleteForm(EventKind $eventKind)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('admin_event_kind_delete', array('id' => $eventKind->getId())))
+            ->setAction($this->generateUrl('admin_event_kind_delete', ['id' => $eventKind->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 }

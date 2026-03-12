@@ -8,7 +8,6 @@ use Symfony\Component\Form\FormInterface;
 use Symfony\Component\Form\FormView;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
-
 // https://github.com/NobletSolutions/SimpleMDEBundle/blob/master/src/Form/Types/MarkdownEditorType.php
 class MarkdownEditorType extends AbstractType
 {
@@ -72,10 +71,12 @@ class MarkdownEditorType extends AbstractType
         }
 
         // added
-        if (!isset($options['spellChecker']) || $options['spellChecker'] === false)
+        if (!isset($options['spellChecker']) || $options['spellChecker'] === false) {
             $editor_config['spellChecker'] = false;
-        if (!isset($options['forceSync']))
+        }
+        if (!isset($options['forceSync'])) {
             $editor_config['forceSync'] = true;
+        }
 
         $view->vars['editor_config'] = json_encode($editor_config);
     }

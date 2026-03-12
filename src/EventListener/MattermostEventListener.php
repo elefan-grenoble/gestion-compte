@@ -25,12 +25,11 @@ class MattermostEventListener
     }
 
     /**
-     * @param ShiftAlertsMattermostEvent $event
      * @throws \Exception
      */
     public function onShiftAlerts(ShiftAlertsMattermostEvent $event)
     {
-        $this->logger->info("Mattermost Listener: onShiftAlerts");
+        $this->logger->info('Mattermost Listener: onShiftAlerts');
 
         $alerts = $event->getAlerts();
         $date = $event->getDate();
@@ -45,7 +44,7 @@ class MattermostEventListener
             }
             $content = $this->container->get('twig')->render(
                 $template,
-                array('alerts' => $alerts, 'date' => $date)
+                ['alerts' => $alerts, 'date' => $date]
             );
 
             (new Client([
@@ -53,7 +52,7 @@ class MattermostEventListener
                     'Content-Type' => 'application/json',
                 ],
             ]))->request('POST', $event->getMattermostHookUrl(), [
-                RequestOptions::JSON => ['text' => $content]
+                RequestOptions::JSON => ['text' => $content],
             ]);
         }
     }

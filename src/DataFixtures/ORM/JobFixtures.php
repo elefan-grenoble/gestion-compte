@@ -19,7 +19,7 @@ class JobFixtures extends Fixture implements FixtureGroupInterface, OrderedFixtu
         $adminsCount = FixturesConstants::ADMINS_COUNT;
         $jobsCount = FixturesConstants::JOBS_COUNT;
 
-        for ($i = 0; $i < $jobsCount; $i++) {
+        for ($i = 0; $i < $jobsCount; ++$i) {
             $job = new Job();
             $job->setName($jobTitles[$i]);
             $job->setColor($jobColors[$i]);
@@ -35,14 +35,14 @@ class JobFixtures extends Fixture implements FixtureGroupInterface, OrderedFixtu
             $admin = $this->getReference('admin_' . rand(1, $adminsCount));
             $job->setCreatedBy($admin);
 
-            $this->setReference('job_' . ($i+1), $job);
+            $this->setReference('job_' . ($i + 1), $job);
 
             $manager->persist($job);
         }
 
         $manager->flush();
 
-        echo $jobsCount." jobs created\n";
+        echo $jobsCount . " jobs created\n";
     }
 
     public static function getGroups(): array

@@ -1,10 +1,11 @@
 <?php
+
 // src/App/Command/InitUsersFirstShiftDateCommand.php
+
 namespace App\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
-use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 
@@ -14,8 +15,7 @@ class InitUsersFirstShiftDateCommand extends Command
 
     public function __construct(
         EntityManagerInterface $em
-    )
-    {
+    ) {
         $this->em = $em;
 
         parent::__construct();
@@ -26,7 +26,8 @@ class InitUsersFirstShiftDateCommand extends Command
         $this
             ->setName('app:user:init_first_shift_date')
             ->setDescription('Init first_shift_date of users')
-            ->setHelp('This command allows you to init users first shift date');
+            ->setHelp('This command allows you to init users first shift date')
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -38,11 +39,11 @@ class InitUsersFirstShiftDateCommand extends Command
             $membership = $shift->getShifter()->getMembership();
             if ($membership->getId() != $last_member_id) {
                 $last_member_id = $membership->getId();
-                $firstDate = clone($shift->getStart());
+                $firstDate = clone $shift->getStart();
                 $firstDate->setTime(0, 0, 0);
                 $membership->setFirstShiftDate($firstDate);
                 $this->em->persist($membership);
-                $count++;
+                ++$count;
             }
         }
         $this->em->flush();
@@ -51,5 +52,4 @@ class InitUsersFirstShiftDateCommand extends Command
 
         return 0;
     }
-
 }

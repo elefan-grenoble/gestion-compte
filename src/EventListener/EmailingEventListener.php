@@ -9,7 +9,6 @@ use App\Event\CodeNewEvent;
 use App\Event\EventProxyCreatedEvent;
 use App\Event\HelloassoEvent;
 use App\Event\MemberCreatedEvent;
-use App\Event\MemberCycleEndEvent;
 use App\Event\MemberCycleHalfEvent;
 use App\Event\MemberCycleStartEvent;
 use App\Event\ShiftAlertsEvent;
@@ -57,23 +56,22 @@ class EmailingEventListener
     }
 
     /**
-     * @param AnonymousBeneficiaryCreatedEvent $event
      * @throws \Exception
      */
     public function onAnonymousBeneficiaryCreated(AnonymousBeneficiaryCreatedEvent $event)
     {
-        $this->logger->info("Emailing Listener: onAnonymousBeneficiaryCreated");
+        $this->logger->info('Emailing Listener: onAnonymousBeneficiaryCreated');
 
         $emailObject = 'Bienvenue à ' . $this->container->getParameter('project_name') . ', tu te présentes ?';
         $emailTo = $event->getAnonymousBeneficiary()->getEmail();
 
-        $dynamicContent = $this->em->getRepository('App:DynamicContent')->findOneByCode("PRE_MEMBERSHIP_EMAIL")->getContent();
+        $dynamicContent = $this->em->getRepository('App:DynamicContent')->findOneByCode('PRE_MEMBERSHIP_EMAIL')->getContent();
 
         $router = $this->container->get('router');
         if (!$event->getAnonymousBeneficiary()->getJoinTo()) {
-            $url = $router->generate('member_new', array('code' => $this->swipeCardHelper->vigenereEncode($emailTo)), UrlGeneratorInterface::ABSOLUTE_URL);
+            $url = $router->generate('member_new', ['code' => $this->swipeCardHelper->vigenereEncode($emailTo)], UrlGeneratorInterface::ABSOLUTE_URL);
         } else {
-            $url = $router->generate('member_add_beneficiary', array('code' => $this->swipeCardHelper->vigenereEncode($emailTo)), UrlGeneratorInterface::ABSOLUTE_URL);
+            $url = $router->generate('member_add_beneficiary', ['code' => $this->swipeCardHelper->vigenereEncode($emailTo)], UrlGeneratorInterface::ABSOLUTE_URL);
         }
 
         $email = (new Email())
@@ -83,34 +81,34 @@ class EmailingEventListener
             ->html(
                 $this->renderView(
                     'emails/needInfo.html.twig',
-                    array(
+                    [
                         'register_url' => $url,
                         'dynamicContent' => $dynamicContent,
-                    )
+                    ]
                 )
-            );
+            )
+        ;
 
         $this->mailer->send($email);
     }
 
     /**
-     * @param AnonymousBeneficiaryRecallEvent $event
      * @throws \Exception
      */
     public function onAnonymousBeneficiaryRecall(AnonymousBeneficiaryRecallEvent $event)
     {
-        $this->logger->info("Emailing Listener: onAnonymousBeneficiaryRecall");
+        $this->logger->info('Emailing Listener: onAnonymousBeneficiaryRecall');
 
         $emailObject = 'Bienvenue à ' . $this->container->getParameter('project_name') . ', souhaites-tu te présenter ?';
         $emailTo = $event->getAnonymousBeneficiary()->getEmail();
 
-        $dynamicContent = $this->em->getRepository('App:DynamicContent')->findOneByCode("PRE_MEMBERSHIP_EMAIL")->getContent();
+        $dynamicContent = $this->em->getRepository('App:DynamicContent')->findOneByCode('PRE_MEMBERSHIP_EMAIL')->getContent();
 
         $router = $this->container->get('router');
         if (!$event->getAnonymousBeneficiary()->getJoinTo()) {
-            $url = $router->generate('member_new', array('code' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($emailTo)), UrlGeneratorInterface::ABSOLUTE_URL);
+            $url = $router->generate('member_new', ['code' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($emailTo)], UrlGeneratorInterface::ABSOLUTE_URL);
         } else {
-            $url = $router->generate('member_add_beneficiary', array('code' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($emailTo)), UrlGeneratorInterface::ABSOLUTE_URL);
+            $url = $router->generate('member_add_beneficiary', ['code' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($emailTo)], UrlGeneratorInterface::ABSOLUTE_URL);
         }
 
         $email = (new Email())
@@ -120,24 +118,24 @@ class EmailingEventListener
             ->html(
                 $this->renderView(
                     'emails/needInfoRecall.html.twig',
-                    array(
+                    [
                         'register_url' => $url,
                         'dynamicContent' => $dynamicContent,
-                        'rdate' => $event->getAnonymousBeneficiary()->getCreatedAt()
-                    )
+                        'rdate' => $event->getAnonymousBeneficiary()->getCreatedAt(),
+                    ]
                 )
-            );
+            )
+        ;
 
         $this->mailer->send($email);
     }
 
     /**
-     * @param BeneficiaryAddEvent $event
      * @throws \Exception
      */
     public function onBeneficiaryAdd(BeneficiaryAddEvent $event)
     {
-        $this->logger->info("Emailing Listener: onBeneficiaryAdd");
+        $this->logger->info('Emailing Listener: onBeneficiaryAdd');
 
         $beneficiary = $event->getBeneficiary();
         $owner = $beneficiary->getMembership()->getMainBeneficiary();
@@ -152,29 +150,28 @@ class EmailingEventListener
             ->html(
                 $this->renderView(
                     'emails/new_beneficiary.html.twig',
-                    array(
+                    [
                         'owner' => $owner,
                         'beneficiary' => $beneficiary,
-                    )
+                    ]
                 )
-            );
+            )
+        ;
 
         $this->mailer->send($email);
     }
 
     /**
-     * @param MemberCreatedEvent $event
      * @throws \Exception
      */
     public function onMemberCreated(MemberCreatedEvent $event)
     {
-        $this->logger->info("Emailing Listener: onMemberCreated");
+        $this->logger->info('Emailing Listener: onMemberCreated');
 
         // TODO ?
     }
 
     /**
-     * @param HelloassoEvent $event
      * @throws \Exception
      */
     public function onHelloassoRegistrationSuccess(HelloassoEvent $event)
@@ -184,7 +181,7 @@ class EmailingEventListener
 
         $emailTo = $user->getEmail();
 
-        if ($user->getBeneficiary()->getMembership()->getRegistrations()->count()>1) {
+        if ($user->getBeneficiary()->getMembership()->getRegistrations()->count() > 1) {
             $emailObject = '[ESPACE MEMBRES] Re-adhésion helloasso bien reçue !';
             $email = (new Email())
                 ->subject($emailObject)
@@ -193,11 +190,12 @@ class EmailingEventListener
                 ->html(
                     $this->renderView(
                         'emails/reregistration.html.twig',
-                        array(
+                        [
                             'beneficiary' => $user->getBeneficiary(),
-                            'payment' => $payment)
+                            'payment' => $payment]
                     )
-                );
+                )
+            ;
         } else {
             $emailObject = '[ESPACE MEMBRES] Adhésion helloasso bien reçue !';
             $email = (new Email())
@@ -207,18 +205,18 @@ class EmailingEventListener
                 ->html(
                     $this->renderView(
                         'emails/registration.html.twig',
-                        array(
+                        [
                             'beneficiary' => $user->getBeneficiary(),
-                            'payment' => $payment)
+                            'payment' => $payment]
                     )
-                );
+                )
+            ;
         }
 
         $this->mailer->send($email);
     }
 
     /**
-     * @param HelloassoEvent $event
      * @throws \Exception
      */
     public function onHelloassoTooEarly(HelloassoEvent $event)
@@ -241,40 +239,40 @@ class EmailingEventListener
                 ->html(
                     $this->renderView(
                         'emails/too_early_registration.html.twig',
-                        array(
+                        [
                             'beneficiary' => $user->getBeneficiary(),
                             'payment' => $payment,
-                            'membershipExpiration' => $membershipExpiration
-                        )
+                            'membershipExpiration' => $membershipExpiration,
+                        ]
                     )
-                );
+                )
+            ;
         } catch (\Exception $e) {
-            die($e->getMessage());
+            exit($e->getMessage());
         }
 
         $this->mailer->send($email);
     }
 
     /**
-     * @param ShiftReservedEvent $event
      * @throws \Exception
      */
     public function onShiftReserved(ShiftReservedEvent $event)
     {
-        $this->logger->info("Emailing Listener: onShiftReserved");
+        $this->logger->info('Emailing Listener: onShiftReserved');
 
         $shift = $event->getShift();
         $formerShift = $event->getFormerShift();
         $beneficiary = $shift->getLastShifter();
 
-        $d = (date_diff(new \DateTime('now'),$shift->getStart())->format("%a"));
+        $d = date_diff(new \DateTime('now'), $shift->getStart())->format('%a');
 
-        $emailObject = '[ESPACE MEMBRES] Reprends ton créneau du ' . strftime("%e %B", $formerShift->getStart()->getTimestamp()) . ' dans ' . $d . ' jours';
+        $emailObject = '[ESPACE MEMBRES] Reprends ton créneau du ' . strftime('%e %B', $formerShift->getStart()->getTimestamp()) . ' dans ' . $d . ' jours';
         $emailTo = $beneficiary->getEmail();
 
         $router = $this->container->get('router');
-        $accept_url = $router->generate('shift_accept_reserved', array('id' => $shift->getId(), 'token' => $shift->getTmpToken($beneficiary->getId())), UrlGeneratorInterface::ABSOLUTE_URL);
-        $reject_url = $router->generate('shift_reject_reserved', array('id' => $shift->getId(), 'token' => $shift->getTmpToken($beneficiary->getId())), UrlGeneratorInterface::ABSOLUTE_URL);
+        $accept_url = $router->generate('shift_accept_reserved', ['id' => $shift->getId(), 'token' => $shift->getTmpToken($beneficiary->getId())], UrlGeneratorInterface::ABSOLUTE_URL);
+        $reject_url = $router->generate('shift_reject_reserved', ['id' => $shift->getId(), 'token' => $shift->getTmpToken($beneficiary->getId())], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $email = (new Email())
             ->subject($emailObject)
@@ -283,33 +281,33 @@ class EmailingEventListener
             ->html(
                 $this->renderView(
                     'emails/shift_reserved.html.twig',
-                    array(
+                    [
                         'shift' => $shift,
                         'oldshift' => $formerShift,
                         'days' => $d,
                         'reserve_new_shift_to_prior_shifter_delay' => $this->reserve_new_shift_to_prior_shifter_delay,
                         'accept_url' => $accept_url,
                         'reject_url' => $reject_url,
-                    )
+                    ]
                 )
-            );
+            )
+        ;
 
         $this->mailer->send($email);
     }
 
     /**
-     * @param ShiftBookedEvent $event
      * @throws \Exception
      */
     public function onShiftBooked(ShiftBookedEvent $event)
     {
-        $this->logger->info("Emailing Listener: onShiftBooked");
+        $this->logger->info('Emailing Listener: onShiftBooked');
 
         $shift = $event->getShift();
         $beneficiary = $shift->getShifter();
 
         $router = $this->container->get('router');
-        $home_url = $router->generate('homepage', array(), UrlGeneratorInterface::ABSOLUTE_URL);
+        $home_url = $router->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
         // send a "confirmation" e-mail to the beneficiary
         $emailObject = '[ESPACE MEMBRES] Réservation de ton créneau confirmée';
@@ -322,12 +320,13 @@ class EmailingEventListener
             ->html(
                 $this->renderView(
                     'emails/shift_booked_confirmation.html.twig',
-                    array(
+                    [
                         'shift' => $shift,
                         'home_url' => $home_url,
-                    )
+                    ]
                 )
-            );
+            )
+        ;
 
         $this->mailer->send($email);
 
@@ -343,22 +342,22 @@ class EmailingEventListener
             ->html(
                 $this->renderView(
                     'emails/shift_booked_archive.html.twig',
-                    array(
-                        'shift' => $shift
-                    )
+                    [
+                        'shift' => $shift,
+                    ]
                 )
-            );
+            )
+        ;
 
         $this->mailer->send($email);
     }
 
     /**
-     * @param ShiftFreedEvent $event
      * @throws \Exception
      */
     public function onShiftFreed(ShiftFreedEvent $event)
     {
-        $this->logger->info("Emailing Listener: onShiftFreed");
+        $this->logger->info('Emailing Listener: onShiftFreed');
 
         $shift = $event->getShift();
         $beneficiary = $event->getBeneficiary();
@@ -375,34 +374,34 @@ class EmailingEventListener
                 ->html(
                     $this->renderView(
                         'emails/shift_freed.html.twig',
-                        array(
+                        [
                             'shift' => $shift,
-                            'beneficiary' => $beneficiary
-                        )
+                            'beneficiary' => $beneficiary,
+                        ]
                     )
-                );
+                )
+            ;
 
             $this->mailer->send($email);
         }
     }
 
     /**
-     * @param ShiftReminderEvent $event
      * @throws \Exception
      */
     public function onShiftReminder(ShiftReminderEvent $event)
     {
-        $this->logger->info("Emailing Listener: onShiftReminder");
+        $this->logger->info('Emailing Listener: onShiftReminder');
 
         $shift = $event->getShift();
         $beneficiary = $shift->getShifter();
 
         $router = $this->container->get('router');
-        $home_url = $router->generate('homepage', array(), UrlGeneratorInterface::ABSOLUTE_URL);
+        $home_url = $router->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $dynamicContent = $this->em->getRepository('App:DynamicContent')->findOneByCode("SHIFT_REMINDER_EMAIL")->getContent();
+        $dynamicContent = $this->em->getRepository('App:DynamicContent')->findOneByCode('SHIFT_REMINDER_EMAIL')->getContent();
         $template = $this->container->get('twig')->createTemplate($dynamicContent);
-        $dynamicContent = $this->container->get('twig')->render($template, array('beneficiary' => $beneficiary));
+        $dynamicContent = $this->container->get('twig')->render($template, ['beneficiary' => $beneficiary]);
 
         // send a reminder e-mail to the beneficiary
         if ($beneficiary) {
@@ -416,25 +415,25 @@ class EmailingEventListener
                 ->html(
                     $this->renderView(
                         'emails/shift_reminder.html.twig',
-                        array(
+                        [
                             'shift' => $shift,
                             'dynamicContent' => $dynamicContent,
                             'home_url' => $home_url,
-                        )
+                        ]
                     )
-                );
+                )
+            ;
 
             $this->mailer->send($email);
         }
     }
 
     /**
-     * @param ShiftDeletedEvent $event
      * @throws \Exception
      */
     public function onShiftDeleted(ShiftDeletedEvent $event)
     {
-        $this->logger->info("Emailing Listener: onShiftDeleted");
+        $this->logger->info('Emailing Listener: onShiftDeleted');
 
         $shift = $event->getShift();
         $beneficiary = $event->getBeneficiary();
@@ -451,31 +450,31 @@ class EmailingEventListener
                 ->html(
                     $this->renderView(
                         'emails/shift_deleted.html.twig',
-                        array(
+                        [
                             'shift' => $shift,
-                            'beneficiary' => $beneficiary
-                        )
+                            'beneficiary' => $beneficiary,
+                        ]
                     )
-                );
+                )
+            ;
 
             $this->mailer->send($email);
         }
     }
 
     /**
-     * @param ShiftAlertsEvent $event
      * @throws \Exception
      */
     public function onShiftAlerts(ShiftAlertsEvent $event)
     {
-        $this->logger->info("Emailing Listener: onShiftAlerts");
+        $this->logger->info('Emailing Listener: onShiftAlerts');
 
         $alerts = $event->getAlerts();
         $date = $event->getDate();
         $recipients = $event->getRecipients();
-        
+
         if ($alerts && $recipients) {
-            $emailObject = '[ALERTE CRENEAUX] ' . strftime("%A %e %B", $date->getTimestamp());
+            $emailObject = '[ALERTE CRENEAUX] ' . strftime('%A %e %B', $date->getTimestamp());
             $emailTo = $recipients;
 
             $dynamicContent = $this->em->getRepository('App:DynamicContent')->findOneByCode($event->getTemplate());
@@ -493,21 +492,21 @@ class EmailingEventListener
                 ->html(
                     $this->container->get('twig')->render(
                         $template,
-                        array('alerts' => $alerts, 'date' => $date)
+                        ['alerts' => $alerts, 'date' => $date]
                     )
-                );
+                )
+            ;
 
             $this->mailer->send($email);
         }
     }
 
     /**
-     * @param MemberCycleStartEvent $event
      * @throws \Exception
      */
     public function onMemberCycleStart(MemberCycleStartEvent $event)
     {
-        $this->logger->info("Emailing Listener: onMemberCycleStart");
+        $this->logger->info('Emailing Listener: onMemberCycleStart');
 
         $membership = $event->getMembership();
         $date = $event->getDate();
@@ -517,7 +516,7 @@ class EmailingEventListener
         // $emailTo: see for loop
 
         $router = $this->container->get('router');
-        $home_url = $router->generate('homepage', array(), UrlGeneratorInterface::ABSOLUTE_URL);
+        $home_url = $router->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
         // Compute cycleShiftsDuration
         $cycleShiftsDuration = 0;
@@ -534,12 +533,13 @@ class EmailingEventListener
                     ->html(
                         $this->container->get('twig')->render(
                             'emails/cycle_start.html.twig',
-                            array(
+                            [
                                 'beneficiary' => $beneficiary,
-                                'home_url' => $home_url
-                            )
+                                'home_url' => $home_url,
+                            ]
                         )
-                    );
+                    )
+                ;
 
                 $this->mailer->send($email);
             }
@@ -547,12 +547,11 @@ class EmailingEventListener
     }
 
     /**
-     * @param MemberCycleHalfEvent $event
      * @throws \Exception
      */
     public function onMemberCycleHalf(MemberCycleHalfEvent $event)
     {
-        $this->logger->info("Emailing Listener: onMemberCycleHalf");
+        $this->logger->info('Emailing Listener: onMemberCycleHalf');
 
         $membership = $event->getMembership();
         $date = $event->getDate();
@@ -562,14 +561,14 @@ class EmailingEventListener
         $emailTo = $membership->getMainBeneficiary()->getEmail();
 
         $router = $this->container->get('router');
-        $home_url = $router->generate('homepage', array(), UrlGeneratorInterface::ABSOLUTE_URL);
+        $home_url = $router->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
         // Compute cycleShiftsDuration
         $cycleShiftsDuration = 0;
         foreach ($currentCycleShifts as $shift) {
             $cycleShiftsDuration += $shift->getDuration();
         }
-        if ($membership->getFirstShiftDate() < $date && $cycleShiftsDuration < $this->due_duration_by_cycle) { //only if member still have to book
+        if ($membership->getFirstShiftDate() < $date && $cycleShiftsDuration < $this->due_duration_by_cycle) { // only if member still have to book
             $email = (new Email())
                 ->subject($emailObject)
                 ->from(new Address($this->shift_email['address'], $this->shift_email['from_name']))
@@ -577,24 +576,24 @@ class EmailingEventListener
                 ->html(
                     $this->renderView(
                         'emails/cycle_half.html.twig',
-                        array(
+                        [
                             'membership' => $membership,
-                            'home_url' => $home_url
-                        )
+                            'home_url' => $home_url,
+                        ]
                     )
-                );
+                )
+            ;
 
             $this->mailer->send($email);
         }
     }
 
     /**
-     * @param EventProxyCreatedEvent $event
      * @throws \Exception
      */
     public function onEventProxyCreated(EventProxyCreatedEvent $event)
     {
-        $this->logger->info("Emailing Listener: onEventProxyCreated");
+        $this->logger->info('Emailing Listener: onEventProxyCreated');
 
         $proxy = $event->getProxy();
 
@@ -614,13 +613,14 @@ class EmailingEventListener
             ->html(
                 $this->renderView(
                     'emails/proxy_owner.html.twig',
-                    array(
+                    [
                         'proxy' => $proxy,
                         'ownerBeneficiary' => $ownerBeneficiary,
-                        'giverMainBeneficiary' => $giverMainBeneficiary
-                    )
+                        'giverMainBeneficiary' => $giverMainBeneficiary,
+                    ]
                 )
-            );
+            )
+        ;
 
         $this->mailer->send($email);
 
@@ -637,24 +637,24 @@ class EmailingEventListener
             ->html(
                 $this->renderView(
                     'emails/proxy_giver.html.twig',
-                    array(
+                    [
                         'proxy' => $proxy,
                         'ownerBeneficiary' => $ownerBeneficiary,
-                        'giverMainBeneficiary' => $giverMainBeneficiary
-                    )
+                        'giverMainBeneficiary' => $giverMainBeneficiary,
+                    ]
                 )
-            );
+            )
+        ;
 
         $this->mailer->send($email);
     }
 
     /**
-     * @param CodeNewEvent $event
      * @throws \Exception
      */
     public function onCodeNew(CodeNewEvent $event)
     {
-        $this->logger->info("Emailing Listener: onCodeNew");
+        $this->logger->info('Emailing Listener: onCodeNew');
 
         $code = $event->getCode();
         $old_codes = $event->getOldCodes();
@@ -663,7 +663,7 @@ class EmailingEventListener
         $emailTo = $code->getRegistrar()->getEmail();
 
         $router = $this->container->get('router');
-        $code_change_done_url = $router->generate('code_change_done', array('token' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($code->getRegistrar()->getUsername() . ',code:' . $code->getId())), UrlGeneratorInterface::ABSOLUTE_URL);
+        $code_change_done_url = $router->generate('code_change_done', ['token' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($code->getRegistrar()->getUsername() . ',code:' . $code->getId())], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $email = (new Email())
             ->subject($emailObject)
@@ -672,14 +672,15 @@ class EmailingEventListener
             ->html(
                 $this->renderView(
                     'emails/code_new.html.twig',
-                    array(
+                    [
                         'code' => $code,
                         'codes' => $old_codes,
                         'changeCodeUrl' => $code_change_done_url,
-                        'wiki_keys_url' => $this->wiki_keys_url
-                    )
+                        'wiki_keys_url' => $this->wiki_keys_url,
+                    ]
                 )
-            );
+            )
+        ;
 
         $this->mailer->send($email);
     }
@@ -687,13 +688,14 @@ class EmailingEventListener
     /**
      * Returns a rendered view.
      *
-     * @param string $view The view name
-     * @param array $parameters An array of parameters to pass to the view
+     * @param string $view       The view name
+     * @param array  $parameters An array of parameters to pass to the view
      *
      * @return string The rendered view
+     *
      * @throws \Exception
      */
-    protected function renderView($view, array $parameters = array())
+    protected function renderView($view, array $parameters = [])
     {
         if ($this->container->has('templating')) {
             return $this->container->get('templating')->render($view, $parameters);

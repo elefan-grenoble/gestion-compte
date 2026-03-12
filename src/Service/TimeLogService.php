@@ -27,13 +27,13 @@ class TimeLogService
     }
 
     /**
-     * Initialize a log with the member data
-     * 
-     * @param Membership $member
-     * @param \DateTime $date
+     * Initialize a log with the member data.
+     *
+     * @param null|mixed $description
+     *
      * @return TimeLog
      */
-    public function initTimeLog(Membership $member, \DateTime $date = null, $description = null)
+    public function initTimeLog(Membership $member, ?\DateTime $date = null, $description = null)
     {
         $current_user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
         $request = $this->requestStack->getCurrentRequest();
@@ -57,13 +57,13 @@ class TimeLogService
     }
 
     /**
-     * Initialize a "shift validation" log with the shift data
-     * 
-     * @param Shift $shift
-     * @param \DateTime $date
+     * Initialize a "shift validation" log with the shift data.
+     *
+     * @param null|mixed $description
+     *
      * @return TimeLog
      */
-    public function initShiftValidatedTimeLog(Shift $shift, \DateTime $date = null, $description = null)
+    public function initShiftValidatedTimeLog(Shift $shift, ?\DateTime $date = null, $description = null)
     {
         $member = $shift->getShifter()->getMembership();
 
@@ -76,13 +76,13 @@ class TimeLogService
     }
 
     /**
-     * Initialize an "shift invalidation" log with the shift data
-     * 
-     * @param Shift $shift
-     * @param \DateTime $date
+     * Initialize an "shift invalidation" log with the shift data.
+     *
+     * @param null|mixed $description
+     *
      * @return TimeLog
      */
-    public function initShiftInvalidatedTimeLog(Shift $shift, Membership $member, \DateTime $date = null, $description = null)
+    public function initShiftInvalidatedTimeLog(Shift $shift, Membership $member, ?\DateTime $date = null, $description = null)
     {
         $log = $this->initTimeLog($member, $date, $description);
         $log->setType(TimeLog::TYPE_SHIFT_INVALIDATED);
@@ -93,13 +93,14 @@ class TimeLogService
     }
 
     /**
-     * Initialize an "shift freed saving" log with the shift data
-     * 
+     * Initialize an "shift freed saving" log with the shift data.
+     *
      * @param Shift $shift
-     * @param \DateTime $date
+     * @param mixed $time
+     *
      * @return TimeLog
      */
-    public function initShiftFreedSavingTimeLog(Membership $member, $time, \DateTime $date = null, $shift)
+    public function initShiftFreedSavingTimeLog(Membership $member, $time, ?\DateTime $date = null, $shift)
     {
         $log = $this->initTimeLog($member, $date);
         $log->setType(TimeLog::TYPE_SHIFT_FREED_SAVING);
@@ -110,13 +111,11 @@ class TimeLogService
     }
 
     /**
-     * Initialize a "cycle beginning" log with the member data
-     * 
-     * @param Membership $member
-     * @param \DateTime $date
+     * Initialize a "cycle beginning" log with the member data.
+     *
      * @return TimeLog
      */
-    public function initCycleBeginningTimeLog(Membership $member, \DateTime $date = null)
+    public function initCycleBeginningTimeLog(Membership $member, ?\DateTime $date = null)
     {
         $log = $this->initTimeLog($member, $date);
         $log->setType(TimeLog::TYPE_CYCLE_END);
@@ -126,27 +125,26 @@ class TimeLogService
     }
 
     /**
-     * Initialize a "current cycle beginning" log with the member data
-     * 
-     * @param Membership $member
+     * Initialize a "current cycle beginning" log with the member data.
+     *
      * @return TimeLog
      */
     public function initCurrentCycleBeginningTimeLog(Membership $member)
     {
         $date = $this->membershipService->getStartOfCycle($member, 0);
-        $log = $this->initCycleBeginningTimeLog($member, $date);
 
-        return $log;
+        return $this->initCycleBeginningTimeLog($member, $date);
     }
 
     /**
-     * Initialize a "cycle end saving" log
-     * 
-     * @param Shift $shift
-     * @param \DateTime $date
+     * Initialize a "cycle end saving" log.
+     *
+     * @param mixed      $time
+     * @param null|mixed $description
+     *
      * @return TimeLog
      */
-    public function initCycleEndSavingTimeLog(Membership $member, $time, \DateTime $date = null, $description = null)
+    public function initCycleEndSavingTimeLog(Membership $member, $time, ?\DateTime $date = null, $description = null)
     {
         $log = $this->initTimeLog($member, $date, $description);
         $log->setType(TimeLog::TYPE_CYCLE_END_SAVING);
@@ -156,13 +154,13 @@ class TimeLogService
     }
 
     /**
-     * Initialize a "regulation optional shifts" log with the member data
-     * 
-     * @param Membership $member
+     * Initialize a "regulation optional shifts" log with the member data.
+     *
      * @param int $time
+     *
      * @return TimeLog
      */
-    public function initRegulateOptionalShiftsTimeLog(Membership $member, $time, \DateTime $date = null)
+    public function initRegulateOptionalShiftsTimeLog(Membership $member, $time, ?\DateTime $date = null)
     {
         $log = $this->initTimeLog($member, $date);
         $log->setType(TimeLog::TYPE_REGULATE_OPTIONAL_SHIFTS);
@@ -172,13 +170,14 @@ class TimeLogService
     }
 
     /**
-     * Initialize a "saving" log with the member data
-     * 
-     * @param Membership $member
-     * @param int $time
+     * Initialize a "saving" log with the member data.
+     *
+     * @param int        $time
+     * @param null|mixed $shift
+     *
      * @return TimeLog
      */
-    public function initSavingTimeLog(Membership $member, $time, \DateTime $date = null, $shift = null)
+    public function initSavingTimeLog(Membership $member, $time, ?\DateTime $date = null, $shift = null)
     {
         $log = $this->initTimeLog($member, $date);
         $log->setType(TimeLog::TYPE_SAVING);
@@ -191,12 +190,14 @@ class TimeLogService
     }
 
     /**
-     * Initialize a "custom" log with the member data
-     * 
-     * @param Membership $member
+     * Initialize a "custom" log with the member data.
+     *
+     * @param null|mixed $time
+     * @param null|mixed $description
+     *
      * @return TimeLog
      */
-    public function initCustomTimeLog(Membership $member, $time = null, \DateTime $date = null, $description = null)
+    public function initCustomTimeLog(Membership $member, $time = null, ?\DateTime $date = null, $description = null)
     {
         $log = $this->initTimeLog($member, $date, $description);
         $log->setType(TimeLog::TYPE_CUSTOM);

@@ -6,10 +6,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 
 /**
- * SwipeCard
+ * SwipeCard.
  *
  * @ORM\Table(name="swipe_card")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\SwipeCardRepository")
  */
 class SwipeCard
@@ -18,7 +20,9 @@ class SwipeCard
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -53,6 +57,7 @@ class SwipeCard
 
     /**
      * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="swipe_cards")
+     *
      * @ORM\JoinColumn(name="beneficiary_id", referencedColumnName="id")
      */
     private $beneficiary;
@@ -81,7 +86,7 @@ class SwipeCard
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -91,7 +96,7 @@ class SwipeCard
     }
 
     /**
-     * Set number
+     * Set number.
      *
      * @param int $number
      *
@@ -105,7 +110,7 @@ class SwipeCard
     }
 
     /**
-     * Get number
+     * Get number.
      *
      * @return int
      */
@@ -115,7 +120,7 @@ class SwipeCard
     }
 
     /**
-     * Set code
+     * Set code.
      *
      * @param string $code
      *
@@ -129,7 +134,7 @@ class SwipeCard
     }
 
     /**
-     * Get code
+     * Get code.
      *
      * @return string
      */
@@ -139,9 +144,9 @@ class SwipeCard
     }
 
     /**
-     * Set enable
+     * Set enable.
      *
-     * @param bool|null $enable
+     * @param null|bool $enable
      *
      * @return SwipeCard
      */
@@ -149,9 +154,9 @@ class SwipeCard
     {
         $this->enable = $enable;
 
-        if (!$enable){
+        if (!$enable) {
             $this->setDisabledAt(new \DateTime('now'));
-        }else{
+        } else {
             $this->setDisabledAt(null);
         }
 
@@ -159,25 +164,25 @@ class SwipeCard
     }
 
     /**
-     * Get enable
+     * Get enable.
      *
-     * @return bool|null
+     * @return null|bool
      */
     public function getEnable()
     {
-        if ($this->getDisabledAt()) //forever
+        if ($this->getDisabledAt()) { // forever
             return false;
+        }
+
         return $this->enable;
     }
 
     /**
-     * Set beneficiary
-     *
-     * @param \App\Entity\Beneficiary|null $beneficiary
+     * Set beneficiary.
      *
      * @return SwipeCard
      */
-    public function setBeneficiary(\App\Entity\Beneficiary $beneficiary = null)
+    public function setBeneficiary(?Beneficiary $beneficiary = null)
     {
         $this->beneficiary = $beneficiary;
 
@@ -185,18 +190,17 @@ class SwipeCard
     }
 
     /**
-     * Get beneficiary
+     * Get beneficiary.
      *
-     * @return \App\Entity\Beneficiary|null
+     * @return null|Beneficiary
      */
     public function getBeneficiary()
     {
         return $this->beneficiary;
     }
 
-
     /**
-     * Set createdAt
+     * Set createdAt.
      *
      * @param \DateTime $date
      *
@@ -210,7 +214,7 @@ class SwipeCard
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */
@@ -220,7 +224,7 @@ class SwipeCard
     }
 
     /**
-     * Set disabledAt
+     * Set disabledAt.
      *
      * @param \DateTime? $disabledAt
      *
@@ -234,7 +238,7 @@ class SwipeCard
     }
 
     /**
-     * Get disabledAt
+     * Get disabledAt.
      *
      * @return \DateTime
      */
@@ -246,15 +250,16 @@ class SwipeCard
     public function getBarcode()
     {
         $generator = new BarcodeGeneratorPNG();
+
         return $generator->getBarcode($this->getCode(), $generator::TYPE_EAN_13, 2, 25);
     }
 
-    //FROM : \CodeItNow\BarcodeBundle\Generator\CINean13::calculateChecksum
-    public static function checkEAN13($code,$checksum = null)
+    // FROM : \CodeItNow\BarcodeBundle\Generator\CINean13::calculateChecksum
+    public static function checkEAN13($code, $checksum = null)
     {
         $c = strlen($code);
         if ($c === 13) {
-            if (!$checksum){
+            if (!$checksum) {
                 $checksum = substr($code, -1, 1);
             }
             $code = substr($code, 0, 12);
@@ -263,9 +268,9 @@ class SwipeCard
         }
         $odd = true;
         $checksumValue = 0;
-        $keys = array('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
+        $keys = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9'];
         $c = strlen($code);
-        for ($i = $c; $i > 0; $i--) {
+        for ($i = $c; $i > 0; --$i) {
             if ($odd === true) {
                 $multiplier = 3;
                 $odd = false;

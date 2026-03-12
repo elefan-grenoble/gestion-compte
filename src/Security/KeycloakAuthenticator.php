@@ -13,15 +13,11 @@ use App\Entity\Proxy;
 use App\Entity\Registration;
 use App\Entity\User;
 use App\Event\BeneficiaryCreatedEvent;
-use App\EventListener\SetFirstPasswordListener;
 use Doctrine\ORM\EntityManagerInterface;
 use KnpU\OAuth2ClientBundle\Client\ClientRegistry;
 use KnpU\OAuth2ClientBundle\Client\OAuth2Client;
-use KnpU\OAuth2ClientBundle\Client\Provider\KeycloakClient;
 use KnpU\OAuth2ClientBundle\Security\Authenticator\SocialAuthenticator;
-use PHPUnit\Util\Type;
 use Stevenmaguire\OAuth2\Client\Provider\KeycloakResourceOwner;
-use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -30,30 +26,33 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\RouterInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Exception\AuthenticationException;
-use Exception;
+use Symfony\Component\Security\Core\User\UserProviderInterface;
 
 /**
- * Class KeycloakAuthenticator
+ * Class KeycloakAuthenticator.
  */
 class KeycloakAuthenticator extends SocialAuthenticator
 {
-
     /**
      * @var ClientRegistry
      */
     private $clientRegistry;
+
     /**
      * @var EntityManagerInterface
      */
     private $em;
+
     /**
      * @var RouterInterface
      */
     private $router;
+
     /**
      * @var EventDispatcherInterface
      */
     private $eventDispatcher;
+
     /**
      * @var ContainerInterface
      */
@@ -65,8 +64,7 @@ class KeycloakAuthenticator extends SocialAuthenticator
         RouterInterface $router,
         EventDispatcherInterface $eventDispatcher,
         ContainerInterface $container
-    )
-    {
+    ) {
         $this->clientRegistry = $clientRegistry;
         $this->em = $entityManager;
         $this->router = $router;
@@ -74,7 +72,7 @@ class KeycloakAuthenticator extends SocialAuthenticator
         $this->container = $container;
     }
 
-    public function start(Request $request, AuthenticationException $authException = null)
+    public function start(Request $request, ?AuthenticationException $authException = null)
     {
         return new RedirectResponse(
             '/oauth/login', // might be the site, where users choose their oauth provider
@@ -92,85 +90,88 @@ class KeycloakAuthenticator extends SocialAuthenticator
         return $this->fetchAccessToken($this->getKeycloakClient());
     }
 
-    public function getUser($credentials, \Symfony\Component\Security\Core\User\UserProviderInterface $userProvider)
+    public function getUser($credentials, UserProviderInterface $userProvider)
     {
         $keycloakUser = $this->getKeycloakClient()->fetchUserFromToken($credentials);
+
         /** @var Beneficiary $existingBeneficiary */
         $existingBeneficiary = $this
             ->em
             ->getRepository(Beneficiary::class)
-            ->findOneBy(['openid' => $keycloakUser->getId()]);
+            ->findOneBy(['openid' => $keycloakUser->getId()])
+        ;
         if ($existingBeneficiary) {
-            $this->updateBeneficiary($keycloakUser,$existingBeneficiary);
+            $this->updateBeneficiary($keycloakUser, $existingBeneficiary);
             $membership = $existingBeneficiary->getMembership();
             $membership->setMemberNumber($existingBeneficiary->getOpenIdMemberNumber());
 
             // co_member
-            $this->updateCoMembership($keycloakUser,$existingBeneficiary);
+            $this->updateCoMembership($keycloakUser, $existingBeneficiary);
 
             $this->em->flush();
+
             return $existingBeneficiary->getUser();
         }
         // if user exist but never connected with keycloak
         $email = $keycloakUser->getEmail();
-        if (!$email) { //may be an admin ?
+        if (!$email) { // may be an admin ?
             return null;
         }
+
         /** @var User $userInDatabase */
         $userInDatabase = $this->em->getRepository(User::class)
-            ->findOneBy(['email' => $email]);
-        if($userInDatabase) {
+            ->findOneBy(['email' => $email])
+        ;
+        if ($userInDatabase) {
             $userInDatabase->getBeneficiary()->setOpenId($keycloakUser->getId());
-            $this->updateBeneficiary($keycloakUser,$userInDatabase->getBeneficiary());
+            $this->updateBeneficiary($keycloakUser, $userInDatabase->getBeneficiary());
 
             $userInDatabase->getBeneficiary()->setOpenId($keycloakUser->getId());
             $userInDatabase->getBeneficiary()->getUser()->setEnabled(true);
 
             // co_member
-            $this->updateCoMembership($keycloakUser,$userInDatabase->getBeneficiary());
+            $this->updateCoMembership($keycloakUser, $userInDatabase->getBeneficiary());
 
             $this->em->flush();
+
             return $userInDatabase;
         }
-        //user not exist in database
+        // user not exist in database
         $beneficiary = new Beneficiary();
 
-        //populate new beneficiary
-        $this->updateBeneficiary($keycloakUser,$beneficiary);
+        // populate new beneficiary
+        $this->updateBeneficiary($keycloakUser, $beneficiary);
 
         // does he have a co_member ?
-        $is_co_member = $this->updateCoMembership($keycloakUser,$beneficiary);
-        if (!$is_co_member){
-            $this->createMembership($beneficiary,$this->getKeycloakUserAttribute($keycloakUser,'member_number',1));
+        $is_co_member = $this->updateCoMembership($keycloakUser, $beneficiary);
+        if (!$is_co_member) {
+            $this->createMembership($beneficiary, $this->getKeycloakUserAttribute($keycloakUser, 'member_number', 1));
         }
 
         $beneficiary->setOpenId($keycloakUser->getId());
         $beneficiary->getUser()->setEnabled(true);
 
         $this->em->flush();
+
         return $beneficiary->getUser();
     }
 
-    /**
-     * @param KeycloakResourceOwner $keycloakUser
-     * @param Beneficiary $beneficiary
-     * @return bool
-     */
-    private function updateCoMembership(KeycloakResourceOwner $keycloakUser, Beneficiary $beneficiary) : bool
+    private function updateCoMembership(KeycloakResourceOwner $keycloakUser, Beneficiary $beneficiary): bool
     {
         $is_co_member = false;
-        $co_member = $this->getKeycloakUserAttribute($keycloakUser,'co_member_number'); //co_member_number
-        if ($co_member){
+        $co_member = $this->getKeycloakUserAttribute($keycloakUser, 'co_member_number'); // co_member_number
+        if ($co_member) {
             /** @var Beneficiary $existingCoBeneficiary */
             $existingCoBeneficiary = $this
                 ->em
                 ->getRepository(Beneficiary::class)
-                ->findOneBy(['openid_member_number' => $co_member]);
+                ->findOneBy(['openid_member_number' => $co_member])
+            ;
             if ($existingCoBeneficiary) {
                 $is_co_member = true;
                 $membership = $existingCoBeneficiary->getMembership();
                 $oldMembership = $beneficiary->getMembership();
-                if ($oldMembership===$membership){
+                if ($oldMembership === $membership) {
                     return $is_co_member;
                 }
                 $membership->addBeneficiary($beneficiary);
@@ -178,27 +179,29 @@ class KeycloakAuthenticator extends SocialAuthenticator
                 $this->em->persist($membership);
                 $this->em->persist($beneficiary);
                 $this->em->flush();
-                if ($oldMembership){
+                if ($oldMembership) {
                     $oldMembership->removeBeneficiary($beneficiary);
                     $oldMembership->setMainBeneficiary(null);
-                    $oldMembership->setMemberNumber(10000+$oldMembership->getMemberNumber());
+                    $oldMembership->setMemberNumber(10000 + $oldMembership->getMemberNumber());
 
                     /** @var Proxy $givenProxy */
-                    foreach ($oldMembership->getGivenProxies() as $givenProxy){
+                    foreach ($oldMembership->getGivenProxies() as $givenProxy) {
                         $oldMembership->removeGivenProxy($givenProxy);
                         $givenProxy->setGiver($membership);
                         $membership->addGivenProxy($givenProxy);
                         $this->em->persist($givenProxy);
                     }
+
                     /** @var Note $note */
-                    foreach ($oldMembership->getNotes() as $note){
+                    foreach ($oldMembership->getNotes() as $note) {
                         $oldMembership->removeNote($note);
                         $note->setSubject($membership);
                         $membership->addNote($note);
                         $this->em->persist($note);
                     }
+
                     /** @var MembershipShiftExemption $membershipShiftExemption */
-                    foreach ($oldMembership->getMembershipShiftExemptions() as $membershipShiftExemption){
+                    foreach ($oldMembership->getMembershipShiftExemptions() as $membershipShiftExemption) {
                         $membershipShiftExemption->setMembership($membership);
                         $this->em->persist($membershipShiftExemption);
                     }
@@ -209,19 +212,19 @@ class KeycloakAuthenticator extends SocialAuthenticator
                     $this->em->flush();
                 }
             }
-        }else if($beneficiary->getMembership()){ //no co user
+        } elseif ($beneficiary->getMembership()) { // no co user
             $membership = $beneficiary->getMembership();
+
             /** @var Beneficiary $b */
-            foreach ($membership->getBeneficiaries() as $b){
-                //if membership is shared
-                if ($b !== $beneficiary && $beneficiary->getMembership()->getMainBeneficiary() !== $b){ //should create a new membership for this beneficiary
+            foreach ($membership->getBeneficiaries() as $b) {
+                // if membership is shared
+                if ($b !== $beneficiary && $beneficiary->getMembership()->getMainBeneficiary() !== $b) { // should create a new membership for this beneficiary
                     $membership->removeBeneficiary($b);
                     $membership->setMemberNumber($beneficiary->getOpenIdMemberNumber());
                     $this->em->persist($membership);
                     $this->em->flush();
                     $this->createMembership($b);
-                }elseif ($b !== $beneficiary && $beneficiary->getMembership()->getMainBeneficiary() === $b) //should create a new membership for me (beneficiary)
-                {
+                } elseif ($b !== $beneficiary && $beneficiary->getMembership()->getMainBeneficiary() === $b) { // should create a new membership for me (beneficiary)
                     $membership->setMemberNumber($b->getOpenIdMemberNumber());
                     $membership->removeBeneficiary($beneficiary);
                     $this->em->persist($membership);
@@ -235,16 +238,15 @@ class KeycloakAuthenticator extends SocialAuthenticator
     }
 
     /**
-     * @param Beneficiary $beneficiary
-     * @return void
+     * @param null|mixed $member_number
      */
-    private function createMembership(Beneficiary $beneficiary,$member_number = null): void
+    private function createMembership(Beneficiary $beneficiary, $member_number = null): void
     {
-        if (!$member_number){
+        if (!$member_number) {
             $member_number = $beneficiary->getOpenIdMemberNumber();
         }
-        if (!$member_number){
-            $member_number = rand(10000,100000);
+        if (!$member_number) {
+            $member_number = rand(10000, 100000);
         }
         $membership = new Membership();
         $membership->setMemberNumber($member_number);
@@ -264,38 +266,35 @@ class KeycloakAuthenticator extends SocialAuthenticator
     }
 
     /**
-     * @param KeycloakResourceOwner $keycloakUser
-     * @param Beneficiary $beneficiary
-     * @return Void
-     * @throws Exception
+     * @throws \Exception
      */
-    private function updateBeneficiary(KeycloakResourceOwner $keycloakUser, Beneficiary $beneficiary) : Void
+    private function updateBeneficiary(KeycloakResourceOwner $keycloakUser, Beneficiary $beneficiary): void
     {
 
-        $mandatory = ['firstname','lastname','member_number'];
+        $mandatory = ['firstname', 'lastname', 'member_number'];
         $default = ['flying' => false];
         foreach ([
-             'firstname'=>'setFirstname',
-             'lastname'=>'setLastname',
-             'phone'=>'setPhone',
-             'member_number'=>'setOpenIdMemberNumber',
-             'flying'=>'setFlying'] as $key => $action){
-            $value = $this->getKeycloakUserAttribute($keycloakUser,$key);
-            if (!$value && in_array($key,$mandatory)) {
-                throw new Exception('no '.$key.' found, is `'.$this->getKeycloakUserAttributeKeyMap($key).'` a good mapping key ? '.
-                    'available keys are : '.implode(', ',$this->getKeycloakUserAvailableKeys($keycloakUser)));
-            }elseif (!$value && isset($default[$key]))
-            {
+            'firstname' => 'setFirstname',
+            'lastname' => 'setLastname',
+            'phone' => 'setPhone',
+            'member_number' => 'setOpenIdMemberNumber',
+            'flying' => 'setFlying'] as $key => $action) {
+            $value = $this->getKeycloakUserAttribute($keycloakUser, $key);
+            if (!$value && in_array($key, $mandatory)) {
+                throw new \Exception('no ' . $key . ' found, is `' . $this->getKeycloakUserAttributeKeyMap($key) . '` a good mapping key ? '
+                    . 'available keys are : ' . implode(', ', $this->getKeycloakUserAvailableKeys($keycloakUser)));
+            }
+            if (!$value && isset($default[$key])) {
                 $value = $default[$key];
             }
-            $beneficiary->$action($value);
+            $beneficiary->{$action}($value);
         }
 
-        $s1 = $this->getKeycloakUserAttribute($keycloakUser,'address_street1');
-        $s2 = $this->getKeycloakUserAttribute($keycloakUser,'address_street2');
-        $city = $this->getKeycloakUserAttribute($keycloakUser,'address_city');
-        $zip = $this->getKeycloakUserAttribute($keycloakUser,'address_zipcode');
-        if ($s1&&$city&&$zip) {
+        $s1 = $this->getKeycloakUserAttribute($keycloakUser, 'address_street1');
+        $s2 = $this->getKeycloakUserAttribute($keycloakUser, 'address_street2');
+        $city = $this->getKeycloakUserAttribute($keycloakUser, 'address_city');
+        $zip = $this->getKeycloakUserAttribute($keycloakUser, 'address_zipcode');
+        if ($s1 && $city && $zip) {
             $address = $beneficiary->getAddress();
             if (!$address) {
                 $address = new Address();
@@ -310,23 +309,24 @@ class KeycloakAuthenticator extends SocialAuthenticator
             $beneficiary->setAddress($address);
         } else { // address must be fully fill or may not exist
             $address = $beneficiary->getAddress();
-            if ($address){
+            if ($address) {
                 $beneficiary->setAddress(null);
                 $this->em->remove($address);
                 $this->em->flush();
             }
         }
-        if ($beneficiary->isFlying()){
+        if ($beneficiary->isFlying()) {
             $beneficiary->getMembership()->setFlying(true);
         }
-        if (!$beneficiary->getId())
+        if (!$beneficiary->getId()) {
             $this->eventDispatcher->dispatch(new BeneficiaryCreatedEvent($beneficiary), BeneficiaryCreatedEvent::NAME);
+        }
 
-        //email once user exist
-        $value = $this->getKeycloakUserAttribute($keycloakUser,'email');
+        // email once user exist
+        $value = $this->getKeycloakUserAttribute($keycloakUser, 'email');
         if (!$value) {
-            throw new Exception('no email found, is `'.$this->getKeycloakUserAttributeKeyMap('email').'` a good mapping key ? '.
-                'available keys are : '.implode(', ',$this->getKeycloakUserAvailableKeys($keycloakUser)));
+            throw new \Exception('no email found, is `' . $this->getKeycloakUserAttributeKeyMap('email') . '` a good mapping key ? '
+                . 'available keys are : ' . implode(', ', $this->getKeycloakUserAvailableKeys($keycloakUser)));
         }
         $beneficiary->setEmail($value);
 
@@ -335,10 +335,10 @@ class KeycloakAuthenticator extends SocialAuthenticator
         $roles = (isset($keycloakUser->toArray()[$roles_claim])) ? $keycloakUser->toArray()[$roles_claim] : [];
         $roles_map = $this->container->getParameter('oidc_roles_map');
         $beneficiary->getUser()->setRoles([]); // RAZ
-        foreach ($roles as $role_name){
-            foreach ($roles_map as $role => $key){
-                if ($key === $role_name){
-                    $beneficiary->getUser()->addRole("ROLE_".$role);
+        foreach ($roles as $role_name) {
+            foreach ($roles_map as $role => $key) {
+                if ($key === $role_name) {
+                    $beneficiary->getUser()->addRole('ROLE_' . $role);
                 }
             }
         }
@@ -347,17 +347,18 @@ class KeycloakAuthenticator extends SocialAuthenticator
         $formations_claim = $this->container->getParameter('oidc_formations_claim');
         $formations_from_keycloak = (isset($keycloakUser->toArray()[$formations_claim])) ? $keycloakUser->toArray()[$formations_claim] : [];
         $formations_map = json_decode($this->container->getParameter('oidc_formations_map'));
-        foreach ($beneficiary->getFormations() as $formation){
+        foreach ($beneficiary->getFormations() as $formation) {
             $beneficiary->removeFormation($formation);
         }
-        foreach ($formations_from_keycloak as $formation){
-            foreach ($formations_map as $formation_name => $oidc_formation_name){
-                if ($oidc_formation_name === $formation){
+        foreach ($formations_from_keycloak as $formation) {
+            foreach ($formations_map as $formation_name => $oidc_formation_name) {
+                if ($oidc_formation_name === $formation) {
                     $forma = $this
                         ->em
                         ->getRepository(Formation::class)
-                        ->findOneBy(['name' => $formation_name]);
-                    if ($forma){
+                        ->findOneBy(['name' => $formation_name])
+                    ;
+                    if ($forma) {
                         $beneficiary->addFormation($forma);
                     }
                 }
@@ -369,17 +370,18 @@ class KeycloakAuthenticator extends SocialAuthenticator
         $commissions_claim = $this->container->getParameter('oidc_commissions_claim');
         $commissions_from_keycloak = (isset($keycloakUser->toArray()[$commissions_claim])) ? $keycloakUser->toArray()[$commissions_claim] : [];
         $commissions_map = json_decode($this->container->getParameter('oidc_commissions_map'));
-        foreach ($beneficiary->getCommissions() as $commission){
+        foreach ($beneficiary->getCommissions() as $commission) {
             $beneficiary->removeCommission($commission);
         }
-        foreach ($commissions_from_keycloak as $commission){
-            foreach ($commissions_map as $commission_name => $oidc_commission_name){
-                if ($oidc_commission_name === $commission){
+        foreach ($commissions_from_keycloak as $commission) {
+            foreach ($commissions_map as $commission_name => $oidc_commission_name) {
+                if ($oidc_commission_name === $commission) {
                     $comm = $this
                         ->em
                         ->getRepository(Commission::class)
-                        ->findOneBy(['name' => $commission_name]);
-                    if ($comm){
+                        ->findOneBy(['name' => $commission_name])
+                    ;
+                    if ($comm) {
                         $beneficiary->addCommission($comm);
                     }
                 }
@@ -394,22 +396,25 @@ class KeycloakAuthenticator extends SocialAuthenticator
     {
         $map = $this->container->getParameter('oidc_user_attributes_map');
         $array = $keycloakUser->toArray();
-        if (isset($map[$attributeKey])){
+        if (isset($map[$attributeKey])) {
             $key = $map[$attributeKey];
-            $keys = explode('.',$key);
-            if (count($keys) === 1 && isset($array[$keys[0]]))
+            $keys = explode('.', $key);
+            if (count($keys) === 1 && isset($array[$keys[0]])) {
                 return $array[$keys[0]];
-            else if (count($keys) > 1){
+            }
+            if (count($keys) > 1) {
                 $t = $array;
                 $i = 0;
                 do {
                     $exist = isset($t[$keys[$i]]);
                     $t = ($exist) ? $t[$keys[$i]] : [];
-                }while($exist&&++$i<count($keys));
-                if ($exist)
+                } while ($exist && ++$i < count($keys));
+                if ($exist) {
                     return $t;
+                }
             }
         }
+
         return $defaultValue;
 
     }
@@ -417,11 +422,13 @@ class KeycloakAuthenticator extends SocialAuthenticator
     private function getKeycloakUserAttributeKeyMap($attributeKey)
     {
         $map = $this->container->getParameter('oidc_user_attributes_map');
+
         return $map[$attributeKey];
     }
 
-    private function getKeycloakUserAvailableKeys($keycloakUser) {
-        return array_keys($keycloakUser->toArray()) ;
+    private function getKeycloakUserAvailableKeys($keycloakUser)
+    {
+        return array_keys($keycloakUser->toArray());
     }
 
     public function onAuthenticationFailure(Request $request, AuthenticationException $exception)
@@ -438,10 +445,7 @@ class KeycloakAuthenticator extends SocialAuthenticator
         return new RedirectResponse($targetUrl);
     }
 
-    /**
-     * @return \KnpU\OAuth2ClientBundle\Client\OAuth2Client
-     */
-    private function getKeycloakClient() : OAuth2Client
+    private function getKeycloakClient(): OAuth2Client
     {
         return $this->clientRegistry->getClient('keycloak');
     }

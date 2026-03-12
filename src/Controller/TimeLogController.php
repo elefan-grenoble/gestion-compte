@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-
 use App\Entity\Membership;
 use App\Entity\TimeLog;
 use App\Form\TimeLogType;
@@ -12,6 +11,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
  * Time Log controller.
@@ -28,11 +28,11 @@ class TimeLogController extends AbstractController
     }
 
     /**
-     * Create a new log
+     * Create a new log.
      *
      * @Route("/{id}/new", name="timelog_new", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_SHIFT_MANAGER')")
-     * @param Membership $member
      */
     public function newAction(Request $request, Membership $member, TimeLogService $time_log_service)
     {
@@ -49,31 +49,35 @@ class TimeLogController extends AbstractController
             // check if user is allowed to create timelog
             if ($member_is_current_user && $this->forbid_own_timelog_new_admin && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
                 $session->getFlashBag()->add('error', 'Vous ne pouvez pas vous rajouter de log de temps.');
-                return $this->redirectToShow($member);
-            } else {
-                $timeLog->setTime($form->get('time')->getData());
-                $timeLog->setDescription($form->get('description')->getData());
 
-                $em = $this->getDoctrine()->getManager();
-                $em->persist($timeLog);
-                $em->flush();
-
-                $session->getFlashBag()->add('success', 'Le log de temps a bien été créé !');
                 return $this->redirectToShow($member);
             }
+            $timeLog->setTime($form->get('time')->getData());
+            $timeLog->setDescription($form->get('description')->getData());
+
+            $em = $this->getDoctrine()->getManager();
+            $em->persist($timeLog);
+            $em->flush();
+
+            $session->getFlashBag()->add('success', 'Le log de temps a bien été créé !');
+
+            return $this->redirectToShow($member);
+
         }
 
         return $this->redirectToShow($member);
     }
 
     /**
-     * Delete time log
+     * Delete time log.
      *
      * @Route("/{id}/timelog_delete/{timelog_id}", name="member_timelog_delete", methods={"DELETE"})
+     *
      * @Security("is_granted('ROLE_SUPER_ADMIN')")
-     * @param Membership $member
-     * @param $timelog_id
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     *
+     * @param mixed $timelog_id
+     *
+     * @return RedirectResponse
      */
     public function timelogDeleteAction(Membership $member, $timelog_id)
     {
@@ -88,6 +92,7 @@ class TimeLogController extends AbstractController
             $session->getFlashBag()->add('error', $timeLog->getMembership() . '<>' . $member);
             $session->getFlashBag()->add('error', $timeLog->getId());
         }
+
         return $this->redirectToShow($member);
     }
 
@@ -98,9 +103,10 @@ class TimeLogController extends AbstractController
             return $this->redirectToRoute('homepage');
         }
         $session = new Session();
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_USER_MANAGER'))
-            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
-        else
-            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getUser()->getUsername())));
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_USER_MANAGER')) {
+            return $this->redirectToRoute('member_show', ['member_number' => $member->getMemberNumber()]);
+        }
+
+        return $this->redirectToRoute('member_show', ['member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getUser()->getUsername())]);
     }
 }

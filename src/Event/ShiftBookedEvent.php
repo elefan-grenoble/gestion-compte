@@ -3,11 +3,10 @@
 namespace App\Event;
 
 use App\Entity\Shift;
-use Symfony\Component\EventDispatcher\Event;
 
 class ShiftBookedEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
-    const NAME = 'shift.booked';
+    public const NAME = 'shift.booked';
 
     private $shift;
     private $fromAdmin;

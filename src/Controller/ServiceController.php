@@ -2,22 +2,17 @@
 
 namespace App\Controller;
 
-
 use App\Entity\Service;
-use App\Entity\Task;
 use App\Form\ServiceType;
 use Liip\ImagineBundle\Imagine\Cache\CacheManager;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Filesystem\Exception\IOException;
-use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\Validator\Constraints\DateTime;
 use Vich\UploaderBundle\Templating\Helper\UploaderHelper;
-
+use Symfony\Component\Form\FormInterface;
 
 /**
  * Service controller.
@@ -39,37 +34,42 @@ class ServiceController extends AbstractController
      * Lists all services.
      *
      * @Route("/", name="service_list", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function listAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
         $services = $em->getRepository('App:Service')->findAll();
-        return $this->render('admin/service/list.html.twig', array(
-            'services' => $services
-        ));
+
+        return $this->render('admin/service/list.html.twig', [
+            'services' => $services,
+        ]);
 
     }
 
     /**
-     * Lists all services (header navlist)
+     * Lists all services (header navlist).
      *
      * @Route("/navlist", name="service_navlist", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_USER')")
      */
     public function navlistAction()
     {
         $em = $this->getDoctrine()->getManager();
-        $services = $em->getRepository('App:Service')->findBy(array('public'=>1));
-        return $this->render('admin/service/navlist.html.twig', array(
-            'services' => $services
-        ));
+        $services = $em->getRepository('App:Service')->findBy(['public' => 1]);
+
+        return $this->render('admin/service/navlist.html.twig', [
+            'services' => $services,
+        ]);
     }
 
     /**
      * add new services.
      *
      * @Route("/new", name="service_new", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function newAction(Request $request)
@@ -91,18 +91,20 @@ class ServiceController extends AbstractController
             }
 
             $session->getFlashBag()->add('success', 'Le nouveau service a bien été créée !');
+
             return $this->redirectToRoute('service_list');
         }
 
-        return $this->render('admin/service/new.html.twig', array(
-            'form' => $form->createView()
-        ));
+        return $this->render('admin/service/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     /**
      * edit service.
      *
      * @Route("/{id}/edit", name="service_edit", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function editAction(Request $request, Service $service)
@@ -122,22 +124,24 @@ class ServiceController extends AbstractController
             }
 
             $session->getFlashBag()->add('success', 'Le service a bien été édité !');
+
             return $this->redirectToRoute('service_list');
         }
 
-        return $this->render('admin/service/edit.html.twig', array(
+        return $this->render('admin/service/edit.html.twig', [
             'form' => $form->createView(),
-            'delete_form' => $this->getDeleteForm($service)->createView()
-        ));
+            'delete_form' => $this->getDeleteForm($service)->createView(),
+        ]);
     }
 
     /**
      * delete service.
      *
      * @Route("/{id}", name="service_delete", methods={"DELETE"})
+     *
      * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
-    public function deleteAction(Request $request,Service $service)
+    public function deleteAction(Request $request, Service $service)
     {
         $session = new Session();
 
@@ -156,19 +160,18 @@ class ServiceController extends AbstractController
     }
 
     /**
-     * @param Service $service
-     * @return \Symfony\Component\Form\FormInterface
+     * @return FormInterface
      */
     protected function getDeleteForm(Service $service)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('service_delete', array('id' => $service->getId())))
+            ->setAction($this->generateUrl('service_delete', ['id' => $service->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 
     /**
-     * @param Service $service
      * @return string
      */
     protected function resolveLogo(Service $service)
@@ -180,7 +183,7 @@ class ServiceController extends AbstractController
 
     private function getErrorMessages(Form $form)
     {
-        $errors = array();
+        $errors = [];
 
         foreach ($form->getErrors() as $key => $error) {
             if ($form->isRoot()) {

@@ -2,7 +2,6 @@
 
 namespace App\Form;
 
-use App\Form\JobHiddenType;
 use App\Entity\Shift;
 use App\Repository\JobRepository;
 use App\Repository\FormationRepository;
@@ -18,9 +17,6 @@ use Symfony\Component\Validator\Constraints\GreaterThan;
 
 class ShiftType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         if (!$options['only_add_formation']) {
@@ -29,27 +25,31 @@ class ShiftType extends AbstractType
                 ->add('end', DateTimeType::class, ['html5' => false, 'date_widget' => 'single_text', 'time_widget' => 'single_text',
                     'constraints' => [
                         new GreaterThan([
-                            'propertyPath' => 'parent.all[start].data'
+                            'propertyPath' => 'parent.all[start].data',
                         ])]])
-                ->add('job', EntityType::class, array(
+                ->add('job', EntityType::class, [
                     'label' => 'Poste',
                     'class' => 'App:Job',
                     'choice_label' => 'name',
                     'multiple' => false,
                     'required' => true,
-                    'query_builder' => function(JobRepository $repository) {
+                    'query_builder' => function (JobRepository $repository) {
                         $qb = $repository->createQueryBuilder('j');
+
                         return $qb
                             ->where($qb->expr()->eq('j.enabled', '?1'))
                             ->setParameter('1', '1')
-                            ->orderBy('j.name', 'ASC');
-                    }
-                ));
+                            ->orderBy('j.name', 'ASC')
+                        ;
+                    },
+                ])
+            ;
         } else {
             $builder
                 ->add('start', DateTimeType::class, ['html5' => false, 'date_widget' => 'single_text', 'time_widget' => 'single_text'])
                 ->add('end', DateTimeType::class, ['html5' => false, 'date_widget' => 'single_text', 'time_widget' => 'single_text'])
-                ->add('job', JobHiddenType::class);
+                ->add('job', JobHiddenType::class)
+            ;
         }
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($options): void {
@@ -59,33 +59,32 @@ class ShiftType extends AbstractType
             // checks if the Shift object is "new"
             // If no data is passed to the form, the data is "null".
             if (!$shift || null === $shift->getId() || $options['only_add_formation']) {
-                $form->add('formation', EntityType::class, array(
+                $form->add('formation', EntityType::class, [
                     'label' => 'Formation',
                     'class' => 'App:Formation',
                     'choice_label' => 'name',
                     'multiple' => false,
                     'required' => false,
-                    'query_builder' => function(FormationRepository $repository) {
+                    'query_builder' => function (FormationRepository $repository) {
                         $qb = $repository->createQueryBuilder('f');
+
                         return $qb->orderBy('f.name', 'ASC');
-                    }
-                ))
-                ->add('number', IntegerType::class, [
-                    'label' => 'Nombre de postes disponibles',
-                    'required' => true,
-                    'mapped' => false,
-                    'data' => 1,
-                    'attr' => [
-                        'min' => 1
-                    ]
-                ]);
+                    },
+                ])
+                    ->add('number', IntegerType::class, [
+                        'label' => 'Nombre de postes disponibles',
+                        'required' => true,
+                        'mapped' => false,
+                        'data' => 1,
+                        'attr' => [
+                            'min' => 1,
+                        ],
+                    ])
+                ;
             }
         });
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlockPrefix()
     {
         return 'App_shift';

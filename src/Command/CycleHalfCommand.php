@@ -24,8 +24,7 @@ class CycleHalfCommand extends Command
         ContainerBagInterface $params,
         MembershipService $membership_service,
         EventDispatcherInterface $event_dispatcher
-    )
-    {
+    ) {
         $this->em = $em;
         $this->params = $params;
         $this->event_dispatcher = $event_dispatcher;
@@ -39,9 +38,10 @@ class CycleHalfCommand extends Command
         $this
             ->setName('app:user:cycle_half')
             ->setDescription('Generate events on member half of cycle')
-            //usefull for tests
+            // usefull for tests
             ->addOption('date', 'date', InputOption::VALUE_OPTIONAL, 'Date to execute (format yyyy-mm-dd. default is today)', '')
-            ->setHelp('This command allows you to generate events for the members on the middle of their cycle');
+            ->setHelp('This command allows you to generate events for the members on the middle of their cycle')
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -51,6 +51,7 @@ class CycleHalfCommand extends Command
             $from = date_create_from_format('Y-m-d', $date);
             if (!$from || $from->format('Y-m-d') != $date) {
                 $output->writeln('<fg=red;> wrong date format. Use Y-m-d </>');
+
                 return 2;
             }
             $date = $from->setTime(0, 0, 0);
@@ -73,7 +74,7 @@ class CycleHalfCommand extends Command
             $this->event_dispatcher->dispatch(new MemberCycleHalfEvent($member, $date, $currentCycleShifts), MemberCycleHalfEvent::NAME);
             $message = 'Generate ' . MemberCycleHalfEvent::NAME . ' event for member #' . $member->getMemberNumber();
             $output->writeln($message);
-            $count++;
+            ++$count;
         }
 
         $message = $count . ' event(s) created';
@@ -81,5 +82,4 @@ class CycleHalfCommand extends Command
 
         return 0;
     }
-
 }
