@@ -49,29 +49,27 @@
                         </div>
                     </div>
                 </div>
-                {% if is_granted('ROLE_USER') %}
-                    <div class="collapsible-body">
-                        <p>
-                            Créneau
-                            {% if use_fly_and_fixed %}
-                                <strong>{% if shift.fixe %}fixe{% else %}volant{% endif %}</strong>
-                            {% endif %}
-                            réservé
-                            {% if shift.shifter != shift.booker.beneficiary and display_names %}
-                                pour <a href="{{ path("member_show", { 'member_number': shift.shifter.membership.memberNumber }) }}" target="_blank">{{ shift.shifter }}</a>
-                            {% endif %}
-                            le <i>{{ shift.bookedTime | date_fr_full_with_time }}</i>
-                            par {% include "member/_partial/member_or_user_link.html.twig" with { user: shift.booker, target_blank: true, display_names: display_names } %}.
-                        </p>
-                        <!-- shift.createdBy -->
-                        {% if shift.createdBy %}
-                            <p>
-                                Créneau créé le <i>{{ shift.createdAt | date_fr_full_with_time }}</i>
-                                par {% include "member/_partial/member_or_user_link.html.twig" with { user: shift.createdBy, target_blank: true, display_names: display_names } %}.
-                            </p>
+                <div class="collapsible-body">
+                    <p>
+                        Créneau
+                        {% if use_fly_and_fixed %}
+                            <strong>{% if shift.fixe %}fixe{% else %}volant{% endif %}</strong>
                         {% endif %}
-                    </div>
-                {% endif %}
+                        réservé
+                        {% if shift.shifter != shift.booker.beneficiary and display_names %}
+                            pour <a href="{{ path("member_show", { 'member_number': shift.shifter.membership.memberNumber }) }}" target="_blank">{{ shift.shifter }}</a>
+                        {% endif %}
+                        le <i>{{ shift.bookedTime | date_fr_full_with_time }}</i>
+                        par {% include "member/_partial/member_or_user_link.html.twig" with { user: shift.booker, target_blank: true, display_names: display_names } %}.
+                    </p>
+                    <!-- shift.createdBy -->
+                    {% if shift.createdBy %}
+                        <p>
+                            Créneau créé le <i>{{ shift.createdAt | date_fr_full_with_time }}</i>
+                            par {% include "member/_partial/member_or_user_link.html.twig" with { user: shift.createdBy, target_blank: true, display_names: display_names } %}.
+                        </p>
+                    {% endif %}
+                </div>
             </li>
         {% else %}
             <li>
@@ -98,17 +96,15 @@
                         </div>
                     </div>
                 </div>
-                {% if is_granted('ROLE_USER') %}
-                    <div class="collapsible-body">
-                        <!-- shift.createdBy -->
-                        {% if shift.createdBy %}
-                            <p>
-                                Créneau créé le <i>{{ shift.createdAt | date_fr_full_with_time }}</i>
-                                par {% include "member/_partial/member_or_user_link.html.twig" with { user: shift.createdBy, target_blank: true, display_names: display_names } %}.
-                            </p>
-                        {% endif %}
-                    </div>
-                {% endif %}
+                <div class="collapsible-body">
+                    <!-- shift.createdBy -->
+                    {% if shift.createdBy %}
+                        <p>
+                            Créneau créé le <i>{{ shift.createdAt | date_fr_full_with_time }}</i>
+                            par {% include "member/_partial/member_or_user_link.html.twig" with { user: shift.createdBy, target_blank: true, display_names: display_names } %}.
+                        </p>
+                    {% endif %}
+                </div>
             </li>
         {% endif %}
     {% endfor %}

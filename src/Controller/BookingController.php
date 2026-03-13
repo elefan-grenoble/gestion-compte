@@ -33,6 +33,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Security as SecurityUser;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
@@ -48,10 +49,16 @@ class BookingController extends AbstractController
     private $use_fly_and_fixed;
     private $display_name_shifters;
 
-    public function __construct(bool $use_fly_and_fixed, bool $display_name_shifters)
+    /**
+     * @var SecurityUser
+     */
+    private $security;
+
+    public function __construct(bool $use_fly_and_fixed, bool $display_name_shifters, SecurityUser $security)
     {
         $this->use_fly_and_fixed = $use_fly_and_fixed;
         $this->display_name_shifters = $display_name_shifters;
+        $this->security = $security;
     }
 
     /**
@@ -160,8 +167,75 @@ class BookingController extends AbstractController
                 'beneficiary_form' => $beneficiaryForm->createView(),
             ]);
         }
-
     }
+
+    /**
+     * @Route("/bucket/{id}/show/for/{beneficiary}/cycle/{cycle}", name="bucket_show_for_beneficiary", methods={"GET"})
+     * @Security("is_granted('ROLE_USER')")
+     * @return Response
+     */
+    public function showBucketForBeneficiaryAction(Shift $shift, Beneficiary $beneficiary, int $cycle, ShiftService $shift_service): Response
+    {
+        $bucket = $shift_service->getShiftBucketFromShift($shift);
+
+        return $this->render('booking/_partial/bucket.html.twig', [
+            'bucket' => $bucket,
+            'beneficiary' => $beneficiary,
+            'cycle' => $cycle,
+        ]);
+    }
+
+    /**
+     * @Route("/bucket/{id}/show", name="bucket_show", methods={"GET"})
+     * @return Response
+     */
+    public function showBucketAction(Shift $shift, ShiftService $shift_service): Response
+    {
+        $bucket = $shift_service->getShiftBucketFromShift($shift);
+
+        return $this->render('booking/_partial/bucket.html.twig', [
+            'bucket' => $bucket,
+            'beneficiary' => null,
+            'display_names' => !is_null($this->security->getUser())
+        ]);
+    }
+
+    /**
+     * @Route("/day/{day}/{beneficiary}/{cycle}", name="booking_by_day", methods={"GET","POST"})
+     * @return Response
+     */
+    public function indexByDayAction(Request $request, String $day, Beneficiary $beneficiary = null, int $cycle = 0, ShiftService $shift_service): Response
+    {
+        // L'utilisateur⋅ice doit être connecté⋅e pour accéder aux données d'un bénéficiaire
+        if (!is_null($beneficiary))
+            $this->denyAccessUnlessGranted('ROLE_USER');
+
+        $day = new \DateTime($day);
+        $em = $this->getDoctrine()->getManager();
+
+        $max = clone $day;
+        $max->modify("+ 1 day");
+
+        $shifts = $em->getRepository('App:Shift')->findFrom($day, $max , null, $this->display_name_shifters);
+        $bucketsByDay = $shift_service->generateShiftBucketsByDayAndJob($shifts);
+
+        $bucketsByJob = $bucketsByDay[$day->format("d m Y")];
+
+        $hours = array();
+        for ($i = 6; $i < 22; $i++) { //todo put this in conf
+            $hours[] = $i;
+        }
+
+        return $this->render('booking/_partial/day.html.twig', [
+            'bucketsByJob' => $bucketsByJob,
+            'hours' => $hours,
+            'beneficiary' => $beneficiary,
+            'jobs' => $em->getRepository(Job::class)->findByEnabled(true),
+            'current_cycle' => $cycle,
+            'display_names' => !is_null($this->security->getUser())
+        ]);
+    }
+
 
     /**
      * Build the filter form for the admin main page (route /booking/admin)
@@ -320,10 +394,11 @@ class BookingController extends AbstractController
     }
 
     /**
-     * @Route("/bucket/{id}/show", name="bucket_show", methods={"GET"})
+     * @Route("/admin/bucket/{id}/show", name="admin_bucket_show", methods={"GET"})
      * @Security("is_granted('ROLE_SHIFT_MANAGER')")
+     * @return Response
      */
-    public function showBucketAction(Request $request, Shift $bucket)
+    public function showBucketForAdminAction(Request $request, Shift $bucket): Response
     {
         $em = $this->getDoctrine()->getManager();
         $shifts = $em->getRepository('App:Shift')->findBucket($bucket);
