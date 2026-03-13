@@ -33,6 +33,7 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Core\Security as SecurityUser;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
@@ -48,10 +49,11 @@ class BookingController extends AbstractController
     private $use_fly_and_fixed;
     private $display_name_shifters;
 
-    public function __construct(bool $use_fly_and_fixed, bool $display_name_shifters)
+    public function __construct(bool $use_fly_and_fixed, bool $display_name_shifters, SecurityUser $security)
     {
         $this->use_fly_and_fixed = $use_fly_and_fixed;
         $this->display_name_shifters = $display_name_shifters;
+        $this->security = $security;
     }
 
     /**
@@ -189,7 +191,7 @@ class BookingController extends AbstractController
         return $this->render('booking/_partial/bucket.html.twig', [
             'bucket' => $bucket,
             'beneficiary' => null,
-            'display_names' => false
+            'display_names' => !is_null($this->security->getUser())
         ]);
     }
 
