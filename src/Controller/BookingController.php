@@ -49,6 +49,11 @@ class BookingController extends AbstractController
     private $use_fly_and_fixed;
     private $display_name_shifters;
 
+    /**
+     * @var SecurityUser
+     */
+    private $security;
+
     public function __construct(bool $use_fly_and_fixed, bool $display_name_shifters, SecurityUser $security)
     {
         $this->use_fly_and_fixed = $use_fly_and_fixed;
