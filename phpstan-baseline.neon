@@ -1483,12 +1483,6 @@ parameters:
 			path: src/Controller/BookingController.php
 
 		-
-			message: '#^Method App\\Controller\\BookingController\:\:showBucketAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Controller/BookingController.php
-
-		-
 			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Shift\>, string given\.$#'
 			identifier: argument.type
 			count: 5
