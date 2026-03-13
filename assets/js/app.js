@@ -26,16 +26,10 @@ require("../less/shift.less");
 require("../less/update.less");
 
 
-$(document).ready(function() {
+global.install_events = function () {
     // initialize Materialize behavior - https://materializeweb.com/
     $('select').formSelect();
-    // $('datepicker').datepicker();  // see datepicker.js
-    $('.sidenav').sidenav({
-        menuWidth: 300, // Default is 300
-        edge: 'left', // Choose the horizontal origin
-        closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
-        draggable: true, // Choose whether you can drag to open on touch screens
-    });
+
     $('.modal').each( function (i, modal) {
         if (M.Modal.getInstance(modal) !== undefined)
             return;
@@ -46,12 +40,33 @@ $(document).ready(function() {
             },
         });
     });
+
     $('.collapsible').collapsible();
-    $('.collapsible.collapsible-expandable').collapsible({ accordion: false });
+    $('.collapsible.collapsible-expandable').collapsible({
+        accordion: false,
+        onOpenStart: function (li) {
+            $(li).trigger("opened");
+        }
+    });
     $('.tooltipped').tooltip();
     $(".dropdown-trigger").dropdown();
     $(".materialboxed").materialbox();
-    // $('input.autocomplete').autocomplete();  // see specific files for initialization & configuration
+}
+
+
+$(document).ready(function() {
+    $('.sidenav').sidenav({
+        menuWidth: 300, // Default is 300
+        edge: 'left', // Choose the horizontal origin
+        closeOnClick: true, // Closes side-nav on <a> clicks, useful for Angular/Meteor
+        draggable: true, // Choose whether you can drag to open on touch screens
+    });
+
+    install_events();
+
+    // Ouvrir le premier jour du planning ; une fois chargé, on ouvrira le second etc.
+    if (typeof load_next !== "undefined")
+        load_next();
 });
 
 global.myCookieInit = function(defaultData){

@@ -201,6 +201,39 @@ class BookingController extends AbstractController
     }
 
     /**
+     * @Route("/day/{day}/{beneficiary}/{cycle}", name="booking_by_day", methods={"GET","POST"})
+     * @Security("is_granted('ROLE_USER')")
+     * @return Response
+     */
+    public function indexByDayAction(Request $request, String $day, Beneficiary $beneficiary = null, int $cycle = 0, ShiftService $shift_service): Response
+    {
+        $day = new \DateTime($day);
+        $em = $this->getDoctrine()->getManager();
+
+        $max = clone $day;
+        $max->modify("+ 1 day");
+
+        $shifts = $em->getRepository('App:Shift')->findFrom($day, $max , null, $this->display_name_shifters);
+        $bucketsByDay = $shift_service->generateShiftBucketsByDayAndJob($shifts);
+
+        $bucketsByJob = $bucketsByDay[$day->format("d m Y")];
+
+        $hours = array();
+        for ($i = 6; $i < 22; $i++) { //todo put this in conf
+            $hours[] = $i;
+        }
+
+        return $this->render('booking/_partial/day.html.twig', [
+            'bucketsByJob' => $bucketsByJob,
+            'hours' => $hours,
+            'beneficiary' => $beneficiary,
+            'jobs' => $em->getRepository(Job::class)->findByEnabled(true),
+            'current_cycle' => $cycle,
+        ]);
+    }
+
+
+    /**
      * Build the filter form for the admin main page (route /booking/admin)
      * and rerun an array with the form object and the date range and the action
      *
