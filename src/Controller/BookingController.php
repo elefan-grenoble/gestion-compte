@@ -165,8 +165,9 @@ class BookingController extends AbstractController
     /**
      * @Route("/bucket/{id}/show/for/{beneficiary}/cycle/{cycle}", name="bucket_show_for_beneficiary", methods={"GET"})
      * @Security("is_granted('ROLE_USER')")
+     * @return Response
      */
-    public function showBucketForBeneficiaryAction(Shift $shift, Beneficiary $beneficiary, int $cycle, ShiftService $shift_service)
+    public function showBucketForBeneficiaryAction(Shift $shift, Beneficiary $beneficiary, int $cycle, ShiftService $shift_service): Response
     {
         $bucket = $shift_service->getShiftBucketFromShift($shift);
 
@@ -179,8 +180,9 @@ class BookingController extends AbstractController
 
     /**
      * @Route("/bucket/{id}/show", name="bucket_show", methods={"GET"})
+     * @return Response
      */
-    public function showBucketAction(Shift $shift, ShiftService $shift_service)
+    public function showBucketAction(Shift $shift, ShiftService $shift_service): Response
     {
         $bucket = $shift_service->getShiftBucketFromShift($shift);
 
@@ -350,8 +352,9 @@ class BookingController extends AbstractController
     /**
      * @Route("/admin/bucket/{id}/show", name="admin_bucket_show", methods={"GET"})
      * @Security("is_granted('ROLE_SHIFT_MANAGER')")
+     * @return Response
      */
-    public function showBucketForAdminAction(Request $request, Shift $bucket)
+    public function showBucketForAdminAction(Request $request, Shift $bucket): Response
     {
         $em = $this->getDoctrine()->getManager();
         $shifts = $em->getRepository('App:Shift')->findBucket($bucket);
