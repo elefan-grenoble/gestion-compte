@@ -202,11 +202,14 @@ class BookingController extends AbstractController
 
     /**
      * @Route("/day/{day}/{beneficiary}/{cycle}", name="booking_by_day", methods={"GET","POST"})
-     * @Security("is_granted('ROLE_USER')")
      * @return Response
      */
     public function indexByDayAction(Request $request, String $day, Beneficiary $beneficiary = null, int $cycle = 0, ShiftService $shift_service): Response
     {
+        // L'utilisateur⋅ice doit être connecté⋅e pour accéder aux données d'un bénéficiaire
+        if (!is_null($beneficiary))
+            $this->denyAccessUnlessGranted('ROLE_USER');
+
         $day = new \DateTime($day);
         $em = $this->getDoctrine()->getManager();
 
@@ -229,6 +232,7 @@ class BookingController extends AbstractController
             'beneficiary' => $beneficiary,
             'jobs' => $em->getRepository(Job::class)->findByEnabled(true),
             'current_cycle' => $cycle,
+            'display_names' => !is_null($this->security->getUser())
         ]);
     }
 
