@@ -64,6 +64,10 @@ php bin/console cache:clear --env=prod
 
 ## Rétro-compatibilité et nouveautés
 
+### Mars 2026
+
+[Documentation pour mise à jour de la version 1.47.2 à la version 2.0](maj-v2.0.md)
+
 ### Novembre 2022 : nouveau champ Beneficiary.created_at
 
 La [release v1.37.6](https://github.com/elefan-grenoble/gestion-compte/releases/tag/v1.37.6) a rajouté la date de création au `Beneficiary`. Elle se rempli à chaque nouvelle création, mais vous pourriez avoir envie de remplir le champ pour les bénéficiaires existants. Des scripts sont disponibles dans la [PR correspondante](https://github.com/elefan-grenoble/gestion-compte/pull/604).
