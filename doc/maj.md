@@ -64,6 +64,14 @@ php bin/console cache:clear --env=prod
 
 ## Rétro-compatibilité et nouveautés
 
+### Novembre 2022 : nouveau champ Beneficiary.created_at
+
+La [release v1.37.6](https://github.com/elefan-grenoble/gestion-compte/releases/tag/v1.37.6) a rajouté la date de création au `Beneficiary`. Elle se rempli à chaque nouvelle création, mais vous pourriez avoir envie de remplir le champ pour les bénéficiaires existants. Des scripts sont disponibles dans la [PR correspondante](https://github.com/elefan-grenoble/gestion-compte/pull/604).
+
+### Novembre 2022 : nouveau champ Membership.created_at
+
+La [release v1.37.6](https://github.com/elefan-grenoble/gestion-compte/releases/tag/v1.37.6) a rajouté la date de création au `Membership`. Elle se rempli à chaque nouvelle création, mais vous pourriez avoir envie de remplir le champ pour les membres existants. Des scripts sont disponibles dans la [PR correspondante](https://github.com/elefan-grenoble/gestion-compte/pull/605).
+
 ### Novembre 2021 : la table PeriodPosition est vidée
 
 Un [commit en Novembre 2021](https://github.com/elefan-grenoble/gestion-compte/commit/f074ada813a7f3475db63b2ff2b21d8c9d2faff9) a supprimé la table `PeriodPosition`. Cela correspond au différents postes types dans la semaine type. Il faut donc que les coops la recréé
@@ -76,11 +84,3 @@ Solution
 * La coop garde un backup de sa semaine type
 * Une fois la migration effectuée, elle recrée sa semaine type
 * Une commande `FixShiftMissingPositionCommand` a été rajoutée dans la [release v1.45.6](https://github.com/elefan-grenoble/gestion-compte/releases/tag/v1.45.6) pour ensuite re-lier les `Shift` à leur `PeriodPosition`. Son usage est documenté dans la [PR correspondante](https://github.com/elefan-grenoble/gestion-compte/pull/1055).
-
-### Novembre 2022 : nouveau champ Membership.created_at
-
-La [release v1.37.6](https://github.com/elefan-grenoble/gestion-compte/releases/tag/v1.37.6) a rajouté la date de création au `Membership`. Elle se rempli à chaque nouvelle création, mais vous pourriez avoir envie de remplir le champ pour les membres existants. Des scripts sont disponibles dans la [PR correspondante](https://github.com/elefan-grenoble/gestion-compte/pull/605).
-
-### Novembre 2022 : nouveau champ Beneficiary.created_at
-
-La [release v1.37.6](https://github.com/elefan-grenoble/gestion-compte/releases/tag/v1.37.6) a rajouté la date de création au `Beneficiary`. Elle se rempli à chaque nouvelle création, mais vous pourriez avoir envie de remplir le champ pour les bénéficiaires existants. Des scripts sont disponibles dans la [PR correspondante](https://github.com/elefan-grenoble/gestion-compte/pull/604).
