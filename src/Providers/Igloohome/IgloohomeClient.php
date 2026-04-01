@@ -36,13 +36,13 @@ class IgloohomeClient
         return new Client([
             'base_uri' => $this->igloohomeApiDevice,
             'headers' => [
-                'Authorization' => 'Bearer '.$this->authenticator->getToken(
-                        $this->igloohomeApiAuthUrl,
-                        $this->igloohomeClientId,
-                        $this->igloohomeClientSecret,
-                    ),
+                'Authorization' => 'Bearer ' . $this->authenticator->getToken(
+                    $this->igloohomeApiAuthUrl,
+                    $this->igloohomeClientId,
+                    $this->igloohomeClientSecret,
+                ),
                 'Content-Type' => 'application/json',
-                'Accept' => 'application/json, application/xml'
+                'Accept' => 'application/json, application/xml',
             ],
         ]);
     }
@@ -54,11 +54,11 @@ class IgloohomeClient
     {
         $result = $this->getClient()->post('algopin/hourly', [
             RequestOptions::JSON => [
-                "variance" => 1,
-                "startDate" => $start,
-                "endDate" => $end,
-                "accessName" => $start
-            ]
+                'variance' => 1,
+                'startDate' => $start,
+                'endDate' => $end,
+                'accessName' => $start,
+            ],
         ]);
 
         return $result->getBody()->getContents();

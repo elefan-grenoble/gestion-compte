@@ -5,13 +5,19 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
- * Event
+ * Event.
  *
  * @ORM\Table(name="event")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\EventRepository")
+ *
  * @Vich\Uploadable
  */
 class Event
@@ -20,7 +26,9 @@ class Event
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -29,12 +37,14 @@ class Event
      * @var string
      *
      * @Assert\NotBlank()
+     *
      * @ORM\Column(name="title", type="string", length=255)
      */
     private $title;
 
     /**
      * @ORM\ManyToOne(targetEntity="EventKind", inversedBy="events", fetch="EAGER")
+     *
      * @ORM\JoinColumn(name="event_kind_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $kind;
@@ -50,7 +60,9 @@ class Event
      * @var \DateTime
      *
      * @Assert\DateTime()
+     *
      * @Assert\NotNull()
+     *
      * @ORM\Column(name="date", type="datetime")
      */
     private $date;
@@ -59,6 +71,7 @@ class Event
      * @var \DateTime
      *
      * @Assert\DateTime()
+     *
      * @ORM\Column(name="end", type="datetime", nullable=true)
      */
     private $end;
@@ -89,7 +102,7 @@ class Event
     /**
      * @ORM\Column(type="integer",nullable=true)
      *
-     * @var integer
+     * @var int
      */
     private $imgSize;
 
@@ -121,7 +134,7 @@ class Event
 
     /**
      * @var bool
-     * 
+     *
      * @ORM\Column(name="displayed_home", type="boolean", options={"default" : 0}, nullable=false)
      */
     private $displayedHome;
@@ -135,29 +148,31 @@ class Event
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
      */
     private $createdBy;
 
     /**
      * @var \DateTime
-     * 
+     *
      * @ORM\Column(type="datetime")
      */
     private $updatedAt;
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="updated_by_id", referencedColumnName="id")
      */
     private $updatedBy;
 
     /**
-     * Constructor
+     * Constructor.
      */
     public function __construct()
     {
-        $this->proxies = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->proxies = new ArrayCollection();
     }
 
     /**
@@ -172,6 +187,7 @@ class Event
 
     /**
      * @ORM\PrePersist
+     *
      * @ORM\PreUpdate
      */
     public function setUpdatedAtValue()
@@ -180,9 +196,9 @@ class Event
     }
 
     /**
-     * Get id
+     * Get id.
      *
-     * @return integer
+     * @return int
      */
     public function getId()
     {
@@ -190,7 +206,7 @@ class Event
     }
 
     /**
-     * Set title
+     * Set title.
      *
      * @param string $title
      *
@@ -204,7 +220,7 @@ class Event
     }
 
     /**
-     * Get title
+     * Get title.
      *
      * @return string
      */
@@ -214,13 +230,11 @@ class Event
     }
 
     /**
-     * Set kind
-     *
-     * @param \App\Entity\EventKind $eventKind
+     * Set kind.
      *
      * @return Event
      */
-    public function setKind(\App\Entity\EventKind $eventKind = null)
+    public function setKind(?EventKind $eventKind = null)
     {
         $this->kind = $eventKind;
 
@@ -228,7 +242,7 @@ class Event
     }
 
     /**
-     * Get kind
+     * Get kind.
      *
      * @return EventKind
      */
@@ -238,7 +252,7 @@ class Event
     }
 
     /**
-     * Set date
+     * Set date.
      *
      * @param \DateTime $date
      *
@@ -252,7 +266,7 @@ class Event
     }
 
     /**
-     * Get date
+     * Get date.
      *
      * @return \DateTime
      */
@@ -262,7 +276,7 @@ class Event
     }
 
     /**
-     * Get time
+     * Get time.
      *
      * @return \DateTime
      */
@@ -272,7 +286,7 @@ class Event
     }
 
     /**
-     * Get end
+     * Get end.
      *
      * @return \DateTime
      */
@@ -282,9 +296,9 @@ class Event
     }
 
     /**
-     * Set end
+     * Set end.
      *
-     * @param \DateTime $date
+     * @param mixed $end
      *
      * @return Event
      */
@@ -303,29 +317,32 @@ class Event
         if ($this->end) {
             return $this->date < $this->end;
         }
+
         return true;
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function getIsOngoing()
     {
         $now = new \DateTime('now');
+
         return ($this->date < $now) && $this->end && ($this->end > $now);
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function getIsPast()
     {
         $now = new \DateTime('now');
+
         return ($this->date < $now && !$this->end) || ($this->date < $now && $this->end < $now);
     }
 
     /**
-     * Set description
+     * Set description.
      *
      * @param string $description
      *
@@ -339,7 +356,7 @@ class Event
     }
 
     /**
-     * Get description
+     * Get description.
      *
      * @return string
      */
@@ -349,7 +366,7 @@ class Event
     }
 
     /**
-     * Set location
+     * Set location.
      *
      * @param string $location
      *
@@ -363,7 +380,7 @@ class Event
     }
 
     /**
-     * Get location
+     * Get location.
      *
      * @return string
      */
@@ -379,7 +396,7 @@ class Event
      * must be able to accept an instance of 'File' as the bundle will inject one here
      * during Doctrine hydration.
      *
-     * @param \Symfony\Component\HttpFoundation\File\UploadedFile $image
+     * @param UploadedFile $image
      */
     public function setImgFile($image = null)
     {
@@ -398,13 +415,11 @@ class Event
     }
 
     /**
-     * Add proxy
-     *
-     * @param \App\Entity\Proxy $proxy
+     * Add proxy.
      *
      * @return Event
      */
-    public function addProxy(\App\Entity\Proxy $proxy)
+    public function addProxy(Proxy $proxy)
     {
         $this->proxies[] = $proxy;
 
@@ -412,11 +427,9 @@ class Event
     }
 
     /**
-     * Remove proxy
-     *
-     * @param \App\Entity\Proxy $proxy
+     * Remove proxy.
      */
-    public function removeProxy(\App\Entity\Proxy $proxy)
+    public function removeProxy(Proxy $proxy)
     {
         $this->proxies->removeElement($proxy);
     }
@@ -424,28 +437,28 @@ class Event
     public function getProxiesByOwner(Beneficiary $beneficiary)
     {
         return $this->proxies->filter(function (Proxy $proxy) use ($beneficiary) {
-            return ($proxy->getOwner() === $beneficiary);
+            return $proxy->getOwner() === $beneficiary;
         });
     }
 
     public function getProxiesByOwnerMembershipMainBeneficiary(Beneficiary $beneficiary)
     {
         return $this->proxies->filter(function (Proxy $proxy) use ($beneficiary) {
-            return ($proxy->getOwner()->getMembership()->getMainBeneficiary() === $beneficiary);
+            return $proxy->getOwner()->getMembership()->getMainBeneficiary() === $beneficiary;
         });
     }
 
     public function getProxiesByGiver(Membership $membership)
     {
         return $this->proxies->filter(function (Proxy $proxy) use ($membership) {
-            return ($proxy->getGiver() === $membership);
+            return $proxy->getGiver() === $membership;
         });
     }
 
     /**
-     * Get proxies
+     * Get proxies.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getProxies()
     {
@@ -453,9 +466,9 @@ class Event
     }
 
     /**
-     * Set needProxy
+     * Set needProxy.
      *
-     * @param boolean $needProxy
+     * @param bool $needProxy
      *
      * @return Event
      */
@@ -467,9 +480,9 @@ class Event
     }
 
     /**
-     * Get needProxy
+     * Get needProxy.
      *
-     * @return boolean
+     * @return bool
      */
     public function getNeedProxy()
     {
@@ -477,9 +490,9 @@ class Event
     }
 
     /**
-     * Set anonymousProxy
+     * Set anonymousProxy.
      *
-     * @param boolean $anonymousProxy
+     * @param bool $anonymousProxy
      *
      * @return Event
      */
@@ -491,9 +504,9 @@ class Event
     }
 
     /**
-     * Get anonymousProxy
+     * Get anonymousProxy.
      *
-     * @return boolean
+     * @return bool
      */
     public function getAnonymousProxy()
     {
@@ -501,7 +514,7 @@ class Event
     }
 
     /**
-     * Set maxDateOfLastRegistration
+     * Set maxDateOfLastRegistration.
      *
      * @param \DateTime $maxDateOfLastRegistration
      *
@@ -515,7 +528,7 @@ class Event
     }
 
     /**
-     * Get maxDateOfLastRegistration
+     * Get maxDateOfLastRegistration.
      *
      * @return \DateTime
      */
@@ -524,13 +537,14 @@ class Event
         if (is_null($this->max_date_of_last_registration)) {
             return $this->date;
         }
+
         return $this->max_date_of_last_registration;
     }
 
     /**
-     * Set img
+     * Set img.
      *
-     * @param string|null $img
+     * @param null|string $img
      *
      * @return Event
      */
@@ -542,9 +556,9 @@ class Event
     }
 
     /**
-     * Get img
+     * Get img.
      *
-     * @return string|null
+     * @return null|string
      */
     public function getImg()
     {
@@ -552,9 +566,9 @@ class Event
     }
 
     /**
-     * Set imgSize
+     * Set imgSize.
      *
-     * @param int|null $imgSize
+     * @param null|int $imgSize
      *
      * @return Event
      */
@@ -566,9 +580,9 @@ class Event
     }
 
     /**
-     * Get imgSize
+     * Get imgSize.
      *
-     * @return int|null
+     * @return null|int
      */
     public function getImgSize()
     {
@@ -576,9 +590,9 @@ class Event
     }
 
     /**
-     * Set displayedHome
+     * Set displayedHome.
      *
-     * @param bool|null $displayedHome
+     * @param null|bool $displayedHome
      *
      * @return Event
      */
@@ -590,7 +604,7 @@ class Event
     }
 
     /**
-     * Get displayedHome
+     * Get displayedHome.
      *
      * @return bool
      */
@@ -600,7 +614,7 @@ class Event
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */
@@ -610,13 +624,11 @@ class Event
     }
 
     /**
-     * Set createdBy
-     *
-     * @param \App\Entity\User $user
+     * Set createdBy.
      *
      * @return Event
      */
-    public function setCreatedBy(\App\Entity\User $user = null)
+    public function setCreatedBy(?User $user = null)
     {
         $this->createdBy = $user;
 
@@ -624,9 +636,9 @@ class Event
     }
 
     /**
-     * Get createdBy
+     * Get createdBy.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getCreatedBy()
     {
@@ -634,7 +646,7 @@ class Event
     }
 
     /**
-     * Get updatedAt
+     * Get updatedAt.
      *
      * @return \DateTime
      */
@@ -644,13 +656,11 @@ class Event
     }
 
     /**
-     * Set updatedBy
-     *
-     * @param \App\Entity\User $user
+     * Set updatedBy.
      *
      * @return Event
      */
-    public function setUpdatedBy(\App\Entity\User $user = null)
+    public function setUpdatedBy(?User $user = null)
     {
         $this->updatedBy = $user;
 
@@ -658,9 +668,9 @@ class Event
     }
 
     /**
-     * Get updatedBy
+     * Get updatedBy.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getUpdatedBy()
     {
@@ -672,10 +682,10 @@ class Event
         if ($this->end) {
             $diff = date_diff($this->date, $this->end);
             if ($scale == 'minutes') {
-                return ($diff->h * 60 + $diff->i) . ' min';  # "180 min"
+                return ($diff->h * 60 + $diff->i) . ' min';  // "180 min"
             }
-            # scale = "hours"
-            $duration = "";
+            // scale = "hours"
+            $duration = '';
             if ($diff->y) {
                 $duration = $duration . $diff->y . ' an' . ($diff->y > 1 ? 's' : '');
             }
@@ -691,8 +701,10 @@ class Event
             if ($diff->i) {
                 $duration = $duration . ($duration ? ' ' : '') . $diff->i . ' min';
             }
+
             return $duration;
         }
+
         return null;
     }
 }

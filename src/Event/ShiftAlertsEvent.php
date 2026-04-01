@@ -2,11 +2,9 @@
 
 namespace App\Event;
 
-use Symfony\Component\EventDispatcher\Event;
-
 class ShiftAlertsEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
-    const NAME = 'shift.alerts';
+    public const NAME = 'shift.alerts';
 
     private $alerts;
     private $date;
@@ -38,7 +36,7 @@ class ShiftAlertsEvent extends \Symfony\Contracts\EventDispatcher\Event
     }
 
     /**
-     * @return string|null
+     * @return null|string
      */
     public function getTemplate()
     {
@@ -46,7 +44,7 @@ class ShiftAlertsEvent extends \Symfony\Contracts\EventDispatcher\Event
     }
 
     /**
-     * @return array|null
+     * @return null|array
      */
     public function getRecipients()
     {

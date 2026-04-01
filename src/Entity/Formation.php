@@ -4,13 +4,18 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 /**
- * Formation
+ * Formation.
  *
  * @ORM\Table(name="formation")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\FormationRepository")
+ *
  * @UniqueEntity(fields={"name"}, message="Ce nom est déjà utilisé par une autre formation")
  */
 class Formation
@@ -19,7 +24,9 @@ class Formation
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
@@ -40,20 +47,21 @@ class Formation
 
     /**
      * @var string
-     * 
+     *
      * @ORM\Column(name="description", type="text", nullable=true)
      */
     private $description;
 
     /**
      * @var string
-     * 
+     *
      * @ORM\Column(name="url", type="string", length=255, nullable=true)
      */
     private $url;
 
     /**
      * Many Formations have Many Beneficiaries.
+     *
      * @ORM\ManyToMany(targetEntity="Beneficiary", mappedBy="formations")
      */
     private $beneficiaries;
@@ -67,16 +75,17 @@ class Formation
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
      */
     private $createdBy;
 
     /**
-     * Constructor
+     * Constructor.
      */
     public function __construct()
     {
-        $this->beneficiaries = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->beneficiaries = new ArrayCollection();
     }
 
     /**
@@ -98,7 +107,7 @@ class Formation
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -113,7 +122,7 @@ class Formation
     }
 
     /**
-     * Get name
+     * Get name.
      *
      * @return string
      */
@@ -123,7 +132,7 @@ class Formation
     }
 
     /**
-     * Get roles
+     * Get roles.
      *
      * @return array
      */
@@ -133,9 +142,7 @@ class Formation
     }
 
     /**
-     * Get description
-     * 
-     * @return string
+     * Get description.
      */
     public function getDescription(): string
     {
@@ -143,19 +150,17 @@ class Formation
     }
 
     /**
-     * Set description
-     * 
-     * @param string $description
-     * @return Formation
+     * Set description.
      */
     public function setDescription(string $description): Formation
     {
         $this->description = $description;
+
         return $this;
     }
 
     /**
-     * Set url
+     * Set url.
      *
      * @param string $url
      *
@@ -169,7 +174,7 @@ class Formation
     }
 
     /**
-     * Get url
+     * Get url.
      *
      * @return string
      */
@@ -179,13 +184,11 @@ class Formation
     }
 
     /**
-     * Add beneficiary
-     *
-     * @param \App\Entity\Beneficiary $beneficiary
+     * Add beneficiary.
      *
      * @return Formation
      */
-    public function addBeneficiary(\App\Entity\Beneficiary $beneficiary)
+    public function addBeneficiary(Beneficiary $beneficiary)
     {
         $this->beneficiaries[] = $beneficiary;
 
@@ -193,19 +196,17 @@ class Formation
     }
 
     /**
-     * Remove beneficiary
-     *
-     * @param \App\Entity\Beneficiary $beneficiary
+     * Remove beneficiary.
      */
-    public function removeBeneficiary(\App\Entity\Beneficiary $beneficiary)
+    public function removeBeneficiary(Beneficiary $beneficiary)
     {
         $this->beneficiaries->removeElement($beneficiary);
     }
 
     /**
-     * Get beneficiaries
+     * Get beneficiaries.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getBeneficiaries()
     {
@@ -213,7 +214,7 @@ class Formation
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */
@@ -223,13 +224,11 @@ class Formation
     }
 
     /**
-     * Set createdBy
-     *
-     * @param \App\Entity\User $createBy
+     * Set createdBy.
      *
      * @return Formation
      */
-    public function setCreatedBy(\App\Entity\User $user = null)
+    public function setCreatedBy(?User $user = null)
     {
         $this->createdBy = $user;
 
@@ -237,9 +236,9 @@ class Formation
     }
 
     /**
-     * Get createdBy
+     * Get createdBy.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getCreatedBy()
     {

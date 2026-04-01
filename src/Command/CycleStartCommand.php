@@ -21,8 +21,7 @@ class CycleStartCommand extends Command
         EntityManagerInterface $em,
         ContainerBagInterface $params,
         EventDispatcherInterface $event_dispatcher
-    )
-    {
+    ) {
         $this->em = $em;
         $this->params = $params;
         $this->event_dispatcher = $event_dispatcher;
@@ -35,9 +34,10 @@ class CycleStartCommand extends Command
         $this
             ->setName('app:user:cycle_start')
             ->setDescription('Freeze/unfreeze members and create cycle start events')
-            //usefull for tests
+            // usefull for tests
             ->addOption('date', 'date', InputOption::VALUE_OPTIONAL, 'Date to execute (format yyyy-mm-dd. default is today)', '')
-            ->setHelp('This command allows you to send emails to member with a cycle starting today and with shift remaining to book');
+            ->setHelp('This command allows you to send emails to member with a cycle starting today and with shift remaining to book')
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -47,6 +47,7 @@ class CycleStartCommand extends Command
             $from = date_create_from_format('Y-m-d', $date);
             if (!$from || $from->format('Y-m-d') != $date) {
                 $output->writeln('<fg=red;> wrong date format. Use Y-m-d </>');
+
                 return 2;
             }
             $date = $from->setTime(0, 0, 0);
@@ -64,7 +65,7 @@ class CycleStartCommand extends Command
         $count = 0;
         foreach ($members_with_cycle_starting_today as $member) {
             $this->event_dispatcher->dispatch(new MemberCycleEndEvent($member, $date), MemberCycleEndEvent::NAME);
-            $count++;
+            ++$count;
             $message = 'Generate ' . MemberCycleEndEvent::NAME . ' event for member #' . $member->getMemberNumber();
             $output->writeln($message);
         }
@@ -73,5 +74,4 @@ class CycleStartCommand extends Command
 
         return 0;
     }
-
 }

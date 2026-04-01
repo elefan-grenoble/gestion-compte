@@ -1,4 +1,5 @@
 <?php
+
 namespace App\Command;
 
 use App\Entity\Membership;
@@ -17,8 +18,7 @@ class CloseMembershipCommand extends Command
     public function __construct(
         EntityManagerInterface $em,
         ContainerBagInterface $params
-    )
-    {
+    ) {
         $this->em = $em;
         $this->params = $params;
 
@@ -31,7 +31,8 @@ class CloseMembershipCommand extends Command
             ->setName('app:member:close')
             ->setDescription('Close memberships with unrenewed registration')
             ->setHelp('This command close memberships when the registration has not been renewed after a delay specified parameters')
-            ->addArgument('delay', InputArgument::REQUIRED, "Delay (example: '1 month')");
+            ->addArgument('delay', InputArgument::REQUIRED, "Delay (example: '1 month')")
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -55,14 +56,15 @@ class CloseMembershipCommand extends Command
 
         $members = $this->em->getRepository('App:Membership')->findWithExpiredRegistrationFrom($date);
         $count = 0;
+
         /** @var Membership $member */
         foreach ($members as $member) {
             $member->setWithdrawn(true);
             $member->setWithdrawnDate(new \DateTime('now'));
             // $member->setWithdrawnBy(); //TODO
-            $member->setFrozen(false); //not frozen anymore
+            $member->setFrozen(false); // not frozen anymore
             $this->em->persist($member);
-            $count++;
+            ++$count;
             $message = 'Close membership #' . $member->getMemberNumber();
             $output->writeln($message);
         }
@@ -74,5 +76,4 @@ class CloseMembershipCommand extends Command
 
         return 0;
     }
-
 }

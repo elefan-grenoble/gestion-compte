@@ -32,7 +32,7 @@ class PeriodPositionFreeLogService
         $current_user = $this->tokenStorage->getToken() ? $this->tokenStorage->getToken()->getUser() : null;
         $request = $this->requestStack->getCurrentRequest();
 
-        $log = new PeriodPositionFreeLog;
+        $log = new PeriodPositionFreeLog();
         $log->setPeriodPosition($periodPosition);
         $log->setPeriodPositionString($this->generatePeriodPositionString($periodPosition));
         $log->setBeneficiary($beneficiary);

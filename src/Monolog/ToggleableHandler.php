@@ -5,7 +5,7 @@ namespace App\Monolog;
 use Monolog\Handler\AbstractHandler;
 
 /**
- * A special Monolog handler allowing an existing handler to be enabled or disabled based on a parameter
+ * A special Monolog handler allowing an existing handler to be enabled or disabled based on a parameter.
  */
 class ToggleableHandler extends AbstractHandler
 {
@@ -27,11 +27,14 @@ class ToggleableHandler extends AbstractHandler
     }
 
     /**
-     * Some handlers like SwiftMailer use specific methods, so redirect everything to the nested handler
+     * Some handlers like SwiftMailer use specific methods, so redirect everything to the nested handler.
+     *
+     * @param mixed $method
+     * @param mixed $args
      */
     public function __call($method, $args)
     {
-        return call_user_func_array(array($this->nestedHandler, $method), $args);
+        return call_user_func_array([$this->nestedHandler, $method], $args);
     }
 
     public function handle(array $record): bool
@@ -39,6 +42,7 @@ class ToggleableHandler extends AbstractHandler
         if ($this->enabled) {
             return $this->nestedHandler->handle($record);
         }
+
         return false;
     }
 }

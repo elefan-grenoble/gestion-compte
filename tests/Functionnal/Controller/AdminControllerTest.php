@@ -3,16 +3,19 @@
 namespace App\Tests\Functionnal\Controller;
 
 use App\Tests\Functionnal\DatabasePrimer;
-use Exception;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class AdminControllerTest extends DatabasePrimer
 {
-
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     public function testCsvImportForEmptyBaseWithCommas()
     {
@@ -30,7 +33,7 @@ class AdminControllerTest extends DatabasePrimer
             'command' => 'app:import:users',
             '--delimiter' => ',',
             'file' => $csvPath,
-            '--default_mapping' => true
+            '--default_mapping' => true,
         ]);
 
         $output = new BufferedOutput();
@@ -60,9 +63,8 @@ class AdminControllerTest extends DatabasePrimer
 
     }
 
-
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     public function testCsvImportForEmptyBaseWithSemiColons()
     {
@@ -81,7 +83,7 @@ class AdminControllerTest extends DatabasePrimer
             'command' => 'app:import:users',
             '--delimiter' => ';',
             'file' => $csvPath,
-            '--default_mapping' => true
+            '--default_mapping' => true,
         ]);
 
         $output = new BufferedOutput();
@@ -111,9 +113,8 @@ class AdminControllerTest extends DatabasePrimer
 
     }
 
-
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     public function testCsvImportForCommissionFiledBaseWithCommas()
     {
@@ -134,7 +135,7 @@ class AdminControllerTest extends DatabasePrimer
             'command' => 'app:import:users',
             '--delimiter' => ';',
             'file' => $csvPath,
-            '--default_mapping' => true
+            '--default_mapping' => true,
         ]);
 
         $application->run($input);
@@ -150,7 +151,7 @@ class AdminControllerTest extends DatabasePrimer
         $count = 0;
         foreach ($beneficiaries as $beneficiary) {
             if ($beneficiary->getCommissions()->count() > 0) {
-                $count+= $beneficiary->getCommissions()->count();
+                $count += $beneficiary->getCommissions()->count();
             }
         }
 
@@ -160,7 +161,7 @@ class AdminControllerTest extends DatabasePrimer
     }
 
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     public function testCsvImportForCommissionFiledBaseWithSemicolons()
     {
@@ -181,7 +182,7 @@ class AdminControllerTest extends DatabasePrimer
             'command' => 'app:import:users',
             '--delimiter' => ';',
             'file' => $csvPath,
-            '--default_mapping' => true
+            '--default_mapping' => true,
         ]);
 
         $application->run($input);
@@ -197,7 +198,7 @@ class AdminControllerTest extends DatabasePrimer
         $count = 0;
         foreach ($beneficiaries as $beneficiary) {
             if ($beneficiary->getCommissions()->count() > 0) {
-                $count+= $beneficiary->getCommissions()->count();
+                $count += $beneficiary->getCommissions()->count();
             }
         }
 

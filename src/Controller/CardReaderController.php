@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use App\Entity\BookedShift;
 use App\Entity\SwipeCard;
 use App\Event\SwipeCardEvent;
 use App\Event\ShiftValidatedEvent;
@@ -49,9 +48,9 @@ class CardReaderController extends AbstractController
         $dynamicContent = $em->getRepository('App:DynamicContent')->findOneByCode('CARD_READER')->getContent();
 
         return $this->render('card_reader/index.html.twig', [
-            "buckets_in_progress" => $buckets_in_progress,
-            "buckets_upcoming" => $buckets_upcoming,
-            "dynamicContent" => $dynamicContent
+            'buckets_in_progress' => $buckets_in_progress,
+            'buckets_upcoming' => $buckets_upcoming,
+            'dynamicContent' => $dynamicContent,
         ]);
     }
 
@@ -73,9 +72,10 @@ class CardReaderController extends AbstractController
             return $this->redirectToRoute('card_reader_index');
         }
         $code = substr($code, 0, -1);  // remove controle
-        $card = $em->getRepository('App:SwipeCard')->findOneBy(array('code' => $code, 'enable' => 1));
+        $card = $em->getRepository('App:SwipeCard')->findOneBy(['code' => $code, 'enable' => 1]);
         if (!$card) {
-            $session->getFlashBag()->add("error", "Oups, ce badge n'est pas actif ou n'existe pas");
+            $session->getFlashBag()->add('error', "Oups, ce badge n'est pas actif ou n'existe pas");
+
             return $this->redirectToRoute('card_reader_index');
         }
 
@@ -84,8 +84,8 @@ class CardReaderController extends AbstractController
         $member = $beneficiary->getMembership();
 
         // validate beneficiary ongoing shift(s)
-        $now = new \Datetime('now');
-        $now_plus_ten = new \Datetime('now +10 minutes');
+        $now = new \DateTime('now');
+        $now_plus_ten = new \DateTime('now +10 minutes');
         $ongoingShifts = $em->getRepository('App:Shift')->findShiftsForBeneficiaries(new ArrayCollection([$beneficiary]), null, null, $now_plus_ten, $now);
         $ongoingShiftsValidated = 0;
         if ($ongoingShifts) {
@@ -98,7 +98,7 @@ class CardReaderController extends AbstractController
 
                     $event_dispatcher->dispatch(new ShiftValidatedEvent($shift), ShiftValidatedEvent::NAME);
 
-                    $ongoingShiftsValidated += 1;
+                    ++$ongoingShiftsValidated;
                 }
             }
 
@@ -118,7 +118,7 @@ class CardReaderController extends AbstractController
             'beneficiary' => $beneficiary,
             'counter' => $counter,
             'ongoingShifts' => $ongoingShifts,
-            'ongoingShiftsValidated' => $ongoingShiftsValidated
+            'ongoingShiftsValidated' => $ongoingShiftsValidated,
         ]);
     }
 }

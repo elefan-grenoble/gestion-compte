@@ -1,5 +1,7 @@
 <?php
+
 // src/App/Validator/Constraints/UniqueEmailValidator.php
+
 namespace App\Validator\Constraints;
 
 use App\Entity\User;
@@ -16,17 +18,19 @@ class UniqueEmailValidator extends ConstraintValidator
         $this->em = $entityManager;
     }
 
-    public function getEntityManager(){
+    public function getEntityManager()
+    {
         return $this->em;
     }
 
     public function validate($value, Constraint $constraint)
     {
         // check if email already used
-        $exist = $this->getEntityManager()->getRepository(User::class)->findOneBy(array('email'=>$value));
+        $exist = $this->getEntityManager()->getRepository(User::class)->findOneBy(['email' => $value]);
         if ($exist) {
             $this->context->buildViolation($constraint->message)
-                ->addViolation();
+                ->addViolation()
+            ;
         }
 
     }

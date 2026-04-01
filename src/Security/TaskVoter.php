@@ -1,20 +1,21 @@
 <?php
+
 // src/App/Security/TaskVoter.php
+
 namespace App\Security;
 
 use App\Entity\Task;
 use App\Entity\User;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class TaskVoter extends Voter
 {
-    const VIEW = 'view';
-    const CREATE = 'create';
-    const EDIT = 'edit';
-    const DELETE = 'delete';
+    public const VIEW = 'view';
+    public const CREATE = 'create';
+    public const EDIT = 'edit';
+    public const DELETE = 'delete';
 
     private $decisionManager;
 
@@ -26,7 +27,7 @@ class TaskVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::CREATE, self::EDIT,self::VIEW,self::DELETE))) {
+        if (!in_array($attribute, [self::CREATE, self::EDIT, self::VIEW, self::DELETE])) {
             return false;
         }
 
@@ -48,7 +49,7 @@ class TaskVoter extends Voter
         }
 
         // ROLE_SUPER_ADMIN can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
+        if ($this->decisionManager->decide($token, ['ROLE_SUPER_ADMIN'])) {
             return true;
         }
 
@@ -60,20 +61,26 @@ class TaskVoter extends Voter
         switch ($attribute) {
             case self::VIEW:
                 return true;
+
             case self::CREATE:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                if ($this->decisionManager->decide($token, ['ROLE_ADMIN'])) {
                     return true;
                 }
+
                 return $this->canAdd($task, $user);
+
             case self::EDIT:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                if ($this->decisionManager->decide($token, ['ROLE_ADMIN'])) {
                     return true;
                 }
+
                 return $this->canEdit($task, $user);
+
             case self::DELETE:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                if ($this->decisionManager->decide($token, ['ROLE_ADMIN'])) {
                     return true;
                 }
+
                 return $this->canDelete($task, $user);
         }
 
@@ -83,7 +90,7 @@ class TaskVoter extends Voter
     private function canAdd(Task $task, User $user)
     {
         // if they can edit, they can add
-        if ($this->canEdit($task,$user)) {
+        if ($this->canEdit($task, $user)) {
             return true;
         }
         if ($user->getBeneficiary()->getCommissions()) {
@@ -93,30 +100,31 @@ class TaskVoter extends Voter
         return false;
     }
 
-
     private function canEdit(Task $task, User $user)
     {
-            if ($task->getOwners()->contains($user->getBeneficiary())){
+        if ($task->getOwners()->contains($user->getBeneficiary())) {
+            return true;
+        }
+        foreach ($task->getCommissions() as $commission) {
+            if ($commission->getBeneficiaries()->contains($user->getBeneficiary())) {
                 return true;
             }
-            foreach ($task->getCommissions() as $commission ){
-                if ($commission->getBeneficiaries()->contains($user->getBeneficiary())){
-                    return true;
-                }
-            }
+        }
+
         return false;
     }
 
     private function canDelete(Task $task, User $user)
     {
-        if ($task->getOwners()->contains($user->getBeneficiary())){
+        if ($task->getOwners()->contains($user->getBeneficiary())) {
             return true;
         }
-        foreach ($task->getCommissions() as $commission ){
-            if ($commission->getOwners()->contains($user->getBeneficiary())){
+        foreach ($task->getCommissions() as $commission) {
+            if ($commission->getOwners()->contains($user->getBeneficiary())) {
                 return true;
             }
         }
+
         return false;
     }
 }

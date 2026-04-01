@@ -5,10 +5,12 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * HelloassoNotification
+ * HelloassoNotification.
  *
  * @ORM\Table(name="helloasso_payment")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\HelloassoPaymentRepository")
  */
 class HelloassoPayment
@@ -17,7 +19,9 @@ class HelloassoPayment
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -80,6 +84,7 @@ class HelloassoPayment
 
     /**
      * @ORM\OneToOne(targetEntity="Registration", inversedBy="helloassoPayment", fetch="EAGER")
+     *
      * @ORM\JoinColumn(name="registration_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $registration;
@@ -96,7 +101,7 @@ class HelloassoPayment
      */
     public function __toString()
     {
-        return '#'.$this->getId().' de '.$this->getEmail().' le '. $this->getCreatedAt()->format('d/m/Y à H:i').' '.$this->getAmount().' €';
+        return '#' . $this->getId() . ' de ' . $this->getEmail() . ' le ' . $this->getCreatedAt()->format('d/m/Y à H:i') . ' ' . $this->getAmount() . ' €';
     }
 
     /**
@@ -110,7 +115,7 @@ class HelloassoPayment
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -120,7 +125,7 @@ class HelloassoPayment
     }
 
     /**
-     * Set date
+     * Set date.
      *
      * @param \DateTime $date
      *
@@ -134,7 +139,7 @@ class HelloassoPayment
     }
 
     /**
-     * Get date
+     * Get date.
      *
      * @return \DateTime
      */
@@ -144,7 +149,7 @@ class HelloassoPayment
     }
 
     /**
-     * Set amount
+     * Set amount.
      *
      * @param float $amount
      *
@@ -158,7 +163,7 @@ class HelloassoPayment
     }
 
     /**
-     * Get amount
+     * Get amount.
      *
      * @return float
      */
@@ -168,7 +173,7 @@ class HelloassoPayment
     }
 
     /**
-     * Set payerFirstName
+     * Set payerFirstName.
      *
      * @param string $payerFirstName
      *
@@ -182,7 +187,7 @@ class HelloassoPayment
     }
 
     /**
-     * Get payerFirstName
+     * Get payerFirstName.
      *
      * @return string
      */
@@ -192,7 +197,7 @@ class HelloassoPayment
     }
 
     /**
-     * Set payerLastName
+     * Set payerLastName.
      *
      * @param string $payerLastName
      *
@@ -206,7 +211,7 @@ class HelloassoPayment
     }
 
     /**
-     * Get payerLastName
+     * Get payerLastName.
      *
      * @return string
      */
@@ -216,13 +221,11 @@ class HelloassoPayment
     }
 
     /**
-     * Set registration
-     *
-     * @param \App\Entity\Registration|null $registration
+     * Set registration.
      *
      * @return HelloassoPayment
      */
-    public function setRegistration(\App\Entity\Registration $registration = null)
+    public function setRegistration(?Registration $registration = null)
     {
         $this->registration = $registration;
 
@@ -230,9 +233,9 @@ class HelloassoPayment
     }
 
     /**
-     * Get registration
+     * Get registration.
      *
-     * @return \App\Entity\Registration|null
+     * @return null|Registration
      */
     public function getRegistration()
     {
@@ -240,7 +243,7 @@ class HelloassoPayment
     }
 
     /**
-     * Set paymentId
+     * Set paymentId.
      *
      * @param int $paymentId
      *
@@ -254,7 +257,7 @@ class HelloassoPayment
     }
 
     /**
-     * Get paymentId
+     * Get paymentId.
      *
      * @return int
      */
@@ -265,7 +268,7 @@ class HelloassoPayment
 
     /**
      * populate payment with action object.
-     * https://dev.helloasso.com/v3/resources#detail-action
+     * https://dev.helloasso.com/v3/resources#detail-action.
      *
      * @param object $ha_action_obj
      *
@@ -327,7 +330,7 @@ class HelloassoPayment
     }
 
     /**
-     * Set campaignId
+     * Set campaignId.
      *
      * @param int $campaignId
      *
@@ -341,7 +344,7 @@ class HelloassoPayment
     }
 
     /**
-     * Get campaignId
+     * Get campaignId.
      *
      * @return int
      */
@@ -351,7 +354,7 @@ class HelloassoPayment
     }
 
     /**
-     * Set status
+     * Set status.
      *
      * @param string $status
      *
@@ -365,7 +368,7 @@ class HelloassoPayment
     }
 
     /**
-     * Get status
+     * Get status.
      *
      * @return string
      */
@@ -375,7 +378,7 @@ class HelloassoPayment
     }
 
     /**
-     * Set email
+     * Set email.
      *
      * @param string $email
      *
@@ -389,7 +392,7 @@ class HelloassoPayment
     }
 
     /**
-     * Get email
+     * Get email.
      *
      * @return string
      */
@@ -399,9 +402,9 @@ class HelloassoPayment
     }
 
     /**
-     * Set createdAt
+     * Set createdAt.
      *
-     * @param \DateTime $createdAt
+     * @param mixed $date
      *
      * @return HelloassoPayment
      */
@@ -413,7 +416,7 @@ class HelloassoPayment
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */

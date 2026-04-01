@@ -4,12 +4,11 @@ namespace App\Event;
 
 use App\Entity\Beneficiary;
 use App\Entity\Commission;
-use Symfony\Component\EventDispatcher\Event;
 
 class CommissionJoinOrLeaveEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
-    const JOIN_EVENT_NAME = 'commission.join';
-    const LEAVE_EVENT_NAME = 'commission.leave';
+    public const JOIN_EVENT_NAME = 'commission.join';
+    public const LEAVE_EVENT_NAME = 'commission.leave';
 
     private $beneficiary;
     private $commission;

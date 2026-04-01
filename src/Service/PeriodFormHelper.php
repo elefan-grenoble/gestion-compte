@@ -13,75 +13,83 @@ class PeriodFormHelper
     public function getFilterForm($formBuilder, $withBeneficiaryField = false)
     {
         $formBuilder
-            ->add('job', EntityType::class, array(
+            ->add('job', EntityType::class, [
                 'label' => 'Type de créneau',
                 'class' => 'App:Job',
                 'choice_label' => 'name',
                 'multiple' => false,
                 'required' => false,
-                'query_builder' => function(JobRepository $repository) {
+                'query_builder' => function (JobRepository $repository) {
                     $qb = $repository->createQueryBuilder('j');
+
                     return $qb
                         ->where($qb->expr()->eq('j.enabled', '?1'))
                         ->setParameter('1', '1')
-                        ->orderBy('j.name', 'ASC');
-                }
-            ))
-            ->add('week', ChoiceType::class, array(
+                        ->orderBy('j.name', 'ASC')
+                    ;
+                },
+            ])
+            ->add('week', ChoiceType::class, [
                 'label' => 'Semaine',
                 'required' => false,
-                'choices' => array(
+                'choices' => [
                     'A' => 'A',
                     'B' => 'B',
                     'C' => 'C',
                     'D' => 'D',
-                ),
-            ));
+                ],
+            ])
+        ;
 
         // admin filter form has beneficiary field + more complex filling field
         if ($withBeneficiaryField) {
             $formBuilder
-                ->add('beneficiary', AutocompleteBeneficiaryType::class, array(
+                ->add('beneficiary', AutocompleteBeneficiaryType::class, [
                     'label' => 'Bénéficiaire',
                     'required' => false,
-                ))
-                ->add('filling', ChoiceType::class, array(
+                ])
+                ->add('filling', ChoiceType::class, [
                     'label' => 'Remplissage',
                     'required' => false,
-                    'choices' => array(
+                    'choices' => [
                         'Complet' => 'full',
                         'Partiel' => 'partial',
                         'Vide' => 'empty',
-                        'Problématique' => 'problematic'  // additional
-                    ),
-                ));
+                        'Problématique' => 'problematic',  // additional
+                    ],
+                ])
+            ;
         } else {
             $formBuilder
-                ->add('filling', ChoiceType::class, array(
+                ->add('filling', ChoiceType::class, [
                     'label' => 'Remplissage',
                     'required' => false,
-                    'choices' => array(
+                    'choices' => [
                         'Complet' => 'full',
                         'Partiel' => 'partial',
                         'Vide' => 'empty',
-                    ),
-                ));
+                    ],
+                ])
+            ;
         }
 
         $formBuilder
-            ->add('submit', SubmitType::class, array(
+            ->add('submit', SubmitType::class, [
                 'label' => 'Filtrer',
-                'attr' => array('class' => 'btn', 'value' => 'Filtrer')
-            ));
+                'attr' => ['class' => 'btn', 'value' => 'Filtrer'],
+            ])
+        ;
 
         return $formBuilder->getForm();
     }
 
-    public function createFilterForm($formBuilder, $defaults, $withBeneficiaryField = false) {
+    public function createFilterForm($formBuilder, $defaults, $withBeneficiaryField = false)
+    {
         $form = $this->getFilterForm($formBuilder, $withBeneficiaryField);
         foreach ($defaults as $k => $v) {
             $form->get($k)->setData($v);
         }
+
         return $form;
     }
 }

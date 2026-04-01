@@ -3,13 +3,10 @@
 namespace App\Controller;
 
 use App\Entity\User;
-use http\Env\Response;
-use OAuth2\OAuth2;
 use Ornicar\GravatarBundle\GravatarApi;
 use Ornicar\GravatarBundle\Templating\Helper\GravatarHelper;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -20,7 +17,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  */
 class ApiController extends AbstractController
 {
-
     protected function getUser(): array
     {
         $user = $this->get('security.token_storage')->getToken()->getUser();
@@ -30,65 +26,74 @@ class ApiController extends AbstractController
             $withDrawn = $beneficiary->getMembership()->isWithdrawn();
         }
 
-        if ($withDrawn || !$user->isEnabled()){ // user inactif
-            return array('user'=>false,'message'=>'User not found');
-        }else{
-            return array('user'=>$user);
+        if ($withDrawn || !$user->isEnabled()) { // user inactif
+            return ['user' => false, 'message' => 'User not found'];
         }
+
+        return ['user' => $user];
+
     }
 
     /**
      * @Route("/swipe/in", name="api_swipe_in",  methods={"POST"})
+     *
      * @Security("is_granted('ROLE_OAUTH_LOGIN')")
      */
-    public function swipeInAction(){
-        return new JsonResponse(array(
-            'success' => true
-        ));
+    public function swipeInAction()
+    {
+        return new JsonResponse([
+            'success' => true,
+        ]);
     }
 
     /**
      * @Route("/oauth/user", name="api_user",  methods={"GET"})
+     *
      * @Security("is_granted('ROLE_OAUTH_LOGIN')")
      */
     public function userAction()
     {
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_PREVIOUS_ADMIN')) { //DO NOT ALLOW OAUTH ON LOGIN AS
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_PREVIOUS_ADMIN')) { // DO NOT ALLOW OAUTH ON LOGIN AS
             throw $this->createAccessDeniedException();
         }
         $response = $this->getUser();
-        if (!$response['user']){
+        if (!$response['user']) {
             return new JsonResponse($response);
         }
-        return new JsonResponse(array('user'=>array(
-                'email' => $response['user']->getEmail(),
-                'username' => $response['user']->getUserName(),
-        )));
+
+        return new JsonResponse(['user' => [
+            'email' => $response['user']->getEmail(),
+            'username' => $response['user']->getUserName(),
+        ]]);
     }
 
     /**
      * @Route("/oauth/nextcloud_user", name="api_nextcloud_user",  methods={"GET"})
+     *
      * @Security("is_granted('ROLE_OAUTH_LOGIN')")
      */
     public function nextcloudUserAction()
     {
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_PREVIOUS_ADMIN')) { //DO NOT ALLOW OAUTH ON LOGIN AS
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_PREVIOUS_ADMIN')) { // DO NOT ALLOW OAUTH ON LOGIN AS
             throw $this->createAccessDeniedException();
         }
         $response = $this->getUser();
-        if (!$response['user']){
+        if (!$response['user']) {
             return new JsonResponse($response);
         }
         $groups = array_map(
-            function($group) { return $group->getName(); },
+            function ($group) {
+                return $group->getName();
+            },
             $response['user']->getGroups()
         );
-        return new JsonResponse(array(
+
+        return new JsonResponse([
             'email' => $response['user']->getEmail(),
             'displayName' => $response['user']->getFirstName() . ' ' . $response['user']->getLastName(),
             'identifier' => $response['user']->getUserName(),
-            'groups' => $groups
-        ));
+            'groups' => $groups,
+        ]);
     }
 
     /**
@@ -99,45 +104,46 @@ class ApiController extends AbstractController
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw $this->createAccessDeniedException();
         }
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_PREVIOUS_ADMIN')) { //DO NOT ALLOW OAUTH ON LOGIN AS
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_PREVIOUS_ADMIN')) { // DO NOT ALLOW OAUTH ON LOGIN AS
             throw $this->createAccessDeniedException();
         }
         $response = $this->getUser();
-        if (!$response['user']){
+        if (!$response['user']) {
             return new JsonResponse($response);
         }
+
         /** @var User $current_app_user */
         $current_app_user = $response['user'];
         $gravatar_helper = new GravatarHelper(new GravatarApi());
-        return new JsonResponse(array(
+
+        return new JsonResponse([
             'id' => $current_app_user->getId(),
             'username' => $current_app_user->getUsername(),
             'email' => $current_app_user->getEmail(),
-            'name' => $current_app_user->getFirstName().' '.$current_app_user->getlastname(),
-            'state' => ($current_app_user->isEnabled()) ? "active" : "",
+            'name' => $current_app_user->getFirstName() . ' ' . $current_app_user->getlastname(),
+            'state' => ($current_app_user->isEnabled()) ? 'active' : '',
             'avatar_url' => $gravatar_helper->getUrl($current_app_user->getEmail()),
-            'web_url' => "",
-            "created_at" => "2012-05-23T08:00:58Z",
-            "bio" => '',
-            "location" => null,
-            "skype" => "",
-            "linkedin" => "",
-            "twitter" => "",
-            "website_url" => "",
-            "organization" => "",
-            "last_sign_in_at" => "2012-06-01T11:41:01Z",
-            "confirmed_at" => "2012-05-23T09:05:22Z",
-            "theme_id" => 1,
-            "last_activity_on" => "2012-05-23",
-            "color_scheme_id" => 2,
-            "projects_limit" => 100,
-            "current_sign_in_at" => "2012-06-02T06:36:55Z",
-            "identities" => array(),
-            "can_create_group" => true,
-            "can_create_project" => true,
-            "two_factor_enabled" => false,
-            "external" => false
-        ));
+            'web_url' => '',
+            'created_at' => '2012-05-23T08:00:58Z',
+            'bio' => '',
+            'location' => null,
+            'skype' => '',
+            'linkedin' => '',
+            'twitter' => '',
+            'website_url' => '',
+            'organization' => '',
+            'last_sign_in_at' => '2012-06-01T11:41:01Z',
+            'confirmed_at' => '2012-05-23T09:05:22Z',
+            'theme_id' => 1,
+            'last_activity_on' => '2012-05-23',
+            'color_scheme_id' => 2,
+            'projects_limit' => 100,
+            'current_sign_in_at' => '2012-06-02T06:36:55Z',
+            'identities' => [],
+            'can_create_group' => true,
+            'can_create_project' => true,
+            'two_factor_enabled' => false,
+            'external' => false,
+        ]);
     }
-
 }

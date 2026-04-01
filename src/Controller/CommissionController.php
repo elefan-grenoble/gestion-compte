@@ -4,24 +4,17 @@ namespace App\Controller;
 
 use App\Entity\Beneficiary;
 use App\Entity\Commission;
-use App\Entity\HelloassoPayment;
-use App\Entity\Role;
 use App\Event\CommissionJoinOrLeaveEvent;
-use App\Event\HelloassoEvent;
 use App\Form\AutocompleteBeneficiaryType;
 use App\Form\CommissionType;
-use Doctrine\ORM\EntityRepository;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Form\Extension\Core\Type\EmailType;
-use Symfony\Component\Form\Extension\Core\Type\HiddenType;
-use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Form\FormInterface;
 
 /**
  * User controller.
@@ -30,23 +23,25 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
  */
 class CommissionController extends AbstractController
 {
-
     /**
-     * Comissions list
+     * Comissions list.
      *
      * @Route("/", name="admin_commissions", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function indexAction(Request $request)
     {
         $commissions = $this->getDoctrine()->getManager()->getRepository('App:Commission')->findAll();
-        return $this->render('admin/commission/list.html.twig',array('commissions'=>$commissions));
+
+        return $this->render('admin/commission/list.html.twig', ['commissions' => $commissions]);
     }
 
     /**
-     * Comission new
+     * Comission new.
      *
      * @Route("/new", name="commission_new", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function newAction(Request $request)
@@ -66,22 +61,23 @@ class CommissionController extends AbstractController
 
             $session->getFlashBag()->add('success', 'La nouvelle commission a bien été créée !');
 
-            return $this->redirectToRoute('commission_edit', array('id' => $commission->getId()));
+            return $this->redirectToRoute('commission_edit', ['id' => $commission->getId()]);
         }
 
-        return $this->render('admin/commission/new.html.twig', array(
+        return $this->render('admin/commission/new.html.twig', [
             'commission' => $commission,
             'form' => $form->createView(),
-        ));
+        ]);
     }
 
     /**
-     * Commission edit
+     * Commission edit.
      *
      * @Route("/{id}/edit", name="commission_edit", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
-    public function editAction(Request $request,Commission $commission)
+    public function editAction(Request $request, Commission $commission)
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
@@ -99,12 +95,12 @@ class CommissionController extends AbstractController
 
             $em = $this->getDoctrine()->getManager();
 
-            foreach ($commission->getBeneficiaries() as $beneficiary){
+            foreach ($commission->getBeneficiaries() as $beneficiary) {
                 $beneficiary->setOwn();
                 $em->persist($beneficiary);
             }
             $owners = $commission->getOwners();
-            foreach ($owners as $beneficiary){
+            foreach ($owners as $beneficiary) {
                 $beneficiary->setOwn($commission);
                 $em->persist($beneficiary);
             }
@@ -114,33 +110,36 @@ class CommissionController extends AbstractController
 
             $session->getFlashBag()->add('success', 'La commission a bien été éditée !');
 
-            if ($current_app_user->hasRole('ROLE_SUPER_ADMIN'))
+            if ($current_app_user->hasRole('ROLE_SUPER_ADMIN')) {
                 return $this->redirectToRoute('admin_commissions');
+            }
 
         }
 
         $add_form = $this->getAddBeneficiaryForm($commission);
 
-        return $this->render('admin/commission/edit.html.twig', array(
+        return $this->render('admin/commission/edit.html.twig', [
             'commission' => $commission,
             'form' => $form->createView(),
             'add_form' => $add_form->createView(),
             'remove_beneficiary_form' => $this->getRemoveBeneficiaryForm($commission)->createView(),
             'delete_form' => $this->getDeleteForm($commission)->createView(),
-        ));
+        ]);
 
     }
 
-    private function getAddBeneficiaryForm(Commission $commission){
+    private function getAddBeneficiaryForm(Commission $commission)
+    {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('commission_add_beneficiary', array('id' => $commission->getId())))
-            ->add('beneficiary', AutocompleteBeneficiaryType::class, array('label'=>'Email ou nom de la personne', 'required'=>true))
+            ->setAction($this->generateUrl('commission_add_beneficiary', ['id' => $commission->getId()]))
+            ->add('beneficiary', AutocompleteBeneficiaryType::class, ['label' => 'Email ou nom de la personne', 'required' => true])
             ->setMethod('POST')
-            ->getForm();
+            ->getForm()
+        ;
     }
 
     /**
-     * Commission add a beneficiary
+     * Commission add a beneficiary.
      *
      * @Route("/{id}/add_beneficiary/", name="commission_add_beneficiary", methods={"POST"})
      */
@@ -162,36 +161,37 @@ class CommissionController extends AbstractController
                 $beneficiary->addCommission($commission);
                 $em->persist($beneficiary);
                 $em->flush();
-                $message = $beneficiary->getFirstname().' a bien été ajouté à la commission';
+                $message = $beneficiary->getFirstname() . ' a bien été ajouté à la commission';
                 $event_dispatcher->dispatch(
-                    new CommissionJoinOrLeaveEvent($beneficiary,$commission),
+                    new CommissionJoinOrLeaveEvent($beneficiary, $commission),
                     CommissionJoinOrLeaveEvent::JOIN_EVENT_NAME
                 );
-            }else{
+            } else {
                 $success = false;
-                $message = $beneficiary->getFirstname().' fait déjà partie de la commission';
+                $message = $beneficiary->getFirstname() . ' fait déjà partie de la commission';
             }
         }
 
-        if ($request->isXmlHttpRequest()){
+        if ($request->isXmlHttpRequest()) {
             $html = $this->container->get('twig')->render('beneficiary/_partial/chip.html.twig', [
                 'beneficiary' => $beneficiary,
                 'close' => true,
             ]);
-            return new JsonResponse(array('success'=>$success,'message'=>$message,'html'=>$html));
+
+            return new JsonResponse(['success' => $success, 'message' => $message, 'html' => $html]);
         }
 
         $session->getFlashBag()->add($success ? 'success' : 'error', $message);
 
-        return $this->redirectToRoute('commission_edit',array('id' => $commission->getId()));
+        return $this->redirectToRoute('commission_edit', ['id' => $commission->getId()]);
     }
 
     /**
-     * Commission remove beneficiary
+     * Commission remove beneficiary.
      *
      * @Route("/{id}/remove_beneficiary/", name="commission_remove_beneficiary", methods={"POST"})
      */
-    public function removeBeneficiaryAction(Request $request,Commission $commission, EventDispatcherInterface $event_dispatcher)
+    public function removeBeneficiaryAction(Request $request, Commission $commission, EventDispatcherInterface $event_dispatcher)
     {
         $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
@@ -202,43 +202,45 @@ class CommissionController extends AbstractController
 
         $em = $this->getDoctrine()->getManager();
         $beneficiary = $em->getRepository('App:Beneficiary')->find($_POST['beneficiary']);
+
         /** @var Beneficiary $beneficiary */
-        if ($beneficiary->getId()){
+        if ($beneficiary->getId()) {
             $beneficiary->removeCommission($commission);
             $em->persist($beneficiary);
             $em->flush();
             $event_dispatcher->dispatch(
-                new CommissionJoinOrLeaveEvent($beneficiary,$commission),
+                new CommissionJoinOrLeaveEvent($beneficiary, $commission),
                 CommissionJoinOrLeaveEvent::LEAVE_EVENT_NAME
             );
         }
-        if ($request->isXmlHttpRequest()){
-            return new JsonResponse(array('success'=>true,'message'=>$beneficiary->getFirstname().' a bien été retiré de la commission'));
+        if ($request->isXmlHttpRequest()) {
+            return new JsonResponse(['success' => true, 'message' => $beneficiary->getFirstname() . ' a bien été retiré de la commission']);
         }
-        $session->getFlashBag()->add('success', 'Le membre '.$beneficiary.' a bien été retiré de la commission !');
+        $session->getFlashBag()->add('success', 'Le membre ' . $beneficiary . ' a bien été retiré de la commission !');
 
 
-        return $this->redirectToRoute('commission_edit',array('id' => $commission->getId()));
+        return $this->redirectToRoute('commission_edit', ['id' => $commission->getId()]);
     }
 
     /**
-     * Comission delete
+     * Comission delete.
      *
      * @Route("/{id}", name="commission_delete", methods={"DELETE"})
+     *
      * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
-    public function deleteAction(Request $request,Commission $commission)
+    public function deleteAction(Request $request, Commission $commission)
     {
         $session = new Session();
         $form = $this->getDeleteForm($commission);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
-            foreach ($commission->getBeneficiaries() as $beneficiary){
+            foreach ($commission->getBeneficiaries() as $beneficiary) {
                 $beneficiary->removeCommission($commission);
                 $em->persist($beneficiary);
             }
-            foreach ($commission->getOwners() as $owner){
+            foreach ($commission->getOwners() as $owner) {
                 $owner->setOwn();
                 $em->persist($owner);
             }
@@ -246,28 +248,31 @@ class CommissionController extends AbstractController
             $em->flush();
             $session->getFlashBag()->add('success', 'La commission a bien été supprimée !');
         }
+
         return $this->redirectToRoute('admin_commissions');
     }
 
     /**
-     * @param Commission $commission
-     * @return \Symfony\Component\Form\FormInterface
+     * @return FormInterface
      */
-    protected function getDeleteForm(Commission $commission){
+    protected function getDeleteForm(Commission $commission)
+    {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('commission_delete', array('id' => $commission->getId())))
+            ->setAction($this->generateUrl('commission_delete', ['id' => $commission->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 
     /**
-     * @param Commission $commission
-     * @return \Symfony\Component\Form\FormInterface
+     * @return FormInterface
      */
-    protected function getRemoveBeneficiaryForm(Commission $commission){
+    protected function getRemoveBeneficiaryForm(Commission $commission)
+    {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('commission_remove_beneficiary', array('id' => $commission->getId())))
+            ->setAction($this->generateUrl('commission_remove_beneficiary', ['id' => $commission->getId()]))
             ->setMethod('POST')
-            ->getForm();
+            ->getForm()
+        ;
     }
 }

@@ -5,10 +5,12 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Proxy
+ * Proxy.
  *
  * @ORM\Table(name="proxy")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\ProxyRepository")
  */
 class Proxy
@@ -17,25 +19,30 @@ class Proxy
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
      * @ORM\ManyToOne(targetEntity="Event", inversedBy="proxies")
+     *
      * @ORM\JoinColumn(name="event_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $event;
 
     /**
      * @ORM\ManyToOne(targetEntity="Beneficiary", inversedBy="received_proxies")
+     *
      * @ORM\JoinColumn(name="owner", referencedColumnName="id", onDelete="CASCADE")
      */
     private $owner;
 
     /**
      * @ORM\ManyToOne(targetEntity="Membership", inversedBy="given_proxies")
+     *
      * @ORM\JoinColumn(name="giver", referencedColumnName="id", onDelete="CASCADE")
      */
     private $giver;
@@ -58,9 +65,9 @@ class Proxy
     }
 
     /**
-     * Get id
+     * Get id.
      *
-     * @return integer
+     * @return int
      */
     public function getId()
     {
@@ -68,13 +75,11 @@ class Proxy
     }
 
     /**
-     * Set event
-     *
-     * @param \App\Entity\Event $event
+     * Set event.
      *
      * @return Proxy
      */
-    public function setEvent(\App\Entity\Event $event = null)
+    public function setEvent(?Event $event = null)
     {
         $this->event = $event;
 
@@ -82,9 +87,9 @@ class Proxy
     }
 
     /**
-     * Get event
+     * Get event.
      *
-     * @return \App\Entity\Event
+     * @return Event
      */
     public function getEvent()
     {
@@ -92,13 +97,11 @@ class Proxy
     }
 
     /**
-     * Set owner
-     *
-     * @param \App\Entity\Beneficiary $owner
+     * Set owner.
      *
      * @return Proxy
      */
-    public function setOwner(\App\Entity\Beneficiary $owner = null)
+    public function setOwner(?Beneficiary $owner = null)
     {
         $this->owner = $owner;
 
@@ -106,9 +109,9 @@ class Proxy
     }
 
     /**
-     * Get owner
+     * Get owner.
      *
-     * @return \App\Entity\Beneficiary
+     * @return Beneficiary
      */
     public function getOwner()
     {
@@ -116,13 +119,11 @@ class Proxy
     }
 
     /**
-     * Set giver
-     *
-     * @param \App\Entity\Membership $giver
+     * Set giver.
      *
      * @return Proxy
      */
-    public function setGiver(Membership $giver = null)
+    public function setGiver(?Membership $giver = null)
     {
         $this->giver = $giver;
 
@@ -130,9 +131,9 @@ class Proxy
     }
 
     /**
-     * Get giver
+     * Get giver.
      *
-     * @return \App\Entity\Membership
+     * @return Membership
      */
     public function getGiver()
     {
@@ -140,7 +141,7 @@ class Proxy
     }
 
     /**
-     * Set createdAt
+     * Set createdAt.
      *
      * @param \DateTime $date
      *
@@ -154,7 +155,7 @@ class Proxy
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */

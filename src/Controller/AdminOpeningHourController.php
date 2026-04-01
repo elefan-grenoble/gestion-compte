@@ -7,25 +7,26 @@ use App\Form\OpeningHourType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Form\Form;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Form\FormInterface;
 
 /**
- * Admin OpeningHour controller
+ * Admin OpeningHour controller.
  *
  * @Route("admin/openinghours")
  */
 class AdminOpeningHourController extends AbstractController
 {
     /**
-     * List all opening hours
+     * List all opening hours.
      *
      * @Route("/", name="admin_openinghour_index", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function indexAction(Request $request)
@@ -35,16 +36,17 @@ class AdminOpeningHourController extends AbstractController
         $openingHours = $em->getRepository('App:OpeningHour')->findAll();
         $openingHourKinds = $em->getRepository('App:OpeningHourKind')->findAll();
 
-        return $this->render('admin/openinghour/index.html.twig', array(
+        return $this->render('admin/openinghour/index.html.twig', [
             'openingHours' => $openingHours,
             'openingHourKinds' => $openingHourKinds,
-        ));
+        ]);
     }
 
     /**
-     * Add new opening hour
+     * Add new opening hour.
      *
      * @Route("/new", name="admin_openinghour_new", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
@@ -67,18 +69,20 @@ class AdminOpeningHourController extends AbstractController
             $em->flush();
 
             $session->getFlashBag()->add('success', "L'horaire a bien été crée !");
+
             return $this->redirectToRoute('admin_openinghour_index');
         }
 
-        return $this->render('admin/openinghour/new.html.twig', array(
-            'form' => $form->createView()
-        ));
+        return $this->render('admin/openinghour/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     /**
-     * Edit opening hour
+     * Edit opening hour.
      *
      * @Route("/edit/{id}", name="admin_openinghour_edit", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function editAction(Request $request, OpeningHour $openingHour)
@@ -106,19 +110,21 @@ class AdminOpeningHourController extends AbstractController
             $em->flush();
 
             $session->getFlashBag()->add('success', "L'horaire a bien été éditée !");
+
             return $this->redirectToRoute('admin_openinghour_index');
         }
 
-        return $this->render('admin/openinghour/edit.html.twig', array(
+        return $this->render('admin/openinghour/edit.html.twig', [
             'form' => $form->createView(),
-            'delete_form' => $this->getDeleteForm($openingHour)->createView()
-        ));
+            'delete_form' => $this->getDeleteForm($openingHour)->createView(),
+        ]);
     }
 
     /**
-     * Delete opening hour
+     * Delete opening hour.
      *
      * @Route("/{id}", name="admin_openinghour_delete", methods={"DELETE"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function deleteAction(Request $request, OpeningHour $openingHour)
@@ -134,6 +140,7 @@ class AdminOpeningHourController extends AbstractController
             $em->flush();
 
             $session->getFlashBag()->add('success', "L'horaire a bien été supprimée !");
+
             return $this->redirectToRoute('admin_openinghour_index');
         }
 
@@ -141,39 +148,41 @@ class AdminOpeningHourController extends AbstractController
     }
 
     /**
-     * Opening hours widget generator
+     * Opening hours widget generator.
      *
      * @Route("/widget_generator", name="admin_openinghour_widget_generator", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function widgetGeneratorAction(Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('kind', EntityType::class, array(
+            ->add('kind', EntityType::class, [
                 'label' => "Quel type d'horaire d'ouverture ?",
                 'class' => 'App:OpeningHourKind',
                 'choice_label' => 'name',
-                'multiple' => false
-            ))
-            ->add('title', CheckboxType::class, array(
+                'multiple' => false,
+            ])
+            ->add('title', CheckboxType::class, [
                 'required' => false,
                 'data' => true,
                 'label' => 'Afficher le titre du widget ?',
-                'attr' => array('class' => 'filled-in')
-            ))
-            ->add('kind_title', CheckboxType::class, array(
+                'attr' => ['class' => 'filled-in'],
+            ])
+            ->add('kind_title', CheckboxType::class, [
                 'required' => false,
                 'data' => true,
                 'label' => 'Afficher les détails du type d\'horaire d\'ouverture ?',
-                'attr' => array('class' => 'filled-in')
-            ))
-            ->add('align', ChoiceType::class, array(
+                'attr' => ['class' => 'filled-in'],
+            ])
+            ->add('align', ChoiceType::class, [
                 'label' => 'Alignement',
-                'choices'  => array('centré' => 'center', 'gauche' => 'left'),
-                'data' => 'center'
-            ))
-            ->add('generate', SubmitType::class, array('label' => 'Générer'))
-            ->getForm();
+                'choices'  => ['centré' => 'center', 'gauche' => 'left'],
+                'data' => 'center',
+            ])
+            ->add('generate', SubmitType::class, ['label' => 'Générer'])
+            ->getForm()
+        ;
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -181,26 +190,26 @@ class AdminOpeningHourController extends AbstractController
 
             $widgetQueryString = 'opening_hour_kind_id=' . ($data['kind'] ? $data['kind']->getId() : '') . '&title=' . ($data['title'] ? 1 : 0) . '&kind_title=' . ($data['kind_title'] ? 1 : 0) . '&align=' . $data['align'];
 
-            return $this->render('admin/openinghour/widget_generator.html.twig', array(
+            return $this->render('admin/openinghour/widget_generator.html.twig', [
                 'form' => $form->createView(),
-                'query_string' => $widgetQueryString
-            ));
+                'query_string' => $widgetQueryString,
+            ]);
         }
 
-        return $this->render('admin/openinghour/widget_generator.html.twig', array(
+        return $this->render('admin/openinghour/widget_generator.html.twig', [
             'form' => $form->createView(),
-        ));
+        ]);
     }
 
     /**
-     * @param OpeningHour $openingHour
-     * @return \Symfony\Component\Form\FormInterface
+     * @return FormInterface
      */
     protected function getDeleteForm(OpeningHour $openingHour)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('admin_openinghour_delete', array('id' => $openingHour->getId())))
+            ->setAction($this->generateUrl('admin_openinghour_delete', ['id' => $openingHour->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 }

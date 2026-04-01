@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-use DateTime;
 use App\Entity\Job;
 use App\Entity\Shift;
 use App\Entity\ShiftBucket;
@@ -33,7 +32,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-
+use Symfony\Component\Form\Form;
 
 /**
  * @Route("shift")
@@ -48,9 +47,15 @@ class ShiftController extends AbstractController
     private $time_log_saving_shift_free_min_time_in_advance_days;
     private $time_log_saving_shift_free_allow_only_if_enough_saving;
 
-    public function __construct(bool $forbid_own_shift_book_admin, bool $forbid_own_shift_free_admin, bool $forbid_own_shift_validate_admin, bool $use_fly_and_fixed,
-        bool $use_time_log_saving, $time_log_saving_shift_free_min_time_in_advance_days, bool $time_log_saving_shift_free_allow_only_if_enough_saving)
-    {
+    public function __construct(
+        bool $forbid_own_shift_book_admin,
+        bool $forbid_own_shift_free_admin,
+        bool $forbid_own_shift_validate_admin,
+        bool $use_fly_and_fixed,
+        bool $use_time_log_saving,
+        $time_log_saving_shift_free_min_time_in_advance_days,
+        bool $time_log_saving_shift_free_allow_only_if_enough_saving
+    ) {
         $this->forbid_own_shift_book_admin = $forbid_own_shift_book_admin;
         $this->forbid_own_shift_free_admin = $forbid_own_shift_free_admin;
         $this->forbid_own_shift_validate_admin = $forbid_own_shift_validate_admin;
@@ -62,6 +67,7 @@ class ShiftController extends AbstractController
 
     /**
      * @Route("/new", name="shift_new", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function newAction(Request $request, ShiftService $shift_service)
@@ -70,10 +76,11 @@ class ShiftController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
-        $job = $em->getRepository(Job::class)->findOneBy(array());
+        $job = $em->getRepository(Job::class)->findOneBy([]);
 
         if (!$job) {
             $session->getFlashBag()->add('warning', 'Commençons par créer un poste de bénévolat');
+
             return $this->redirectToRoute('job_new');
         }
 
@@ -84,10 +91,10 @@ class ShiftController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $number = $form->get('number')->getData();
             while ($number > 1) {
-                $s = clone($shift);
+                $s = clone $shift;
                 $s->setCreatedBy($current_user);
                 $em->persist($s);
-                $number --;
+                --$number;
             }
             $shift->setCreatedBy($current_user);
             $em->persist($shift);
@@ -103,38 +110,43 @@ class ShiftController extends AbstractController
         if ($request->isXmlHttpRequest()) {
             if ($success) {
                 $bucket = $shift_service->getShiftBucketFromShift($shift);
-                $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
+                $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', [
                     'bucket' => $bucket,
                     'start' => 6,
                     'end' => 22,
                     'line' => 0,
-                ));
+                ]);
                 $modal = $this->forward('App\Controller\BookingController::showBucketAction', [
-                    'bucket' => $bucket->getShiftWithMinId()
+                    'bucket' => $bucket->getShiftWithMinId(),
                 ])->getContent();
-                return new JsonResponse(array('message'=>$message, 'card' => $card, 'modal' => $modal), 201);
-            } else {
-                return new JsonResponse(array('message'=>$message), 400);
+
+                return new JsonResponse(['message' => $message, 'card' => $card, 'modal' => $modal], 201);
             }
-        } else {
-            if ($success) {
-                $session->getFlashBag()->add('success', $message);
-                return $this->redirectToRoute('booking_admin');
-            } else {
-                if ($form->isSubmitted()) {
-                    $session->getFlashBag()->add('error', $message);
-                }
-                return $this->render('admin/shift/new.html.twig', array(
-                    "form" => $form->createView()
-                ));
-            }
+
+            return new JsonResponse(['message' => $message], 400);
+
         }
+        if ($success) {
+            $session->getFlashBag()->add('success', $message);
+
+            return $this->redirectToRoute('booking_admin');
+        }
+        if ($form->isSubmitted()) {
+            $session->getFlashBag()->add('error', $message);
+        }
+
+        return $this->render('admin/shift/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
+
+
     }
 
     /**
      * Book a shift.
      *
      * @Route("/{id}/book", name="shift_book", methods={"POST"})
+     *
      * @Security("is_granted('ROLE_USER')")
      */
     public function bookShiftAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher): Response
@@ -155,13 +167,14 @@ class ShiftController extends AbstractController
             || !$shift_service->isShiftBookable($shift, $beneficiary)
             || !$this->isGranted(MembershipVoter::BOOK, $beneficiary->getMembership())
         ) {
-            $session->getFlashBag()->add("error", "Impossible de réserver ce créneau");
+            $session->getFlashBag()->add('error', 'Impossible de réserver ce créneau');
+
             return new Response($this->generateUrl('booking'), 205);
         }
 
         if (!$shift->getBooker()) {
             $shift->setBooker($current_user);
-            $shift->setBookedTime(new DateTime('now'));
+            $shift->setBookedTime(new \DateTime('now'));
         }
         $shift->setShifter($beneficiary);
         $shift->setLastShifter(null);
@@ -180,7 +193,8 @@ class ShiftController extends AbstractController
 
         $event_dispatcher->dispatch(new ShiftBookedEvent($shift, false), ShiftBookedEvent::NAME);
 
-        $session->getFlashBag()->add("success", "Ce créneau a bien été réservé !");
+        $session->getFlashBag()->add('success', 'Ce créneau a bien été réservé !');
+
         return new Response($this->generateUrl('homepage'), 200);
     }
 
@@ -188,6 +202,7 @@ class ShiftController extends AbstractController
      * Book a shift (admin side).
      *
      * @Route("/{id}/book_admin", name="shift_book_admin", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function bookShiftAdminAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher)
@@ -200,26 +215,26 @@ class ShiftController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $beneficiary = $form->get("shifter")->getData();
-            $fixe = $form->get("fixe")->getData();
+            $beneficiary = $form->get('shifter')->getData();
+            $fixe = $form->get('fixe')->getData();
             $shifter_is_current_user = $current_user->getBeneficiary() == $beneficiary;
 
             if ($shift->getShifter()) {
                 $success = false;
-                $message = "Désolé, ce créneau est déjà réservé";
+                $message = 'Désolé, ce créneau est déjà réservé';
             } elseif ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
                 $success = false;
-                $message = "Désolé, ce bénévole n'a pas la qualification necessaire (" . $shift->getFormation()->getName() . ")";
+                $message = "Désolé, ce bénévole n'a pas la qualification necessaire (" . $shift->getFormation()->getName() . ')';
             } elseif ($beneficiary->getMembership()->isCurrentlyExemptedFromShifts($shift->getStart())) {
                 $success = false;
-                $message = "Désolé, ce bénévole est exempté de créneau sur cette période";
-            // check if user is allowed to book shift
+                $message = 'Désolé, ce bénévole est exempté de créneau sur cette période';
+                // check if user is allowed to book shift
             } elseif ($shifter_is_current_user && $this->forbid_own_shift_book_admin && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
                 $success = false;
-                $message = "Vous ne pouvez pas réserver votre propre créneau.";
+                $message = 'Vous ne pouvez pas réserver votre propre créneau.';
             } else {
                 $shift->setBooker($current_user);
-                $shift->setBookedTime(new DateTime('now'));
+                $shift->setBookedTime(new \DateTime('now'));
                 $shift->setShifter($beneficiary);
                 $shift->setLastShifter(null);
                 $shift->setFixe($fixe);
@@ -237,7 +252,7 @@ class ShiftController extends AbstractController
 
                 $event_dispatcher->dispatch(new ShiftBookedEvent($shift, true), ShiftBookedEvent::NAME);
 
-                $message = "Créneau réservé avec succès pour " . $shift->getShifter();
+                $message = 'Créneau réservé avec succès pour ' . $shift->getShifter();
                 $success = true;
             }
         } else {
@@ -248,29 +263,33 @@ class ShiftController extends AbstractController
         if ($request->isXmlHttpRequest()) {
             if ($success) {
                 $bucket = $shift_service->getShiftBucketFromShift($shift);
-                $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
+                $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', [
                     'bucket' => $bucket,
                     'start' => 6,
                     'end' => 22,
                     'line' => 0,
-                ));
+                ]);
                 $modal = $this->forward('App\Controller\BookingController::showBucketAction', [
-                    'bucket' => $bucket->getShiftWithMinId()
+                    'bucket' => $bucket->getShiftWithMinId(),
                 ])->getContent();
-                return new JsonResponse(array('message' => $message, 'card' => $card, 'modal' => $modal), 200);
-            } else {
-                return new JsonResponse(array('message' => $message), 400);
+
+                return new JsonResponse(['message' => $message, 'card' => $card, 'modal' => $modal], 200);
             }
-        } else {
-            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
-            return $this->redirectToRoute('booking_admin');
+
+            return new JsonResponse(['message' => $message], 400);
+
         }
+        $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+
+        return $this->redirectToRoute('booking_admin');
+
     }
 
     /**
      * Free a shift.
      *
      * @Route("/{id}/free", name="shift_free", methods={"POST"})
+     *
      * @Security("is_granted('ROLE_USER')")
      */
     public function freeShiftAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher)
@@ -289,15 +308,16 @@ class ShiftController extends AbstractController
             // check if beneficiary can free this shift
             $shift_can_be_freed = $shift_service->canFreeShift($current_user->getBeneficiary(), $shift);
             if (!$shift_can_be_freed['result']) {
-                $session->getFlashBag()->add("error", $shift_can_be_freed['message'] || "Impossible d'annuler ce créneau.");
-                return $this->redirectToRoute("homepage");
+                $session->getFlashBag()->add('error', $shift_can_be_freed['message'] || "Impossible d'annuler ce créneau.");
+
+                return $this->redirectToRoute('homepage');
             }
 
             // store shift beneficiary & reason (before shift free())
             $beneficiary = $shift->getShifter();
             $member = $beneficiary->getMembership();
             $fixe = $shift->isFixe();
-            $reason = $form->get("reason")->getData();
+            $reason = $form->get('reason')->getData();
 
             // free shift
             $shift->free($reason);
@@ -307,10 +327,10 @@ class ShiftController extends AbstractController
 
             $event_dispatcher->dispatch(new ShiftFreedEvent($shift, $beneficiary, $fixe, $reason), ShiftFreedEvent::NAME);
 
-            $session->getFlashBag()->add('success', "Le créneau a été annulé !");
+            $session->getFlashBag()->add('success', 'Le créneau a été annulé !');
             if ($this->use_time_log_saving) {
                 if (count($em->getRepository('App:TimeLog')->findAll($member, $shift, TimeLog::TYPE_SAVING))) {
-                    $session->getFlashBag()->add("warning", "Grâce au compteur épargne, votre créneau a été comptabilisé !<br />En échange, votre compteur épargne a été décrémenté de la durée du créneau.");
+                    $session->getFlashBag()->add('warning', 'Grâce au compteur épargne, votre créneau a été comptabilisé !<br />En échange, votre compteur épargne a été décrémenté de la durée du créneau.');
                 }
             }
         }
@@ -322,6 +342,7 @@ class ShiftController extends AbstractController
      * Free a shift (admin side).
      *
      * @Route("/{id}/free_admin", name="shift_free_admin", methods={"POST"})
+     *
      * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function freeShiftAdminAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher)
@@ -341,19 +362,18 @@ class ShiftController extends AbstractController
             // check if user is allowed to free shift
             if ($shifter_is_current_user && $this->forbid_own_shift_free_admin && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
                 $success = false;
-                $message = "Vous ne pouvez pas annuler votre propre créneau.";
+                $message = 'Vous ne pouvez pas annuler votre propre créneau.';
             }
             // check if shift can be freed
             elseif (!$shift_can_be_freed['result']) {
                 $success = false;
                 $message = $shift_can_be_freed['message'] || "Impossible d'annuler ce créneau.";
-            }
-            else {
+            } else {
                 // store shift beneficiary & reason (before shift free())
                 $beneficiary = $shift->getShifter();
                 $member = $beneficiary->getMembership();
                 $fixe = $shift->isFixe();
-                $reason = $form->get("reason")->getData();
+                $reason = $form->get('reason')->getData();
 
                 // shouldn't happen: in the UI, you need to first invalidate a shift before being able to free it
                 $wasCarriedOut = $shift->getWasCarriedOut() == 1;
@@ -373,11 +393,11 @@ class ShiftController extends AbstractController
                 $event_dispatcher->dispatch(new ShiftFreedEvent($shift, $beneficiary, $fixe, $reason), ShiftFreedEvent::NAME);
 
                 $success = true;
-                $message = "Le créneau a bien été libéré !";
+                $message = 'Le créneau a bien été libéré !';
 
                 if ($this->use_time_log_saving) {
                     if (count($em->getRepository('App:TimeLog')->findAll($member, $shift, TimeLog::TYPE_SAVING))) {
-                        $message += "Grâce au compteur épargne, le créneau a été comptabilisé (en échange, le compteur épargne a été décrémenté de la durée du créneau).";
+                        $message += 'Grâce au compteur épargne, le créneau a été comptabilisé (en échange, le compteur épargne a été décrémenté de la durée du créneau).';
                     }
                 }
             }
@@ -389,30 +409,34 @@ class ShiftController extends AbstractController
         if ($request->isXmlHttpRequest()) {
             if ($success) {
                 $bucket = $shift_service->getShiftBucketFromShift($shift);
-                $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
+                $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', [
                     'bucket' => $bucket,
                     'start' => 6,
                     'end' => 22,
                     'line' => 0,
-                ));
+                ]);
                 $modal = $this->forward('App\Controller\BookingController::showBucketAction', [
-                    'bucket' => $bucket->getShiftWithMinId()
+                    'bucket' => $bucket->getShiftWithMinId(),
                 ])->getContent();
-                return new JsonResponse(array('message' => $message, 'card' => $card, 'modal' => $modal), 200);
-            } else {
-                return new JsonResponse(array('message' => $message), 400);
+
+                return new JsonResponse(['message' => $message, 'card' => $card, 'modal' => $modal], 200);
             }
-        } else {
-            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
-            $referer = $request->headers->get('referer');
-            return new RedirectResponse($referer);
+
+            return new JsonResponse(['message' => $message], 400);
+
         }
+        $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+        $referer = $request->headers->get('referer');
+
+        return new RedirectResponse($referer);
+
     }
 
     /**
      * validate / invalidate a shift.
      *
      * @Route("/{id}/validate_admin", name="shift_validate_admin", methods={"POST"})
+     *
      * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function validateShiftAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher)
@@ -433,14 +457,13 @@ class ShiftController extends AbstractController
             // check if user is allowed to (in)validate shift
             if ($shifter_is_current_user && $this->forbid_own_shift_validate_admin && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
                 $success = false;
-                $message = "Vous ne pouvez pas " . ($validate ? "valider" : "invalider") . " votre propre créneau.";
+                $message = 'Vous ne pouvez pas ' . ($validate ? 'valider' : 'invalider') . ' votre propre créneau.';
             }
             // check mismatch between $validate & $current
             elseif ($validate == $current) {
                 $success = false;
-                $message = "La participation au créneau a déjà été " . ($validate ? "validée" : "invalidée");
-            }
-            else {
+                $message = 'La participation au créneau a déjà été ' . ($validate ? 'validée' : 'invalidée');
+            } else {
                 if ($validate) {
                     $shift->validateShiftParticipation();
                 } else {
@@ -457,7 +480,7 @@ class ShiftController extends AbstractController
                     $event_dispatcher->dispatch(new ShiftInvalidatedEvent($shift, $beneficiary), ShiftInvalidatedEvent::NAME);
                 }
 
-                $message = "La participation au créneau a bien été " . ($validate ? "validée" : "invalidée") . " !";
+                $message = 'La participation au créneau a bien été ' . ($validate ? 'validée' : 'invalidée') . ' !';
                 $success = true;
             }
         } else {
@@ -468,28 +491,31 @@ class ShiftController extends AbstractController
         if ($request->isXmlHttpRequest()) {
             if ($success) {
                 $bucket = $shift_service->getShiftBucketFromShift($shift);
-                $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
+                $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', [
                     'bucket' => $bucket,
                     'start' => 6,
                     'end' => 22,
                     'line' => 0,
-                ));
+                ]);
                 $modal = $this->forward('App\Controller\BookingController::showBucketAction', [
-                    'bucket' => $bucket->getShiftWithMinId()
+                    'bucket' => $bucket->getShiftWithMinId(),
                 ])->getContent();
-                return new JsonResponse(array('message' => $message, 'card' => $card, 'modal' => $modal), 200);
-            } else {
-                return new JsonResponse(array('message' => $message), 400);
+
+                return new JsonResponse(['message' => $message, 'card' => $card, 'modal' => $modal], 200);
             }
-        } else {
-            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
-            $referer = $request->headers->get('referer');
-            return new RedirectResponse($referer);
+
+            return new JsonResponse(['message' => $message], 400);
+
         }
+        $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+        $referer = $request->headers->get('referer');
+
+        return new RedirectResponse($referer);
+
     }
 
     /**
-     * Accept a reserved shift
+     * Accept a reserved shift.
      *
      * @Route("/{id}/accept", name="shift_accept_reserved", methods={"GET"})
      */
@@ -500,22 +526,25 @@ class ShiftController extends AbstractController
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         if (!$shift->getId()) {
-            $session->getFlashBag()->add('error', "Créneau pas trouvé");
-            return $this->redirectToRoute("homepage");
+            $session->getFlashBag()->add('error', 'Créneau pas trouvé');
+
+            return $this->redirectToRoute('homepage');
         }
         if (!$shift->getLastShifter()) {
-            $session->getFlashBag()->add('error', "Oups, ce créneau a déjà été confirmé / refusé, ou le délai de reservation est écoulé.");
-            return $this->redirectToRoute("homepage");
+            $session->getFlashBag()->add('error', 'Oups, ce créneau a déjà été confirmé / refusé, ou le délai de reservation est écoulé.');
+
+            return $this->redirectToRoute('homepage');
         }
         if (!$this->isGranted('accept', $shift)) {
-            $session->getFlashBag()->add("error", "Impossible d'accepter la réservation");
-            return $this->redirectToRoute("homepage");
+            $session->getFlashBag()->add('error', "Impossible d'accepter la réservation");
+
+            return $this->redirectToRoute('homepage');
         }
 
         $beneficiary = $shift->getLastShifter();
         $shift->setBooker(($current_user instanceof User) ? $current_user : $beneficiary->getUser());
         $shift->setShifter($beneficiary);
-        $shift->setBookedTime(new DateTime('now'));
+        $shift->setBookedTime(new \DateTime('now'));
         $shift->setLastShifter(null);
         $shift->setFixe(false);
 
@@ -524,12 +553,13 @@ class ShiftController extends AbstractController
 
         $event_dispatcher->dispatch(new ShiftBookedEvent($shift, false), ShiftBookedEvent::NAME);
 
-        $session->getFlashBag()->add('success', "Créneau réservé ! Merci " . $shift->getShifter()->getFirstname());
+        $session->getFlashBag()->add('success', 'Créneau réservé ! Merci ' . $shift->getShifter()->getFirstname());
+
         return $this->redirectToRoute('homepage');
     }
 
     /**
-     * Reject a reserved shift
+     * Reject a reserved shift.
      *
      * @Route("/{id}/reject", name="shift_reject_reserved", methods={"GET"})
      */
@@ -540,16 +570,19 @@ class ShiftController extends AbstractController
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         if (!$shift->getId()) {
-            $session->getFlashBag()->add('error', "Créneau pas trouvé");
-            return $this->redirectToRoute("homepage");
+            $session->getFlashBag()->add('error', 'Créneau pas trouvé');
+
+            return $this->redirectToRoute('homepage');
         }
         if (!$shift->getLastShifter()) {
-            $session->getFlashBag()->add('error', "Oups, ce créneau a déjà été confirmé / refusé, ou le délai de reservation est écoulé.");
-            return $this->redirectToRoute("homepage");
+            $session->getFlashBag()->add('error', 'Oups, ce créneau a déjà été confirmé / refusé, ou le délai de reservation est écoulé.');
+
+            return $this->redirectToRoute('homepage');
         }
         if (!$this->isGranted('reject', $shift)) {
-            $session->getFlashBag()->add("error", "Impossible de rejeter la réservation");
-            return $this->redirectToRoute("homepage");
+            $session->getFlashBag()->add('error', 'Impossible de rejeter la réservation');
+
+            return $this->redirectToRoute('homepage');
         }
 
         $shift->setLastShifter(null);
@@ -558,8 +591,9 @@ class ShiftController extends AbstractController
         $em->persist($shift);
         $em->flush();
 
-        $session->getFlashBag()->add('success', "Créneau libéré !");
-        $session->getFlashBag()->add('warning', "Pense à revenir dans quelques jours choisir un autre créneau pour ton bénévolat :)");
+        $session->getFlashBag()->add('success', 'Créneau libéré !');
+        $session->getFlashBag()->add('warning', 'Pense à revenir dans quelques jours choisir un autre créneau pour ton bénévolat :)');
+
         return $this->redirectToRoute('homepage');
     }
 
@@ -567,6 +601,7 @@ class ShiftController extends AbstractController
      * delete a shift.
      *
      * @Route("/{id}", name="shift_delete", methods={"DELETE"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function deleteShiftAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher)
@@ -594,27 +629,30 @@ class ShiftController extends AbstractController
             if ($success) {
                 $bucket = $shift_service->getShiftBucketFromShift($shift);
                 if (count($bucket->getShifts()) > 0) {
-                    $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', array(
+                    $card =  $this->get('twig')->render('admin/booking/_partial/bucket_card.html.twig', [
                         'bucket' => $bucket,
                         'start' => 6,
                         'end' => 22,
                         'line' => 0,
-                    ));
+                    ]);
                     $modal = $this->forward('App\Controller\BookingController::showBucketAction', [
-                        'bucket' => $bucket->getShiftWithMinId()
+                        'bucket' => $bucket->getShiftWithMinId(),
                     ])->getContent();
                 } else {
                     $card = null;
                     $modal = null;
                 }
-                return new JsonResponse(array('message'=>$message, 'card' => $card, 'modal' => $modal), 200);
-            } else {
-                return new JsonResponse(array('message'=>$message), 400);
+
+                return new JsonResponse(['message' => $message, 'card' => $card, 'modal' => $modal], 200);
             }
-        } else {
-            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
-            return $this->redirectToRoute('booking_admin');
+
+            return new JsonResponse(['message' => $message], 400);
+
         }
+        $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+
+        return $this->redirectToRoute('booking_admin');
+
     }
 
     /**
@@ -632,29 +670,30 @@ class ShiftController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $beneficiaries = $form->get('to')->getData();
             $from = $form->get('from')->getData();
-            $from = $em->getRepository('App:Beneficiary')->findOneBy(array('id' => $from));
-            $emails = array();
-            $firstnames = array();
+            $from = $em->getRepository('App:Beneficiary')->findOneBy(['id' => $from]);
+            $emails = [];
+            $firstnames = [];
             foreach ($beneficiaries as $beneficiary) {
                 $emails[] = $beneficiary->getEmail();
                 $firstnames[] = $beneficiary->getFirstname();
             }
             $message = (new Email())
-                ->subject('[ESPACE MEMBRES] Un message de ' . $from->getFirstName() . " " . substr($from->getLastName(),0,1))
+                ->subject('[ESPACE MEMBRES] Un message de ' . $from->getFirstName() . ' ' . substr($from->getLastName(), 0, 1))
                 ->from($this->getParameter('transactional_mailer_user'))
                 ->replyTo($from->getEmail())
                 ->bcc(...$emails)
                 ->html(
                     $this->renderView(
                         'emails/coshifter_message.html.twig',
-                        array(
+                        [
                             'message' => trim($form->get('message')->getData()),
                             'from' => $from,
                             'firstnames' => $firstnames,
-                            'shift' => $shift
-                        )
+                            'shift' => $shift,
+                        ]
                     )
-                );
+                )
+            ;
             $mailer->send($message);
 
             if (count($firstnames) > 1) {
@@ -666,23 +705,24 @@ class ShiftController extends AbstractController
             }
 
             $session->getFlashBag()->add('success', 'Ton message a été transmis à ' . $firstnames);
+
             return $this->redirectToRoute('homepage');
         }
 
-        return $this->render('booking/_partial/home_shift_contactform.html.twig', array(
+        return $this->render('booking/_partial/home_shift_contactform.html.twig', [
             'shift' => $shift,
-            'form' => $form->createView()
-        ));
+            'form' => $form->createView(),
+        ]);
     }
 
     /**
-     * Widget display
-     * 
+     * Widget display.
+     *
      * @Route("/widget", name="shift_widget", methods={"GET"})
      */
     public function widgetAction(Request $request)
     {
-        $buckets = array();
+        $buckets = [];
         $job = null;
 
         $job_id = $request->get('job_id');
@@ -696,7 +736,7 @@ class ShiftController extends AbstractController
             if ($job) {
                 $shifts = $em->getRepository('App:Shift')->findFutures(null, $job);
                 foreach ($shifts as $shift) {
-                    $day = $shift->getStart()->format("d m Y");
+                    $day = $shift->getStart()->format('d m Y');
                     $interval = $shift->getIntervalCode();
                     if (!isset($buckets[$interval . $day])) {
                         $buckets[$interval . $day] = new ShiftBucket();
@@ -711,7 +751,7 @@ class ShiftController extends AbstractController
             'buckets' => $buckets,
             'display_end' => $display_end,
             'display_on_empty' => $display_on_empty,
-            'title' => $title
+            'title' => $title,
         ]);
     }
 
@@ -720,13 +760,14 @@ class ShiftController extends AbstractController
      *
      * @param Shift $shift The shift entity
      *
-     * @return \Symfony\Component\Form\Form The form
+     * @return Form The form
      */
     private function createShiftBookAdminForm(Shift $shift)
     {
         $form = $this->get('form.factory')->createNamedBuilder('shift_book_forms_' . $shift->getId())
-            ->setAction($this->generateUrl('shift_book_admin', array('id' => $shift->getId())))
-            ->add('shifter', AutocompleteBeneficiaryType::class, array('label' => 'Numéro d\'adhérent ou nom du membre', 'required' => true));
+            ->setAction($this->generateUrl('shift_book_admin', ['id' => $shift->getId()]))
+            ->add('shifter', AutocompleteBeneficiaryType::class, ['label' => 'Numéro d\'adhérent ou nom du membre', 'required' => true])
+        ;
 
         if ($this->use_fly_and_fixed) {
             $form = $form->add('fixe', RadioChoiceType::class, [
@@ -734,11 +775,11 @@ class ShiftController extends AbstractController
                     'Volant' => 0,
                     'Fixe' => 1,
                 ],
-                'data' => 0
+                'data' => 0,
             ]);
         } else {
             $form = $form->add('fixe', HiddenType::class, [
-                'data' => 0
+                'data' => 0,
             ]);
         }
 
@@ -750,14 +791,15 @@ class ShiftController extends AbstractController
      *
      * @param Shift $shift The shift entity
      *
-     * @return \Symfony\Component\Form\Form The form
+     * @return Form The form
      */
     private function createShiftDeleteForm(Shift $shift)
     {
         return $this->get('form.factory')->createNamedBuilder('shift_delete_forms_' . $shift->getId())
-            ->setAction($this->generateUrl('shift_delete', array('id' => $shift->getId())))
+            ->setAction($this->generateUrl('shift_delete', ['id' => $shift->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 
     /**
@@ -765,15 +807,16 @@ class ShiftController extends AbstractController
      *
      * @param Shift $shift The shift entity
      *
-     * @return \Symfony\Component\Form\Form The form
+     * @return Form The form
      */
     private function createShiftFreeForm(Shift $shift)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('shift_free', array('id' => $shift->getId())))
-            ->add('reason', TextareaType::class, array('required' => false))
+            ->setAction($this->generateUrl('shift_free', ['id' => $shift->getId()]))
+            ->add('reason', TextareaType::class, ['required' => false])
             ->setMethod('POST')
-            ->getForm();
+            ->getForm()
+        ;
     }
 
     /**
@@ -781,15 +824,16 @@ class ShiftController extends AbstractController
      *
      * @param Shift $shift The shift entity
      *
-     * @return \Symfony\Component\Form\Form The form
+     * @return Form The form
      */
     private function createShiftFreeAdminForm(Shift $shift)
     {
         return $this->get('form.factory')->createNamedBuilder('shift_free_forms_' . $shift->getId())
-            ->setAction($this->generateUrl('shift_free_admin', array('id' => $shift->getId())))
-            ->add('reason', TextareaType::class, array('required' => false, 'label' => 'Justification éventuelle', 'attr' => array('class' => 'materialize-textarea')))
+            ->setAction($this->generateUrl('shift_free_admin', ['id' => $shift->getId()]))
+            ->add('reason', TextareaType::class, ['required' => false, 'label' => 'Justification éventuelle', 'attr' => ['class' => 'materialize-textarea']])
             ->setMethod('POST')
-            ->getForm();
+            ->getForm()
+        ;
     }
 
     /**
@@ -797,42 +841,44 @@ class ShiftController extends AbstractController
      *
      * @param Shift $shift The shift entity
      *
-     * @return \Symfony\Component\Form\Form The form
+     * @return Form The form
      */
     private function createShiftValidateInvalidateAdminForm(Shift $shift)
     {
         return $this->get('form.factory')->createNamedBuilder('shift_validate_invalidate_forms_' . $shift->getId())
-            ->setAction($this->generateUrl('shift_validate_admin', array('id' => $shift->getId())))
+            ->setAction($this->generateUrl('shift_validate_admin', ['id' => $shift->getId()]))
             ->add('validate', HiddenType::class, [
                 'data'  => ($shift->getWasCarriedOut() ? 0 : 1),
             ])
             ->setMethod('POST')
-            ->getForm();
+            ->getForm()
+        ;
     }
 
     /**
      * Create a form to contact co shifters.
-     * 
-     * @param Shift $shift The shift entity
-     * @param $coShifters
-     * 
-     * @return \Symfony\Component\Form\Form The form
+     *
+     * @param Shift      $shift      The shift entity
+     * @param null|mixed $coShifters
+     *
+     * @return Form The form
      */
     private function createShiftContactForm(Shift $shift, $coShifters = null)
     {
         return $this->get('form.factory')->createNamedBuilder('shift_contact_form_' . $shift->getId())
-            ->add('from', HiddenType::class, array('data' => $shift->getShifter()->getId()))
+            ->add('from', HiddenType::class, ['data' => $shift->getShifter()->getId()])
             ->add('to', AutocompleteBeneficiaryCollectionType::class, [
                 'label' => 'A',
-                'data' => $coShifters
+                'data' => $coShifters,
             ])
             ->add('message', TextareaType::class, [
                 'attr' => ['class' => 'materialize-textarea'],
                 'label' => 'Message',
-                'data' => 'Bonjour XX,'.PHP_EOL."Tu n'es toujours pas arrivé pour notre créneau.".PHP_EOL."Est-ce que tout va bien ?".PHP_EOL."A très vite,".PHP_EOL.$shift->getShifter()->getFirstName().PHP_EOL.PHP_EOL."Bonjour à tou.te.s,".PHP_EOL."Je vais en être en retard pour mon créneau.".PHP_EOL."Je serai à l'épicerie d'ici XX minutes.".PHP_EOL."A tout de suite,".PHP_EOL.$shift->getShifter()->getFirstName()
+                'data' => 'Bonjour XX,' . PHP_EOL . "Tu n'es toujours pas arrivé pour notre créneau." . PHP_EOL . 'Est-ce que tout va bien ?' . PHP_EOL . 'A très vite,' . PHP_EOL . $shift->getShifter()->getFirstName() . PHP_EOL . PHP_EOL . 'Bonjour à tou.te.s,' . PHP_EOL . 'Je vais en être en retard pour mon créneau.' . PHP_EOL . "Je serai à l'épicerie d'ici XX minutes." . PHP_EOL . 'A tout de suite,' . PHP_EOL . $shift->getShifter()->getFirstName(),
             ])
-            ->setAction($this->generateUrl('shift_contact_form', array('id' => $shift->getId())))
+            ->setAction($this->generateUrl('shift_contact_form', ['id' => $shift->getId()]))
             ->setMethod('POST')
-            ->getForm();
+            ->getForm()
+        ;
     }
 }

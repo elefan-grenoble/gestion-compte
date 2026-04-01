@@ -12,5 +12,6 @@ return RectorConfig::configure()
     ->withComposerBased(true, true, true, true)
     ->withSymfonyContainerXml(__DIR__ . '/var/cache/dev/srcApp_KernelDevDebugContainer.xml')
     ->withMemoryLimit('512M')
-    ->withParallel(2000,2)
-    ->withTypeCoverageLevel(0);
+    ->withParallel(2000, 2)
+    ->withTypeCoverageLevel(0)
+;

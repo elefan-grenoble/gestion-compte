@@ -3,7 +3,6 @@
 namespace App\DataFixtures\ORM;
 
 use App\Entity\User;
-use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
@@ -20,8 +19,8 @@ class SuperAdminFixtures extends Fixture implements FixtureGroupInterface, Order
         $user->setEmail('superadmin@email.com');
         $user->setPlainPassword('password');
         $user->setEnabled(true);
-        $user->setRoles(array('ROLE_SUPER_ADMIN', 'ROLE_ADMIN'));
-        $user->setLastLogin(new DateTime('now'));
+        $user->setRoles(['ROLE_SUPER_ADMIN', 'ROLE_ADMIN']);
+        $user->setLastLogin(new \DateTime('now'));
 
         $this->addReference('superadmin', $user);
 
@@ -43,5 +42,4 @@ class SuperAdminFixtures extends Fixture implements FixtureGroupInterface, Order
     {
         return 3;
     }
-
 }

@@ -2,31 +2,30 @@
 
 namespace App\Controller;
 
-
 use App\Entity\ClosingException;
 use App\Form\ClosingExceptionType;
 use App\Repository\ClosingExceptionRepository;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
-use Symfony\Component\Form\Form;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
-
+use Symfony\Component\Form\FormInterface;
 
 /**
- * Admin ClosingException controller ("fermetures exceptionnelles" coté admin)
+ * Admin ClosingException controller ("fermetures exceptionnelles" coté admin).
  *
  * @Route("admin/closingexceptions")
  */
 class AdminClosingExceptionController extends AbstractController
 {
     /**
-     * Admin closing exception home
+     * Admin closing exception home.
      *
      * @Route("/", name="admin_closingexception_index", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function indexAction(Request $request)
@@ -37,25 +36,26 @@ class AdminClosingExceptionController extends AbstractController
         $repository = $em->getRepository(ClosingException::class);
         $closingExceptionsFuture = $repository->findFutures();
         $closingExceptionsOngoing = $repository->findOngoing();
-        $closingExceptionsPast = $repository->findPast(null, 10);  # only the 10 last
+        $closingExceptionsPast = $repository->findPast(null, 10);  // only the 10 last
 
-        $delete_forms = array();
+        $delete_forms = [];
         foreach ($closingExceptionsFuture as $closingException) {
             $delete_forms[$closingException->getId()] = $this->getDeleteForm($closingException)->createView();
         }
 
-        return $this->render('admin/closingexception/index.html.twig', array(
+        return $this->render('admin/closingexception/index.html.twig', [
             'closingExceptionsFuture' => $closingExceptionsFuture,
             'closingExceptionsOngoing' => $closingExceptionsOngoing,
             'closingExceptionsPast' => $closingExceptionsPast,
-            'delete_forms' => $delete_forms
-        ));
+            'delete_forms' => $delete_forms,
+        ]);
     }
 
     /**
-     * Admin closing exception list
+     * Admin closing exception list.
      *
      * @Route("/list", name="admin_closingexception_list", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function listAction(Request $request)
@@ -64,23 +64,24 @@ class AdminClosingExceptionController extends AbstractController
 
         $closingExceptions = $em->getRepository(ClosingException::class)->findAll();
 
-        $delete_forms = array();
+        $delete_forms = [];
         foreach ($closingExceptions as $closingException) {
             if (!$closingException->getIsPast()) {
                 $delete_forms[$closingException->getId()] = $this->getDeleteForm($closingException)->createView();
             }
         }
 
-        return $this->render('admin/closingexception/list.html.twig', array(
+        return $this->render('admin/closingexception/list.html.twig', [
             'closingExceptions' => $closingExceptions,
-            'delete_forms' => $delete_forms
-        ));
+            'delete_forms' => $delete_forms,
+        ]);
     }
 
     /**
-     * Add new closing exception
+     * Add new closing exception.
      *
      * @Route("/new", name="admin_closingexception_new", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
@@ -100,19 +101,21 @@ class AdminClosingExceptionController extends AbstractController
             $em->persist($closingException);
             $em->flush();
 
-            $session->getFlashBag()->add('success', "La fermeture exceptionnelle a bien été crée !");
+            $session->getFlashBag()->add('success', 'La fermeture exceptionnelle a bien été crée !');
+
             return $this->redirectToRoute('admin_closingexception_index');
         }
 
-        return $this->render('admin/closingexception/new.html.twig', array(
-            'form' => $form->createView()
-        ));
+        return $this->render('admin/closingexception/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     /**
-     * Closing exception delete
+     * Closing exception delete.
      *
      * @Route("/{id}", name="admin_closingexception_delete", methods={"DELETE"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function deleteAction(Request $request, ClosingException $closingException)
@@ -134,22 +137,24 @@ class AdminClosingExceptionController extends AbstractController
     }
 
     /**
-     * Closing exception widget generator
+     * Closing exception widget generator.
      *
      * @Route("/widget_generator", name="admin_closingexception_widget_generator", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function widgetGeneratorAction(Request $request)
     {
         $form = $this->createFormBuilder()
-            ->add('title', CheckboxType::class, array(
+            ->add('title', CheckboxType::class, [
                 'required' => false,
                 'data' => true,
                 'label' => 'Afficher le titre du widget ?',
-                'attr' => array('class' => 'filled-in')
-            ))
-            ->add('generate', SubmitType::class, array('label' => 'Générer'))
-            ->getForm();
+                'attr' => ['class' => 'filled-in'],
+            ])
+            ->add('generate', SubmitType::class, ['label' => 'Générer'])
+            ->getForm()
+        ;
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -157,26 +162,26 @@ class AdminClosingExceptionController extends AbstractController
 
             $widgetQueryString = 'title=' . ($data['title'] ? 1 : 0);
 
-            return $this->render('admin/closingexception/widget_generator.html.twig', array(
+            return $this->render('admin/closingexception/widget_generator.html.twig', [
                 'form' => $form->createView(),
-                'query_string' => $widgetQueryString
-            ));
+                'query_string' => $widgetQueryString,
+            ]);
         }
 
-        return $this->render('admin/closingexception/widget_generator.html.twig', array(
+        return $this->render('admin/closingexception/widget_generator.html.twig', [
             'form' => $form->createView(),
-        ));
+        ]);
     }
 
     /**
-     * @param ClosingException $closingException
-     * @return \Symfony\Component\Form\FormInterface
+     * @return FormInterface
      */
     protected function getDeleteForm(ClosingException $closingException)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('admin_closingexception_delete', array('id' => $closingException->getId())))
+            ->setAction($this->generateUrl('admin_closingexception_delete', ['id' => $closingException->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 }

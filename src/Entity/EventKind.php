@@ -4,12 +4,15 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\Common\Collections\Collection;
 
 /**
- * EventKind
+ * EventKind.
  *
  * @ORM\Table(name="event_kind")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\EventKindRepository")
  */
 class EventKind
@@ -18,7 +21,9 @@ class EventKind
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -27,6 +32,7 @@ class EventKind
      * @var string
      *
      * @Assert\NotBlank()
+     *
      * @ORM\Column(name="name", type="string", length=255)
      */
     private $name;
@@ -62,7 +68,7 @@ class EventKind
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -72,7 +78,7 @@ class EventKind
     }
 
     /**
-     * Set name
+     * Set name.
      *
      * @param string $name
      *
@@ -86,7 +92,7 @@ class EventKind
     }
 
     /**
-     * Get name
+     * Get name.
      *
      * @return string
      */
@@ -96,9 +102,9 @@ class EventKind
     }
 
     /**
-     * Get events
+     * Get events.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getEvents()
     {
@@ -106,7 +112,7 @@ class EventKind
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */

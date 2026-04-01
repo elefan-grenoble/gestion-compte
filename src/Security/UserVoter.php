@@ -1,5 +1,7 @@
 <?php
+
 // src/App/Security/UserVoter.php
+
 namespace App\Security;
 
 use App\Helper\PlaceIP;
@@ -11,22 +13,22 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class UserVoter extends Voter
 {
-    const ACCESS_TOOLS = 'access_tools';
-    const CARD_READER = 'card_reader';
-    const CREATE = 'create';
-    const VIEW = 'view';
-    const EDIT = 'edit';
-    const CLOSE = 'close';
-    const FREEZE = 'freeze';
-    const FREEZE_CHANGE = 'freeze_change';
-    const ROLE_REMOVE = 'role_remove';
-    const ROLE_ADD = 'role_add';
-    const ANNOTATE = 'annotate';
+    public const ACCESS_TOOLS = 'access_tools';
+    public const CARD_READER = 'card_reader';
+    public const CREATE = 'create';
+    public const VIEW = 'view';
+    public const EDIT = 'edit';
+    public const CLOSE = 'close';
+    public const FREEZE = 'freeze';
+    public const FREEZE_CHANGE = 'freeze_change';
+    public const ROLE_REMOVE = 'role_remove';
+    public const ROLE_ADD = 'role_add';
+    public const ANNOTATE = 'annotate';
 
     private $decisionManager;
     private $container;
 
-    public function __construct(ContainerInterface $container,AccessDecisionManagerInterface $decisionManager)
+    public function __construct(ContainerInterface $container, AccessDecisionManagerInterface $decisionManager)
     {
         $this->container = $container;
         $this->decisionManager = $decisionManager;
@@ -35,7 +37,7 @@ class UserVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::VIEW, self::EDIT, self::CLOSE,self::ROLE_REMOVE,self::ROLE_ADD, self::FREEZE,self::FREEZE_CHANGE, self::CREATE,self::ANNOTATE, self::ACCESS_TOOLS, self::CARD_READER))) {
+        if (!in_array($attribute, [self::VIEW, self::EDIT, self::CLOSE, self::ROLE_REMOVE, self::ROLE_ADD, self::FREEZE, self::FREEZE_CHANGE, self::CREATE, self::ANNOTATE, self::ACCESS_TOOLS, self::CARD_READER])) {
             return false;
         }
 
@@ -55,42 +57,47 @@ class UserVoter extends Voter
             if ($attribute == self::CARD_READER) {
                 return $this->container->get(PlaceIP::class)->isLocationOk();
             }
+
             // the user must be logged in; if not, deny access
             return false;
         }
 
-        if ($this->container->getParameter("oidc_enable"))
-        {
+        if ($this->container->getParameter('oidc_enable')) {
             return false;
         }
 
         // ROLE_SUPER_ADMIN can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
+        if ($this->decisionManager->decide($token, ['ROLE_SUPER_ADMIN'])) {
             return true;
         }
         // on user ROLE_ADMIN can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+        if ($this->decisionManager->decide($token, ['ROLE_ADMIN'])) {
             return true;
         }
         // on user ROLE_USER_MANAGER can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_USER_MANAGER'))) {
+        if ($this->decisionManager->decide($token, ['ROLE_USER_MANAGER'])) {
             return true;
         }
 
         // you know $subject is a Post object, thanks to supports
         switch ($attribute) {
-            case self::CARD_READER: //for all
+            case self::CARD_READER: // for all
                 return true;
+
             case self::ACCESS_TOOLS:
             case self::CREATE:
                 return $this->container->get(PlaceIP::class)->isLocationOk();
+
             case self::VIEW:
             case self::ANNOTATE:
                 return $this->canView($subject, $token);
+
             case self::FREEZE_CHANGE:
                 if ($subject === $user) {
                     return true;
                 }
+
+                // no break
             case self::FREEZE:
             case self::CLOSE:
             case self::ROLE_ADD:
@@ -113,6 +120,7 @@ class UserVoter extends Voter
         if ($this->decisionManager->decide($token, ['ROLE_USER_VIEWER'])) {
             return true;
         }
+
         return false;
     }
 
@@ -125,10 +133,12 @@ class UserVoter extends Voter
                 return true;
             }
             if ($subject->getId() === $user->getId()) {
-                    return true;
+                return true;
             }
+
             return false;
         }
+
         return false;
 
     }

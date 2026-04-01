@@ -1,12 +1,9 @@
 <?php
 
-
 namespace App\Command;
-
 
 use App\Entity\Address;
 use App\Entity\Beneficiary;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -18,12 +15,12 @@ class FixBeneficiariesWithoutAddressCommand extends Command
 
     public function __construct(
         EntityManagerInterface $em
-    )
-    {
+    ) {
         $this->em = $em;
 
         parent::__construct();
     }
+
     protected function configure()
     {
         $this
@@ -38,7 +35,8 @@ class FixBeneficiariesWithoutAddressCommand extends Command
         $qb->leftJoin('b.membership', 'm')
             ->leftJoin('m.mainBeneficiary', 'mb')
             ->where('b.address IS NULL')
-            ->andWhere('mb.address IS NOT NULL');
+            ->andWhere('mb.address IS NOT NULL')
+        ;
 
         $beneficiariesToFix = $qb->getQuery()->getResult();
 

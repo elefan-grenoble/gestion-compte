@@ -37,6 +37,6 @@ class OAuthEventListener
 
     protected function getUser(OAuthEvent $event)
     {
-        return $this->em->getRepository('App:User')->findOneBy(array('username'=>$event->getUser()->getUsername()));
+        return $this->em->getRepository('App:User')->findOneBy(['username' => $event->getUser()->getUsername()]);
     }
 }

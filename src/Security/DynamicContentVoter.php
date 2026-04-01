@@ -1,5 +1,7 @@
 <?php
+
 // src/App/Security/NoteVoter.php
+
 namespace App\Security;
 
 use App\Entity\DynamicContent;
@@ -10,8 +12,8 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class DynamicContentVoter extends Voter
 {
-    const VIEW = 'view';
-    const EDIT = 'edit';
+    public const VIEW = 'view';
+    public const EDIT = 'edit';
 
     private $decisionManager;
 
@@ -23,7 +25,7 @@ class DynamicContentVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::EDIT, self::VIEW))) {
+        if (!in_array($attribute, [self::EDIT, self::VIEW])) {
             return false;
         }
 
@@ -45,11 +47,10 @@ class DynamicContentVoter extends Voter
         }
 
         // ROLE_SUPER_ADMIN can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
+        if ($this->decisionManager->decide($token, ['ROLE_SUPER_ADMIN'])) {
             return true;
         }
 
-        return $this->decisionManager->decide($token, array('ROLE_ADMIN'));
+        return $this->decisionManager->decide($token, ['ROLE_ADMIN']);
     }
-
 }

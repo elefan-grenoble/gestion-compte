@@ -12,37 +12,27 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class JobType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('name', TextType::class, array('label' => 'Nom du poste de bénévolat'))
-            ->add('min_shifter_alert', IntegerType::class, array('label' => 'Nombre minimum de bénévoles inscrits sur le créneau pour ne pas envoyer d\'alerte', 'required' => true, 'data' => 2, 'empty_data' => 2))
-            ->add('color', TextType::class, array('label' => 'Couleur des créneaux dans le planning'))
-            ->add('description', MarkdownEditorType::class, array('label' => 'Description', 'required' => false, 'empty_data' => ''))
-            ->add('url', TextType::class, array('label' => 'Lien vers une documentation', 'required' => false))
-            ->add('enabled', CheckboxType::class, array('label' => 'Poste activé', 'required' => false, 'attr' => array('class' => 'filled-in')));
+            ->add('name', TextType::class, ['label' => 'Nom du poste de bénévolat'])
+            ->add('min_shifter_alert', IntegerType::class, ['label' => 'Nombre minimum de bénévoles inscrits sur le créneau pour ne pas envoyer d\'alerte', 'required' => true, 'data' => 2, 'empty_data' => 2])
+            ->add('color', TextType::class, ['label' => 'Couleur des créneaux dans le planning'])
+            ->add('description', MarkdownEditorType::class, ['label' => 'Description', 'required' => false, 'empty_data' => ''])
+            ->add('url', TextType::class, ['label' => 'Lien vers une documentation', 'required' => false])
+            ->add('enabled', CheckboxType::class, ['label' => 'Poste activé', 'required' => false, 'attr' => ['class' => 'filled-in']])
+        ;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
-            'data_class' => Job::class
-        ));
+        $resolver->setDefaults([
+            'data_class' => Job::class,
+        ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlockPrefix()
     {
         return 'App_job';
     }
-
-
 }

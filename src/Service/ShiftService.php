@@ -5,15 +5,11 @@ namespace App\Service;
 use App\Entity\Beneficiary;
 use App\Entity\Membership;
 use App\Entity\PeriodPosition;
-use App\Entity\Registration;
 use App\Entity\Shift;
 use App\Entity\ShiftBucket;
-use App\Service\MembershipService;
-use App\Service\BeneficiaryService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
-use phpDocumentor\Reflection\Types\Array_;
-use Symfony\Component\DependencyInjection\Container;
+use Doctrine\Common\Collections\Collection;
 
 class ShiftService
 {
@@ -32,11 +28,22 @@ class ShiftService
     private $time_log_saving_shift_free_min_time_in_advance_days;
     private $time_log_saving_shift_free_allow_only_if_enough_saving;
 
-    public function __construct(EntityManagerInterface $em, BeneficiaryService $beneficiaryService, MembershipService $membershipService,
-        $due_duration_by_cycle, $min_shift_duration, $newUserStartAsBeginner, $allowExtraShifts, $maxTimeInAdvanceToBookExtraShifts, $forbidShiftOverlapTime,
-        bool $use_fly_and_fixed, bool $fly_and_fixed_allow_fixed_shift_free,
-        bool $use_time_log_saving, $time_log_saving_shift_free_min_time_in_advance_days, bool $time_log_saving_shift_free_allow_only_if_enough_saving)
-    {
+    public function __construct(
+        EntityManagerInterface $em,
+        BeneficiaryService $beneficiaryService,
+        MembershipService $membershipService,
+        $due_duration_by_cycle,
+        $min_shift_duration,
+        $newUserStartAsBeginner,
+        $allowExtraShifts,
+        $maxTimeInAdvanceToBookExtraShifts,
+        $forbidShiftOverlapTime,
+        bool $use_fly_and_fixed,
+        bool $fly_and_fixed_allow_fixed_shift_free,
+        bool $use_time_log_saving,
+        $time_log_saving_shift_free_min_time_in_advance_days,
+        bool $time_log_saving_shift_free_allow_only_if_enough_saving
+    ) {
         $this->em = $em;
         $this->beneficiaryService = $beneficiaryService;
         $this->membershipService = $membershipService;
@@ -54,20 +61,22 @@ class ShiftService
     }
 
     /**
-     * Return the remaining amount of time to book by the given membership in the current cycle
-     * @param Membership $member
+     * Return the remaining amount of time to book by the given membership in the current cycle.
+     *
      * @return mixed
      */
     public function remainingToBook(Membership $member)
     {
         $cycle_end = $this->membershipService->getEndOfCycle($member);
+
         return $this->due_duration_by_cycle - $member->getShiftTimeCount($cycle_end);
     }
 
     /**
-     * Check if a beneficiary can book on the given cycle
-     * @param Beneficiary $beneficiary
+     * Check if a beneficiary can book on the given cycle.
+     *
      * @param int $cycle
+     *
      * @return bool
      */
     public function canBookOnCycle(Beneficiary $beneficiary, $cycle)
@@ -76,23 +85,22 @@ class ShiftService
     }
 
     /**
-     * Check if a beneficiary can book an extra shift
-     * @param Beneficiary $beneficiary
-     * @param Shift $shift
+     * Check if a beneficiary can book an extra shift.
+     *
      * @return bool
      */
     public function canBookExtraShift(Beneficiary $beneficiary, Shift $shift)
     {
-        if (true === $this->allowExtraShifts && NULL === $this->maxTimeInAdvanceToBookExtraShifts) {
+        if (true === $this->allowExtraShifts && null === $this->maxTimeInAdvanceToBookExtraShifts) {
             return true;
         }
+
         return true === $this->allowExtraShifts && $shift->isBefore($this->maxTimeInAdvanceToBookExtraShifts);
     }
 
     /**
-     * Check if a beneficiary can book an extra shift bucket
-     * @param Beneficiary $beneficiary
-     * @param ShiftBucket $shiftBucket
+     * Check if a beneficiary can book an extra shift bucket.
+     *
      * @return bool
      */
     public function canBookExtraShiftBucket(Beneficiary $beneficiary, ShiftBucket $shiftBucket)
@@ -101,8 +109,8 @@ class ShiftService
     }
 
     /**
-     * Check if a beneficiary can book on the current and next cycles
-     * @param Beneficiary $beneficiary
+     * Check if a beneficiary can book on the current and next cycles.
+     *
      * @return bool
      */
     public function canBookSomething(Beneficiary $beneficiary)
@@ -110,40 +118,43 @@ class ShiftService
         if (true === $this->allowExtraShifts) {
             return true;
         }
+
         return $this->canBookOnCycle($beneficiary, 0) || $this->canBookOnCycle($beneficiary, 1);
     }
 
     /**
-     * Check if a beneficiary do not have booked a shift that overlaps the current
-     * @param Beneficiary $beneficiary
-     * @param Shift $currentShift
+     * Check if a beneficiary do not have booked a shift that overlaps the current.
+     *
      * @return bool
      */
-    public function canBookShift(Beneficiary $beneficiary, Shift $currentShift) {
+    public function canBookShift(Beneficiary $beneficiary, Shift $currentShift)
+    {
         if ($this->forbidShiftOverlapTime < 0) {
             return true;
         }
         $shifts = $beneficiary->getShifts()->filter(function ($shift) use ($currentShift) {
-            $start = (clone $shift->getStart())->add(\DateInterval::createFromDateString($this->forbidShiftOverlapTime.' minutes'));
-            $end = (clone $shift->getEnd())->sub(\DateInterval::createFromDateString($this->forbidShiftOverlapTime.' minutes'));
+            $start = (clone $shift->getStart())->add(\DateInterval::createFromDateString($this->forbidShiftOverlapTime . ' minutes'));
+            $end = (clone $shift->getEnd())->sub(\DateInterval::createFromDateString($this->forbidShiftOverlapTime . ' minutes'));
+
             return ($currentShift->getStart() < $end
                 && $currentShift->getEnd() >= $shift->getEnd())
                 || ($currentShift->getEnd() > $start
                 && $currentShift->getStart() <= $shift->getStart());
         });
+
         return $shifts->count() == 0;
     }
 
     /**
-     * Check if a beneficiary can book a specific duration on the given cycle
-     * @param Beneficiary $beneficiary
-     * @param $duration
+     * Check if a beneficiary can book a specific duration on the given cycle.
+     *
      * @param int $cycle
+     *
      * @return bool
      */
     public function canBookDuration(Beneficiary $beneficiary, $duration, $cycle = 0)
     {
-        if (true === $this->allowExtraShifts && NULL === $this->maxTimeInAdvanceToBookExtraShifts) {
+        if (true === $this->allowExtraShifts && null === $this->maxTimeInAdvanceToBookExtraShifts) {
             return true;
         }
 
@@ -152,9 +163,9 @@ class ShiftService
         $cycle_end = $this->membershipService->getEndOfCycle($member, $cycle);
         $membership_counter = $member->getShiftTimeCount($cycle_end);
 
-        //check if beneficiary booked time is ok
-        //if timecount < due_duration_by_cycle : some shift to catchup, can book more than what's due
-        if ($membership_counter >= $this->due_duration_by_cycle && $beneficiary_cycle_shift_duration >= $this->due_duration_by_cycle) { //Beneficiary is already ok
+        // check if beneficiary booked time is ok
+        // if timecount < due_duration_by_cycle : some shift to catchup, can book more than what's due
+        if ($membership_counter >= $this->due_duration_by_cycle && $beneficiary_cycle_shift_duration >= $this->due_duration_by_cycle) { // Beneficiary is already ok
             return false;
         }
 
@@ -168,8 +179,8 @@ class ShiftService
     }
 
     /**
-     * Get total shift time for a cycle
-     * @param Membership $member
+     * Get total shift time for a cycle.
+     *
      * @return float|int
      */
     public function shiftTimeByCycle(Membership $member)
@@ -178,10 +189,9 @@ class ShiftService
     }
 
     /**
-     * Get beneficiaries who can book for the current and next cycles
+     * Get beneficiaries who can book for the current and next cycles.
      *
-     * @param Membership $member
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getBeneficiariesWhoCanBook(Membership $member)
     {
@@ -191,11 +201,11 @@ class ShiftService
     }
 
     /**
-     * Get beneficiaries who can book for the given cycle
+     * Get beneficiaries who can book for the given cycle.
      *
-     * @param Membership $member
      * @param int $cycle
-     * @return \Doctrine\Common\Collections\Collection
+     *
+     * @return Collection
      */
     public function getBeneficiariesWhoCanBookForCycle(Membership $member, $cycle = 0)
     {
@@ -204,7 +214,7 @@ class ShiftService
         });
     }
 
-    public function isShiftBookable(Shift $shift, Beneficiary $beneficiary = null)
+    public function isShiftBookable(Shift $shift, ?Beneficiary $beneficiary = null)
     {
         if (!$beneficiary) {
             return true;
@@ -244,30 +254,35 @@ class ShiftService
         }
         if ($member->getFrozen()) {
             $cycle_end = $this->membershipService->getEndOfCycle($member);
-            //current cycle : cannot book when frozen
-            if ($shift->getStart() <= $cycle_end)
+            // current cycle : cannot book when frozen
+            if ($shift->getStart() <= $cycle_end) {
                 return false;
-            //next cycle : cannot book if frozen
-            if ($shift->getStart() > $cycle_end && !$member->getFrozenChange())
+            }
+            // next cycle : cannot book if frozen
+            if ($shift->getStart() > $cycle_end && !$member->getFrozenChange()) {
                 return false;
+            }
         }
 
         // TODO refactor code to remove shift_cycle
         // canBookDuration method should not use TimeLog but request shifts
         $shift_cycle = $this->membershipService->getCycleNumber($member, $shift->getStart());
+
         return $this->canBookDuration($beneficiary, $shift->getDuration(), $shift_cycle) or $this->canBookExtraShift($beneficiary, $shift);
     }
 
     /**
-     * Check if the beneficiary is able to free the shift
-     * @param Beneficiary $beneficiary
-     * @param Shift $shift
+     * Check if the beneficiary is able to free the shift.
+     *
+     * @param mixed $from_admin
+     *
      * @return array
      */
-    public function canFreeShift(Beneficiary $beneficiary, Shift $shift, $from_admin = false) {
+    public function canFreeShift(Beneficiary $beneficiary, Shift $shift, $from_admin = false)
+    {
         // init
         $result = true;
-        $message = "";
+        $message = '';
 
         // cannot free a shift without shifter
         if (!$shift->getShifter()) {
@@ -285,7 +300,7 @@ class ShiftService
             // cannot free a past or current shift
             if ($shift->getIsPast() || $shift->getIsCurrent()) {
                 $result = false;
-                $message = "Impossible de libérer un créneau dans le passé.";
+                $message = 'Impossible de libérer un créneau dans le passé.';
             }
 
             // Fly & fixed:
@@ -293,7 +308,7 @@ class ShiftService
             if ($this->use_fly_and_fixed) {
                 if ($shift->isFixe() && !$this->fly_and_fixed_allow_fixed_shift_free) {
                     $result = false;
-                    $message = "Impossible de libérer un créneau fixe.";
+                    $message = 'Impossible de libérer un créneau fixe.';
                 }
             }
 
@@ -305,25 +320,25 @@ class ShiftService
                 if ($this->time_log_saving_shift_free_min_time_in_advance_days) {
                     if ($shift->isBefore($this->time_log_saving_shift_free_min_time_in_advance_days . ' days')) {
                         $result = false;
-                        $message = "Impossible de libérer un créneau si peu de temps en avance (minumum " . $this->time_log_saving_shift_free_min_time_in_advance_days . " jours).";
+                        $message = 'Impossible de libérer un créneau si peu de temps en avance (minumum ' . $this->time_log_saving_shift_free_min_time_in_advance_days . ' jours).';
                     }
                 }
                 if ($this->time_log_saving_shift_free_allow_only_if_enough_saving) {
                     $member_saving_now = $member->getSavingTimeCount();
                     if ($shift->getDuration() > $member_saving_now) {
                         $result = false;
-                        $message = "Impossible de libérer le créneau car sa durée dépasse la capacité du compteur épargne du membre.";
+                        $message = 'Impossible de libérer le créneau car sa durée dépasse la capacité du compteur épargne du membre.';
                     }
                 }
             }
         }
 
-        return array('result' => $result, 'message' => $message);
+        return ['result' => $result, 'message' => $message];
     }
 
     /**
-     * Check if the beneficiary is a beginner, eg : no shift completed
-     * @param Beneficiary $beneficiary
+     * Check if the beneficiary is a beginner, eg : no shift completed.
+     *
      * @return bool
      */
     public function isBeginner(Beneficiary $beneficiary)
@@ -336,8 +351,8 @@ class ShiftService
     }
 
     /**
-     * Check if the given beneficiary did at least one shift
-     * @param Beneficiary $beneficiary
+     * Check if the given beneficiary did at least one shift.
+     *
      * @return bool
      */
     public function hasPreviousValidShifts(Beneficiary $beneficiary)
@@ -350,17 +365,18 @@ class ShiftService
     }
 
     /**
-     * Check if the bucket of the given shift doesn't contain any shifters
-     * @param $shift
+     * Check if the bucket of the given shift doesn't contain any shifters.
+     *
      * @return bool
      */
     public function isShiftEmpty($shift)
     {
         $shifts = $this->em->getRepository('App:Shift')->findAlreadyBookedShiftsOfBucket($shift);
+
         return count($shifts) === 0;
     }
 
-    public function getBookableShifts(ShiftBucket $bucket, Beneficiary $beneficiary = null)
+    public function getBookableShifts(ShiftBucket $bucket, ?Beneficiary $beneficiary = null)
     {
         if (!$beneficiary) {
             // return all free shifts
@@ -376,16 +392,17 @@ class ShiftService
                 $bookableShifts = new ArrayCollection();
             }
         }
+
         return $bookableShifts;
     }
 
-    /***
+    /*
      * Renvoie le premier shift bookable.
      * @param ShiftBucket $bucket
      * @param Beneficiary|null $beneficiary
      * @return mixed|null
      */
-    public function getFirstBookable(ShiftBucket $bucket, Beneficiary $beneficiary = null)
+    public function getFirstBookable(ShiftBucket $bucket, ?Beneficiary $beneficiary = null)
     {
         if ($beneficiary && $this->isBucketBookable($bucket, $beneficiary)) {
             $bookableShifts = $this->getBookableShifts($bucket, $beneficiary);
@@ -393,20 +410,22 @@ class ShiftService
             $iterator->uasort(function (Shift $a, Shift $b) use ($beneficiary) {
                 return ShiftBucket::compareShifts($a, $b, $beneficiary);
             });
-            $sorted = new \Doctrine\Common\Collections\ArrayCollection(iterator_to_array($iterator));
+            $sorted = new ArrayCollection(iterator_to_array($iterator));
+
             return $sorted->isEmpty() ? null : $sorted->first();
-        } else {
-            return null;
         }
+
+        return null;
+
     }
 
-    /***
+    /*
      * Renvoie le nombre de shits bookable.
      * @param ShiftBucket $bucket
      * @param Beneficiary|null $beneficiary
      * @return int
      */
-    public function getBookableShiftsCount(ShiftBucket $bucket, Beneficiary $beneficiary = null)
+    public function getBookableShiftsCount(ShiftBucket $bucket, ?Beneficiary $beneficiary = null)
     {
         $bookableShifts = $this->getBookableShifts($bucket, $beneficiary);
 
@@ -417,7 +436,7 @@ class ShiftService
         return count(ShiftBucket::filterByFormations($bookableShifts, $beneficiary->getFormations()));
     }
 
-    public function isBucketBookable(ShiftBucket $bucket, Beneficiary $beneficiary = null)
+    public function isBucketBookable(ShiftBucket $bucket, ?Beneficiary $beneficiary = null)
     {
         return $this->getBookableShiftsCount($bucket, $beneficiary) > 0;
     }
@@ -426,27 +445,30 @@ class ShiftService
     {
         $bookableShifts = $this->getBookableShifts($bucket, $beneficiary);
         $bookableIntersectFormations = ShiftBucket::shiftIntersectFormations($bookableShifts, $beneficiary->getFormations());
+
         return $bucket->getShifts()->filter(ShiftBucket::createShiftFilterCallback($bookableIntersectFormations));
     }
 
     /**
      * build the bucket
-     * group similar shifts together (same time & same job)
+     * group similar shifts together (same time & same job).
+     *
+     * @param mixed $shifts
      */
     public function generateShiftBucketsByDayAndJob($shifts)
     {
-        $bucketsByDay = array();
+        $bucketsByDay = [];
 
         foreach ($shifts as $shift) {
-            $day = $shift->getStart()->format("d m Y");
+            $day = $shift->getStart()->format('d m Y');
             $jobId = $shift->getJob()->getId();
             $interval = $shift->getIntervalCode();
 
             if (!isset($bucketsByDay[$day])) {
-                $bucketsByDay[$day] = array();
+                $bucketsByDay[$day] = [];
             }
             if (!isset($bucketsByDay[$day][$jobId])) {
-                $bucketsByDay[$day][$jobId] = array();
+                $bucketsByDay[$day][$jobId] = [];
             }
             if (!isset($bucketsByDay[$day][$jobId][$interval])) {
                 $bucket = new ShiftBucket();
@@ -459,9 +481,11 @@ class ShiftService
     }
 
     /**
-     * Filter bucketsByDay by filling (empty / partial / full)
+     * Filter bucketsByDay by filling (empty / partial / full).
+     *
+     * @param mixed $bucketsByDay
      */
-    public function filterBucketsByDayAndJobByFilling($bucketsByDay, string $filling = null)
+    public function filterBucketsByDayAndJobByFilling($bucketsByDay, ?string $filling = null)
     {
         if ($filling) {
             foreach ($bucketsByDay as $day => $bucketsByJob) {
@@ -470,9 +494,9 @@ class ShiftService
                         $nbShifts = count($bucket->getShifts());
                         $nbBookableShifts = count($this->getBookableShifts($bucket));
                         if (
-                            ($filling == 'empty' and $nbBookableShifts != $nbShifts) ||
-                            ($filling == 'full' and $nbBookableShifts != 0) ||
-                            ($filling == 'partial' and ($nbBookableShifts == $nbShifts or $nbBookableShifts == 0))
+                            ($filling == 'empty' and $nbBookableShifts != $nbShifts)
+                            || ($filling == 'full' and $nbBookableShifts != 0)
+                            || ($filling == 'partial' and ($nbBookableShifts == $nbShifts or $nbBookableShifts == 0))
                         ) {
                             unset($bucketsByDay[$day][$jobId][$interval]);
                             if (count($bucketsByDay[$day][$jobId]) == 0) {
@@ -491,26 +515,26 @@ class ShiftService
     }
 
     /**
-     * @param $shifts
      * @return array
      */
     public function generateShiftBuckets($shifts)
     {
-        $buckets = array();
+        $buckets = [];
         foreach ($shifts as $shift) {
-            $key = $shift->getIntervalCode().$shift->getJob()->getId();
+            $key = $shift->getIntervalCode() . $shift->getJob()->getId();
             if (!isset($buckets[$key])) {
                 $bucket = new ShiftBucket();
                 $buckets[$key] = $bucket;
             }
             $buckets[$key]->addShift($shift);
         }
+
         return $buckets;
     }
 
     /**
-     * Create a ShiftBucket from a single Shift
-     * @param Shift $shift
+     * Create a ShiftBucket from a single Shift.
+     *
      * @return ShiftBucket
      */
     public function getShiftBucketFromShift(Shift $shift)
@@ -519,7 +543,7 @@ class ShiftService
         $shifts = $this->em->getRepository('App:Shift')->findBy([
             'job' => $shift->getJob(),
             'start' => $shift->getStart(),
-            'end' => $shift->getEnd()
+            'end' => $shift->getEnd(),
         ]);
         $shiftBucket->addShifts($shifts);
 
@@ -532,8 +556,8 @@ class ShiftService
     }
 
     /**
-     * Remove all empty shifts from an array of shift buckets
-     * @param $buckets
+     * Remove all empty shifts from an array of shift buckets.
+     *
      * @return array
      */
     public function removeEmptyShift($buckets)
@@ -541,18 +565,19 @@ class ShiftService
         foreach ($buckets as $bucket) {
             $bucket->removeEmptyShift();
         }
+
         return $buckets;
     }
 
     /**
-     * Check if the beneficiary has shifts that match parameters
-     * @param Beneficiary $beneficiary
+     * Check if the beneficiary has shifts that match parameters.
+     *
      * @param Datetime $start_before
      * @param Datetime $start_after
-     * @param Datetime $end_before
+     *
      * @return bool
      */
-    public function isBeneficiaryHasShifts(Beneficiary $beneficiary, \Datetime $start_after, \Datetime $start_before, \Datetime $end_after)
+    public function isBeneficiaryHasShifts(Beneficiary $beneficiary, \DateTime $start_after, \DateTime $start_before, \DateTime $end_after)
     {
         $beneficiaryShifts = $this->em->getRepository('App:Shift')->findShiftsForBeneficiary(
             $beneficiary,
@@ -561,17 +586,17 @@ class ShiftService
             $start_before,
             $end_after
         );
+
         return !$beneficiaryShifts->isEmpty();
     }
 
     /**
-     * Get number of shifts for a given beneficiary, with possible filters on PeriodPosition, wasCarriedOut & endBeforeNow
-     * @param Beneficiary $beneficiary
-     * @param PeriodPosition $position
+     * Get number of shifts for a given beneficiary, with possible filters on PeriodPosition, wasCarriedOut & endBeforeNow.
+     *
      * @param bool $wasCarriedOut
      * @param bool $endBeforeNow
      */
-    public function getBeneficiaryShiftCount(Beneficiary $beneficiary, PeriodPosition $position = null, $wasCarriedOut = null, $endBeforeNow = false)
+    public function getBeneficiaryShiftCount(Beneficiary $beneficiary, ?PeriodPosition $position = null, $wasCarriedOut = null, $endBeforeNow = false)
     {
         return $this->em->getRepository('App:Shift')->getBeneficiaryShiftCount(
             $beneficiary,
@@ -582,11 +607,9 @@ class ShiftService
     }
 
     /**
-     * Get number of freed shifts for a given beneficiary, with possible filter on PeriodPosition
-     * @param Beneficiary $beneficiary
-     * @param PeriodPosition $position
+     * Get number of freed shifts for a given beneficiary, with possible filter on PeriodPosition.
      */
-    public function getBeneficiaryShiftFreedCount(Beneficiary $beneficiary, PeriodPosition $position = null)
+    public function getBeneficiaryShiftFreedCount(Beneficiary $beneficiary, ?PeriodPosition $position = null)
     {
         return $this->em->getRepository('App:ShiftFreeLog')->getBeneficiaryShiftFreedCount(
             $beneficiary,

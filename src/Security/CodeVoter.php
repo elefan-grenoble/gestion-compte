@@ -1,5 +1,7 @@
 <?php
+
 // src/App/Security/CodeVoter.php
+
 namespace App\Security;
 
 use App\Helper\PlaceIP;
@@ -12,12 +14,12 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class CodeVoter extends Voter
 {
-    const VIEW = 'view';
-    const GENERATE = 'generate';
-    const EDIT = 'edit';
-    const DELETE = 'delete';
-    const CLOSE = 'close';
-    const OPEN = 'open';
+    public const VIEW = 'view';
+    public const GENERATE = 'generate';
+    public const EDIT = 'edit';
+    public const DELETE = 'delete';
+    public const CLOSE = 'close';
+    public const OPEN = 'open';
 
     private $decisionManager;
     private $container;
@@ -31,7 +33,7 @@ class CodeVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::GENERATE, self::EDIT, self::VIEW, self::DELETE, self::OPEN, self::CLOSE))) {
+        if (!in_array($attribute, [self::GENERATE, self::EDIT, self::VIEW, self::DELETE, self::OPEN, self::CLOSE])) {
             return false;
         }
 
@@ -53,10 +55,11 @@ class CodeVoter extends Voter
         }
 
         // ROLE_SUPER_ADMIN can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
-            if ($attribute == self::GENERATE && !$this->container->getParameter('code_generation_enabled')) { //do not generate if fixed code
+        if ($this->decisionManager->decide($token, ['ROLE_SUPER_ADMIN'])) {
+            if ($attribute == self::GENERATE && !$this->container->getParameter('code_generation_enabled')) { // do not generate if fixed code
                 return false;
             }
+
             return true;
         }
 
@@ -68,27 +71,34 @@ class CodeVoter extends Voter
         switch ($attribute) {
             case self::VIEW:
             case self::CLOSE:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                if ($this->decisionManager->decide($token, ['ROLE_ADMIN'])) {
                     return true;
                 }
+
                 return $this->canView($code, $user);
+
             case self::GENERATE:
                 if (!$this->container->getParameter('code_generation_enabled')) {
                     return false;
                 }
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                if ($this->decisionManager->decide($token, ['ROLE_ADMIN'])) {
                     return true;
                 }
+
                 return $this->canAdd($code, $user);
+
             case self::OPEN:
             case self::EDIT:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+                if ($this->decisionManager->decide($token, ['ROLE_ADMIN'])) {
                     return true;
                 }
+
+                // no break
             case self::DELETE:
-                if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
+                if ($this->decisionManager->decide($token, ['ROLE_SUPER_ADMIN'])) {
                     return true;
                 }
+
                 return $this->canDelete($code, $user);
         }
 
@@ -98,8 +108,8 @@ class CodeVoter extends Voter
     private function canAdd(Code $code, User $user)
     {
         $now = new \DateTime('now');
-        if ($this->canView($code, $user)) { //can add only if last code can be seen
-            if ($code->getRegistrar() != $user || $code->getCreatedAt()->format('Y m d') != ($now->format('Y m d'))) { // on ne change pas son propre code
+        if ($this->canView($code, $user)) { // can add only if last code can be seen
+            if ($code->getRegistrar() != $user || $code->getCreatedAt()->format('Y m d') != $now->format('Y m d')) { // on ne change pas son propre code
                 if ($this->container->get(PlaceIP::class)->isLocationOk()) { // et si l'utilisateur est physiquement à l'épicerie
                     return true;
                 }
@@ -109,29 +119,30 @@ class CodeVoter extends Voter
         return false;
     }
 
-
     private function canView(Code $code, User $user)
     {
-        if (!$code->getId())
+        if (!$code->getId()) {
             return false;
+        }
 
         if ($code->getRegistrar() === $user) { // my code
             return true;
         }
 
         if ($user->getBeneficiary()) {
-            if ($this->container->get("shift_service")->isBeginner($user->getBeneficiary())) { // not for beginner
+            if ($this->container->get('shift_service')->isBeginner($user->getBeneficiary())) { // not for beginner
                 return false;
             }
 
             $start_after = new \DateTime('Yesterday');
             $start_after->setTime(23, 59, 59);
             $end_after = new \DateTime();
-            $end_after->sub(new \DateInterval("PT2H")); //time - 120min TODO put in conf
+            $end_after->sub(new \DateInterval('PT2H')); // time - 120min TODO put in conf
             $start_before = new \DateTime();
-            $start_before->add(new \DateInterval("PT1H")); //time + 60min TODO put in conf
+            $start_before->add(new \DateInterval('PT1H')); // time + 60min TODO put in conf
 
-            return $this->container->get("shift_service")->isBeneficiaryHasShifts($user->getBeneficiary(),
+            return $this->container->get('shift_service')->isBeneficiaryHasShifts(
+                $user->getBeneficiary(),
                 $start_after,
                 $start_before,
                 $end_after,
@@ -147,13 +158,14 @@ class CodeVoter extends Voter
         return false;
     }
 
-    //\App\Security\UserVoter::isLocationOk DUPLICATED
+    // \App\Security\UserVoter::isLocationOk DUPLICATED
     private function isLocationOk()
     {
         $ip = $this->container->get('request_stack')->getCurrentRequest()->getClientIp();
         $checkIps = $this->container->getParameter('enable_place_local_ip_address_check');
         $ips = $this->container->getParameter('place_local_ip_address');
         $ips = explode(',', $ips);
+
         return (isset($checkIps) and !$checkIps) or (isset($ip) and in_array($ip, $ips));
     }
 }

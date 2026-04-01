@@ -10,8 +10,8 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class EmailTemplateVoter extends Voter
 {
-    const VIEW = 'view';
-    const EDIT = 'edit';
+    public const VIEW = 'view';
+    public const EDIT = 'edit';
 
     private $decisionManager;
 
@@ -23,7 +23,7 @@ class EmailTemplateVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::EDIT, self::VIEW))) {
+        if (!in_array($attribute, [self::EDIT, self::VIEW])) {
             return false;
         }
 
@@ -45,11 +45,10 @@ class EmailTemplateVoter extends Voter
         }
 
         // ROLE_SUPER_ADMIN can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
+        if ($this->decisionManager->decide($token, ['ROLE_SUPER_ADMIN'])) {
             return true;
         }
 
-        return $this->decisionManager->decide($token, array('ROLE_ADMIN'));
+        return $this->decisionManager->decide($token, ['ROLE_ADMIN']);
     }
-
 }

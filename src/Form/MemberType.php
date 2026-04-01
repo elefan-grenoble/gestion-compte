@@ -21,9 +21,7 @@ class MemberType extends AbstractType
     {
         $this->tokenStorage = $tokenStorage;
     }
-    /**
-     * {@inheritdoc}
-     */
+
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
 
@@ -40,47 +38,41 @@ class MemberType extends AbstractType
             $memberData = $event->getData();
 
             if (is_object($user) && ($user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN'))) {
-                $form->add('member_number', IntegerType::class, array('label'=> 'Numéro d\'adhérent'));
-            }else{
-                $form->add('member_number', IntegerType::class, array('label'=> 'Numéro d\'adhérent', 'disabled' => true));
+                $form->add('member_number', IntegerType::class, ['label' => 'Numéro d\'adhérent']);
+            } else {
+                $form->add('member_number', IntegerType::class, ['label' => 'Numéro d\'adhérent', 'disabled' => true]);
             }
 
             if (is_object($user)) {
-                if ($user->hasRole('ROLE_USER_MANAGER') || $user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN')){
-                    if ($memberData && $memberData->getId()) { //in not new
-                        $form->add('withdrawn', CheckboxType::class, array(
+                if ($user->hasRole('ROLE_USER_MANAGER') || $user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN')) {
+                    if ($memberData && $memberData->getId()) { // in not new
+                        $form->add('withdrawn', CheckboxType::class, [
                             'label' => 'Compte fermé',
                             'required' => false,
-                            'attr' => array('class' => 'filled-in')));
-                        $form->add('frozen', CheckboxType::class, array(
+                            'attr' => ['class' => 'filled-in']]);
+                        $form->add('frozen', CheckboxType::class, [
                             'label' => 'Compte gelé',
                             'required' => false,
-                            'attr' => array('class' => 'filled-in')));
+                            'attr' => ['class' => 'filled-in']]);
                     }
                 }
             }
 
-            $form->add('mainBeneficiary', BeneficiaryType::class, array('label'=>' '));
+            $form->add('mainBeneficiary', BeneficiaryType::class, ['label' => ' ']);
 
             if ($memberData && !$memberData->getId()) {
-                $form->add('lastRegistration', RegistrationType::class,array('label'=>' ','data_class'=>Registration::class));
+                $form->add('lastRegistration', RegistrationType::class, ['label' => ' ', 'data_class' => Registration::class]);
             }
         });
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
-            'data_class' => Membership::class
-        ));
+        $resolver->setDefaults([
+            'data_class' => Membership::class,
+        ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlockPrefix()
     {
         return 'App_membership';

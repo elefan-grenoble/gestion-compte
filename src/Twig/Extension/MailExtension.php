@@ -20,12 +20,12 @@ class MailExtension extends AbstractExtension
 
     public function getFunctions()
     {
-        return array(
-            new TwigFunction('isTemporaryEmail', array($this, 'isTemporaryEmail')),
-        );
+        return [
+            new TwigFunction('isTemporaryEmail', [$this, 'isTemporaryEmail']),
+        ];
     }
 
-    public function isTemporaryEmail(string $email) : bool
+    public function isTemporaryEmail(string $email): bool
     {
         return $this->mailerService->isTemporaryEmail($email);
     }

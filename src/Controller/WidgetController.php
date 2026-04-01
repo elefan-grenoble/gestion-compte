@@ -6,27 +6,25 @@ use App\Entity\ShiftBucket;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
  * Widget controller.
- * 
+ *
  * @Route("widget")
  */
 class WidgetController extends AbstractController
 {
-
     /**
-     * Widget display
-     * 
+     * Widget display.
+     *
      * Note: moved to ShiftController. Duplicate left here to avoid breaking existing widgets.
-     * 
+     *
      * @Route("/", name="widget", methods={"GET"})
      */
     public function widgetAction(Request $request)
     {
         $job_id = $request->get('job_id');
-        $buckets = array();
+        $buckets = [];
         $display_end = $request->query->has('display_end') ? ($request->get('display_end') == 1) : false;
         $display_on_empty = $request->query->has('display_on_empty') ? ($request->get('display_on_empty') == 1) : false;
         $title = $request->query->has('title') ? ($request->get('title') == 1) : true;
@@ -37,7 +35,7 @@ class WidgetController extends AbstractController
             if ($job) {
                 $shifts = $em->getRepository('App:Shift')->findFutures(null, $job);
                 foreach ($shifts as $shift) {
-                    $day = $shift->getStart()->format("d m Y");
+                    $day = $shift->getStart()->format('d m Y');
                     $interval = $shift->getIntervalCode();
                     if (!isset($buckets[$interval . $day])) {
                         $buckets[$interval . $day] = new ShiftBucket();
@@ -52,7 +50,7 @@ class WidgetController extends AbstractController
             'buckets' => $buckets,
             'display_end' => $display_end,
             'display_on_empty' => $display_on_empty,
-            'title' => $title
+            'title' => $title,
         ]);
     }
 }

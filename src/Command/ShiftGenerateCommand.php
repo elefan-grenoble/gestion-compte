@@ -3,7 +3,6 @@
 namespace App\Command;
 
 use App\Entity\Shift;
-use App\Entity\ClosingException;
 use App\Event\ShiftReservedEvent;
 use App\Service\PeriodService;
 use Doctrine\ORM\EntityManagerInterface;
@@ -27,8 +26,7 @@ class ShiftGenerateCommand extends Command
         ContainerBagInterface $params,
         EventDispatcherInterface $event_dispatcher,
         PeriodService $period_service
-    )
-    {
+    ) {
         $this->em = $em;
         $this->params = $params;
         $this->event_dispatcher = $event_dispatcher;
@@ -44,7 +42,8 @@ class ShiftGenerateCommand extends Command
             ->setDescription('Generate shift from period')
             ->setHelp('This command allows you to generate shift using period')
             ->addArgument('date', InputArgument::REQUIRED, 'The date format yyyy-mm-dd')
-            ->addOption('to', 't', InputOption::VALUE_OPTIONAL, 'Every day until this date (not included)', '');
+            ->addOption('to', 't', InputOption::VALUE_OPTIONAL, 'Every day until this date (not included)', '')
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -62,27 +61,28 @@ class ShiftGenerateCommand extends Command
 
         if (!$from || $from->format('Y-m-d') != $from_given) {
             $output->writeln('<fg=red;> wrong date format. Use Y-m-d </>');
+
             return 2;
         }
         if ($to_given) {
             $to = date_create_from_format('Y-m-d', $to_given);
-            $output->writeln('<fg=yellow;>'.'Shift generation from <fg=cyan;>'.$from->format('d M Y').'</><fg=yellow;> to </><fg=cyan;>'.$to->format('d M Y').'</>');
+            $output->writeln('<fg=yellow;>Shift generation from <fg=cyan;>' . $from->format('d M Y') . '</><fg=yellow;> to </><fg=cyan;>' . $to->format('d M Y') . '</>');
         } else {
             $to = clone $from;
             $to->add($one_day_interval);
-            $output->writeln('<fg=yellow;>'.'Shift generation for </><fg=cyan;>'.$from->format('d M Y').'</>');
+            $output->writeln('<fg=yellow;>Shift generation for </><fg=cyan;>' . $from->format('d M Y') . '</>');
         }
 
         $period = new \DatePeriod($from, $one_day_interval, $to);
         $count_new_all = 0;
         $count_existing_all = 0;
-        $reservedShifts = array();
-        $formerShifts = array();
+        $reservedShifts = [];
+        $formerShifts = [];
 
         foreach ($period as $date) {
             $count_new_period = 0;
             $count_existing_period = 0;
-            $output->writeln('<fg=cyan;>'.$date->format('D d M Y').'</>');
+            $output->writeln('<fg=cyan;>' . $date->format('D d M Y') . '</>');
 
             $closingException = $this->em->getRepository('App:ClosingException')->findBy(['date' => $date]);
             if ($closingException) {
@@ -94,7 +94,8 @@ class ShiftGenerateCommand extends Command
                     ->setParameter('dow', $dayOfWeek)
                     ->orderBy('p.start')
                     ->getQuery()
-                    ->getResult();
+                    ->getResult()
+                ;
 
                 foreach ($periods as $period) {
                     $shift = new Shift();
@@ -112,23 +113,23 @@ class ShiftGenerateCommand extends Command
                             }
                         }
 
-                        $already_generated = $this->em->getRepository('App:Shift')->findBy(array('start' => $start, 'end' => $end, 'job' => $period->getJob(), 'position' => $position));
+                        $already_generated = $this->em->getRepository('App:Shift')->findBy(['start' => $start, 'end' => $end, 'job' => $period->getJob(), 'position' => $position]);
                         if (!$already_generated) {
                             $lastStart = $this->lastCycleDate($start);
                             $lastEnd = $this->lastCycleDate($end);
-                            $last_cycle_shift = $this->em->getRepository('App:Shift')->findOneBy(array('start' => $lastStart, 'end' => $lastEnd, 'job' => $period->getJob(), 'position' => $position));
+                            $last_cycle_shift = $this->em->getRepository('App:Shift')->findOneBy(['start' => $lastStart, 'end' => $lastEnd, 'job' => $period->getJob(), 'position' => $position]);
                             $current_shift = clone $shift;
                             $current_shift->setJob($period->getJob());
                             $current_shift->setFormation($position->getFormation());
                             $current_shift->setPosition($position);
                             // si c'est un créneau fixe + membre non exempté
                             if ($use_fly_and_fixed && $position->getShifter() != null && !$position->getShifter()->getMembership()->isCurrentlyExemptedFromShifts($current_shift->getStart())) {
-                                $current_shift->setFixe(True);
+                                $current_shift->setFixe(true);
                                 $current_shift->setShifter($position->getShifter());
                                 $current_shift->setBookedTime(new \DateTime('now'));
                                 $current_shift->setBooker($admin);
-                            // créneau pré-reservé
-                            } else if ($reserve_new_shift_to_prior_shifter && $last_cycle_shift && $last_cycle_shift->getShifter()) {
+                                // créneau pré-reservé
+                            } elseif ($reserve_new_shift_to_prior_shifter && $last_cycle_shift && $last_cycle_shift->getShifter()) {
                                 $current_shift->setLastShifter($last_cycle_shift->getShifter());
                                 $reservedShifts[$count_new_all] = $current_shift;
                                 $formerShifts[$count_new_all] = $last_cycle_shift;
@@ -139,11 +140,11 @@ class ShiftGenerateCommand extends Command
                             }
 
                             $this->em->persist($current_shift);
-                            $count_new_period++;
-                            $count_new_all++;
+                            ++$count_new_period;
+                            ++$count_new_all;
                         } else {
-                            $count_existing_period++;
-                            $count_existing_all++;
+                            ++$count_existing_period;
+                            ++$count_existing_all;
                         }
                     }
                 }
@@ -165,16 +166,17 @@ class ShiftGenerateCommand extends Command
 
     protected function lastCycleDate(\DateTime $date)
     {
-        $lastCycleDate = clone($date);
-        $lastCycleDate->modify("-28 days");
+        $lastCycleDate = clone $date;
+        $lastCycleDate->modify('-28 days');
+
         return $lastCycleDate;
     }
 
     protected function printRecapMessage($output, $count_new, $count_existing)
     {
-        $message = $count_new.' créneau'.(($count_new>1) ? 'x':'').' généré'.(($count_new>1) ? 's':'');
-        $output->writeln('<fg=cyan;>>>></><fg=green;> '.$message.' </>');
-        $message = $count_existing.' créneau'.(($count_existing>1) ? 'x':'').' existe'.(($count_existing>1) ? 'nt':'');
-        $output->writeln('<fg=cyan;>>>></><fg=red;> '.$message.' déjà </>');
+        $message = $count_new . ' créneau' . (($count_new > 1) ? 'x' : '') . ' généré' . (($count_new > 1) ? 's' : '');
+        $output->writeln('<fg=cyan;>>>></><fg=green;> ' . $message . ' </>');
+        $message = $count_existing . ' créneau' . (($count_existing > 1) ? 'x' : '') . ' existe' . (($count_existing > 1) ? 'nt' : '');
+        $output->writeln('<fg=cyan;>>>></><fg=red;> ' . $message . ' déjà </>');
     }
 }

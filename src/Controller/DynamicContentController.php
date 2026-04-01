@@ -20,31 +20,33 @@ class DynamicContentController extends AbstractController
      * Lists all dynamic contents.
      *
      * @Route("/", name="dynamic_content_list", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function listAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
         $dynamicContents = $em->getRepository('App:DynamicContent')->findAll();
-        $dynamicContentsByType = array();
+        $dynamicContentsByType = [];
 
         foreach ($dynamicContents as $dynamicContent) {
             $type = $dynamicContent->getType();
             if (!isset($dynamicContentsByType[$type])) {
-                $dynamicContentsByType[$type] = array();
+                $dynamicContentsByType[$type] = [];
             }
             $dynamicContentsByType[$type][] = $dynamicContent;
         }
 
-        return $this->render('admin/content/list.html.twig', array(
+        return $this->render('admin/content/list.html.twig', [
             'dynamicContentsByType' => $dynamicContentsByType,
-        ));
+        ]);
     }
 
     /**
-     * Edit a dynamic content
+     * Edit a dynamic content.
      *
      * @Route("/{id}/edit", name="dynamic_content_edit", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_PROCESS_MANAGER')")
      */
     public function dynamicContentEditAction(Request $request, DynamicContent $dynamicContent)
@@ -65,12 +67,13 @@ class DynamicContentController extends AbstractController
             $em->flush();
 
             $session->getFlashBag()->add('success', 'Contenu dynamique édité !');
+
             return $this->redirectToRoute('dynamic_content_list');
         }
 
-        return $this->render('admin/content/edit.html.twig', array(
+        return $this->render('admin/content/edit.html.twig', [
             'dynamicContent' => $dynamicContent,
-            'form' => $form->createView()
-        ));
+            'form' => $form->createView(),
+        ]);
     }
 }

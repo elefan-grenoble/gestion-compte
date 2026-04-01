@@ -5,21 +5,22 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * AbstractRegistration
+ * AbstractRegistration.
  *
  * @ORM\Table(name="view_abstract_registration")
+ *
  * @ORM\Entity(readOnly=true)
  */
 class AbstractRegistration
 {
-
-    const TYPE_ANONYMOUS = 2;
-    const TYPE_MEMBER = 1;
+    public const TYPE_ANONYMOUS = 2;
+    public const TYPE_MEMBER = 1;
 
     /**
      * @var string
      *
      * @ORM\Column(name="id", type="string")
+     *
      * @ORM\Id
      */
     private $id;
@@ -61,6 +62,7 @@ class AbstractRegistration
 
     /**
      * @ORM\ManyToOne(targetEntity="User", inversedBy="recordedRegistrations")
+     *
      * @ORM\JoinColumn(name="registrar_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $registrar;
@@ -74,13 +76,13 @@ class AbstractRegistration
 
     /**
      * @ORM\ManyToOne(targetEntity="Membership")
+     *
      * @ORM\JoinColumn(name="membership_id", referencedColumnName="id")
      */
     private $membership;
 
-
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -89,9 +91,8 @@ class AbstractRegistration
         return $this->id;
     }
 
-
     /**
-     * Get date
+     * Get date.
      *
      * @return \DateTime
      */
@@ -101,9 +102,7 @@ class AbstractRegistration
     }
 
     /**
-     * Get start date
-     *
-     * @return \DateTime
+     * Get start date.
      */
     public function getStartDate(): ?\DateTime
     {
@@ -111,7 +110,7 @@ class AbstractRegistration
     }
 
     /**
-     * Get amount
+     * Get amount.
      *
      * @return string
      */
@@ -121,7 +120,7 @@ class AbstractRegistration
     }
 
     /**
-     * Get mode
+     * Get mode.
      *
      * @return string
      */
@@ -131,9 +130,9 @@ class AbstractRegistration
     }
 
     /**
-     * Get type
+     * Get type.
      *
-     * @return integer
+     * @return int
      */
     public function getType()
     {
@@ -141,9 +140,9 @@ class AbstractRegistration
     }
 
     /**
-     * Get registrar
+     * Get registrar.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getRegistrar()
     {
@@ -151,7 +150,7 @@ class AbstractRegistration
     }
 
     /**
-     * Get beneficiary
+     * Get beneficiary.
      *
      * @return string
      */
@@ -175,11 +174,12 @@ class AbstractRegistration
         $registration->setMode($this->mode);
         $registration->setAmount($this->amount);
         $registration->setDate($this->date);
+
         return $registration;
     }
 
-    public function getEntityId(){
-        return substr($this->getId(),2);
+    public function getEntityId()
+    {
+        return substr($this->getId(), 2);
     }
-
 }

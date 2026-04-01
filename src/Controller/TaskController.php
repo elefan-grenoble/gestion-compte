@@ -2,16 +2,14 @@
 
 namespace App\Controller;
 
-
 use App\Entity\Task;
 use App\Form\TaskType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\Validator\Constraints\DateTime;
+use Symfony\Component\Form\FormInterface;
 
 /**
  * Task controller.
@@ -20,7 +18,6 @@ use Symfony\Component\Validator\Constraints\DateTime;
  */
 class TaskController extends AbstractController
 {
-
     /**
      * Lists all tasks.
      *
@@ -32,10 +29,11 @@ class TaskController extends AbstractController
 
         $em = $this->getDoctrine()->getManager();
         $commissions = $em->getRepository('App:Commission')->findAll();
-        return $this->render('default/task/list.html.twig', array(
+
+        return $this->render('default/task/list.html.twig', [
             'commissions' => $commissions,
             'task' => new Task(),
-        ));
+        ]);
     }
 
     /**
@@ -50,7 +48,7 @@ class TaskController extends AbstractController
 
         $task = new Task();
 
-        $this->denyAccessUnlessGranted('create',$task);
+        $this->denyAccessUnlessGranted('create', $task);
 
         $em = $this->getDoctrine()->getManager();
 
@@ -68,17 +66,21 @@ class TaskController extends AbstractController
             $em->flush();
 
             $session->getFlashBag()->add('success', 'La nouvelle tache a bien été créée !');
-            return $this->redirectToRoute('task_edit',array('id'=>$task->getId()));
 
-        } elseif ($form->isSubmitted()) {
+            return $this->redirectToRoute('task_edit', ['id' => $task->getId()]);
+
+        }
+        if ($form->isSubmitted()) {
             foreach ($this->getErrorMessages($form) as $key => $errors) {
-                foreach ($errors as $error)
-                    $session->getFlashBag()->add('error', $key." : ".$error);
+                foreach ($errors as $error) {
+                    $session->getFlashBag()->add('error', $key . ' : ' . $error);
+                }
             }
         }
-        return $this->render('default/task/new.html.twig', array(
-            'form' => $form->createView()
-        ));
+
+        return $this->render('default/task/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
     }
 
     /**
@@ -91,7 +93,7 @@ class TaskController extends AbstractController
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
-        $this->denyAccessUnlessGranted('edit',$task);
+        $this->denyAccessUnlessGranted('edit', $task);
 
         $form = $this->createForm(TaskType::class, $task);
         $form->get('due_date')->setData($task->getDueDate()->format('Y-m-d'));
@@ -112,24 +114,27 @@ class TaskController extends AbstractController
             $em->flush();
 
             $session->getFlashBag()->add('success', 'La tache a bien été éditée !');
+
             return $this->redirectToRoute('tasks_list');
 
-        } elseif ($form->isSubmitted()) {
-            foreach ($this->getErrorMessages($form) as $key => $errors){
-                foreach ($errors as $error)
-                    $session->getFlashBag()->add('error', $key." : ".$error);
+        }
+        if ($form->isSubmitted()) {
+            foreach ($this->getErrorMessages($form) as $key => $errors) {
+                foreach ($errors as $error) {
+                    $session->getFlashBag()->add('error', $key . ' : ' . $error);
+                }
             }
         }
-        return $this->render('default/task/edit.html.twig', array(
+
+        return $this->render('default/task/edit.html.twig', [
             'task' => $task,
             'form' => $form->createView(),
-            'delete_form' => $this->getDeleteForm($task)->createView()
-        ));
+            'delete_form' => $this->getDeleteForm($task)->createView(),
+        ]);
     }
 
-
     /**
-     * task delete
+     * task delete.
      *
      * @Route("/{id}", name="task_delete", methods={"DELETE"})
      */
@@ -154,18 +159,20 @@ class TaskController extends AbstractController
     }
 
     /**
-     * @param Task $task
-     * @return \Symfony\Component\Form\FormInterface
+     * @return FormInterface
      */
-    protected function getDeleteForm(Task $task){
+    protected function getDeleteForm(Task $task)
+    {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('task_delete', array('id' => $task->getId())))
+            ->setAction($this->generateUrl('task_delete', ['id' => $task->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 
-    private function getErrorMessages(Form $form) {
-        $errors = array();
+    private function getErrorMessages(Form $form)
+    {
+        $errors = [];
 
         foreach ($form->getErrors() as $key => $error) {
             if ($form->isRoot()) {
@@ -184,5 +191,4 @@ class TaskController extends AbstractController
 
         return $errors;
     }
-
 }

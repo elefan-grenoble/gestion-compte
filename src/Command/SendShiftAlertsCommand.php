@@ -1,12 +1,13 @@
 <?php
+
 // src/App/Command/SendShiftAlertsCommand.php
+
 namespace App\Command;
 
 use App\Entity\ShiftAlert;
 use App\Entity\ShiftBucket;
 use App\Event\ShiftAlertsEvent;
 use App\Event\ShiftAlertsMattermostEvent;
-use DateTime;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
@@ -23,8 +24,7 @@ class SendShiftAlertsCommand extends Command
     public function __construct(
         EntityManagerInterface $em,
         EventDispatcherInterface $event_dispatcher
-    )
-    {
+    ) {
         $this->em = $em;
         $this->event_dispatcher = $event_dispatcher;
 
@@ -42,7 +42,8 @@ class SendShiftAlertsCommand extends Command
             ->addOption('emails', null, InputOption::VALUE_OPTIONAL, 'Email recipients (comma separated)')
             ->addOption('emailTemplate', null, InputOption::VALUE_OPTIONAL, 'Template used in email alerts', 'SHIFT_ALERT_EMAIL')
             ->addOption('mattermostUrl', null, InputOption::VALUE_OPTIONAL, 'Mattermost webhook URL')
-            ->addOption('mattermostTemplate', null, InputOption::VALUE_OPTIONAL, 'Template used in Mattermost alerts', 'SHIFT_ALERT_MARKDOWN');
+            ->addOption('mattermostTemplate', null, InputOption::VALUE_OPTIONAL, 'Template used in Mattermost alerts', 'SHIFT_ALERT_MARKDOWN')
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -57,15 +58,16 @@ class SendShiftAlertsCommand extends Command
         $date = date_create_from_format('Y-m-d', $date_given);
         if (!$date || $date->format('Y-m-d') != $date_given) {
             $output->writeln('<error>Wrong date format. Use Y-m-d </>');
+
             return 2;
         }
         $date->setTime(0, 0);
 
         $alerts = $this->computeAlerts($date, $jobs);
         if (count($alerts) > 0) {
-            $output->writeln('<question>Found ' . count($alerts) . ' alert' . ((count($alerts)>1)?'s':'') . ' to send</>');
+            $output->writeln('<question>Found ' . count($alerts) . ' alert' . ((count($alerts) > 1) ? 's' : '') . ' to send</>');
 
-            // email 
+            // email
             if ($emails) {
                 $this->event_dispatcher->dispatch(new ShiftAlertsEvent($alerts, $date, $email_template, $emails), ShiftAlertsEvent::NAME);
                 $output->writeln('<comment>Email(s) sent</>');
@@ -84,13 +86,14 @@ class SendShiftAlertsCommand extends Command
         return 0;
     }
 
-    private function computeAlerts(DateTime $date, $jobs) {
+    private function computeAlerts(\DateTime $date, $jobs)
+    {
         $shifts = $this->em->getRepository('App:Shift')->findAt($date, $jobs);
 
         // Build buckets from shifts
-        $buckets = array();
+        $buckets = [];
         foreach ($shifts as $shift) {
-            $key = $shift->getIntervalCode().$shift->getJob()->getId();
+            $key = $shift->getIntervalCode() . $shift->getJob()->getId();
             if (!isset($buckets[$key])) {
                 $bucket = new ShiftBucket();
                 $buckets[$key] = $bucket;
@@ -98,19 +101,20 @@ class SendShiftAlertsCommand extends Command
             $buckets[$key]->addShift($shift);
         }
 
-        $alerts = array();
+        $alerts = [];
         foreach ($buckets as $bucket) {
             $shifterCount = $bucket->getShifterCount();
             $shiftCount = count($bucket->getShifts());
             if ($shifterCount < $bucket->getJob()->getMinShifterAlert() && $shifterCount != $shiftCount) {
                 if ($shifterCount < 2) {
-                    $issue = $shifterCount . " personne inscrite sur " . $shiftCount;
+                    $issue = $shifterCount . ' personne inscrite sur ' . $shiftCount;
                 } else {
-                    $issue = $shifterCount . " personnes inscrites sur " . $shiftCount;
+                    $issue = $shifterCount . ' personnes inscrites sur ' . $shiftCount;
                 }
                 $alerts[] = new ShiftAlert($bucket, $issue);
             }
         }
+
         return $alerts;
     }
 }

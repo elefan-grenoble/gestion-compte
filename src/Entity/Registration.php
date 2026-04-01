@@ -6,25 +6,30 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Registration
+ * Registration.
  *
  * @ORM\Table(name="registration")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\RegistrationRepository")
  */
 class Registration
 {
-    const TYPE_CASH = 1;
-    const TYPE_CHECK = 2;
-    const TYPE_LOCAL = 3;
-    const TYPE_CREDIT_CARD = 4;
-    const TYPE_HELLOASSO = 6;
-    const TYPE_DEFAULT = 5;
+    public const TYPE_CASH = 1;
+    public const TYPE_CHECK = 2;
+    public const TYPE_LOCAL = 3;
+    public const TYPE_CREDIT_CARD = 4;
+    public const TYPE_HELLOASSO = 6;
+    public const TYPE_DEFAULT = 5;
+
     /**
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -33,6 +38,7 @@ class Registration
      * @var \DateTime
      *
      * @ORM\Column(name="date", type="datetime")
+     *
      * @Assert\DateTime()
      */
     private $date;
@@ -41,6 +47,7 @@ class Registration
      * @var string
      *
      * @ORM\Column(name="amount", type="string", length=255)
+     *
      * @Assert\NotBlank(message="Un montant est requis")
      */
     private $amount;
@@ -49,18 +56,21 @@ class Registration
      * @var string
      *
      * @ORM\Column(name="mode", type="integer")
+     *
      * @Assert\NotBlank(message="Un mode de paiement est requis")
      */
     private $mode;
 
     /**
      * @ORM\ManyToOne(targetEntity="Membership", inversedBy="registrations")
+     *
      * @ORM\JoinColumn(name="membership_id", referencedColumnName="id", onDelete="CASCADE")
      */
     private $membership;
 
     /**
      * @ORM\ManyToOne(targetEntity="User", inversedBy="recordedRegistrations")
+     *
      * @ORM\JoinColumn(name="registrar_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $registrar;
@@ -76,6 +86,7 @@ class Registration
      * @var \DateTime
      *
      * @ORM\Column(name="created_at", type="datetime")
+     *
      * @Assert\DateTime()
      */
     private $createdAt;
@@ -91,7 +102,7 @@ class Registration
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -108,7 +119,7 @@ class Registration
     }
 
     /**
-     * Set date
+     * Set date.
      *
      * @param \DateTime $date
      *
@@ -122,7 +133,7 @@ class Registration
     }
 
     /**
-     * Get date
+     * Get date.
      *
      * @return \DateTime
      */
@@ -132,7 +143,7 @@ class Registration
     }
 
     /**
-     * Set amount
+     * Set amount.
      *
      * @param string $amount
      *
@@ -146,7 +157,7 @@ class Registration
     }
 
     /**
-     * Get amount
+     * Get amount.
      *
      * @return string
      */
@@ -156,7 +167,7 @@ class Registration
     }
 
     /**
-     * Set mode
+     * Set mode.
      *
      * @param string $mode
      *
@@ -170,7 +181,7 @@ class Registration
     }
 
     /**
-     * Get mode
+     * Get mode.
      *
      * @return string
      */
@@ -180,13 +191,11 @@ class Registration
     }
 
     /**
-     * Set registrar
-     *
-     * @param \App\Entity\User $registrar
+     * Set registrar.
      *
      * @return Registration
      */
-    public function setRegistrar(\App\Entity\User $registrar = null)
+    public function setRegistrar(?User $registrar = null)
     {
         $this->registrar = $registrar;
 
@@ -194,20 +203,22 @@ class Registration
     }
 
     /**
-     * Get registrar
+     * Get registrar.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getRegistrar()
     {
         return $this->registrar;
     }
 
-    public function getIsNew(){
+    public function getIsNew()
+    {
         return $this->is_new;
     }
 
-    public function setIsNew($value){
+    public function setIsNew($value)
+    {
         $this->is_new = $value;
 
         return $this;
@@ -216,11 +227,9 @@ class Registration
     /**
      * Set helloassoPayment.
      *
-     * @param \App\Entity\HelloassoPayment|null $helloassoPayment
-     *
      * @return Registration
      */
-    public function setHelloassoPayment(\App\Entity\HelloassoPayment $helloassoPayment = null)
+    public function setHelloassoPayment(?HelloassoPayment $helloassoPayment = null)
     {
         $this->helloassoPayment = $helloassoPayment;
 
@@ -230,7 +239,7 @@ class Registration
     /**
      * Get helloassoPayment.
      *
-     * @return \App\Entity\HelloassoPayment|null
+     * @return null|HelloassoPayment
      */
     public function getHelloassoPayment()
     {
@@ -254,9 +263,9 @@ class Registration
     }
 
     /**
-     * Set createdAt
+     * Set createdAt.
      *
-     * @param \DateTime $createdAt
+     * @param mixed $date
      *
      * @return Registration
      */
@@ -268,7 +277,7 @@ class Registration
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */

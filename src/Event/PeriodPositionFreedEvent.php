@@ -5,11 +5,10 @@ namespace App\Event;
 use App\Entity\Beneficiary;
 use App\Entity\Membership;
 use App\Entity\PeriodPosition;
-use Symfony\Component\EventDispatcher\Event;
 
 class PeriodPositionFreedEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
-    const NAME = 'period_position.freed';
+    public const NAME = 'period_position.freed';
 
     private $periodPosition;
     private $beneficiary;
@@ -47,7 +46,7 @@ class PeriodPositionFreedEvent extends \Symfony\Contracts\EventDispatcher\Event
     }
 
     /**
-     * @return \DateTime|null
+     * @return null|\DateTime
      */
     public function getBookedTime()
     {

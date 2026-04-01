@@ -5,19 +5,16 @@ namespace App\Controller;
 use App\Entity\PeriodPositionFreeLog;
 use App\Form\AutocompleteBeneficiaryType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
 /**
- * AdminPeriodPositionFreeLog controller
+ * AdminPeriodPositionFreeLog controller.
  *
  * @Route("admin/period/positionfreelogs")
  */
@@ -36,7 +33,7 @@ class AdminPeriodPositionFreeLogController extends AbstractController
         ];
 
         // filter creation ----------------------
-        $res["form"] = $this->createFormBuilder()
+        $res['form'] = $this->createFormBuilder()
             ->setAction($this->generateUrl('admin_periodpositionfreelog_index'))
             ->add('created_at', DateType::class, [
                 'widget' => 'single_text',
@@ -44,28 +41,29 @@ class AdminPeriodPositionFreeLogController extends AbstractController
                 'label' => "Date de l'annulation",
                 'required' => false,
                 'attr' => [
-                    'class' => 'datepicker'
-                ]
+                    'class' => 'datepicker',
+                ],
             ])
-            ->add('beneficiary', AutocompleteBeneficiaryType::class, array(
+            ->add('beneficiary', AutocompleteBeneficiaryType::class, [
                 'label' => 'Bénéficiaire',
                 'required' => false,
-            ))
-            ->add('page', HiddenType::class, [
-                'data' => '1'
             ])
-            ->add('submit', SubmitType::class, array(
+            ->add('page', HiddenType::class, [
+                'data' => '1',
+            ])
+            ->add('submit', SubmitType::class, [
                 'label' => 'Filtrer',
-                'attr' => array('class' => 'btn', 'value' => 'filtrer')
-            ))
-            ->getForm();
+                'attr' => ['class' => 'btn', 'value' => 'filtrer'],
+            ])
+            ->getForm()
+        ;
 
         $res['form']->handleRequest($request);
 
         if ($res['form']->isSubmitted() && $res['form']->isValid()) {
-            $res["created_at"] = $res["form"]->get("created_at")->getData();
-            $res["beneficiary"] = $res["form"]->get("beneficiary")->getData();
-            $res["page"] = $res["form"]->get("page")->getData();
+            $res['created_at'] = $res['form']->get('created_at')->getData();
+            $res['beneficiary'] = $res['form']->get('beneficiary')->getData();
+            $res['page'] = $res['form']->get('page')->getData();
         }
 
         return $res;
@@ -75,6 +73,7 @@ class AdminPeriodPositionFreeLogController extends AbstractController
      * Lists all PeriodPositionFreeLog entities.
      *
      * @Route("/", name="admin_periodpositionfreelog_index", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function listAction(Request $request)
@@ -85,15 +84,18 @@ class AdminPeriodPositionFreeLogController extends AbstractController
         $order = 'DESC';
 
         $qb = $em->getRepository('App:PeriodPositionFreeLog')->createQueryBuilder('ppfl')
-            ->orderBy('ppfl.' . $sort, $order);
+            ->orderBy('ppfl.' . $sort, $order)
+        ;
 
-        if ($filter["created_at"]) {
+        if ($filter['created_at']) {
             $qb = $qb->andWhere("DATE_FORMAT(ppfl.createdAt, '%Y-%m-%d') = :created_at_formatted")
-                ->setParameter('created_at_formatted', $filter['created_at']->format('Y-m-d'));
+                ->setParameter('created_at_formatted', $filter['created_at']->format('Y-m-d'))
+            ;
         }
-        if ($filter["beneficiary"]) {
+        if ($filter['beneficiary']) {
             $qb = $qb->andWhere('ppfl.beneficiary = :beneficiary')
-                ->setParameter('beneficiary', $filter['beneficiary']);
+                ->setParameter('beneficiary', $filter['beneficiary'])
+            ;
         }
 
         $limitPerPage = 25;
@@ -105,15 +107,16 @@ class AdminPeriodPositionFreeLogController extends AbstractController
 
         $paginator
             ->getQuery()
-            ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
-            ->setMaxResults($limitPerPage); // set the limit
+            ->setFirstResult($limitPerPage * ($currentPage - 1)) // set the offset
+            ->setMaxResults($limitPerPage) // set the limit
+        ;
 
-        return $this->render('admin/periodpositionfreelog/index.html.twig', array(
+        return $this->render('admin/periodpositionfreelog/index.html.twig', [
             'periodPositionFreeLogs' => $paginator,
             'filter_form' => $filter['form']->createView(),
             'result_count' => $resultCount,
             'current_page' => $currentPage,
             'page_count' => $pageCount,
-        ));
+        ]);
     }
 }

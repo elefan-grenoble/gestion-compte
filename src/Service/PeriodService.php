@@ -38,16 +38,15 @@ class PeriodService
      *
      * useful only if the use_fly_and_fixed is activated
      *
-     * @param String|null $weekCycle a string of the week to keep or null if no filter
-     * @return bool
+     * @param null|string $weekCycle a string of the week to keep or null if no filter
      */
-    public function hasWarningStatus(Period $period, ?String $weekCycle=null): bool
+    public function hasWarningStatus(Period $period, ?string $weekCycle = null): bool
     {
         if ($this->use_fly_and_fixed) {
             foreach ($period->getPositions() as $position) {
                 if ($shifter = $position->getShifter()) {
                     $shifterIsFlying = ($this->fly_and_fixed_entity_flying == 'Beneficiary' and $shifter->isFlying()) or ($this->fly_and_fixed_entity_flying == 'Membership' and $shifter->getMembership()->isFlying());
-                    if ((($weekCycle && $position->getWeekCycle()==$weekCycle) or !$weekCycle)
+                    if ((($weekCycle && $position->getWeekCycle() == $weekCycle) or !$weekCycle)
                         and ($shifterIsFlying
                         or $shifter->getMembership()->isFrozen()
                         or $shifter->getMembership()->isWithdrawn())) {

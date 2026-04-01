@@ -1,5 +1,7 @@
 <?php
+
 // src/App/Command/ImportUsersCommand.php
+
 namespace App\Command;
 
 use App\Entity\Address;
@@ -15,10 +17,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Question\ChoiceQuestion;
-use Symfony\Component\Console\Question\ConfirmationQuestion;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
-use Symfony\Component\Validator\Constraints\DateTime;
 
 class ImportUsersCommand extends CsvCommand
 {
@@ -28,8 +27,7 @@ class ImportUsersCommand extends CsvCommand
     public function __construct(
         EntityManagerInterface $em,
         EventDispatcherInterface $event_dispatcher
-    )
-    {
+    ) {
         $this->em = $em;
         $this->event_dispatcher = $event_dispatcher;
 
@@ -43,118 +41,119 @@ class ImportUsersCommand extends CsvCommand
             ->setDescription('Import users and registration from csv')
             ->setHelp('This command allows you to import user from outside as a csv file')
             ->addArgument('file', InputArgument::REQUIRED, 'Csv file source')
-            ->addOption('delimiter','d',InputOption::VALUE_OPTIONAL,'csv delimiter',';')
-            ->addOption('limit','l',InputOption::VALUE_OPTIONAL,'limit')
-            //->addOption('dry_run',null,InputOption::VALUE_NONE,'dry run')
-            ->addOption('default_mapping',null,InputOption::VALUE_NONE,'')
+            ->addOption('delimiter', 'd', InputOption::VALUE_OPTIONAL, 'csv delimiter', ';')
+            ->addOption('limit', 'l', InputOption::VALUE_OPTIONAL, 'limit')
+            // ->addOption('dry_run',null,InputOption::VALUE_NONE,'dry run')
+            ->addOption('default_mapping', null, InputOption::VALUE_NONE, '')
         ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $file = $input->getArgument('file');
-        $delimiter= $input->getOption('delimiter');
-        //$dry_run= $input->getOption('dry_run');
-        $limit= $input->getOption('limit');
-        $default_mapping= $input->getOption('default_mapping');
+        $delimiter = $input->getOption('delimiter');
+        // $dry_run= $input->getOption('dry_run');
+        $limit = $input->getOption('limit');
+        $default_mapping = $input->getOption('default_mapping');
 
-        $delimiter = $this->checkDelimiter($file,$delimiter,$input,$output);
+        $delimiter = $this->checkDelimiter($file, $delimiter, $input, $output);
 
         $output->writeln([
             '====================================',
             '    Import users data from csv      ',
             '====================================',
         ]);
-        //no	nom	prénom	adresse	code postal	commune	Date de naissance	téléphone	mail	Commissions	Personne Associée	montant des parts	paiment 2 fois
+        // no	nom	prénom	adresse	code postal	commune	Date de naissance	téléphone	mail	Commissions	Personne Associée	montant des parts	paiment 2 fois
 
-        $this->setNeededFields(array(
-            'member_number' => array('label' => 'Numero existant','index'=>0,"required" => false,"default" =>null),
-            'last_name' => array('label' => 'Nom','index'=>1),
-            'first_name' => array('label' => 'Prénom','index'=>2),
-            'street1' => array('label' => 'Rue','index'=>3),
-            'street2' => array('label' => 'Complement adresse',"required" => false,"default" =>null),
-            'zip' => array('label' => 'Code postale','index'=>4),
-            'city' => array('label' => 'Ville','index'=>5),
-            'phone' => array('label' => 'Téléphone','index'=>7),
-            'email' => array('label' => 'Email','index'=>8),
-            'commissions' => array('label' => 'Commission (liste id)',
-                'tips'=>'Liste d\'id de commissions, séparé par des virgules. ex: 1,5,7',
-                "required" => false,"default" =>'', 'index'=>9),
-            'add_to' => array('label' => 'Email du compte associé','index'=>10,"required" => false,"default" =>''),
-            'date' => array('label' => 'Date inscription',
-                'tips'=>'Au format d/m/Y ex: 13/12/2018',
-                "required" => false,"default" =>date('d/m/Y')),
-            'amount' => array('label' => 'Montant','index'=>11),
-            'mode' => array('label' => 'Mode de paiement',
-                'tips'=>'int : 1 = espèce,2 = chèque, 3 = monnaie locale, 4 = cb, 6 = Helloasso, 5 = autre',
-                "required" => false,"default" =>5),
-            'registrar' => array('label' => 'Membre ayant réalisé l\'inscription',
-                'tips'=>'Id de l\'utilisateur. Ex: 45. Default is 1.',
-                "required" => false,"default" =>1),
-            //todo : manage extra fields
-            //'dob' => array('label' => 'Date de naissance (d/m/Y)','index'=>6),
-            //'splited_invoice' => array('label' => 'Payé en 2 fois','index'=>-1,"required" => false),
-        ));
+        $this->setNeededFields([
+            'member_number' => ['label' => 'Numero existant', 'index' => 0, 'required' => false, 'default' => null],
+            'last_name' => ['label' => 'Nom', 'index' => 1],
+            'first_name' => ['label' => 'Prénom', 'index' => 2],
+            'street1' => ['label' => 'Rue', 'index' => 3],
+            'street2' => ['label' => 'Complement adresse', 'required' => false, 'default' => null],
+            'zip' => ['label' => 'Code postale', 'index' => 4],
+            'city' => ['label' => 'Ville', 'index' => 5],
+            'phone' => ['label' => 'Téléphone', 'index' => 7],
+            'email' => ['label' => 'Email', 'index' => 8],
+            'commissions' => ['label' => 'Commission (liste id)',
+                'tips' => 'Liste d\'id de commissions, séparé par des virgules. ex: 1,5,7',
+                'required' => false, 'default' => '', 'index' => 9],
+            'add_to' => ['label' => 'Email du compte associé', 'index' => 10, 'required' => false, 'default' => ''],
+            'date' => ['label' => 'Date inscription',
+                'tips' => 'Au format d/m/Y ex: 13/12/2018',
+                'required' => false, 'default' => date('d/m/Y')],
+            'amount' => ['label' => 'Montant', 'index' => 11],
+            'mode' => ['label' => 'Mode de paiement',
+                'tips' => 'int : 1 = espèce,2 = chèque, 3 = monnaie locale, 4 = cb, 6 = Helloasso, 5 = autre',
+                'required' => false, 'default' => 5],
+            'registrar' => ['label' => 'Membre ayant réalisé l\'inscription',
+                'tips' => 'Id de l\'utilisateur. Ex: 45. Default is 1.',
+                'required' => false, 'default' => 1],
+            // todo : manage extra fields
+            // 'dob' => array('label' => 'Date de naissance (d/m/Y)','index'=>6),
+            // 'splited_invoice' => array('label' => 'Payé en 2 fois','index'=>-1,"required" => false),
+        ]);
 
-        if (!$default_mapping)
-            $this->mapField($file,$delimiter,$input,$output);
+        if (!$default_mapping) {
+            $this->mapField($file, $delimiter, $input, $output);
+        }
 
         $lines = $this->getLines($file) - 1;
-        if ($limit){
-            $lines = min($lines,$limit);
+        if ($limit) {
+            $lines = min($lines, $limit);
         }
-        $output->writeln("<info>Dealing with $lines lines</info>");
+        $output->writeln("<info>Dealing with {$lines} lines</info>");
 
-        $progress = new ProgressBar($output,$lines);
+        $progress = new ProgressBar($output, $lines);
 
         $row = 0;
-        if (($handle = fopen($file, "r")) !== FALSE) {
-            while (($data = fgetcsv($handle, 10000, $delimiter)) !== FALSE) {
-                $row++;
-                if ($limit and $limit <= $row){
+        if (($handle = fopen($file, 'r')) !== false) {
+            while (($data = fgetcsv($handle, 10000, $delimiter)) !== false) {
+                ++$row;
+                if ($limit and $limit <= $row) {
                     break;
                 }
-                $data = array_map("utf8_encode", $data); //utf8
-                if ($row > 1) { //skip first line
+                $data = array_map('utf8_encode', $data); // utf8
+                if ($row > 1) { // skip first line
                     $progress->advance();
 
-                    $output->writeln("",OutputInterface::VERBOSITY_DEBUG);
+                    $output->writeln('', OutputInterface::VERBOSITY_DEBUG);
 
-                    $member_number = ($this->getField('member_number',$data));
-                    $first_name = ($this->getField('first_name',$data));
-                    $last_name = ($this->getField('last_name',$data));
-                    $street1 = ($this->getField('street1',$data));
-                    $street2 = ($this->getField('street2',$data));
-                    $zip = ($this->getField('zip',$data));
-                    $city = ($this->getField('city',$data));
-                    $phone = ($this->getField('phone',$data));
-                    $email = ($this->getField('email',$data));
-                    $commissions = explode(',',$this->getField('commissions',$data));
-                    $add_to = ($this->getField('add_to',$data));
-                    $date = date_create_from_format('d/m/Y',$this->getField('date',$data));
-                    $amount = ($this->getField('amount',$data));
-                    $mode = ($this->getField('mode',$data));
-                    $registrar = ($this->getField('registrar',$data));
+                    $member_number = $this->getField('member_number', $data);
+                    $first_name = $this->getField('first_name', $data);
+                    $last_name = $this->getField('last_name', $data);
+                    $street1 = $this->getField('street1', $data);
+                    $street2 = $this->getField('street2', $data);
+                    $zip = $this->getField('zip', $data);
+                    $city = $this->getField('city', $data);
+                    $phone = $this->getField('phone', $data);
+                    $email = $this->getField('email', $data);
+                    $commissions = explode(',', $this->getField('commissions', $data));
+                    $add_to = $this->getField('add_to', $data);
+                    $date = date_create_from_format('d/m/Y', $this->getField('date', $data));
+                    $amount = $this->getField('amount', $data);
+                    $mode = $this->getField('mode', $data);
+                    $registrar = $this->getField('registrar', $data);
 
                     $membership_is_new = false;
                     $user_is_new = false;
 
                     $membership = new Membership();
-                    if ($add_to){
-                        $parent_user = $this->em->getRepository(User::class)->findOneBy(array('email'=>$add_to));
-                        if ($parent_user && $parent_user->getId()){
+                    if ($add_to) {
+                        $parent_user = $this->em->getRepository(User::class)->findOneBy(['email' => $add_to]);
+                        if ($parent_user && $parent_user->getId()) {
                             $membership = $parent_user->getBeneficiary()->getMembership();
-                            $output->writeln("<info>Membership found for parent email <fg=cyan>$add_to</> (#<fg=cyan>".$membership->getMemberNumber()."</>), using it</info>",OutputInterface::VERBOSITY_DEBUG);
+                            $output->writeln("<info>Membership found for parent email <fg=cyan>{$add_to}</> (#<fg=cyan>" . $membership->getMemberNumber() . '</>), using it</info>', OutputInterface::VERBOSITY_DEBUG);
                         }
                     }
-                    if (!$membership->getId()){
-                        $membership = $this->em->getRepository(Membership::class)->findOneBy(array('member_number'=>$member_number));
-                        if ($membership && $membership->getId()){
-                            $output->writeln("<info>Membership with number <fg=cyan>$member_number</> exist, using it</info>",OutputInterface::VERBOSITY_DEBUG);
-                        }else{
+                    if (!$membership->getId()) {
+                        $membership = $this->em->getRepository(Membership::class)->findOneBy(['member_number' => $member_number]);
+                        if ($membership && $membership->getId()) {
+                            $output->writeln("<info>Membership with number <fg=cyan>{$member_number}</> exist, using it</info>", OutputInterface::VERBOSITY_DEBUG);
+                        } else {
                             $membership_is_new = true;
                             $membership = new Membership();
-                            $output->writeln("<info>No Membership with number <fg=cyan>$member_number</> found, create one</info>",OutputInterface::VERBOSITY_DEBUG);
+                            $output->writeln("<info>No Membership with number <fg=cyan>{$member_number}</> found, create one</info>", OutputInterface::VERBOSITY_DEBUG);
                             $membership->setMemberNumber($member_number);
                             $membership->setFlying(false);
                             $membership->setWithdrawn(false);
@@ -164,15 +163,15 @@ class ImportUsersCommand extends CsvCommand
                         }
                     }
 
-                    $user = $this->em->getRepository(User::class)->findOneBy(array('email'=>$email));
+                    $user = $this->em->getRepository(User::class)->findOneBy(['email' => $email]);
                     $beneficiary = new Beneficiary();
 
-                    if ($user && $user->getId()){
-                        $output->writeln("<info>User with email <fg=cyan>$email</> found. Update it</info>",OutputInterface::VERBOSITY_DEBUG);
+                    if ($user && $user->getId()) {
+                        $output->writeln("<info>User with email <fg=cyan>{$email}</> found. Update it</info>", OutputInterface::VERBOSITY_DEBUG);
                         $beneficiary = $user->getBeneficiary();
-                    }else{
+                    } else {
                         $user_is_new = true;
-                        $output->writeln("<info>Create new User and Beneficiary (<fg=cyan>$last_name $first_name $email</>)</info>",OutputInterface::VERBOSITY_DEBUG);
+                        $output->writeln("<info>Create new User and Beneficiary (<fg=cyan>{$last_name} {$first_name} {$email}</>)</info>", OutputInterface::VERBOSITY_DEBUG);
 
                         $beneficiary->setFirstname($first_name);
                         $beneficiary->setLastname($last_name);
@@ -187,7 +186,7 @@ class ImportUsersCommand extends CsvCommand
                     }
 
                     $address = new Address();
-                    if ($beneficiary->getAddress()){
+                    if ($beneficiary->getAddress()) {
                         $address = $beneficiary->getAddress();
                     }
 
@@ -199,39 +198,40 @@ class ImportUsersCommand extends CsvCommand
 
                     $beneficiary->setAddress($address);
                     $beneficiary->setMembership($membership);
-                    if ($membership_is_new){
+                    if ($membership_is_new) {
                         $membership->setMainBeneficiary($beneficiary);
                         $this->em->persist($membership);
                     }
                     $this->em->persist($beneficiary);
 
                     $registration = new Registration();
-                    if (!$user_is_new){ //do not add registration
-                        foreach ($membership->getRegistrations() as $r){
-                            if ($r->getDate()->format('Y')==$date->format('Y')){
-                                $output->writeln("<info>Registration within this year (<fg=cyan>".$date->format('Y')."</>) found. Do nothing</info>",OutputInterface::VERBOSITY_DEBUG);
+                    if (!$user_is_new) { // do not add registration
+                        foreach ($membership->getRegistrations() as $r) {
+                            if ($r->getDate()->format('Y') == $date->format('Y')) {
+                                $output->writeln('<info>Registration within this year (<fg=cyan>' . $date->format('Y') . '</>) found. Do nothing</info>', OutputInterface::VERBOSITY_DEBUG);
                                 $registration = null;
+
                                 break;
                             }
                         }
                     }
-                    if ($registration){
+                    if ($registration) {
                         $registration->setDate($date);
                         $registration->setMembership($membership);
                         $registration->setAmount($amount);
-                        $registrar = $this->em->getRepository(User::class)->findOneBy(array('id'=>$registrar));
+                        $registrar = $this->em->getRepository(User::class)->findOneBy(['id' => $registrar]);
                         $registration->setRegistrar($registrar);
                         $registration->setMode($mode);
                         $this->em->persist($registration);
                     }
 
-                    foreach ($commissions as $commission_id){
-                        if ($commission_id){
-                            $commission =  $this->em->getRepository(Commission::class)->findOneBy(array('id'=>$commission_id));
-                            if ($commission){
+                    foreach ($commissions as $commission_id) {
+                        if ($commission_id) {
+                            $commission =  $this->em->getRepository(Commission::class)->findOneBy(['id' => $commission_id]);
+                            if ($commission) {
                                 $beneficiary->addCommission($commission);
-                            }else{
-                                $output->writeln("<error>Commission with id  #<fg=cyan>".$commission_id."</> not found</error>",OutputInterface::VERBOSITY_DEBUG);
+                            } else {
+                                $output->writeln('<error>Commission with id  #<fg=cyan>' . $commission_id . '</> not found</error>', OutputInterface::VERBOSITY_DEBUG);
                             }
                         }
                     }
@@ -242,11 +242,10 @@ class ImportUsersCommand extends CsvCommand
                 }
             }
             fclose($handle);
-            $output->writeln("");
+            $output->writeln('');
         }
-        //$progress->finish();
+        // $progress->finish();
 
         return 0;
     }
-
 }

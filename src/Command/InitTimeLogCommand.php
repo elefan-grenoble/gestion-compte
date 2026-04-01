@@ -2,16 +2,13 @@
 
 namespace App\Command;
 
-use App\Entity\Membership;
 use App\Service\MembershipService;
-use App\Entity\Shift;
-use App\Entity\TimeLog;
 use App\Service\TimeLogService;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Doctrine\ORM\ORMException;
 
 class InitTimeLogCommand extends Command
 {
@@ -23,8 +20,7 @@ class InitTimeLogCommand extends Command
         EntityManagerInterface $em,
         MembershipService $membership_service,
         TimeLogService $time_log_service
-    )
-    {
+    ) {
         $this->em = $em;
         $this->membership_service = $membership_service;
         $this->time_log_service = $time_log_service;
@@ -37,14 +33,12 @@ class InitTimeLogCommand extends Command
         $this
             ->setName('app:user:init_time_log')
             ->setDescription('Init time logs data')
-            ->setHelp('This command allows you to init time logs data');
+            ->setHelp('This command allows you to init time logs data')
+        ;
     }
 
     /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return int
-     * @throws \Doctrine\ORM\ORMException
+     * @throws ORMException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -62,13 +56,13 @@ class InitTimeLogCommand extends Command
                 foreach ($shifts as $shift) {
                     $log = $this->time_log_service->initShiftValidatedTimeLog($shift, $shift->getStart());
                     $this->em->persist($log);
-                    $countShiftLogs++;
+                    ++$countShiftLogs;
                 }
 
                 if ($member->getFirstShiftDate() < $beginningOfLastCycle) {
                     $log = $this->time_log_service->initCurrentCycleBeginningTimeLog($member);
                     $this->em->persist($log);
-                    $countCycleBeginning++;
+                    ++$countCycleBeginning;
                 }
             }
         }

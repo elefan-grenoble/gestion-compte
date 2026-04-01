@@ -17,11 +17,12 @@ class JobToNumberTransformer implements DataTransformerInterface
     }
 
     /**
-    * Transforms an object (job) to a string (id).
-    *
-    * @param  Job|null $job
-    * @return string
-    */
+     * Transforms an object (job) to a string (id).
+     *
+     * @param null|Job $job
+     *
+     * @return string
+     */
     public function transform($job)
     {
         if (null === $job) {
@@ -34,8 +35,10 @@ class JobToNumberTransformer implements DataTransformerInterface
     /**
      * Transforms a string (id) to an object (job).
      *
-     * @param  string $jobId
+     * @param string $jobId
+     *
      * @return Job
+     *
      * @throws TransformationFailedException if object (job) is not found
      */
     public function reverseTransform($jobId)
@@ -45,8 +48,8 @@ class JobToNumberTransformer implements DataTransformerInterface
         }
 
         $job = $this->entityManager
-                    ->getRepository(Job::class)
-                    ->find($jobId)
+            ->getRepository(Job::class)
+            ->find($jobId)
         ;
 
         if (null === $job) {

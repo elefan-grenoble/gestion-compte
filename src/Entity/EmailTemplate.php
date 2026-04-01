@@ -5,10 +5,12 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Email template
+ * Email template.
  *
  * @ORM\Table(name="email_template")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\EmailTemplateRepository")
  */
 class EmailTemplate
@@ -17,7 +19,9 @@ class EmailTemplate
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
@@ -26,7 +30,6 @@ class EmailTemplate
      * @var string
      *
      * @ORM\Column(name="name", type="string", length=64)
-     *
      */
     protected $name;
 
@@ -34,7 +37,6 @@ class EmailTemplate
      * @var string
      *
      * @ORM\Column(name="description", type="string", length=512)
-     *
      */
     protected $description;
 
@@ -54,6 +56,7 @@ class EmailTemplate
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
      */
     private $createdBy;
@@ -67,16 +70,15 @@ class EmailTemplate
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="updated_by_id", referencedColumnName="id")
      */
     private $updatedBy;
 
     /**
-     * Constructor
+     * Constructor.
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     public function __toString()
     {
@@ -95,6 +97,7 @@ class EmailTemplate
 
     /**
      * @ORM\PrePersist
+     *
      * @ORM\PreUpdate
      */
     public function setUpdatedAtValue()
@@ -103,7 +106,7 @@ class EmailTemplate
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -113,7 +116,7 @@ class EmailTemplate
     }
 
     /**
-     * Set name
+     * Set name.
      *
      * @param string $name
      *
@@ -127,7 +130,7 @@ class EmailTemplate
     }
 
     /**
-     * Get name
+     * Get name.
      *
      * @return string
      */
@@ -144,9 +147,6 @@ class EmailTemplate
         return $this->content;
     }
 
-    /**
-     * @param string $content
-     */
     public function setContent(string $content): void
     {
         $this->content = $content;
@@ -160,16 +160,13 @@ class EmailTemplate
         return $this->description;
     }
 
-    /**
-     * @param string $description
-     */
     public function setDescription(string $description): void
     {
         $this->description = $description;
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */
@@ -179,13 +176,11 @@ class EmailTemplate
     }
 
     /**
-     * Set createdBy
-     *
-     * @param \App\Entity\User $user
+     * Set createdBy.
      *
      * @return EmailTemplate
      */
-    public function setCreatedBy(\App\Entity\User $user = null)
+    public function setCreatedBy(?User $user = null)
     {
         $this->createdBy = $user;
 
@@ -193,9 +188,9 @@ class EmailTemplate
     }
 
     /**
-     * Get createdBy
+     * Get createdBy.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getCreatedBy()
     {
@@ -203,7 +198,7 @@ class EmailTemplate
     }
 
     /**
-     * Get updatedAt
+     * Get updatedAt.
      *
      * @return \DateTime
      */
@@ -213,13 +208,11 @@ class EmailTemplate
     }
 
     /**
-     * Set updatedBy
-     *
-     * @param \App\Entity\User $user
+     * Set updatedBy.
      *
      * @return EmailTemplate
      */
-    public function setUpdatedBy(\App\Entity\User $user = null)
+    public function setUpdatedBy(?User $user = null)
     {
         $this->updatedBy = $user;
 
@@ -227,9 +220,9 @@ class EmailTemplate
     }
 
     /**
-     * Get updatedBy
+     * Get updatedBy.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getUpdatedBy()
     {

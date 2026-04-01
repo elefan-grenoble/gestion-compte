@@ -1,5 +1,7 @@
 <?php
+
 // src/App/Validator/Constraints/BeneficiaryCanHost.php
+
 namespace App\Validator\Constraints;
 
 use Symfony\Component\Validator\Constraint;

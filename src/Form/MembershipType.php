@@ -14,7 +14,6 @@ use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInt
 
 class MembershipType extends AbstractType
 {
-
     private $tokenStorage;
 
     public function __construct(TokenStorageInterface $tokenStorage)
@@ -22,9 +21,6 @@ class MembershipType extends AbstractType
         $this->tokenStorage = $tokenStorage;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
 
@@ -38,40 +34,33 @@ class MembershipType extends AbstractType
 
         $builder->add('mainBeneficiary', BeneficiaryType::class);
 
-        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user, $options): void {
+        $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user): void {
             $form = $event->getForm();
+
             /** @var Membership $userData */
             $userData = $event->getData();
 
             if (is_object($user) && ($user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN'))) {
-                $form->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent'));
+                $form->add('member_number', IntegerType::class, ['label' => 'Numéro d\'adhérent']);
             } else {
-                $form->add('member_number', IntegerType::class, array('label' => 'Numéro d\'adhérent', 'disabled' => true));
+                $form->add('member_number', IntegerType::class, ['label' => 'Numéro d\'adhérent', 'disabled' => true]);
             }
 
             if ($userData && !$userData->getId() && $userData->getLastRegistration()->getAmount() === null) {
-                $form->add('lastRegistration', RegistrationType::class, array('label' => ' ', 'data_class' => Registration::class));
+                $form->add('lastRegistration', RegistrationType::class, ['label' => ' ', 'data_class' => Registration::class]);
             }
         });
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
-            'data_class' => Membership::class
-        ));
+        $resolver->setDefaults([
+            'data_class' => Membership::class,
+        ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlockPrefix()
     {
         return 'App_membership';
     }
-
-
 }

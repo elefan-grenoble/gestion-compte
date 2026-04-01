@@ -6,9 +6,10 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Process update
+ * Process update.
  *
  * @ORM\Table(name="process_update")
+ *
  * @ORM\Entity(repositoryClass="App\Repository\ProcessUpdateRepository")
  */
 class ProcessUpdate
@@ -17,7 +18,9 @@ class ProcessUpdate
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
@@ -26,12 +29,14 @@ class ProcessUpdate
      * @var \DateTime
      *
      * @ORM\Column(name="date", type="datetime")
+     *
      * @Assert\DateTime()
      */
     private $date;
 
     /**
      * @ORM\ManyToOne(targetEntity="User", inversedBy="processUpdates")
+     *
      * @ORM\JoinColumn(name="author_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $author;
@@ -47,7 +52,6 @@ class ProcessUpdate
      * @var string
      *
      * @ORM\Column(name="description", type="text")
-     *
      */
     protected $description;
 
@@ -59,14 +63,12 @@ class ProcessUpdate
     protected $link;
 
     /**
-     * Constructor
+     * Constructor.
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -83,9 +85,6 @@ class ProcessUpdate
         return $this->title;
     }
 
-    /**
-     * @param string $title
-     */
     public function setTitle(string $title)
     {
         $this->title = $title;
@@ -99,9 +98,6 @@ class ProcessUpdate
         return $this->description;
     }
 
-    /**
-     * @param string $description
-     */
     public function setDescription(string $description)
     {
         $this->description = $description;
@@ -115,9 +111,6 @@ class ProcessUpdate
         return $this->link;
     }
 
-    /**
-     * @param string $link
-     */
     public function setLink(string $link)
     {
         $this->link = $link;
@@ -131,9 +124,6 @@ class ProcessUpdate
         return $this->date;
     }
 
-    /**
-     * @param \DateTime $date
-     */
     public function setDate(\DateTime $date)
     {
         $this->date = $date;

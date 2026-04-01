@@ -8,15 +8,15 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
- * OpeningHour controller
+ * OpeningHour controller.
  *
  * @Route("openinghours")
  */
 class OpeningHourController extends AbstractController
 {
     /**
-     * Opening hours widget display
-     * 
+     * Opening hours widget display.
+     *
      * @Route("/widget", name="openinghour_widget", methods={"GET"})
      */
     public function widgetAction(Request $request)

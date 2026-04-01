@@ -2,14 +2,15 @@
 
 namespace App\Entity;
 
-use App\Repository\PeriodPositionFreeLogRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * PeriodPositionFreeLog
+ * PeriodPositionFreeLog.
  *
  * @ORM\Table(name="period_position_free_log")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\PeriodPositionFreeLogRepository")
  */
 class PeriodPositionFreeLog
@@ -18,13 +19,16 @@ class PeriodPositionFreeLog
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
      * @ORM\ManyToOne(targetEntity="PeriodPosition", inversedBy="freeLogs")
+     *
      * @ORM\JoinColumn(referencedColumnName="id", onDelete="SET NULL")
      */
     private $periodPosition;
@@ -38,6 +42,7 @@ class PeriodPositionFreeLog
 
     /**
      * @ORM\ManyToOne(targetEntity="Beneficiary", cascade={"remove"})
+     *
      * @ORM\JoinColumn(referencedColumnName="id", onDelete="CASCADE")
      */
     private $beneficiary;
@@ -65,6 +70,7 @@ class PeriodPositionFreeLog
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(referencedColumnName="id")
      */
     private $createdBy;

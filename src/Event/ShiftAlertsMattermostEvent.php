@@ -2,11 +2,9 @@
 
 namespace App\Event;
 
-use Symfony\Component\EventDispatcher\Event;
-
 class ShiftAlertsMattermostEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
-    const NAME = 'shift.alerts.mattermost';
+    public const NAME = 'shift.alerts.mattermost';
 
     private $alerts;
     private $date;
@@ -38,7 +36,7 @@ class ShiftAlertsMattermostEvent extends \Symfony\Contracts\EventDispatcher\Even
     }
 
     /**
-     * @return string|null
+     * @return null|string
      */
     public function getTemplate()
     {
@@ -46,7 +44,7 @@ class ShiftAlertsMattermostEvent extends \Symfony\Contracts\EventDispatcher\Even
     }
 
     /**
-     * @return string|null
+     * @return null|string
      */
     public function getMattermostHookUrl()
     {

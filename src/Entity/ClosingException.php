@@ -6,10 +6,12 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * ClosingException
+ * ClosingException.
  *
  * @ORM\Table(name="closing_exception")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\ClosingExceptionRepository")
  */
 class ClosingException
@@ -18,7 +20,9 @@ class ClosingException
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -39,13 +43,14 @@ class ClosingException
 
     /**
      * @var \DateTime
-     * 
+     *
      * @ORM\Column(name="created_at", type="datetime")
      */
     private $createdAt;
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
      */
     private $createdBy;
@@ -61,7 +66,7 @@ class ClosingException
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -71,7 +76,7 @@ class ClosingException
     }
 
     /**
-     * Set date
+     * Set date.
      *
      * @param \DateTime $date
      *
@@ -85,7 +90,7 @@ class ClosingException
     }
 
     /**
-     * Get date
+     * Get date.
      *
      * @return \DateTime
      */
@@ -95,12 +100,13 @@ class ClosingException
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function getIsOngoing()
     {
         $now = new \DateTime('now');
-        return ($this->date->format('Y-m-d') == $now->format('Y-m-d'));
+
+        return $this->date->format('Y-m-d') == $now->format('Y-m-d');
     }
 
     public function setReason(?string $reason): self
@@ -116,7 +122,7 @@ class ClosingException
     }
 
     /**
-     * Set createdAt
+     * Set createdAt.
      *
      * @param \DateTime $date
      *
@@ -130,7 +136,7 @@ class ClosingException
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */
@@ -140,13 +146,11 @@ class ClosingException
     }
 
     /**
-     * Set createdBy
-     *
-     * @param \App\Entity\User $createBy
+     * Set createdBy.
      *
      * @return ClosingException
      */
-    public function setCreatedBy(\App\Entity\User $user = null)
+    public function setCreatedBy(?User $user = null)
     {
         $this->createdBy = $user;
 
@@ -154,9 +158,9 @@ class ClosingException
     }
 
     /**
-     * Get createdBy
+     * Get createdBy.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getCreatedBy()
     {
@@ -164,16 +168,16 @@ class ClosingException
     }
 
     /**
-     * Return if the closingException is past for a given date
+     * Return if the closingException is past for a given date.
      *
-     * @param \DateTime $date
-     * @return boolean
+     * @return bool
      */
-    public function getIsPast(\Datetime $date = null)
+    public function getIsPast(?\DateTime $date = null)
     {
         if (!$date) {
             $date = new \DateTime('now');
         }
+
         return $date > $this->date;
     }
 }

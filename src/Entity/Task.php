@@ -3,30 +3,36 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 /**
- * Task
+ * Task.
  *
  * @ORM\Table(name="task")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\TaskRepository")
  */
 class Task
 {
-    const PRIORITY_URGENT_VALUE = 5;
-    const PRIORITY_URGENT_COLOR = "red white-text";
-    const PRIORITY_IMPORTANT_VALUE = 4;
-    const PRIORITY_IMPORTANT_COLOR = "orange white-text";
-    const PRIORITY_NORMAL_VALUE = 3;
-    const PRIORITY_NORMAL_COLOR = "brown white-text";
-    const PRIORITY_ANNEXE_VALUE = 2;
-    const PRIORITY_ANNEXE_COLOR = "gray black-text";
+    public const PRIORITY_URGENT_VALUE = 5;
+    public const PRIORITY_URGENT_COLOR = 'red white-text';
+    public const PRIORITY_IMPORTANT_VALUE = 4;
+    public const PRIORITY_IMPORTANT_COLOR = 'orange white-text';
+    public const PRIORITY_NORMAL_VALUE = 3;
+    public const PRIORITY_NORMAL_COLOR = 'brown white-text';
+    public const PRIORITY_ANNEXE_VALUE = 2;
+    public const PRIORITY_ANNEXE_COLOR = 'gray black-text';
 
     /**
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -54,20 +60,25 @@ class Task
 
     /**
      * Many Tasks have Many Commissions.
+     *
      * @ORM\ManyToMany(targetEntity="Commission", inversedBy="tasks")
+     *
      * @ORM\JoinTable(name="tasks_commissions")
      */
     private $commissions;
 
     /**
      * Many Tasks have Many Owners (beneficiaries).
+     *
      * @ORM\ManyToMany(targetEntity="Beneficiary", inversedBy="tasks", cascade={"persist"})
+     *
      * @ORM\JoinTable(name="tasks_beneficiaries")
      */
     private $owners;
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="registrar_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $registrar;
@@ -90,17 +101,18 @@ class Task
      * @var \DateTime
      *
      * Used as start date...
+     *
      * @ORM\Column(name="created_at", type="datetime")
      */
     private $createdAt;
 
     /**
-     * Constructor
+     * Constructor.
      */
     public function __construct()
     {
-        $this->commissions = new \Doctrine\Common\Collections\ArrayCollection();
-        $this->owners = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->commissions = new ArrayCollection();
+        $this->owners = new ArrayCollection();
     }
 
     /**
@@ -114,7 +126,7 @@ class Task
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -124,7 +136,7 @@ class Task
     }
 
     /**
-     * Set title
+     * Set title.
      *
      * @param string $title
      *
@@ -138,7 +150,7 @@ class Task
     }
 
     /**
-     * Get title
+     * Get title.
      *
      * @return string
      */
@@ -148,13 +160,11 @@ class Task
     }
 
     /**
-     * Add commission
-     *
-     * @param \App\Entity\Commission $commission
+     * Add commission.
      *
      * @return Task
      */
-    public function addCommission(\App\Entity\Commission $commission)
+    public function addCommission(Commission $commission)
     {
         $this->commissions[] = $commission;
 
@@ -162,19 +172,17 @@ class Task
     }
 
     /**
-     * Remove commission
-     *
-     * @param \App\Entity\Commission $commission
+     * Remove commission.
      */
-    public function removeCommission(\App\Entity\Commission $commission)
+    public function removeCommission(Commission $commission)
     {
         $this->commissions->removeElement($commission);
     }
 
     /**
-     * Get commissions
+     * Get commissions.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getCommissions()
     {
@@ -182,13 +190,11 @@ class Task
     }
 
     /**
-     * Add owner
-     *
-     * @param \App\Entity\Beneficiary $owner
+     * Add owner.
      *
      * @return Task
      */
-    public function addOwner(\App\Entity\Beneficiary $owner)
+    public function addOwner(Beneficiary $owner)
     {
         $this->owners[] = $owner;
         $owner->addTask($this);
@@ -197,19 +203,17 @@ class Task
     }
 
     /**
-     * Remove owner
-     *
-     * @param \App\Entity\Beneficiary $owner
+     * Remove owner.
      */
-    public function removeOwner(\App\Entity\Beneficiary $owner)
+    public function removeOwner(Beneficiary $owner)
     {
         $this->owners->removeElement($owner);
     }
 
     /**
-     * Get owners
+     * Get owners.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getOwners()
     {
@@ -217,13 +221,11 @@ class Task
     }
 
     /**
-     * Set registrar
-     *
-     * @param \App\Entity\User $registrar
+     * Set registrar.
      *
      * @return Task
      */
-    public function setRegistrar(\App\Entity\User $registrar = null)
+    public function setRegistrar(?User $registrar = null)
     {
         $this->registrar = $registrar;
 
@@ -231,9 +233,9 @@ class Task
     }
 
     /**
-     * Get registrar
+     * Get registrar.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getRegistrar()
     {
@@ -241,7 +243,7 @@ class Task
     }
 
     /**
-     * Set dueDate
+     * Set dueDate.
      *
      * @param \DateTime $dueDate
      *
@@ -255,7 +257,7 @@ class Task
     }
 
     /**
-     * Get dueDate
+     * Get dueDate.
      *
      * @return \DateTime
      */
@@ -265,9 +267,9 @@ class Task
     }
 
     /**
-     * Set closed
+     * Set closed.
      *
-     * @param boolean $closed
+     * @param bool $closed
      *
      * @return Task
      */
@@ -279,9 +281,9 @@ class Task
     }
 
     /**
-     * Get closed
+     * Get closed.
      *
-     * @return boolean
+     * @return bool
      */
     public function getClosed()
     {
@@ -289,9 +291,9 @@ class Task
     }
 
     /**
-     * Set priority
+     * Set priority.
      *
-     * @param integer $priority
+     * @param int $priority
      *
      * @return Task
      */
@@ -303,7 +305,7 @@ class Task
     }
 
     /**
-     * Get priority
+     * Get priority.
      *
      * @return int
      */
@@ -313,7 +315,7 @@ class Task
     }
 
     /**
-     * Set status
+     * Set status.
      *
      * @param string $status
      *
@@ -327,7 +329,7 @@ class Task
     }
 
     /**
-     * Get status
+     * Get status.
      *
      * @return string
      */
@@ -337,7 +339,7 @@ class Task
     }
 
     /**
-     * Set createdAt
+     * Set createdAt.
      *
      * @param \DateTime $date
      *
@@ -351,7 +353,7 @@ class Task
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */

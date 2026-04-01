@@ -2,12 +2,11 @@
 
 namespace App\Command;
 
-use App\Entity\ShiftFreeLog;
-use Doctrine\ORM\EntityManager;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Doctrine\ORM\ORMException;
 
 class InitShiftFreeLogShiftStringFieldCommand extends Command
 {
@@ -15,8 +14,7 @@ class InitShiftFreeLogShiftStringFieldCommand extends Command
 
     public function __construct(
         EntityManagerInterface $em
-    )
-    {
+    ) {
         $this->em = $em;
 
         parent::__construct();
@@ -27,14 +25,12 @@ class InitShiftFreeLogShiftStringFieldCommand extends Command
         $this
             ->setName('app:shiftfreelog:init_shift_string_field')
             ->setDescription('Init ShiftFreeLog.shiftString data')
-            ->setHelp('This command allows you to init ShiftFreeLog.shiftString data');
+            ->setHelp('This command allows you to init ShiftFreeLog.shiftString data')
+        ;
     }
 
     /**
-     * @param InputInterface $input
-     * @param OutputInterface $output
-     * @return int
-     * @throws \Doctrine\ORM\ORMException
+     * @throws ORMException
      */
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
@@ -47,7 +43,7 @@ class InitShiftFreeLogShiftStringFieldCommand extends Command
                     $shiftString = $shiftFreeLog->getShift()->getJob()->getName() . ' - ' . $shiftFreeLog->getShift()->getDisplayDateSeperateTime();
                     $shiftFreeLog->setShiftString($shiftString);
                     $this->em->persist($shiftFreeLog);
-                    $countShiftFreeLogs++;
+                    ++$countShiftFreeLogs;
                 }
             }
         }

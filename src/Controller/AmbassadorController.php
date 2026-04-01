@@ -2,16 +2,12 @@
 
 namespace App\Controller;
 
-
 use App\Entity\Membership;
 use App\Entity\Note;
-use App\Entity\Task;
-use App\Entity\User;
 use App\Form\NoteType;
 use App\Service\SearchUserFormHelper;
 use Doctrine\ORM\Query\Expr\Join;
 use Doctrine\ORM\Tools\Pagination\Paginator;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -19,10 +15,11 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Symfony\Component\Validator\Constraints\DateTime;
+use Symfony\Component\Form\FormInterface;
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 /**
- * Ambassador controller
+ * Ambassador controller.
  *
  * @Route("ambassador")
  */
@@ -38,12 +35,15 @@ class AmbassadorController extends AbstractController
     }
 
     /**
-     * List all members without a registration
+     * List all members without a registration.
      *
      * @Route("/noregistration", name="ambassador_noregistration_list", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_USER_VIEWER')")
-     * @param request $request , searchuserformhelper $formhelper
-     * @return response
+     *
+     * @param Request $request , searchuserformhelper $formhelper
+     *
+     * @return Response
      */
     public function memberNoRegistrationAction(Request $request, SearchUserFormHelper $formHelper)
     {
@@ -51,7 +51,7 @@ class AmbassadorController extends AbstractController
             'withdrawn' => 1,
             'registration' => 1,
             'sort' => 'r.date',
-            'dir' => 'DESC'
+            'dir' => 'DESC',
         ];
         $disabledFields = ['withdrawn', 'registration', 'lastregistrationdatelt', 'lastregistrationdategt'];
 
@@ -75,26 +75,30 @@ class AmbassadorController extends AbstractController
 
         $paginator
             ->getQuery()
-            ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
-            ->setMaxResults($limitPerPage); // set the limit
+            ->setFirstResult($limitPerPage * ($currentPage - 1)) // set the offset
+            ->setMaxResults($limitPerPage) // set the limit
+        ;
 
-        return $this->render('ambassador/phone/list.html.twig', array(
-            'reason' => "Liste des membres sans adhésion",
+        return $this->render('ambassador/phone/list.html.twig', [
+            'reason' => 'Liste des membres sans adhésion',
             'members' => $paginator,
             'form' => $form->createView(),
             'result_count' => $resultCount,
             'current_page' => $currentPage,
-            'page_count' => $pageCount
-        ));
+            'page_count' => $pageCount,
+        ]);
     }
 
     /**
-     * List all members with a registration date older than one year
+     * List all members with a registration date older than one year.
      *
      * @Route("/lateregistration", name="ambassador_lateregistration_list", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_USER_VIEWER')")
-     * @param request $request , searchuserformhelper $formhelper
-     * @return response
+     *
+     * @param Request $request , searchuserformhelper $formhelper
+     *
+     * @return Response
      */
     public function memberLateRegistrationAction(Request $request, SearchUserFormHelper $formHelper)
     {
@@ -103,14 +107,14 @@ class AmbassadorController extends AbstractController
         } else {
             $endLastRegistration = new \DateTime('last year');
         }
-        $endLastRegistration->setTime(0,0);
+        $endLastRegistration->setTime(0, 0);
 
         $defaults = [
             'withdrawn' => 1,
             'registration' => 2,
             'lastregistrationdatelt' => $endLastRegistration,
             'sort' => 'r.date',
-            'dir' => 'DESC'
+            'dir' => 'DESC',
         ];
         $disabledFields = ['withdrawn', 'registration', 'lastregistrationdatelt'];
 
@@ -120,7 +124,8 @@ class AmbassadorController extends AbstractController
         $qb = $formHelper->initSearchQuery($this->getDoctrine()->getManager(), 'lateregistration');
         $qb = $formHelper->processSearchFormAmbassadorData($form, $qb);
         $qb = $qb->andWhere('r.date < :lastregistrationdatelt')
-            ->setParameter('lastregistrationdatelt', $defaults['lastregistrationdatelt']->format('Y-m-d'));
+            ->setParameter('lastregistrationdatelt', $defaults['lastregistrationdatelt']->format('Y-m-d'))
+        ;
 
         $sort = $form->get('sort')->getData();
         $order = $form->get('dir')->getData();
@@ -135,30 +140,34 @@ class AmbassadorController extends AbstractController
 
         $paginator
             ->getQuery()
-            ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
-            ->setMaxResults($limitPerPage); // set the limit
+            ->setFirstResult($limitPerPage * ($currentPage - 1)) // set the offset
+            ->setMaxResults($limitPerPage) // set the limit
+        ;
 
-        return $this->render('ambassador/phone/list.html.twig', array(
-            'reason' => "Liste des membres en retard de ré-adhésion",
+        return $this->render('ambassador/phone/list.html.twig', [
+            'reason' => 'Liste des membres en retard de ré-adhésion',
             'members' => $paginator,
             'form' => $form->createView(),
             'result_count' => $resultCount,
             'current_page' => $currentPage,
-            'page_count' => $pageCount
-        ));
+            'page_count' => $pageCount,
+        ]);
     }
 
     /**
-     * List all members with negative shift time count
+     * List all members with negative shift time count.
      *
      * @Route("/shifttimelog", name="ambassador_shifttimelog_list", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_USER_MANAGER')")
-     * @param request $request , searchuserformhelper $formhelper
-     * @return response
+     *
+     * @param Request $request , searchuserformhelper $formhelper
+     *
+     * @return Response
      */
     public function memberShiftTimeLogAction(Request $request, SearchUserFormHelper $formHelper)
     {
-        $action = $request->request->get("form")["csv"] ?? null;
+        $action = $request->request->get('form')['csv'] ?? null;
 
         $defaults = [
             'withdrawn' => 1,
@@ -166,7 +175,7 @@ class AmbassadorController extends AbstractController
             'registration' => 2,
             'compteurlt' => 0,
             'sort' => 'time',
-            'dir' => 'ASC'
+            'dir' => 'ASC',
         ];
         $disabledFields = ['withdrawn', 'registration'];
 
@@ -183,7 +192,7 @@ class AmbassadorController extends AbstractController
         $qb = $qb->orderBy($sort, $order);
 
         // Export CSV
-        if ($action == "csv") {
+        if ($action == 'csv') {
             /* NOTE: Ici on devrait utiliser $qb->getQuery()->iterate() pour réellement streamer les résultats de la requête un par un.
              * Appeler ->getResult() agrège tous les résultats dans la variable $members, qui consomme beaucoup de mémoire (~80Mo pour 400 lignes de CSV)
              * Mais Doctrine n'est pas content avec ->iterate() du fait de la requête, qu'il faudrait retravailler.
@@ -194,12 +203,14 @@ class AmbassadorController extends AbstractController
             $response = new StreamedResponse(function () use ($members): void {
                 $handle = fopen('php://output', 'wb');
                 foreach ($members as $member) {
-                    $names = $member->getBeneficiaries()->map(function($b) { return $b->getFirstname() . " " . $b->getLastname(); });
+                    $names = $member->getBeneficiaries()->map(function ($b) {
+                        return $b->getFirstname() . ' ' . $b->getLastname();
+                    });
                     $row = [
                         $member->getMemberNumber(),
-                        join($names->toArray(), " & "),
-                        $member->getLastRegistration()->getDate()->format("d/m/Y"),
-                        $member->getShiftTimeCount() / 60
+                        join($names->toArray(), ' & '),
+                        $member->getLastRegistration()->getDate()->format('d/m/Y'),
+                        $member->getShiftTimeCount() / 60,
                         /* NOTE: On s'attend à trouver un nombre d'heures dans l'export, comme à l'affichage sur la page.
                          * Or ->getShiftTimeCount renvoie des minutes, d'où la division par 60.
                          */
@@ -225,27 +236,31 @@ class AmbassadorController extends AbstractController
 
         $paginator
             ->getQuery()
-            ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
-            ->setMaxResults($limitPerPage); // set the limit
+            ->setFirstResult($limitPerPage * ($currentPage - 1)) // set the offset
+            ->setMaxResults($limitPerPage) // set the limit
+        ;
 
-        return $this->render('ambassador/phone/list.html.twig', array(
-            'reason' => "Liste des membres en retard de créneaux",
+        return $this->render('ambassador/phone/list.html.twig', [
+            'reason' => 'Liste des membres en retard de créneaux',
             'members' => $paginator,
             'form' => $form->createView(),
             'result_count' => $resultCount,
             'current_page' => $currentPage,
-            'page_count' => $pageCount
-        ));
+            'page_count' => $pageCount,
+        ]);
     }
 
     /**
      * List all beneficiaries "fixe" without periodposition
-     * Useful for use_fly_and_fixed and fly_and_fixed_entity_flying == 'Beneficiary'
+     * Useful for use_fly_and_fixed and fly_and_fixed_entity_flying == 'Beneficiary'.
      *
      * @Route("/beneficiary_fixe_without_periodposition", name="ambassador_beneficiary_fixe_without_periodposition_list", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_USER_MANAGER')")
-     * @param request $request , searchuserformhelper $formhelper
-     * @return response
+     *
+     * @param Request $request , searchuserformhelper $formhelper
+     *
+     * @return Response
      */
     public function beneficiaryFixeWithoutPeriodPosition(Request $request, SearchUserFormHelper $formHelper)
     {
@@ -256,7 +271,7 @@ class AmbassadorController extends AbstractController
             'flying' => 1,
             'has_period_position' => 1,
             'sort' => 'm.member_number',
-            'dir' => 'ASC'
+            'dir' => 'ASC',
         ];
         $disabledFields = ['withdrawn', 'registration', 'flying', 'has_period_position'];
 
@@ -279,53 +294,54 @@ class AmbassadorController extends AbstractController
 
         $paginator
             ->getQuery()
-            ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
-            ->setMaxResults($limitPerPage); // set the limit
+            ->setFirstResult($limitPerPage * ($currentPage - 1)) // set the offset
+            ->setMaxResults($limitPerPage) // set the limit
+        ;
 
-        return $this->render('ambassador/phone/list.html.twig', array(
-            'reason' => "Liste des bénéficiaires fixes sans poste fixe",
+        return $this->render('ambassador/phone/list.html.twig', [
+            'reason' => 'Liste des bénéficiaires fixes sans poste fixe',
             'members' => $paginator,
             'form' => $form->createView(),
             'result_count' => $resultCount,
             'current_page' => $currentPage,
-            'page_count' => $pageCount
-        ));
+            'page_count' => $pageCount,
+        ]);
     }
 
     /**
-     * Display a member phones
+     * Display a member phones.
      *
      * @Route("/phone/{member_number}", name="ambassador_phone_show", methods={"GET"})
-     * @param Membership $member
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     *
+     * @return RedirectResponse
      */
     public function showAction(Membership $member)
     {
-        return $this->redirectToRoute('member_show', array('member_number'=>$member->getMemberNumber()));
+        return $this->redirectToRoute('member_show', ['member_number' => $member->getMemberNumber()]);
     }
 
     /**
-     * Creates a form to delete a note entity
+     * Creates a form to delete a note entity.
      *
      * @param Note $note the note entity
      *
-     * @return \Symfony\Component\Form\FormInterface The form
+     * @return FormInterface The form
      */
     private function createNoteDeleteForm(Note $note)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('note_delete', array('id' => $note->getId())))
+            ->setAction($this->generateUrl('note_delete', ['id' => $note->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 
     /**
-     * Create a note
+     * Create a note.
      *
      * @Route("/note/{member_number}", name="ambassador_new_note", methods={"POST"})
-     * @param Membership $member
-     * @param Request $request
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse
+     *
+     * @return RedirectResponse
      */
     public function newNoteAction(Membership $member, Request $request)
     {
@@ -343,11 +359,11 @@ class AmbassadorController extends AbstractController
             $em->persist($note);
             $em->flush();
 
-            $session->getFlashBag()->add('success','La note a bien été ajoutée');
+            $session->getFlashBag()->add('success', 'La note a bien été ajoutée');
         } else {
             $session->getFlashBag()->add('error', 'Impossible d\'ajouter une note');
         }
 
-        return $this->redirectToRoute("ambassador_phone_show", array('member_number'=>$member->getMemberNumber()));
+        return $this->redirectToRoute('ambassador_phone_show', ['member_number' => $member->getMemberNumber()]);
     }
 }
