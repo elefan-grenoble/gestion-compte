@@ -109,7 +109,7 @@ class ShiftController extends AbstractController
                     'end' => 22,
                     'line' => 0,
                 ));
-                $modal = $this->forward('App\Controller\BookingController::showBucketAction', [
+                $modal = $this->forward('App\Controller\BookingController::showBucketForAdminAction', [
                     'bucket' => $bucket->getShiftWithMinId()
                 ])->getContent();
                 return new JsonResponse(array('message'=>$message, 'card' => $card, 'modal' => $modal), 201);
@@ -254,7 +254,7 @@ class ShiftController extends AbstractController
                     'end' => 22,
                     'line' => 0,
                 ));
-                $modal = $this->forward('App\Controller\BookingController::showBucketAction', [
+                $modal = $this->forward('App\Controller\BookingController::showBucketForAdminAction', [
                     'bucket' => $bucket->getShiftWithMinId()
                 ])->getContent();
                 return new JsonResponse(array('message' => $message, 'card' => $card, 'modal' => $modal), 200);
@@ -395,7 +395,7 @@ class ShiftController extends AbstractController
                     'end' => 22,
                     'line' => 0,
                 ));
-                $modal = $this->forward('App\Controller\BookingController::showBucketAction', [
+                $modal = $this->forward('App\Controller\BookingController::showBucketForAdminAction', [
                     'bucket' => $bucket->getShiftWithMinId()
                 ])->getContent();
                 return new JsonResponse(array('message' => $message, 'card' => $card, 'modal' => $modal), 200);
@@ -474,7 +474,7 @@ class ShiftController extends AbstractController
                     'end' => 22,
                     'line' => 0,
                 ));
-                $modal = $this->forward('App\Controller\BookingController::showBucketAction', [
+                $modal = $this->forward('App\Controller\BookingController::showBucketForAdminAction', [
                     'bucket' => $bucket->getShiftWithMinId()
                 ])->getContent();
                 return new JsonResponse(array('message' => $message, 'card' => $card, 'modal' => $modal), 200);
@@ -600,7 +600,7 @@ class ShiftController extends AbstractController
                         'end' => 22,
                         'line' => 0,
                     ));
-                    $modal = $this->forward('App\Controller\BookingController::showBucketAction', [
+                    $modal = $this->forward('App\Controller\BookingController::showBucketForAdminAction', [
                         'bucket' => $bucket->getShiftWithMinId()
                     ])->getContent();
                 } else {

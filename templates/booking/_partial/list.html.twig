@@ -9,58 +9,26 @@
 
 </div> <!-- end div.section -->
 </div> <!-- end div.container: we want full-screen display -->
-<div style="padding: 5px;">
+<div id="weeks" style="padding: 5px;">
     {% for bucketsByjob in bucketsByDay %}
-        {% set weekIndex = (((bucketsByjob|first|first).start | date('W') - 1) % 4) %}
+        {% set first_shift = bucketsByjob|first|first %}
+        {% set weekIndex = ((first_shift.start | date('W') - 1) % 4) %}
 
         {% if previousWeekIndex != weekIndex %}
             {% if previousWeekIndex != -1 %}</ul>{% endif %}
-            {% include "booking/_partial/week_title.html.twig" with { first_shift: bucketsByjob|first|first } %}
+            {% include "booking/_partial/week_title.html.twig" with { first_shift: first_shift } %}
             {% set previousWeekIndex = weekIndex %}
             <ul class="collapsible collapsible-expandable">
         {% endif %}
-        <li class="active">
+        <li data-date="{{ first_shift.start.format("Y-m-d") }}" data-beneficiary="{{ beneficiary.id ?? null }}" data-cycle="{{ current_cycle }}">
             <div class="collapsible-header">
                 <i class="material-icons">{% if date('now') > (bucketsByjob|last|last).end %}event_busy{% else %}event_available{% endif %}</i>
-                {{ (bucketsByjob|first|first).start | date_fr_long }}
+                {{ first_shift.start | date_fr_long }}
             </div>
             <div class="collapsible-body" style="padding: 1rem 0">
-                {% for buckets in bucketsByjob %}
-                    <div class="row" style="display: flex;min-height: 40px;">
-                        <div class="col s12">
-                            <div style="position: relative">
-                                {% set lignes = {} %}
-                                {% for bucket in buckets %}
-                                    {#compute lines #}
-                                    {% set l = 0 %}
-                                    {% set break = false %}
-                                    {% for i in 0..100 if not break %}
-                                        {% if lignes[i~'_'] is not defined %}
-                                            {% set l = i %}
-                                            {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
-                                            {% set break = true %}
-                                        {% else %}
-                                            {% if lignes[i~'_'] < bucket.start %}
-                                                {% set l = i %}
-                                                {% set lignes = lignes|merge({(i~'_'): bucket.end}) %}
-                                                {% set break = true %}
-                                            {% endif %}
-                                        {% endif %}
-                                    {% endfor %}
-                                    {# / compute lines #}
-                                    {% if shift_service.isBucketBookable(bucket, beneficiary) or not beneficiary %}
-                                        {% include "booking/_partial/shift.html.twig" with { beneficiary: beneficiary, user: app.user, bucket: bucket, start: hours|first, end: hours|last, line:l, cycle: current_cycle, display_names: display_names } %}
-                                    {% else %}
-                                        {% include "booking/_partial/disabled_shift.html.twig" with { bucket: bucket,start: hours|first, end: hours|last, line:l, display_names: display_names } %}
-                                    {% endif %}
-                                {% endfor %}
-                            </div>
-                        </div>
-                    </div>
-                {% endfor %}
             </div>
         </li>
-        {% if beneficiary and (( membership_service.endOfCycle(beneficiary.membership, current_cycle) | date('Y-m-d') ) == (((bucketsByjob|first|first).start) | date('Y-m-d') )) %}
+        {% if beneficiary and (( membership_service.endOfCycle(beneficiary.membership, current_cycle) | date('Y-m-d') ) == ((first_shift.start) | date('Y-m-d') )) %}
                 {% set current_cycle = current_cycle + 1 %}
             </ul>
             <ul class="collapsible" accordion="false">
@@ -78,3 +46,39 @@
     {% endif %}
     </ul>
 </div>
+
+<script type="text/javascript">
+    function load_next() {
+        // On précharge une semaine de planning
+        if ($('#weeks li.active').length >= 7)
+            return;
+
+        $('#weeks > ul.collapsible > li:not(.active) > .collapsible-header').first().click();
+    }
+
+    function load_on_open() {
+        $("#weeks ul li").on("opened", function () {
+            let li = this;
+
+            if ($(li).children(".collapsible-body").html().trim() != "") {
+                return;  // déjà chargé
+            }
+
+            $.ajax({
+                url: $(this).data("beneficiary") ?
+                    `/booking/day/${$(this).data("date")}/${$(this).data("beneficiary")}/${$(this).data("cycle")}` :
+                    `/booking/day/${$(this).data("date")}`,
+                success: function(content) {
+                    $(li).children(".collapsible-body").html(content);
+                    install_events();
+
+                    load_next();
+                }
+            });
+        });
+    }
+
+    document.readyState === "loading" ?
+        document.addEventListener('DOMContentLoaded', load_on_open) :
+        load_on_open();
+</script>
