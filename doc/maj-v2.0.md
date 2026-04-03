@@ -4,6 +4,8 @@
 
 La version 2.0 embarque la mise à jour du framework Symfony dans sa version 4 (anciennement version 3).
 
+⚠️ Avant de commencer, il est fortement recommandé de faire une sauvegarde complète de votre base de données et de votre fichier `parameters.yml`.
+
 
 ## Fichier de paramètres
 
@@ -53,3 +55,49 @@ Les variables concernées sont les suivantes :
 - `HELLOASSO_*`
 - `IGLOOHOME_*`
 
+
+## Point d'entrée de l'application (nginx)
+
+Le point d'entrée PHP a changé dans Symfony 4. La configuration nginx doit être mise à jour en conséquence :
+
+| Version           | Point d'entrée     |
+|-------------------|--------------------|
+| 1.x (Symfony 3.4) | `web/app.php`      |
+| 2.0 (Symfony 4.4) | `public/index.php` |
+
+Penser à mettre à jour le `root` et le `fastcgi_param SCRIPT_FILENAME` dans la configuration nginx.
+
+La modification du fichier de configuration nginx pourra donc ressembler à ceci :
+
+```diff
+-    root   /elefan/public/;
++    root   /elefan/web/;
+
+    location / {
+-        index  index.php;
++        index  app.php;
+-        try_files $uri /index.php$is_args$args;
++        try_files $uri /app.php$is_args$args;
+    }
+```
+
+## Stratégie de migration recommandée
+
+Les versions 1.47 et 2.0 partagent le même schéma de base de données, ce qui permet de revenir en 1.47 sans manipulation
+de BDD si nécessaire.
+
+Il est donc recommandé de procéder ainsi :
+
+1. Installer la version 2.0 dans un répertoire séparé (par exemple `/var/www/gestion-compte-sf4`).
+2. Configurer le fichier `.env` de cette nouvelle installation. Suivre
+   les [instructions d'installation](./install.serveur.md#installation) **sans utiliser les commandes qui modifient la base de
+   données**
+3. Créer une nouvelle configuration nginx pointant vers ce répertoire.
+4. Changer le lien symbolique dans `/etc/nginx/sites-enabled` pour pointer sur la nouvelle configuration
+
+```shell
+sudo ln -sf /etc/nginx/sites-available/membres-sf4 /etc/nginx/sites-enabled/membres
+sudo systemctl reload nginx
+```
+
+Cette approche permet de basculer (et revenir en arrière) sans interruption de service.
