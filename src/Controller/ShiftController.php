@@ -188,7 +188,6 @@ class ShiftController extends AbstractController
      * Book a shift (admin side).
      *
      * @Route("/{id}/book_admin", name="shift_book_admin", methods={"GET","POST"})
-     * @
      * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
     public function bookShiftAdminAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher)
