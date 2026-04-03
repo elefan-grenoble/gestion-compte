@@ -68,6 +68,9 @@ parameters:
   igloohome_api_auth_url: '%env(default::IGLOOHOME_API_AUTH_URL)%'
   igloohome_api_device: '%env(default::IGLOOHOME_API_DEVICE)%'
 
+  send_email_copy_to_admin_for_booked_shift: '%env(default:send_email_copy_to_admin_for_booked_shift_default:bool:SEND_EMAIL_COPY_TO_ADMIN_FOR_BOOKED_SHIFT)%'
+  send_email_copy_to_admin_for_booked_shift_default: true
+
   images_tmp_dir: '%kernel.project_dir%/web/tmp'
   locale: fr_FR.UTF8
   local_currency_name: '%env(LOCAL_CURRENCY_NAME)%'
@@ -213,6 +216,7 @@ services:
       $igloohomeClientSecret: '%igloohome_client_secret%'
       $igloohomeApiAuthUrl: '%igloohome_api_auth_url%'
       $igloohomeApiDevice: '%igloohome_api_device%'
+      $sendEmailCopyToAdminForBookedShift: '%send_email_copy_to_admin_for_booked_shift%'
 
   # makes classes in src available to be used as services
   # this creates a service per class whose id is the fully-qualified class name

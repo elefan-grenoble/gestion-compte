@@ -40,7 +40,10 @@ class EmailingEventListener
     protected $reserve_new_shift_to_prior_shifter_delay;
     private SwipeCard $swipeCardHelper;
 
-    public function __construct(EntityManagerInterface $entityManager, Logger $logger, Container $container, MailerInterface $mailer, SwipeCard $swipeCardHelper)
+    /** @var bool */
+    protected $sendEmailCopyToAdminForBookedShift;
+
+    public function __construct(EntityManagerInterface $entityManager, Logger $logger, Container $container, MailerInterface $mailer, bool $sendEmailCopyToAdminForBookedShift, SwipeCard $swipeCardHelper)
     {
         $this->swipeCardHelper = $swipeCardHelper;
         $this->em = $entityManager;
@@ -52,6 +55,7 @@ class EmailingEventListener
         $this->shift_email = $this->container->getParameter('emails.shift');
         $this->wiki_keys_url = $this->container->getParameter('wiki_keys_url');
         $this->reserve_new_shift_to_prior_shifter_delay = $this->container->getParameter('reserve_new_shift_to_prior_shifter_delay');
+        $this->sendEmailCopyToAdminForBookedShift = $sendEmailCopyToAdminForBookedShift;
         $locale = $this->container->getParameter('locale');
         setlocale(LC_TIME, $locale);
     }
@@ -332,8 +336,8 @@ class EmailingEventListener
         $this->mailer->send($email);
 
         // send an "archive" e-mail to the admin
-        $emailObject = '[ESPACE MEMBRES] Réservation de ton créneau confirmée';
-        $emailTo = $beneficiary->getEmail();
+        if (!$this->sendEmailCopyToAdminForBookedShift)
+            return;
 
         $email = (new Email())
             ->subject('[ESPACE MEMBRES] BOOKING')
