@@ -336,23 +336,24 @@ class EmailingEventListener
         $this->mailer->send($email);
 
         // send an "archive" e-mail to the admin
-        if ($this->sendEmailCopyToAdminForBookedShift) {
-            $email = (new Email())
-                ->subject('[ESPACE MEMBRES] BOOKING')
-                ->from(new Address($this->shift_email['address'], $this->shift_email['from_name']))
-                ->to($this->shift_email['address'])
-                ->replyTo($beneficiary->getEmail())
-                ->html(
-                    $this->renderView(
-                        'emails/shift_booked_archive.html.twig',
-                        array(
-                            'shift' => $shift
-                        )
-                    )
-                );
+        if (!$this->sendEmailCopyToAdminForBookedShift)
+            return;
 
-            $this->mailer->send($email);
-        }
+        $email = (new Email())
+            ->subject('[ESPACE MEMBRES] BOOKING')
+            ->from(new Address($this->shift_email['address'], $this->shift_email['from_name']))
+            ->to($this->shift_email['address'])
+            ->replyTo($beneficiary->getEmail())
+            ->html(
+                $this->renderView(
+                    'emails/shift_booked_archive.html.twig',
+                    array(
+                        'shift' => $shift
+                    )
+                )
+            );
+
+        $this->mailer->send($email);
     }
 
     /**
