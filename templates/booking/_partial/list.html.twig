@@ -31,7 +31,7 @@
         {% if beneficiary and (( membership_service.endOfCycle(beneficiary.membership, current_cycle) | date('Y-m-d') ) == ((first_shift.start) | date('Y-m-d') )) %}
                 {% set current_cycle = current_cycle + 1 %}
             </ul>
-            <ul class="collapsible" accordion="false">
+            <ul class="collapsible collapsible-expandable" accordion="false">
         {% endif %}
     {% endfor %}
     {% if (bucketsByDay | length) > 7 %}
