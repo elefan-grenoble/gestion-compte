@@ -98,7 +98,7 @@ class HelloassoEventListener
             $membership = $beneficiary->getMembership();
             if (!$this->container->get('membership_service')->canRegister($membership)) {
                 //throw new \LogicException('user cannot register yet');
-                $this->container->get('event_dispatcher')->dispatch(HelloassoEvent::TOO_EARLY,new HelloassoEvent($payment,$user));
+                $this->container->get('event_dispatcher')->dispatch(new HelloassoEvent($payment,$user), HelloassoEvent::TOO_EARLY);
             } else {
                 $registration = new Registration();
                 $registration->setAmount($payment->getAmount());
@@ -133,7 +133,7 @@ class HelloassoEventListener
 
                 $this->em->flush();
 
-                $this->container->get('event_dispatcher')->dispatch(HelloassoEvent::RE_REGISTRATION_SUCCESS,new HelloassoEvent($payment,$beneficiary->getUser()));
+                $this->container->get('event_dispatcher')->dispatch(new HelloassoEvent($payment,$beneficiary->getUser()), HelloassoEvent::RE_REGISTRATION_SUCCESS);
             }
         } else {
             throw new \LogicException('user without beneficiary');
