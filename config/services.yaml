@@ -145,6 +145,9 @@ parameters:
   registration_every_civil_year: '%env(bool:REGISTRATION_EVERY_CIVIL_YEAR)%'
   reserve_new_shift_to_prior_shifter: '%env(bool:RESERVE_NEW_SHIFT_TO_PRIOR_SHIFTER)%'
   reserve_new_shift_to_prior_shifter_delay: '%env(bool:RESERVE_NEW_SHIFT_TO_PRIOR_SHIFTER_DELAY)%'
+  # NOTE: https://symfony.com/doc/4.x/routing.html#generating-urls-in-commands
+  router.request_context.host: '%env(ROUTER_REQUEST_CONTEXT_HOST)%'
+  router.request_context.base_url: '%env(ROUTER_REQUEST_CONTEXT_BASE_URL)%'
   site_name: '%env(SITE_NAME)%'
   super_admin.initial_password: '%env(SUPER_ADMIN_INITIAL_PASSWORD)%'
   super_admin.username: '%env(SUPER_ADMIN_USERNAME)%'

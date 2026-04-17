@@ -257,7 +257,7 @@ class TimeLogEventListener
             $currentCycleShifts = $this->em->getRepository('App:Shift')->findShiftsForMembership($member, $current_cycle_start, $current_cycle_end);
 
             $dispatcher = $this->container->get('event_dispatcher');
-            $dispatcher->dispatch(MemberCycleStartEvent::NAME, new MemberCycleStartEvent($member, $date, $currentCycleShifts));
+            $dispatcher->dispatch(new MemberCycleStartEvent($member, $date, $currentCycleShifts), MemberCycleStartEvent::NAME);
         }
     }
 
