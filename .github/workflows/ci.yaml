@@ -247,6 +247,9 @@ jobs:
       - name: Set up environment
         run: make env-ci
 
+      - name: Add membres.yourcoop.local to /etc/hosts
+        run: echo "127.0.0.1 membres.yourcoop.local" | sudo tee -a /etc/hosts
+
       - name: Run migrations
         run: make db-migrate
 
