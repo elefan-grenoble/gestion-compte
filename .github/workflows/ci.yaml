@@ -66,6 +66,9 @@ jobs:
       - name: Install Composer dependencies
         run: composer install --no-progress --prefer-dist --optimize-autoloader
 
+#       BUILD FRONT-END ASSETS ----------------
+      - name: Build front-end assets
+        run: ./node_modules/.bin/encore production --progress
 
 #       UPLOAD CACHED DIRECTORIES ----------------
       - name: Upload Vendor Directory as Artifact
@@ -73,6 +76,12 @@ jobs:
         with:
           name: vendor-dir
           path: vendor/
+
+      - name: Upload Build Directory as Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-dir
+          path: public/build/
 
   phpStan:
       needs: setup
@@ -157,6 +166,12 @@ jobs:
         with:
           name: vendor-dir
           path: vendor/
+
+      - name: Download Build Directory
+        uses: actions/download-artifact@v4
+        with:
+          name: build-dir
+          path: public/build/
 
 #      INSTALL DEPENDENCIES ----------------
       - name: Setup PHP, extensions and composer with shivammathur/setup-php
@@ -244,14 +259,14 @@ jobs:
         run: php bin/console doctrine:fixtures:load --no-interaction
 
 #       BUILD FRONT ----------------
+      - name: Download Build Directory
+        uses: actions/download-artifact@v4
+        with:
+          name: build-dir
+          path: public/build/
+
       - name : install packages
         run: npm install
-
-      - name: Enable verbose npm logging
-        run: npm config set loglevel verbose
-
-      - name: Build front-end assets
-        run: ./node_modules/.bin/encore production --progress
 
 #       START SYMFONY SERVER ----------------
       - name: Start Symfony server
