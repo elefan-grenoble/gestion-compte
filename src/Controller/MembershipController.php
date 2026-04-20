@@ -448,24 +448,6 @@ class MembershipController extends AbstractController
     }
 
     /**
-     * @Route("/help_find_user", name="find_user_help")
-     */
-    public function findUserHelpAction(Request $request)
-    {
-
-        return $this->render('default/find_user_number.html.twig');
-    }
-
-    /**
-     * @Route("/find_user", name="find_user")
-     */
-    public function findUserAction(Request $request)
-    {
-        die($request->getName());
-    }
-
-
-    /**
      * @Route("/find_me", name="find_me")
      * @param Request $request
      * @return Response

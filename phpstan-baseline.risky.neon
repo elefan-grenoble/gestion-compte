@@ -541,12 +541,6 @@ parameters:
 			path: src/Controller/MembershipController.php
 
 		-
-			message: '#^Call to an undefined method Symfony\\Component\\HttpFoundation\\Request\:\:getName\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Controller/MembershipController.php
-
-		-
 			message: '#^Call to an undefined method Symfony\\Component\\HttpFoundation\\Session\\SessionInterface\:\:getFlashBag\(\)\.$#'
 			identifier: method.notFound
 			count: 6

@@ -2293,18 +2293,6 @@ parameters:
 			path: src/Controller/MembershipController.php
 
 		-
-			message: '#^Method App\\Controller\\MembershipController\:\:findUserAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Controller/MembershipController.php
-
-		-
-			message: '#^Method App\\Controller\\MembershipController\:\:findUserHelpAction\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Controller/MembershipController.php
-
-		-
 			message: '#^Method App\\Controller\\MembershipController\:\:joinAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
