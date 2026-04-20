@@ -18,17 +18,27 @@
 # ------------------------------------------------------------------
 
 # ---- Mode CI vs Local ------------------------------------------------
+# Cypress version — doit correspondre à package.json
+CYPRESS_VERSION      ?= 13.6.4
+CYPRESS_BASE_URL     ?= http://membres.yourcoop.local:8000
+CYPRESS_KEYCLOAK_URL ?= http://localhost:8080
+
 ifdef CI
   EXEC        :=
   _DOCKER_DEP :=
+  CYPRESS_CMD  = CYPRESS_BASE_URL=$(CYPRESS_BASE_URL) \
+                 CYPRESS_KEYCLOAK_URL=$(CYPRESS_KEYCLOAK_URL) \
+                 npx cypress run
 else
   COMPOSE     := $(shell docker compose version >/dev/null 2>&1 && echo "docker compose" || echo "docker-compose")
   EXEC        := $(COMPOSE) exec -T php
   _DOCKER_DEP := up
+  CYPRESS_CMD  = docker run --rm --network host \
+                 -v $(CURDIR):/e2e -w /e2e \
+                 -e CYPRESS_BASE_URL=$(CYPRESS_BASE_URL) \
+                 -e CYPRESS_KEYCLOAK_URL=$(CYPRESS_KEYCLOAK_URL) \
+                 cypress/included:$(CYPRESS_VERSION)
 endif
-
-CYPRESS_BASE_URL     ?= http://localhost:8000
-CYPRESS_KEYCLOAK_URL ?= http://localhost:8080
 
 .PHONY: help check-docker setup-test \
         test test-unit test-func test-coverage lint \
@@ -176,16 +186,16 @@ lint: ## Analyse PHPStan
 test-e2e: test-e2e-main test-e2e-shift test-e2e-membership ## Tous les tests Cypress (hors OIDC)
 
 test-e2e-main: ## Cypress — tests login
-	CYPRESS_BASE_URL=$(CYPRESS_BASE_URL) npm run cy:test:main
+	$(CYPRESS_CMD) --spec 'cypress/e2e/login/**/*'
 
 test-e2e-shift: ## Cypress — tests créneaux
-	CYPRESS_BASE_URL=$(CYPRESS_BASE_URL) npm run cy:test:shift
+	$(CYPRESS_CMD) --spec 'cypress/e2e/shift/**/*'
 
 test-e2e-membership: ## Cypress — tests adhésion
-	CYPRESS_BASE_URL=$(CYPRESS_BASE_URL) npm run cy:test:membership
+	$(CYPRESS_CMD) --spec 'cypress/e2e/membership/**/*'
 
 test-e2e-oidc: ## Cypress — tests OIDC / Keycloak
-	CYPRESS_BASE_URL=$(CYPRESS_BASE_URL) CYPRESS_KEYCLOAK_URL=$(CYPRESS_KEYCLOAK_URL) npm run cy:test:oidc
+	$(CYPRESS_CMD) --spec 'cypress/e2e/keycloak/**/*'
 
 # ------------------------------------------------------------------
 # Helpers CI
