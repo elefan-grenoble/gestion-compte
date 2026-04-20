@@ -10,7 +10,6 @@ use App\Entity\Shift;
 use App\Entity\ShiftBucket;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
-use phpDocumentor\Reflection\Types\Array_;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use \Datetime;
 use App\Entity\PeriodPosition;

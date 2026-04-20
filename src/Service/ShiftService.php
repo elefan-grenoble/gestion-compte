@@ -12,7 +12,6 @@ use App\Service\MembershipService;
 use App\Service\BeneficiaryService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
-use phpDocumentor\Reflection\Types\Array_;
 use Symfony\Component\DependencyInjection\Container;
 use App\Entity\ShiftFreeLog;
 
