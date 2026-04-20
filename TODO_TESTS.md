@@ -215,10 +215,10 @@ Améliorations du fichier `.github/workflows/ci.yaml` existant :
 - [x] Remplacer `cy.contains('gelé')` fragile par des assertions structurelles sur le header et le badge
 - [x] Supprimer le regex lookbehind `(?<!dé)gelé` non fiable
 
-### Commit 6.2 : `test(cypress): add custom commands in support/commands.js`
-- [ ] Déplacer la logique de `login_reusables.cytools.js` dans `cypress/support/commands.js` en tant que `Cypress.Commands.add('login', ...)`
-- [ ] Adapter les tests existants pour utiliser `cy.login()` au lieu de l'import
-- [ ] Garder le login Keycloak séparé : `Cypress.Commands.add('loginKeycloak', ...)`
+### Commit 6.2 : `test(cypress): add custom commands in support/commands.js` ✅ DONE
+- [x] Créer `cy.login(username, password)` dans `cypress/support/commands.js`
+- [x] Créer `cy.loginKeycloak(username, password)` (utilise `Cypress.env('KEYCLOAK_URL')` automatiquement)
+- [x] Adapter les 3 tests existants pour utiliser `cy.login()` / `cy.loginKeycloak()` au lieu des imports
 
 ### Commit 6.3 : `test(cypress): add E2E tests for member shift booking flow`
 - [ ] Créer `cypress/e2e/shift/member_can_book_shift.cy.js`
