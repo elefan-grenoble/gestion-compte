@@ -68,49 +68,44 @@
 
 ---
 
-## Étape 2 — Tests unitaires des services métier
+## Étape 2 — Tests unitaires des services métier ✅ DONE
 
 ### Commit 2.1 : `test(MembershipService): add unit tests for core membership logic`
-- [ ] Créer `tests/Unit/Service/MembershipServiceTest.php`
-- [ ] Tester `getRemainder()` : cas cotisation à jour, en retard, pas de dernière registration
-- [ ] Tester `canRegister()` : cas autorisé, cas refusé
-- [ ] Tester `getExpire()` : cas civil year vs durée fixe
-- [ ] Tester `isUptodate()` : cas à jour, expiré
-- [ ] Tester `getStartOfCycle()` / `getEndOfCycle()` : avec différents `cycle_type` (abcd)
-- [ ] Tester `hasWarningStatus()` : cas warning, pas de warning
+- [x] Créer `tests/Unit/Service/MembershipServiceTest.php`
+- [x] Tester `getRemainder()`, `canRegister()`, `getExpire()`, `isUptodate()`
+- [x] Tester `getStartOfCycle()` / `getEndOfCycle()` / `getCycleNumber()` : ABCD + non-ABCD, offsets
+- [x] Tester `hasWarningStatus()` : withdrawn, frozen, flying, not up-to-date, all ok
+- [x] 27 tests, 32 assertions
 
 ### Commit 2.2 : `test(BeneficiaryService): add unit tests for beneficiary logic`
-- [ ] Créer `tests/Unit/Service/BeneficiaryServiceTest.php`
-- [ ] Tester `getCycleShiftDurationSum()` : avec shifts, sans shifts, multi-cycle
-- [ ] Tester `getDisplayNameWithMemberNumberAndStatusIcon()` : différents statuts
-- [ ] Tester `hasWarningStatus()` : bénéficiaire en alerte, normal
-- [ ] Tester `getStatusIcon()` : les différents cas d'icônes
+- [x] Créer `tests/Unit/Service/BeneficiaryServiceTest.php`
+- [x] Tester `getCycleShiftDurationSum()` : avec shifts, sans shifts
+- [x] Tester `getDisplayNameWithMemberNumberAndStatusIcon()` : format, avec warning
+- [x] Tester `hasWarningStatus()` : delegation, flying beneficiary, flying entity mismatch
+- [x] Tester `getStatusIcon()` : withdrawn, frozen, flying, exempted, registration missing, multiple, none
+- [x] 15 tests, 25 assertions
 
-### Commit 2.3 : `test(ShiftService): add missing unit tests for untested methods`
-- [ ] Ajouter dans `ShiftServiceTest.php` (ou nouveau fichier `tests/Unit/Service/ShiftServiceTest.php`) :
-- [ ] Tester `remainingToBook()` : cas basique, cas rien à réserver
-- [ ] Tester `canBookExtraShift()` : extra shifts autorisés, non autorisés, délai respecté / non
-- [ ] Tester `canBookSomething()` : cas flying, cas normal
-- [ ] Tester `canBookShift()` : overlap interdit, shift dans le passé
-- [ ] Tester `canBookDuration()` : durée suffisante, insuffisante
-- [ ] Tester `canFreeShift()` : depuis admin, depuis user, time_log_saving activé
-- [ ] Tester `isShiftEmpty()` : shift vide, shift avec shifters
-- [ ] Tester `getBookableShiftsCount()` / `isBucketBookable()`
+### Commit 2.3 : `test(ShiftService): add unit tests for untested methods`
+- [x] Créer `tests/Unit/Service/ShiftServiceUnitTest.php`
+- [x] Tester `remainingToBook()`, `canBookExtraShift()`, `canBookSomething()`, `canBookShift()`, `canBookDuration()`
+- [x] Tester `canFreeShift()` : no shifter, different shifter, admin, past shift, fixed shift, time log saving
+- [x] Tester `isBeginner()`, `shiftTimeByCycle()`, `getMinimalShiftDuration()`
+- [x] 26 tests, 29 assertions
 
 ### Commit 2.4 : `test(TimeLogService): add unit tests for time log operations`
-- [ ] Créer `tests/Unit/Service/TimeLogServiceTest.php`
-- [ ] Tester `initTimeLog()` : création correcte du TimeLog, calcul du temps
-- [ ] Tester `initShiftValidatedTimeLog()` : durée correcte, membership associée
-- [ ] Tester `initShiftInvalidatedTimeLog()` : temps négatif correctement calculé
-- [ ] Tester `initCycleBeginningTimeLog()` : reset correct du compteur
-- [ ] Tester `initSavingTimeLog()` : saving avec et sans shift
-- [ ] Tester `initCustomTimeLog()` : avec et sans date, avec et sans description
+- [x] Créer `tests/Unit/Service/TimeLogServiceTest.php`
+- [x] Tester `initTimeLog()`, `initShiftValidatedTimeLog()`, `initShiftInvalidatedTimeLog()`
+- [x] Tester `initCycleBeginningTimeLog()`, `initCurrentCycleBeginningTimeLog()`
+- [x] Tester `initSavingTimeLog()`, `initCustomTimeLog()`, `initRegulateOptionalShiftsTimeLog()`
+- [x] Tester `initShiftFreedSavingTimeLog()`, `initCycleEndSavingTimeLog()`
+- [x] 17 tests, 36 assertions
 
 ### Commit 2.5 : `test(PeriodService): add unit tests for period logic`
-- [ ] Créer `tests/Unit/Service/PeriodServiceTest.php`
-- [ ] Tester `getDaysOfWeekArray()` : retour correct des jours
-- [ ] Tester `getWeekCycleArray()` : retour correct selon config
-- [ ] Tester `hasWarningStatus()` : période avec alerte, sans alerte
+- [x] Créer `tests/Unit/Service/PeriodServiceTest.php`
+- [x] Tester `getDaysOfWeekArray()`, `getWeekCycleArray()`
+- [x] Tester `hasWarningStatus()` : disabled, frozen, withdrawn, flying, empty, weekCycle filter
+- [x] Découverte du bug #4 (précédence `and`/`or` dans `hasWarningStatus`)
+- [x] 11 tests, 16 assertions
 
 ---
 
@@ -231,9 +226,9 @@ Améliorations du fichier `.github/workflows/ci.yaml` existant :
 
 | Métrique | Actuel | Cible après TODO |
 |----------|--------|-----------------|
-| Fichiers de test PHP | 2 | ~20 |
-| Méthodes de test | ~15 | ~100+ |
-| Services testés | 1/14 | 5/14 |
+| Fichiers de test PHP | 8 | ~20 |
+| Méthodes de test | ~112 | ~150+ |
+| Services testés | 5/14 | 5/14 |
 | Entités testées | 0/42 | 4/42 (les plus critiques) |
 | Contrôleurs testés | 1/43 | Smoke test global + 1-2 détaillés |
 | Specs Cypress | 3 | 5 |
