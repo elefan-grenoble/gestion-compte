@@ -139,7 +139,6 @@ class ShiftController extends AbstractController
      */
     public function bookShiftAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher): Response
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -155,7 +154,7 @@ class ShiftController extends AbstractController
             || !$shift_service->isShiftBookable($shift, $beneficiary)
             || !$this->isGranted(MembershipVoter::BOOK, $beneficiary->getMembership())
         ) {
-            $session->getFlashBag()->add("error", "Impossible de réserver ce créneau");
+            $this->addFlash("error", "Impossible de réserver ce créneau");
             return new Response($this->generateUrl('booking'), 205);
         }
 
@@ -180,7 +179,7 @@ class ShiftController extends AbstractController
 
         $event_dispatcher->dispatch(new ShiftBookedEvent($shift, false), ShiftBookedEvent::NAME);
 
-        $session->getFlashBag()->add("success", "Ce créneau a bien été réservé !");
+        $this->addFlash("success", "Ce créneau a bien été réservé !");
         return new Response($this->generateUrl('homepage'), 200);
     }
 
