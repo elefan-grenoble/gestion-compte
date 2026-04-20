@@ -278,8 +278,91 @@ jobs:
       - name: Run Cypress membership tests
         run: make test-e2e-membership
 
+      - name: Upload Cypress screenshots on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots/
+          retention-days: 7
+
+  # ================================================================
+  # 6. Cypress OIDC / Keycloak E2E tests
+  # ================================================================
+  cypress-tests-oidc:
+    needs: setup
+    runs-on: ubuntu-22.04
+    services:
+      mariadb:
+        image: mariadb:10.4
+        env:
+          MYSQL_ROOT_PASSWORD: secret
+          MYSQL_DATABASE: symfony
+          MYSQL_USER: user
+          MYSQL_PASSWORD: password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -psecret"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download vendor/
+        uses: actions/download-artifact@v4
+        with:
+          name: vendor-dir
+          path: vendor/
+
+      - name: Download public/build/
+        uses: actions/download-artifact@v4
+        with:
+          name: build-dir
+          path: public/build/
+
+      - name: Install Cypress system dependencies
+        run: sudo apt-get update && sudo apt-get install -y xvfb libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libnss3 libxss1 libasound2 libxtst6 xauth
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@verbose
+        with:
+          php-version: '7.4'
+          tools: composer:2.2
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, json
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20.11.0'
+
+      - name: Install Symfony CLI
+        run: |
+          curl -sS https://get.symfony.com/cli/installer | bash
+          sudo mv /home/runner/.symfony5/bin/symfony /usr/local/bin/symfony
+
       - name: Set up OIDC environment
         run: make env-ci-oidc
+
+      - name: Add membres.yourcoop.local to /etc/hosts
+        run: echo "127.0.0.1 membres.yourcoop.local" | sudo tee -a /etc/hosts
+
+      - name: Run migrations
+        run: make db-migrate
+
+      - name: Load fixtures
+        run: make db-fixtures-load
+
+      - name: Cache Cypress binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/Cypress
+          key: ${{ runner.os }}-cypress-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: ${{ runner.os }}-cypress-
+
+      - name: Install NPM packages
+        run: make npm-install
 
       - name: Start Keycloak
         run: |
@@ -304,6 +387,9 @@ jobs:
             sleep 5
           done
 
+      - name: Start Symfony server
+        run: make serve
+
       - name: Run Cypress OIDC tests
         run: make test-e2e-oidc
 
@@ -311,6 +397,6 @@ jobs:
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: cypress-screenshots
+          name: cypress-oidc-screenshots
           path: cypress/screenshots/
           retention-days: 7

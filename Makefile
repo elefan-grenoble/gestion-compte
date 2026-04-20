@@ -209,7 +209,7 @@ test-e2e-oidc: ## Cypress — tests OIDC / Keycloak
 env-ci: ## Configure l'environnement CI
 	cp .env.test .env
 
-env-ci-oidc: ## Configure l'environnement CI pour OIDC
+env-ci-oidc: env-ci ## Configure l'environnement CI pour OIDC
 	cp .env.oidc.test .env.test
 
 serve: ## Démarre le serveur Symfony (CI / host)
