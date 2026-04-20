@@ -646,17 +646,19 @@
       "secret": "secret",
       "description": "membres.yourcoop.local",
       "rootUrl": "",
-      "adminUrl": "http://localhost:8000/",
-      "baseUrl": "http://localhost:8000/",
+      "adminUrl": "http://membres.yourcoop.local:8000/",
+      "baseUrl": "http://membres.yourcoop.local:8000/",
       "surrogateAuthRequired": false,
       "enabled": true,
       "alwaysDisplayInConsole": false,
       "clientAuthenticatorType": "client-secret",
       "redirectUris": [
+        "http://membres.yourcoop.local:8000/*",
         "http://localhost:8000/*"
       ],
       "webOrigins": [
-        "http://localhost:8000/"
+        "http://membres.yourcoop.local:8000",
+        "http://localhost:8000"
       ],
       "notBefore": 0,
       "bearerOnly": false,
