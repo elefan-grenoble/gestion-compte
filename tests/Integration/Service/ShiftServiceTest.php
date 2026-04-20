@@ -99,7 +99,7 @@ class ShiftServiceTest extends TestCase
         // Mock the shift repository
         $shiftRepositoryMock = $this->getMockBuilder(EntityRepository::class)
             ->disableOriginalConstructor()
-            ->setMethods(['findShiftsForBeneficiary'])
+            ->addMethods(['findShiftsForBeneficiary'])
             ->getMock();
 
         // Define the behavior of the findShiftsForBeneficiary() method
@@ -197,7 +197,7 @@ class ShiftServiceTest extends TestCase
         $beneficiaryService = new BeneficiaryService($this->container, $this->em, $membershipService);
         $shiftService = $this
             ->getMockBuilder(ShiftService::class)
-            ->setMethods(['isShiftEmpty', 'canBookDuration', 'isBeginner'])
+            ->onlyMethods(['isShiftEmpty', 'canBookDuration', 'isBeginner'])
             ->setConstructorArgs(
                 [
                     $this->em,
@@ -259,7 +259,7 @@ class ShiftServiceTest extends TestCase
         $beneficiaryService = new BeneficiaryService($this->container, $this->em, $membershipService);
         $shiftService = $this
             ->getMockBuilder(ShiftService::class)
-            ->setMethods(['hasPreviousValidShifts'])
+            ->onlyMethods(['hasPreviousValidShifts'])
             ->setConstructorArgs([
                 $this->em,
                 $beneficiaryService,
@@ -330,7 +330,7 @@ class ShiftServiceTest extends TestCase
 
         $shiftService = $this
             ->getMockBuilder(ShiftService::class)
-            ->setMethodsExcept(['hasPreviousValidShifts'])
+            ->onlyMethods([])
             ->disableOriginalConstructor()
             ->getMock();
 
