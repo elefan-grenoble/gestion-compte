@@ -37,7 +37,7 @@
       <directory>tests/Integration</directory>
     </testsuite>
     <testsuite name="functional">
-      <directory>tests/Functionnal</directory>
+      <directory>tests/Functional</directory>
     </testsuite>
   </testsuites>
 </phpunit>
