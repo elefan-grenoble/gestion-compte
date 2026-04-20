@@ -6,11 +6,6 @@ use App\Tests\Functional\FunctionalTestCase;
 
 /**
  * Functional tests for MembershipController.
- *
- * Note: Most MembershipController routes use `new Session()` instead of
- * `$request->getSession()`, which causes 500 errors in test environment
- * (see TODO_TESTS.md annexe #7). Only routes that don't have this issue
- * are tested here. The blocked routes are documented in the skipped tests section.
  */
 class MembershipControllerTest extends FunctionalTestCase
 {
@@ -186,41 +181,130 @@ class MembershipControllerTest extends FunctionalTestCase
     }
 
     // -------------------------------------------------------
-    // Blocked routes — `new Session()` issue (annexe #7)
-    // These tests document what SHOULD be tested but currently
-    // cannot due to the `new Session()` pattern causing 500.
+    // GET routes that require admin authentication
     // -------------------------------------------------------
 
     /**
-     * @dataProvider blockedByNewSessionProvider
+     * @dataProvider adminGetRouteProvider
      */
-    public function testBlockedRouteDocumentation(string $route, string $description): void
+    public function testAdminGetRouteReturns200(string $url): void
     {
-        $this->markTestSkipped(
-            sprintf(
-                'Route "%s" (%s) is blocked by `new Session()` usage — see TODO_TESTS.md annexe #7.',
-                $route,
-                $description
-            )
+        $client = $this->loginAs('admin');
+        $client->request('GET', $url);
+
+        $this->assertSame(
+            200,
+            $client->getResponse()->getStatusCode(),
+            sprintf('GET %s should return 200 for admin.', $url)
         );
     }
 
-    public function blockedByNewSessionProvider(): array
+    public function adminGetRouteProvider(): array
     {
         return [
-            'member_show' => ['/member/{number}/show', 'Show membership details'],
-            'member_new' => ['/member/new', 'Create new membership'],
-            'member_edit_firewall' => ['/member/edit', 'Edit firewall form'],
-            'member_new_registration' => ['/member/{number}/newRegistration', 'New registration'],
-            'member_new_beneficiary' => ['/member/{number}/newBeneficiary', 'Add beneficiary (admin)'],
-            'member_add_beneficiary' => ['/member/add_beneficiary', 'Add beneficiary (public link)'],
-            'member_join' => ['/member/join', 'Join two memberships'],
-            'member_flying' => ['/member/{id}/flying', 'Toggle flying status'],
-            'member_freeze' => ['/member/{id}/freeze', 'Freeze member'],
-            'member_unfreeze' => ['/member/{id}/unfreeze', 'Unfreeze member'],
-            'member_freeze_change' => ['/member/{id}/freeze_change', 'Request freeze change'],
-            'member_withdrawn' => ['/member/{id}/withdrawn', 'Close/reopen member'],
-            'member_delete' => ['/member/{id}', 'Delete member'],
+            'member_show' => ['/member/1/show'],
+            'member_edit_firewall' => ['/member/edit'],
+            'member_join' => ['/member/join'],
         ];
+    }
+
+    /**
+     * Routes that redirect to the show page on GET (form is embedded in show page).
+     *
+     * @dataProvider adminRedirectRouteProvider
+     */
+    public function testAdminGetRouteRedirects(string $url): void
+    {
+        $client = $this->loginAs('admin');
+        $client->request('GET', $url);
+
+        $response = $client->getResponse();
+        $this->assertTrue(
+            $response->isRedirection(),
+            sprintf('GET %s should redirect (302).', $url)
+        );
+    }
+
+    public function adminRedirectRouteProvider(): array
+    {
+        return [
+            'member_new_registration' => ['/member/1/newRegistration'],
+            'member_new_beneficiary' => ['/member/1/newBeneficiary'],
+        ];
+    }
+
+    /**
+     * /member/new — renders the new membership form for admin.
+     */
+    public function testMemberNewReturns200ForAdmin(): void
+    {
+        $client = $this->loginAs('admin');
+        $client->request('GET', '/member/new');
+
+        $this->assertSame(
+            200,
+            $client->getResponse()->getStatusCode(),
+            'GET /member/new should return 200 for admin.'
+        );
+    }
+
+    /**
+     * /member/add_beneficiary — without code, throws AccessDeniedException.
+     */
+    public function testAddBeneficiaryDeniedWithoutCode(): void
+    {
+        $client = $this->loginAs('admin');
+        $client->request('GET', '/member/add_beneficiary');
+
+        $this->assertSame(
+            403,
+            $client->getResponse()->getStatusCode(),
+            'GET /member/add_beneficiary without code should return 403.'
+        );
+    }
+
+    // -------------------------------------------------------
+    // POST/DELETE-only routes — GET returns 405
+    // -------------------------------------------------------
+
+    /**
+     * @dataProvider postOnlyRouteProvider
+     */
+    public function testPostOnlyRouteReturns405OnGet(string $url): void
+    {
+        $client = $this->loginAs('admin');
+        $client->request('GET', $url);
+
+        $this->assertSame(
+            405,
+            $client->getResponse()->getStatusCode(),
+            sprintf('GET %s should return 405 (Method Not Allowed).', $url)
+        );
+    }
+
+    public function postOnlyRouteProvider(): array
+    {
+        return [
+            'member_flying' => ['/member/1/flying'],
+            'member_freeze' => ['/member/1/freeze'],
+            'member_unfreeze' => ['/member/1/unfreeze'],
+            'member_freeze_change' => ['/member/1/freeze_change'],
+            'member_withdrawn' => ['/member/1/withdrawn'],
+        ];
+    }
+
+    /**
+     * /member/{id} DELETE — GET returns 405.
+     */
+    public function testMemberDeleteReturns405OnGet(): void
+    {
+        $client = $this->loginAs('admin');
+        $client->request('GET', '/member/1');
+
+        $this->assertSame(
+            405,
+            $client->getResponse()->getStatusCode(),
+            'GET /member/{id} should return 405 (DELETE only).'
+        );
     }
 }

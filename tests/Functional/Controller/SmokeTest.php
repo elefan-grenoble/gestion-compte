@@ -237,7 +237,7 @@ class SmokeTest extends FunctionalTestCase
     public function authenticatedUrlProvider(): array
     {
         return [
-            // '/' authenticated skipped — see TODO_TESTS.md annexe #7
+            'homepage authenticated' => ['/'],
             'profile' => ['/profile/'],
             'schedule' => ['/schedule'],
             'events' => ['/events/'],
@@ -245,7 +245,6 @@ class SmokeTest extends FunctionalTestCase
             'services' => ['/services/'],
             'dynamic content list' => ['/content/'],
             'email templates' => ['/emailTemplate/'],
-            // '/codes/' skipped — see TODO_TESTS.md annexe #7
             'registrations' => ['/registrations/'],
             'period index' => ['/period/'],
             'tasks list' => ['/tasks/'],
@@ -255,6 +254,20 @@ class SmokeTest extends FunctionalTestCase
             'member office_tools' => ['/member/office_tools'],
             'member emails_csv' => ['/member/emails_csv'],
         ];
+    }
+
+    /**
+     * /codes/ redirects to homepage when no codes exist in DB.
+     */
+    public function testCodesRedirectsWhenEmpty(): void
+    {
+        $client = $this->loginAs('admin');
+        $client->request('GET', '/codes/');
+
+        $this->assertTrue(
+            $client->getResponse()->isRedirection(),
+            'GET /codes/ should redirect when no codes exist.'
+        );
     }
 
     // -------------------------------------------------------
