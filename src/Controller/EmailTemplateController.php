@@ -6,7 +6,6 @@ use App\Entity\EmailTemplate;
 use App\Form\EmailTemplateType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -40,7 +39,6 @@ class EmailTemplateController extends AbstractController
      */
     public function newAction(Request $request)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -53,7 +51,7 @@ class EmailTemplateController extends AbstractController
             $em->persist($emailTemplate);
             $em->flush();
 
-            $session->getFlashBag()->add('success', "Modèle d'email créé");
+            $this->addFlash('success', "Modèle d'email créé");
             return $this->redirectToRoute('email_template_list');
         }
 
@@ -70,7 +68,6 @@ class EmailTemplateController extends AbstractController
      */
     public function editAction(Request $request, EmailTemplate $emailTemplate)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -84,7 +81,7 @@ class EmailTemplateController extends AbstractController
             $em->persist($emailTemplate);
             $em->flush();
 
-            $session->getFlashBag()->add('success', "Modèle d'email édité");
+            $this->addFlash('success', "Modèle d'email édité");
             return $this->redirectToRoute('email_template_list');
         }
 

@@ -13,7 +13,6 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Session;
 use App\Entity\DynamicContent;
 use App\Entity\Shift;
 
@@ -62,7 +61,6 @@ class CardReaderController extends AbstractController
      */
     public function checkAction(Request $request, MembershipService $membership_service, EventDispatcherInterface $event_dispatcher)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $code = $request->get('swipe_code');
@@ -77,7 +75,7 @@ class CardReaderController extends AbstractController
         $code = substr($code, 0, -1);  // remove controle
         $card = $em->getRepository(SwipeCard::class)->findOneBy(array('code' => $code, 'enable' => 1));
         if (!$card) {
-            $session->getFlashBag()->add("error", "Oups, ce badge n'est pas actif ou n'existe pas");
+            $this->addFlash("error", "Oups, ce badge n'est pas actif ou n'existe pas");
             return $this->redirectToRoute('card_reader_index');
         }
 

@@ -17,7 +17,6 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Mailer\Exception\TransportExceptionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
@@ -109,7 +108,6 @@ class MailController extends AbstractController
      */
     public function sendAction(Request $request, MailerInterface $mailer, MailerService $mailer_service)
     {
-        $session = new Session();
         $mailform = $this->getMailForm($mailer_service);
         $mailform->handleRequest($request);
         if ($mailform->isSubmitted() && $mailform->isValid()) {
@@ -143,7 +141,7 @@ class MailController extends AbstractController
                 $from = new Address($from_email, $from_name);
             } else {
                 //email not listed !
-                $session->getFlashBag()->add('error', 'cet email n\'est pas autorisé !');
+                $this->addFlash('error', 'cet email n\'est pas autorisé !');
                 return $this->redirectToRoute('mail_edit');
             }
             $content = $mailform->get('message')->getData();
@@ -171,12 +169,12 @@ class MailController extends AbstractController
                 }
             }
             if ($nb > 1) {
-                $session->getFlashBag()->add('success', $nb . ' messages envoyés');
+                $this->addFlash('success', $nb . ' messages envoyés');
                 if (!empty($errored)) {
-                    $session->getFlashBag()->add('warning', 'Impossible d\'envoyer à : ' . implode(', ', $errored));
+                    $this->addFlash('warning', 'Impossible d\'envoyer à : ' . implode(', ', $errored));
                 }
             } else {
-                $session->getFlashBag()->add('success', 'message envoyé');
+                $this->addFlash('success', 'message envoyé');
             }
         }
         return $this->redirectToRoute('mail_edit');

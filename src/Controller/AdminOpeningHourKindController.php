@@ -7,7 +7,6 @@ use App\Form\OpeningHourKindType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 
@@ -43,7 +42,6 @@ class AdminOpeningHourKindController extends AbstractController
      */
     public function newAction(Request $request)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -56,7 +54,7 @@ class AdminOpeningHourKindController extends AbstractController
             $em->persist($openingHourKind);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le type d\'horaire d\'ouverture a bien été créé !');
+            $this->addFlash('success', 'Le type d\'horaire d\'ouverture a bien été créé !');
             return $this->redirectToRoute('admin_openinghour_kind_list');
         }
 
@@ -73,7 +71,6 @@ class AdminOpeningHourKindController extends AbstractController
      */
     public function editAction(Request $request, OpeningHourKind $openingHourKind)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -85,7 +82,7 @@ class AdminOpeningHourKindController extends AbstractController
             $em->persist($openingHourKind);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le type d\'horaire d\'ouverture a bien été édité !');
+            $this->addFlash('success', 'Le type d\'horaire d\'ouverture a bien été édité !');
             return $this->redirectToRoute('admin_openinghour_kind_list');
         }
 
@@ -104,7 +101,6 @@ class AdminOpeningHourKindController extends AbstractController
      */
     public function deleteAction(Request $request, OpeningHourKind $openingHourKind)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $form = $this->getDeleteForm($openingHourKind);
@@ -114,7 +110,7 @@ class AdminOpeningHourKindController extends AbstractController
             $em->remove($openingHourKind);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le type d\'horaire d\'ouverture a bien été supprimé !');
+            $this->addFlash('success', 'Le type d\'horaire d\'ouverture a bien été supprimé !');
         }
 
         return $this->redirectToRoute('admin_openinghour_kind_list');

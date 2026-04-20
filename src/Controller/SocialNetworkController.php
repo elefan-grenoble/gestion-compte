@@ -13,7 +13,6 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\DateTime;
 
 
@@ -48,7 +47,6 @@ class SocialNetworkController extends AbstractController
      */
     public function newAction(Request $request)
     {
-        $session = new Session();
 
         $socialNetwork = new SocialNetwork();
 
@@ -60,7 +58,7 @@ class SocialNetworkController extends AbstractController
             $em->persist($socialNetwork);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le nouveau réseau social a bien été créé !');
+            $this->addFlash('success', 'Le nouveau réseau social a bien été créé !');
             return $this->redirectToRoute('admin_socialnetwork_list');
         }
 
@@ -77,7 +75,6 @@ class SocialNetworkController extends AbstractController
      */
     public function editAction(Request $request, SocialNetwork $socialNetwork)
     {
-        $session = new Session();
 
         $form = $this->createForm(SocialNetworkType::class, $socialNetwork);
         $form->handleRequest($request);
@@ -87,7 +84,7 @@ class SocialNetworkController extends AbstractController
             $em->persist($socialNetwork);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le réseau social a bien été édité !');
+            $this->addFlash('success', 'Le réseau social a bien été édité !');
             return $this->redirectToRoute('admin_socialnetwork_list');
         }
 
@@ -105,7 +102,6 @@ class SocialNetworkController extends AbstractController
      */
     public function deleteAction(Request $request, SocialNetwork $socialNetwork)
     {
-        $session = new Session();
 
         $form = $this->getDeleteForm($socialNetwork);
         $form->handleRequest($request);
@@ -115,7 +111,7 @@ class SocialNetworkController extends AbstractController
             $em->remove($socialNetwork);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le réseau social a bien été supprimé !');
+            $this->addFlash('success', 'Le réseau social a bien été supprimé !');
             return $this->redirectToRoute('admin_socialnetwork_list');
         }
 

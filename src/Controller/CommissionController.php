@@ -17,7 +17,6 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -52,7 +51,6 @@ class CommissionController extends AbstractController
     public function newAction(Request $request)
     {
 
-        $session = new Session();
 
         $commission = new Commission();
         $em = $this->getDoctrine()->getManager();
@@ -64,7 +62,7 @@ class CommissionController extends AbstractController
             $em->persist($commission);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'La nouvelle commission a bien été créée !');
+            $this->addFlash('success', 'La nouvelle commission a bien été créée !');
 
             return $this->redirectToRoute('commission_edit', array('id' => $commission->getId()));
         }
@@ -83,7 +81,6 @@ class CommissionController extends AbstractController
      */
     public function editAction(Request $request,Commission $commission)
     {
-        $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         $beneficiary = $current_app_user->getBeneficiary();
 
@@ -112,7 +109,7 @@ class CommissionController extends AbstractController
             $em->persist($commission);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'La commission a bien été éditée !');
+            $this->addFlash('success', 'La commission a bien été éditée !');
 
             if ($current_app_user->hasRole('ROLE_SUPER_ADMIN'))
                 return $this->redirectToRoute('admin_commissions');
@@ -151,7 +148,6 @@ class CommissionController extends AbstractController
         if (! $current_app_user->hasRole('ROLE_SUPER_ADMIN') && ! $current_app_user->getBeneficiary()->getOwnedCommissions()->contains($commission)) {
             throw $this->createAccessDeniedException();
         }
-        $session = new Session();
         $success = true;
         $form = $this->getAddBeneficiaryForm($commission);
         $form->handleRequest($request);
@@ -181,7 +177,7 @@ class CommissionController extends AbstractController
             return new JsonResponse(array('success'=>$success,'message'=>$message,'html'=>$html));
         }
 
-        $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+        $this->addFlash($success ? 'success' : 'error', $message);
 
         return $this->redirectToRoute('commission_edit',array('id' => $commission->getId()));
     }
@@ -193,7 +189,6 @@ class CommissionController extends AbstractController
      */
     public function removeBeneficiaryAction(Request $request,Commission $commission, EventDispatcherInterface $event_dispatcher)
     {
-        $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
         if (! $current_app_user->hasRole('ROLE_SUPER_ADMIN') && ! $current_app_user->getBeneficiary()->getOwnedCommissions()->contains($commission)) {
@@ -215,7 +210,7 @@ class CommissionController extends AbstractController
         if ($request->isXmlHttpRequest()){
             return new JsonResponse(array('success'=>true,'message'=>$beneficiary->getFirstname().' a bien été retiré de la commission'));
         }
-        $session->getFlashBag()->add('success', 'Le membre '.$beneficiary.' a bien été retiré de la commission !');
+        $this->addFlash('success', 'Le membre '.$beneficiary.' a bien été retiré de la commission !');
 
 
         return $this->redirectToRoute('commission_edit',array('id' => $commission->getId()));
@@ -229,7 +224,6 @@ class CommissionController extends AbstractController
      */
     public function deleteAction(Request $request,Commission $commission)
     {
-        $session = new Session();
         $form = $this->getDeleteForm($commission);
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
@@ -244,7 +238,7 @@ class CommissionController extends AbstractController
             }
             $em->remove($commission);
             $em->flush();
-            $session->getFlashBag()->add('success', 'La commission a bien été supprimée !');
+            $this->addFlash('success', 'La commission a bien été supprimée !');
         }
         return $this->redirectToRoute('admin_commissions');
     }

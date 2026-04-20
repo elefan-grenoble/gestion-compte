@@ -8,7 +8,6 @@ use App\Entity\TimeLog;
 use App\Form\TimeLogType;
 use App\Service\TimeLogService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -36,7 +35,6 @@ class TimeLogController extends AbstractController
      */
     public function newAction(Request $request, Membership $member, TimeLogService $time_log_service)
     {
-        $session = new Session();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $timeLog = $time_log_service->initCustomTimeLog($member);
@@ -48,7 +46,7 @@ class TimeLogController extends AbstractController
             $member_is_current_user = $current_user->getMembership() == $member;
             // check if user is allowed to create timelog
             if ($member_is_current_user && $this->forbid_own_timelog_new_admin && !$this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
-                $session->getFlashBag()->add('error', 'Vous ne pouvez pas vous rajouter de log de temps.');
+                $this->addFlash('error', 'Vous ne pouvez pas vous rajouter de log de temps.');
                 return $this->redirectToShow($member);
             } else {
                 $timeLog->setTime($form->get('time')->getData());
@@ -58,7 +56,7 @@ class TimeLogController extends AbstractController
                 $em->persist($timeLog);
                 $em->flush();
 
-                $session->getFlashBag()->add('success', 'Le log de temps a bien été créé !');
+                $this->addFlash('success', 'Le log de temps a bien été créé !');
                 return $this->redirectToShow($member);
             }
         }
@@ -77,16 +75,15 @@ class TimeLogController extends AbstractController
      */
     public function timelogDeleteAction(Membership $member, $timelog_id)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $timeLog = $this->getDoctrine()->getManager()->getRepository(TimeLog::class)->find($timelog_id);
         if ($timeLog->getMembership() === $member) {
             $em->remove($timeLog);
             $em->flush();
-            $session->getFlashBag()->add('success', 'Time log supprimé');
+            $this->addFlash('success', 'Time log supprimé');
         } else {
-            $session->getFlashBag()->add('error', $timeLog->getMembership() . '<>' . $member);
-            $session->getFlashBag()->add('error', $timeLog->getId());
+            $this->addFlash('error', $timeLog->getMembership() . '<>' . $member);
+            $this->addFlash('error', $timeLog->getId());
         }
         return $this->redirectToShow($member);
     }
@@ -97,10 +94,9 @@ class TimeLogController extends AbstractController
         if (!$securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             return $this->redirectToRoute('homepage');
         }
-        $session = new Session();
         if ($this->get('security.authorization_checker')->isGranted('ROLE_USER_MANAGER'))
             return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
         else
-            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getUser()->getUsername())));
+            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($this->get('request_stack')->getCurrentRequest()->getSession()->get('token_key') . $this->getUser()->getUsername())));
     }
 }

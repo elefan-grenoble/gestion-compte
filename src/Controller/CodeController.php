@@ -16,7 +16,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Validator\Constraints\DateTime;
@@ -56,7 +55,6 @@ class CodeController extends AbstractController
      */
     public function listAction(Request $request)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $this->logger->info('CODE : codes_list',array('username'=>$this->getUser()->getUsername()));
@@ -70,7 +68,7 @@ class CodeController extends AbstractController
         }
 
         if (!count($codes)){
-            $session->getFlashBag()->add('warning', 'aucun code à lire');
+            $this->addFlash('warning', 'aucun code à lire');
             return $this->redirectToRoute('homepage');
         }
 
@@ -90,7 +88,6 @@ class CodeController extends AbstractController
      */
     public function newAction(Request $request)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $codeform = $this->createFormBuilder()
@@ -121,12 +118,12 @@ class CodeController extends AbstractController
                     $open_code->setClosed(true);
                     $em->persist($code);
                 }
-                //$session->getFlashBag()->add('success', 'Anciens codes fermés.');
+                //$this->addFlash('success', 'Anciens codes fermés.');
             }
 
             $em->flush();
 
-            $session->getFlashBag()->add('success', '🎉 Nouveau code enregistré.');
+            $this->addFlash('success', '🎉 Nouveau code enregistré.');
 
             return $this->redirectToRoute('codes_list');
         }
@@ -144,7 +141,6 @@ class CodeController extends AbstractController
      */
     public function generateAction(Request $request, EventDispatcherInterface $event_dispatcher)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -196,7 +192,7 @@ class CodeController extends AbstractController
 
         $event_dispatcher->dispatch(new CodeNewEvent($code, $old_codes), CodeNewEvent::NAME);
 
-        $session->getFlashBag()->add('success','🎉 Bravo ! Note bien les deux codes ci-dessous ! <br>Tu peux aussi retrouver ces infos dans tes mails.');
+        $this->addFlash('success','🎉 Bravo ! Note bien les deux codes ci-dessous ! <br>Tu peux aussi retrouver ces infos dans tes mails.');
 
         return $this->render('default/code/generate.html.twig', array(
             'generate' =>  true,
@@ -213,7 +209,6 @@ class CodeController extends AbstractController
      */
     public function toggleAction(Request $request, Code $code)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         if ($code->getClosed())
@@ -226,7 +221,7 @@ class CodeController extends AbstractController
         $em->persist($code);
         $em->flush();
 
-        $session->getFlashBag()->add('success', 'Le code a bien été marqué '.(($code->getClosed())?'fermé':'ouvert').' !');
+        $this->addFlash('success', 'Le code a bien été marqué '.(($code->getClosed())?'fermé':'ouvert').' !');
 
         return $this->redirectToRoute('codes_list');
     }
@@ -238,7 +233,6 @@ class CodeController extends AbstractController
      */
     public function closeAllButMineAction(Request $request, SwipeCardHelper $swipeCardHelper)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $securityContext = $this->container->get('security.authorization_checker');
 
@@ -283,7 +277,7 @@ class CodeController extends AbstractController
             $this->get("security.token_storage")->setToken($previousToken);
         }
 
-        $session->getFlashBag()->add('success', 'Bien enregistré, merci !');
+        $this->addFlash('success', 'Bien enregistré, merci !');
 
         return $this->redirectToRoute('homepage');
     }
@@ -298,7 +292,6 @@ class CodeController extends AbstractController
     {
         $this->denyAccessUnlessGranted('delete', $code);
 
-        $session = new Session();
 
         $form = $this->getDeleteForm($code);
         $form->handleRequest($request);
@@ -308,7 +301,7 @@ class CodeController extends AbstractController
             $em->remove($code);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le code a bien été supprimé !');
+            $this->addFlash('success', 'Le code a bien été supprimé !');
         }
         return $this->redirectToRoute('codes_list');
     }

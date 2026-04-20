@@ -11,7 +11,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\DateTime;
 
 
@@ -44,7 +43,6 @@ class ClientController extends AbstractController
      */
     public function newAction(Request $request)
     {
-        $session = new Session();
 
         $form = $this->createForm(ClientType::class);
         $form->handleRequest($request);
@@ -60,7 +58,7 @@ class ClientController extends AbstractController
             $client->setService($service);
             $clientManager->updateClient($client);
 
-            $session->getFlashBag()->add('success', 'Le client a bien été créé !');
+            $this->addFlash('success', 'Le client a bien été créé !');
             return $this->redirectToRoute('client_list');
 
 //            return $this->redirect($this->generateUrl('fos_oauth_server_authorize', array(
@@ -84,7 +82,6 @@ class ClientController extends AbstractController
      */
     public function editAction(Request $request, Client $client)
     {
-        $session = new Session();
 
         $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(ClientType::class);
@@ -105,12 +102,12 @@ class ClientController extends AbstractController
             $em->persist($client);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le client a bien été édité !');
+            $this->addFlash('success', 'Le client a bien été édité !');
             return $this->redirectToRoute('client_list');
 
         } elseif ($form->isSubmitted()) {
             foreach ($form->getErrors(true) as $key => $error) {
-                $session->getFlashBag()->add('error', 'Erreur ' . ($key + 1) . " : " . $error->getMessage());
+                $this->addFlash('error', 'Erreur ' . ($key + 1) . " : " . $error->getMessage());
             }
         }
 
@@ -131,7 +128,6 @@ class ClientController extends AbstractController
      */
     public function deleteAction(Request $request, Client $client)
     {
-        $session = new Session();
 
         $form = $this->getDeleteForm($client);
         $form->handleRequest($request);
@@ -141,7 +137,7 @@ class ClientController extends AbstractController
             $em->remove($client);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le client a bien été supprimé !');
+            $this->addFlash('success', 'Le client a bien été supprimé !');
         }
 
         return $this->redirectToRoute('client_list');

@@ -10,7 +10,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\DateTime;
 use App\Entity\Commission;
 
@@ -46,7 +45,6 @@ class TaskController extends AbstractController
      */
     public function newAction(Request $request)
     {
-        $session = new Session();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $task = new Task();
@@ -68,13 +66,13 @@ class TaskController extends AbstractController
             $em->persist($task);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'La nouvelle tache a bien été créée !');
+            $this->addFlash('success', 'La nouvelle tache a bien été créée !');
             return $this->redirectToRoute('task_edit',array('id'=>$task->getId()));
 
         } elseif ($form->isSubmitted()) {
             foreach ($this->getErrorMessages($form) as $key => $errors) {
                 foreach ($errors as $error)
-                    $session->getFlashBag()->add('error', $key." : ".$error);
+                    $this->addFlash('error', $key." : ".$error);
             }
         }
         return $this->render('default/task/new.html.twig', array(
@@ -89,7 +87,6 @@ class TaskController extends AbstractController
      */
     public function editAction(Request $request, Task $task)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $this->denyAccessUnlessGranted('edit',$task);
@@ -112,13 +109,13 @@ class TaskController extends AbstractController
             $em->persist($task);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'La tache a bien été éditée !');
+            $this->addFlash('success', 'La tache a bien été éditée !');
             return $this->redirectToRoute('tasks_list');
 
         } elseif ($form->isSubmitted()) {
             foreach ($this->getErrorMessages($form) as $key => $errors){
                 foreach ($errors as $error)
-                    $session->getFlashBag()->add('error', $key." : ".$error);
+                    $this->addFlash('error', $key." : ".$error);
             }
         }
         return $this->render('default/task/edit.html.twig', array(
@@ -138,7 +135,6 @@ class TaskController extends AbstractController
     {
         $this->denyAccessUnlessGranted('delete', $task);
 
-        $session = new Session();
 
         $form = $this->getDeleteForm($task);
         $form->handleRequest($request);
@@ -148,7 +144,7 @@ class TaskController extends AbstractController
             $em->remove($task);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'La tache a bien été supprimée !');
+            $this->addFlash('success', 'La tache a bien été supprimée !');
         }
 
         return $this->redirectToRoute('tasks_list');

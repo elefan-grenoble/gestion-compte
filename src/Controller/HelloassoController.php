@@ -14,7 +14,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
 
 /**
@@ -82,8 +81,7 @@ class HelloassoController extends AbstractController
         try {
             $campaigns = $helloassoClient->getForms();
         } catch (ClientExceptionInterface $e) {
-            $session = new Session();
-            $session->getFlashBag()->add('error','Connexion à helloasso impossible');
+            $this->addFlash('error','Connexion à helloasso impossible');
             return $this->redirectToRoute('admin');
         }
 
@@ -101,8 +99,7 @@ class HelloassoController extends AbstractController
             $payments = $helloassoClient->getFormPayments($formType, $slug, ['page' => $currentPage]);
             $details = $helloassoClient->getFormDetails($formType, $slug);
         } catch (ClientExceptionInterface $e) {
-            $session = new Session();
-            $session->getFlashBag()->add('error','campaign not found');
+            $this->addFlash('error','campaign not found');
             return $this->redirectToRoute('helloasso_browser');
         }
 
@@ -122,12 +119,11 @@ class HelloassoController extends AbstractController
      */
     public function helloassoManualPaimentAddAction(Request $request, HelloassoClient $helloassoClient, HelloassoPaymentHandler $paymentHandler, string $paymentId)
     {
-        $session = new Session();
 
         try {
             $payment = $helloassoClient->getPayment($paymentId);
         } catch (ClientExceptionInterface $e) {
-            $session->getFlashBag()->add('error', 'Impossible de récupérer les informations depuis helloasso');
+            $this->addFlash('error', 'Impossible de récupérer les informations depuis helloasso');
             $formType = $request->get("formType");
             $slug = $request->get("slug");
             if (is_string($formType) && is_string($slug)) {
@@ -140,9 +136,9 @@ class HelloassoController extends AbstractController
         $newPayment = $paymentHandler->savePayments([$payment]);
 
         if (count($newPayment) === 0) {
-            $session->getFlashBag()->add('error', 'Ce paiement est déjà enregistré');
+            $this->addFlash('error', 'Ce paiement est déjà enregistré');
         } else {
-            $session->getFlashBag()->add('success', 'Ce paiement a bien été enregistré');
+            $this->addFlash('success', 'Ce paiement a bien été enregistré');
         }
 
         return $this->redirectToRoute('helloasso_campaign_details', ['formType' => $payment->order->formType, 'slug' => $payment->order->formSlug]);
@@ -156,7 +152,6 @@ class HelloassoController extends AbstractController
      */
     public function removePaymentAction(Request $request, HelloassoPayment $payment)
     {
-        $session = new Session();
 
         $form = $this->getPaymentDeleteForm($payment);
         $form->handleRequest($request);
@@ -164,12 +159,12 @@ class HelloassoController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             if ($payment->getRegistration()) {
-                $session->getFlashBag()->add('error', 'ce paiement est lié à une adhésion');
+                $this->addFlash('error', 'ce paiement est lié à une adhésion');
                 return $this->redirectToRoute('helloasso_payments');
             }
             $em->remove($payment);
             $em->flush();
-            $session->getFlashBag()->add('success', 'Le paiement a bien été supprimé !');
+            $this->addFlash('success', 'Le paiement a bien été supprimé !');
         }
 
         return $this->redirectToRoute('helloasso_payments');
@@ -183,13 +178,12 @@ class HelloassoController extends AbstractController
      */
     public function editPaymentAction(Request $request, HelloassoPayment $payment, EventDispatcherInterface $event_dispatcher)
     {
-        $session = new Session();
 
         $form = $this->createPaymentEditForm($payment);
         $form->handleRequest($request);
 
         if ($payment->getRegistration()) {
-            $session->getFlashBag()->add('error', 'Désolé, cette adhésion est déjà associée à un membre valide');
+            $this->addFlash('error', 'Désolé, cette adhésion est déjà associée à un membre valide');
             return $this->redirectToRoute('helloasso_payments');
         }
 
@@ -201,7 +195,7 @@ class HelloassoController extends AbstractController
                 HelloassoEvent::ORPHAN_SOLVE
             );
 
-            $session->getFlashBag()->add('success', "L'adhésion a été mise à jour avec succès pour " . $beneficiary);
+            $this->addFlash('success', "L'adhésion a été mise à jour avec succès pour " . $beneficiary);
             return $this->redirectToRoute('helloasso_payments');
         }
 
@@ -247,17 +241,16 @@ class HelloassoController extends AbstractController
     public function resolveOrphan(HelloassoPayment $payment,$code, SwipeCardHelper $swipeCardHelper){
         $code = urldecode($code);
         $email = $swipeCardHelper->vigenereDecode($code);
-        $session = new Session();
         if ($email == $payment->getEmail()){
             if ($payment->getRegistration()){
-                $session->getFlashBag()->add('error', 'Le paiement helloasso que tu cherches à corriger n\'a plus besoin de ton aide !');
+                $this->addFlash('error', 'Le paiement helloasso que tu cherches à corriger n\'a plus besoin de ton aide !');
             }else{
                 return $this->render(
                     'user/helloasso_resolve_orphan.html.twig',
                     array('payment' => $payment));
             }
         }else{
-            $session->getFlashBag()->add('error', 'Oups, ce lien ne semble pas fonctionner !');
+            $this->addFlash('error', 'Oups, ce lien ne semble pas fonctionner !');
         }
         return $this->redirectToRoute('homepage');
     }
@@ -271,15 +264,14 @@ class HelloassoController extends AbstractController
     public function confirmOrphan(HelloassoPayment $payment, $code, EventDispatcherInterface $event_dispatcher, SwipeCardHelper $swipeCardHelper){
         $code = urldecode($code);
         $email = $swipeCardHelper->vigenereDecode($code);
-        $session = new Session();
         if ($email == $payment->getEmail()) {
-            $session->getFlashBag()->add('success', 'Merci !');
+            $this->addFlash('success', 'Merci !');
             $event_dispatcher->dispatch(
                 new HelloassoEvent($payment, $this->getUser()),
                 HelloassoEvent::ORPHAN_SOLVE
             );
         }else{
-            $session->getFlashBag()->add('error', 'Oups, ce lien ne semble pas fonctionner !');
+            $this->addFlash('error', 'Oups, ce lien ne semble pas fonctionner !');
         }
         return $this->redirectToRoute('homepage');
     }

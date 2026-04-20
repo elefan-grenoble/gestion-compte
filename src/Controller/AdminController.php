@@ -31,7 +31,6 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
@@ -299,7 +298,7 @@ class AdminController extends AbstractController
             // return the output, don't use if you used NullOutput()
             $content = $output->fetch();
 
-            $request->getSession()->getFlashBag()->add('notice', 'Le fichier a été traité.');
+            $this->addFlash('notice', 'Le fichier a été traité.');
 
             return $this->render('admin/user/import_return.html.twig', array(
                 'content' => $content,

@@ -17,7 +17,6 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\ResponseHeaderBag;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -54,17 +53,16 @@ class SwipeCardController extends AbstractController
      */
     public function swipeInAction(Request $request, $code, EventDispatcherInterface $event_dispatcher)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $code = $this->swipeCardHelper->vigenereDecode($code);
         $card = $em->getRepository(SwipeCard::class)->findLastEnable($code);
 
         if (!$card) {
-            $session->getFlashBag()->add("error","Oups, ce badge n'est pas actif ou n'est pas associé à un compte");
+            $this->addFlash("error","Oups, ce badge n'est pas actif ou n'est pas associé à un compte");
             $card = $em->getRepository(SwipeCard::class)->findOneBy(array("code"=>$code));
             if ($card && !$card->getEnable() && !$card->getDisabledAt())
-                $session->getFlashBag()->add("warning","Si c'est le tiens, <a href=\"".$this->generateUrl('fos_user_security_login')."\">connecte toi</a> sur ton espace membre pour l'activer");
+                $this->addFlash("warning","Si c'est le tiens, <a href=\"".$this->generateUrl('fos_user_security_login')."\">connecte toi</a> sur ton espace membre pour l'activer");
         } else {
             $user = $card->getBeneficiary()->getUser();
             $token = new UsernamePasswordToken($user, $user->getPassword(), "main", $user->getRoles());
@@ -89,7 +87,6 @@ class SwipeCardController extends AbstractController
      */
     public function activateSwipeCardAction(Request $request)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $this->denyAccessUnlessGranted(SwipeCardVoter::PAIR, new SwipeCardEntity());
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
@@ -100,12 +97,12 @@ class SwipeCardController extends AbstractController
 
         // verify code
         if (!SwipeCardEntity::checkEAN13($code)) {
-            $session->getFlashBag()->add('error', 'Hum, ces chiffres ne correspondent pas à un code badge valide... 🤔');
+            $this->addFlash('error', 'Hum, ces chiffres ne correspondent pas à un code badge valide... 🤔');
             return new RedirectResponse($referer);
         }
         $code = substr($code, 0, -1);  // remove controle
         if ($code === '421234567890') {
-            $session->getFlashBag()->add('warning', 'Hihi, ceci est le numéro d\'exemple 😁 Utilise un badge physique 🍌');
+            $this->addFlash('warning', 'Hihi, ceci est le numéro d\'exemple 😁 Utilise un badge physique 🍌');
             return new RedirectResponse($referer);
         }
 
@@ -117,9 +114,9 @@ class SwipeCardController extends AbstractController
         $beneficiaryCards = $beneficiary->getEnabledSwipeCards();
         if ($beneficiaryCards->count()) {
             if ($current_user === $beneficiary->getUser()) {
-                $session->getFlashBag()->add('error', 'Ton compte possède déjà un badge actif');
+                $this->addFlash('error', 'Ton compte possède déjà un badge actif');
             } else {
-                $session->getFlashBag()->add('error', 'Il existe déjà un badge actif associé à ce compte');
+                $this->addFlash('error', 'Il existe déjà un badge actif associé à ce compte');
             }
             return new RedirectResponse($referer);
         }
@@ -128,9 +125,9 @@ class SwipeCardController extends AbstractController
         $card = $em->getRepository(SwipeCard::class)->findOneBy(array('code' => $code));
         if ($card) {
             if ($beneficiary != $card->getBeneficiary()) {
-                $session->getFlashBag()->add('error', 'Ce badge est déjà associé à un autre utilisateur 👮');
+                $this->addFlash('error', 'Ce badge est déjà associé à un autre utilisateur 👮');
             } else {
-                $session->getFlashBag()->add('error', 'Oups ! Ce badge est déjà associé mais il est inactif. Réactive-le !');
+                $this->addFlash('error', 'Oups ! Ce badge est déjà associé mais il est inactif. Réactive-le !');
             }
             return new RedirectResponse($referer);
         }
@@ -144,7 +141,7 @@ class SwipeCardController extends AbstractController
         $em->persist($card);
         $em->flush();
 
-        $session->getFlashBag()->add('success', 'Le badge ' . $card->getcode() . ' a bien été associé à ton compte.');
+        $this->addFlash('success', 'Le badge ' . $card->getcode() . ' a bien été associé à ton compte.');
         return new RedirectResponse($referer);
     }
 
@@ -156,7 +153,6 @@ class SwipeCardController extends AbstractController
      */
     public function enableSwipeCardAction(Request $request)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -172,7 +168,7 @@ class SwipeCardController extends AbstractController
         // beneficiary should have 0 enabled cards
         $beneficiaryCards = $beneficiary->getEnabledSwipeCards();
         if ($beneficiaryCards->count()) {
-            $session->getFlashBag()->add('error', 'Tu as déjà un badge actif');
+            $this->addFlash('error', 'Tu as déjà un badge actif');
             return new RedirectResponse($referer);
         }
 
@@ -181,18 +177,18 @@ class SwipeCardController extends AbstractController
             $this->denyAccessUnlessGranted(SwipeCardVoter::ENABLE, $card);
             if ($beneficiary != $card->getBeneficiary()) {
                 if ($current_user === $beneficiary->getUser())
-                    $session->getFlashBag()->add('error', 'Ce badge ne t\'appartient pas');
+                    $this->addFlash('error', 'Ce badge ne t\'appartient pas');
                 else
-                    $session->getFlashBag()->add('error', 'Ce badge n\'appartient pas au bénéficiaire');
+                    $this->addFlash('error', 'Ce badge n\'appartient pas au bénéficiaire');
             } else {
                 $card->setEnable(true);
                 $card->setDisabledAt(null);
                 $em->persist($card);
                 $em->flush();
-                $session->getFlashBag()->add('success', 'Le badge #' . $card->getNumber() . ' a bien été réactivé');
+                $this->addFlash('success', 'Le badge #' . $card->getNumber() . ' a bien été réactivé');
             }
         } else {
-            $session->getFlashBag()->add('error', 'Aucun badge ne correspond à ce code');
+            $this->addFlash('error', 'Aucun badge ne correspond à ce code');
         }
 
         return new RedirectResponse($referer);
@@ -206,7 +202,6 @@ class SwipeCardController extends AbstractController
      */
     public function disableSwipeCardAction(Request $request)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -224,17 +219,17 @@ class SwipeCardController extends AbstractController
             $this->denyAccessUnlessGranted(SwipeCardVoter::DISABLE, $card);
             if ($beneficiary != $card->getBeneficiary()) {
                 if ($current_user === $beneficiary->getUser())
-                    $session->getFlashBag()->add('error', 'Ce badge ne t\'appartient pas');
+                    $this->addFlash('error', 'Ce badge ne t\'appartient pas');
                 else
-                    $session->getFlashBag()->add('error', 'Ce badge n\'appartient pas au bénéficiaire');
+                    $this->addFlash('error', 'Ce badge n\'appartient pas au bénéficiaire');
             } else {
                 $card->setEnable(false);
                 $em->persist($card);
                 $em->flush();
-                $session->getFlashBag()->add('success','Ce badge est maintenant désactivé');
+                $this->addFlash('success','Ce badge est maintenant désactivé');
             }
         } else {
-            $session->getFlashBag()->add('error','Aucune badge trouvé');
+            $this->addFlash('error','Aucune badge trouvé');
         }
 
         return new RedirectResponse($referer);
@@ -248,7 +243,6 @@ class SwipeCardController extends AbstractController
      */
     public function deleteAction(Request $request)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $referer = $request->headers->get('referer');
@@ -261,9 +255,9 @@ class SwipeCardController extends AbstractController
             $this->denyAccessUnlessGranted(SwipeCardVoter::DELETE, $card);
             $em->remove($card);
             $em->flush();
-            $session->getFlashBag()->add('success','Le badge a bien été supprimé');
+            $this->addFlash('success','Le badge a bien été supprimé');
         } else {
-            $session->getFlashBag()->add('error','Aucune badge trouvé');
+            $this->addFlash('error','Aucune badge trouvé');
         }
 
         return new RedirectResponse($referer);

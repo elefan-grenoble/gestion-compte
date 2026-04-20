@@ -40,7 +40,6 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Form;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -81,14 +80,13 @@ class MembershipController extends AbstractController
      * @param Membership $member
      * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
      */
-    public function showAction(Membership $member, MembershipService $membership_service)
+    public function showAction(Request $request, Membership $member, MembershipService $membership_service)
     {
         if ($member->getMemberNumber() <= 0) {
             return $this->redirectToRoute("homepage");
         }
         $this->denyAccessUnlessGranted('view', $member);
 
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $flyingForm = $this->createFlyingForm($member);
@@ -131,7 +129,7 @@ class MembershipController extends AbstractController
         if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
             $action = $this->generateUrl('member_new_registration', array('member_number' => $member->getMemberNumber()));
         } else {
-            $action = $this->generateUrl('member_new_registration', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+            $action = $this->generateUrl('member_new_registration', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($request->getSession()->get('token_key') . $this->getCurrentAppUser()->getUsername())));
         }
 
         $registrationForm = $this->createForm(RegistrationType::class, $newReg, array('action' => $action));
@@ -156,7 +154,7 @@ class MembershipController extends AbstractController
                 $deleteBeneficiaryForms[$beneficiary->getId()] = $this->createFormBuilder()
                     ->setAction($this->generateUrl('beneficiary_delete', array(
                         'id' => $beneficiary->getId(),
-                        'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())
+                        'token' => $user->getTmpToken($request->getSession()->get('token_key') . $this->getCurrentAppUser()->getUsername())
                     )))
                     ->setMethod('DELETE')->getForm()->createView();
             }
@@ -232,7 +230,6 @@ class MembershipController extends AbstractController
      */
     public function newRegistration(Request $request, Membership $member, MembershipService $membership_service)
     {
-        $session = new Session();
         $this->denyAccessUnlessGranted('edit', $member);
         $newReg = new Registration();
         $remainder = $membership_service->getRemainder($member);
@@ -250,19 +247,19 @@ class MembershipController extends AbstractController
         if ($registrationForm->isSubmitted() && $registrationForm->isValid() && $registrationForm->get('is_new')->getData() != null) {
             $amount = floatval($registrationForm->get('amount')->getData());
             if ($amount <= 0) {
-                $session->getFlashBag()->add('error', 'Adhésion prix libre & non gratuit !');
+                $this->addFlash('error', 'Adhésion prix libre & non gratuit !');
                 return $this->redirectToShow($member);
             }
 
             if ($this->getCurrentAppUser()->getBeneficiary() && $this->getCurrentAppUser()->getBeneficiary()->getMembership()->getId() == $member->getId()) {
-                $session->getFlashBag()->add('error', 'Tu ne peux pas enregistrer ta propre ré-adhésion, demande à un autre adhérent :)');
+                $this->addFlash('error', 'Tu ne peux pas enregistrer ta propre ré-adhésion, demande à un autre adhérent :)');
                 return $this->redirectToShow($member);
             }
             $newReg->setRegistrar($this->getCurrentAppUser());
 
             $date = $registrationForm->get('date')->getData();
             if ($membership_service->getExpire($member) >= $date) {
-                $session->getFlashBag()->add('warning', 'l\'adhésion précédente est encore valable à cette date !');
+                $this->addFlash('warning', 'l\'adhésion précédente est encore valable à cette date !');
                 return $this->redirectToShow($member);
             }
             $newReg->setMembership($member);
@@ -272,7 +269,7 @@ class MembershipController extends AbstractController
             $em->persist($newReg);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Enregistrement effectuée');
+            $this->addFlash('success', 'Enregistrement effectuée');
             return $this->redirectToShow($member);
         }
 
@@ -285,19 +282,19 @@ class MembershipController extends AbstractController
                 $form->handleRequest($request);
                 if ($form->isSubmitted() && $form->isValid()) {
                     if ($this->getCurrentAppUser()->getBeneficiary() && $this->getCurrentAppUser()->getBeneficiary()->getMembership()->getId() == $member->getId()) {
-                        $session->getFlashBag()->add('error', 'Tu ne peux pas modifier tes propres adhésions :)');
+                        $this->addFlash('error', 'Tu ne peux pas modifier tes propres adhésions :)');
                         return $this->redirectToShow($member);
                     }
                     $em->persist($registration);
                     $em->flush();
-                    $session->getFlashBag()->add('success', 'Mise à jour effectuée');
+                    $this->addFlash('success', 'Mise à jour effectuée');
                     return $this->redirectToShow($member);
                 }
             }
         }
 
         if ($member->isWithdrawn())
-            $session->getFlashBag()->add('warning', 'Ce compte est fermé');
+            $this->addFlash('warning', 'Ce compte est fermé');
 
         return $this->redirectToShow($member);
     }
@@ -312,7 +309,6 @@ class MembershipController extends AbstractController
      */
     public function newBeneficiary(Request $request, Membership $member, EventDispatcherInterface $event_dispatcher, ValidatorInterface $validator)
     {
-        $session = new Session();
         $this->denyAccessUnlessGranted(MembershipVoter::BENEFICIARY_ADD, $member);
 
         //check if member can host
@@ -324,9 +320,9 @@ class MembershipController extends AbstractController
         if (0 !== count($violations)) {
             // there are errors, now you can show them
             foreach ($violations as $violation) {
-                $session->getFlashBag()->add('error', $violation->getMessage());
+                $this->addFlash('error', $violation->getMessage());
             }
-            $session->getFlashBag()->add('warning','Veuillez réaliser une nouvelle adhésion');
+            $this->addFlash('warning','Veuillez réaliser une nouvelle adhésion');
 
             return $this->redirectToShow($member);
         }
@@ -348,14 +344,14 @@ class MembershipController extends AbstractController
                 $em->flush();
 
                 $event_dispatcher->dispatch(new BeneficiaryAddEvent($beneficiary), BeneficiaryAddEvent::NAME);
-                $session->getFlashBag()->add('success', 'Beneficiaire ajouté');
+                $this->addFlash('success', 'Beneficiaire ajouté');
             } else {
-                $session->getFlashBag()->add('error', 'Maximum ' . ($this->getParameter('maximum_nb_of_beneficiaries_in_membership')) . ' beneficiaires enregistrés');
+                $this->addFlash('error', 'Maximum ' . ($this->getParameter('maximum_nb_of_beneficiaries_in_membership')) . ' beneficiaires enregistrés');
             }
             return $this->redirectToShow($member);
         } elseif ($beneficiaryForm->isSubmitted()) {
             foreach ($beneficiaryForm->getErrors(true) as $key => $error) {
-                $session->getFlashBag()->add('error', 'Erreur ' . ($key + 1) . " : " . $error->getMessage());
+                $this->addFlash('error', 'Erreur ' . ($key + 1) . " : " . $error->getMessage());
             }
         }
 
@@ -372,7 +368,6 @@ class MembershipController extends AbstractController
      */
     public function editFirewallAction(Request $request)
     {
-        $session = new Session();
 
         if ($this->isGranted('ROLE_USER_VIEWER')) {
             $form = $this->createFormBuilder()
@@ -406,14 +401,14 @@ class MembershipController extends AbstractController
             }
 
             if ($member && ($this->isGranted('view', $member))) {
-                $session->set('token_key', uniqid());
+                $request->getSession()->set('token_key', uniqid());
                 return $this->redirectToShow($member);
             }
 
             if ($email)
-                $session->getFlashBag()->add('error', 'cet email n\'est pas associé à ce numéro');
+                $this->addFlash('error', 'cet email n\'est pas associé à ce numéro');
             if (!$member)
-                $session->getFlashBag()->add('error', 'membre non trouvé');
+                $this->addFlash('error', 'membre non trouvé');
         }
 
         return $this->render('user/edit_firewall.html.twig', array(
@@ -438,9 +433,9 @@ class MembershipController extends AbstractController
             $em = $this->getDoctrine()->getManager();
             $em->persist($user);
             $em->flush();
-            $request->getSession()->getFlashBag()->add('success', 'Merci ! votre email a bien été enregistré');
+            $this->addFlash('success', 'Merci ! votre email a bien été enregistré');
         } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-            $request->getSession()->getFlashBag()->add('warning', "Oups, le format de l'email entré semble problématique");
+            $this->addFlash('warning', "Oups, le format de l'email entré semble problématique");
         }
         return $this->render('beneficiary/confirm.html.twig', array(
             'beneficiary' => $beneficiary,
@@ -468,7 +463,7 @@ class MembershipController extends AbstractController
             $ms = $em->getRepository(Membership::class)->findOneBy(array('member_number' => $member_number));
 
             if (!$ms){
-                $request->getSession()->getFlashBag()->add('warning', 'Oups, aucun membre trouvé avec ce numéro d\'adhérent');
+                $this->addFlash('warning', 'Oups, aucun membre trouvé avec ce numéro d\'adhérent');
                 return $this->render('user/tools/find_me.html.twig', array(
                     'form' => $form->createView(),
                 ));
@@ -496,7 +491,6 @@ class MembershipController extends AbstractController
     {
         $this->denyAccessUnlessGranted('flying', $member);
 
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -507,12 +501,12 @@ class MembershipController extends AbstractController
             $flying = $form->get("flying")->getData();
             if ($flying) {
                 if ($member->isFlying()) {
-                    $session->getFlashBag()->add('error', 'Ce compte est déjà volant');
+                    $this->addFlash('error', 'Ce compte est déjà volant');
                     return $this->redirectToShow($member);
                 }
             } else {
                 if (!$member->isFlying()) {
-                    $session->getFlashBag()->add('error', 'Ce compte est déjà fixe');
+                    $this->addFlash('error', 'Ce compte est déjà fixe');
                     return $this->redirectToShow($member);
                 }
             }
@@ -522,9 +516,9 @@ class MembershipController extends AbstractController
             $em->flush();
 
             if ($flying) {
-                $session->getFlashBag()->add('success', 'Le compte est maintenant volant !');
+                $this->addFlash('success', 'Le compte est maintenant volant !');
             } else {
-                $session->getFlashBag()->add('success', 'Le compte est maintenant fixe !');
+                $this->addFlash('success', 'Le compte est maintenant fixe !');
             }
         }
 
@@ -547,7 +541,6 @@ class MembershipController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $session = new Session();
             $em = $this->getDoctrine()->getManager();
 
             $member->setFrozen(true);
@@ -555,7 +548,7 @@ class MembershipController extends AbstractController
             $em->persist($member);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Compte gelé !');
+            $this->addFlash('success', 'Compte gelé !');
         }
 
         return $this->redirectToShow($member);
@@ -577,7 +570,6 @@ class MembershipController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $session = new Session();
             $em = $this->getDoctrine()->getManager();
 
             $member->setFrozen(false);
@@ -585,7 +577,7 @@ class MembershipController extends AbstractController
             $em->persist($member);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Compte dégelé !');
+            $this->addFlash('success', 'Compte dégelé !');
         }
 
         return $this->redirectToShow($member);
@@ -607,7 +599,6 @@ class MembershipController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $session = new Session();
             $em = $this->getDoctrine()->getManager();
 
             $member->setFrozenChange(!$member->getFrozenChange());
@@ -616,15 +607,15 @@ class MembershipController extends AbstractController
 
             if ($member->isFrozen()) {
                 if ($member->getFrozenChange()) {
-                    $session->getFlashBag()->add('success', 'Le compte sera dégelé à la fin du cycle !');
+                    $this->addFlash('success', 'Le compte sera dégelé à la fin du cycle !');
                 } else {
-                    $session->getFlashBag()->add('success', 'La demande de dégel a été annulée !');
+                    $this->addFlash('success', 'La demande de dégel a été annulée !');
                 }
             } else {
                 if ($member->getFrozenChange()) {
-                    $session->getFlashBag()->add('success', 'Le compte sera gelé à la fin du cycle !');
+                    $this->addFlash('success', 'Le compte sera gelé à la fin du cycle !');
                 } else {
-                    $session->getFlashBag()->add('success', 'La demande de gel a été annulée !');
+                    $this->addFlash('success', 'La demande de gel a été annulée !');
                 }
             }
         }
@@ -647,7 +638,6 @@ class MembershipController extends AbstractController
      */
     public function withdrawnAction(Request $request, Membership $member)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -659,7 +649,7 @@ class MembershipController extends AbstractController
             if ($withdrawn) {
                 $this->denyAccessUnlessGranted('close', $member);
                 if ($member->isWithdrawn()) {
-                    $session->getFlashBag()->add('error', 'Ce compte est déjà fermé');
+                    $this->addFlash('error', 'Ce compte est déjà fermé');
                     return $this->redirectToShow($member);
                 }
                 $member->setWithdrawnDate(new \DateTime('now'));
@@ -667,7 +657,7 @@ class MembershipController extends AbstractController
             } else {
                 $this->denyAccessUnlessGranted('open', $member);
                 if (!$member->isWithdrawn()) {
-                    $session->getFlashBag()->add('error', 'Ce compte est déjà ouvert');
+                    $this->addFlash('error', 'Ce compte est déjà ouvert');
                     return $this->redirectToShow($member);
                 }
             }
@@ -676,9 +666,9 @@ class MembershipController extends AbstractController
             $em->flush();
 
             if ($withdrawn) {
-                $session->getFlashBag()->add('success', 'Compte fermé !');
+                $this->addFlash('success', 'Compte fermé !');
             } else {
-                $session->getFlashBag()->add('success', 'Compte ré-ouvert !');
+                $this->addFlash('success', 'Compte ré-ouvert !');
             }
         }
 
@@ -696,7 +686,6 @@ class MembershipController extends AbstractController
      */
     public function deleteAction(Request $request, Membership $member)
     {
-        $session = new Session();
 
         $form = $this->createDeleteForm($member);
         $form->handleRequest($request);
@@ -706,7 +695,7 @@ class MembershipController extends AbstractController
             $em->remove($member);
             $em->flush();
 
-            $session->getFlashBag()->add('success', "Le membre a bien été supprimé !");
+            $this->addFlash('success', "Le membre a bien été supprimé !");
         }
 
         return $this->redirectToRoute('user_index');
@@ -719,7 +708,6 @@ class MembershipController extends AbstractController
      */
     public function newAction(Request $request, EventDispatcherInterface $event_dispatcher, SwipeCardHelper $swipeCardHelper)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -732,7 +720,7 @@ class MembershipController extends AbstractController
                 $a_beneficiary = $em->getRepository(AnonymousBeneficiary::class)->findOneBy(array('email'=>$email));
             }
             if (!$a_beneficiary) {
-                $session->getFlashBag()->add('error', 'Cette url n\'est plus valide');
+                $this->addFlash('error', 'Cette url n\'est plus valide');
                 return $this->redirectToRoute("homepage");
             } else {
                 if ($a_beneficiary->getJoinTo()) { //adding beneficiary to an existing membership : wrong place
@@ -820,17 +808,17 @@ class MembershipController extends AbstractController
 
             $securityContext = $this->container->get('security.authorization_checker');
             if (!$securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
-                $session->getFlashBag()->add('success', 'Merci '.$member->getMainBeneficiary()->getFirstname().' ! Ton adhésion est maintenant finalisée. Verifie tes emails pour te connecter.');
+                $this->addFlash('success', 'Merci '.$member->getMainBeneficiary()->getFirstname().' ! Ton adhésion est maintenant finalisée. Verifie tes emails pour te connecter.');
                 return $this->redirectToRoute('homepage');
             } else {
-                $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
+                $this->addFlash('success', 'La nouvelle adhésion a bien été prise en compte !');
             }
 
             return $this->redirectToShow($member);
 
         } elseif ($form->isSubmitted()) {
             foreach ($form->getErrors(true) as $key => $error) {
-                $session->getFlashBag()->add('error', 'Erreur ' . ($key + 1) . " : " . $error->getMessage());
+                $this->addFlash('error', 'Erreur ' . ($key + 1) . " : " . $error->getMessage());
             }
         }
 
@@ -850,7 +838,6 @@ class MembershipController extends AbstractController
      */
     public function addBeneficiaryAction(Request $request, EventDispatcherInterface $event_dispatcher, SwipeCardHelper $swipeCardHelper, ValidatorInterface $validator)
     {
-        $session = new Session();
 
         $code = $request->query->get('code');
         $em = $this->getDoctrine()->getManager();
@@ -861,7 +848,7 @@ class MembershipController extends AbstractController
                 $a_beneficiary = $em->getRepository(AnonymousBeneficiary::class)->findOneBy(array('email' => $email));
             }
             if (!$a_beneficiary) {
-                $session->getFlashBag()->add('error', 'Cette url n\'est plus valide');
+                $this->addFlash('error', 'Cette url n\'est plus valide');
                 return $this->redirectToRoute('homepage');
             }
         }
@@ -870,7 +857,7 @@ class MembershipController extends AbstractController
             throw $this->createAccessDeniedException('Tu cherches ?');
         }
         if (!$a_beneficiary->getJoinTo()){
-            $session->getFlashBag()->add('error','destination non trouvé');
+            $this->addFlash('error','destination non trouvé');
             return $this->redirectToRoute('homepage');
         }
         $member = $a_beneficiary->getJoinTo()->getMembership();
@@ -883,9 +870,9 @@ class MembershipController extends AbstractController
         if (0 !== count($violations)) {
             // there are errors, now you can show them
             foreach ($violations as $violation) {
-                $session->getFlashBag()->add('error',$violation->getMessage());
+                $this->addFlash('error',$violation->getMessage());
             }
-            $session->getFlashBag()->add('warning','Veuillez réaliser une nouvelle adhésion');
+            $this->addFlash('warning','Veuillez réaliser une nouvelle adhésion');
             $em->remove($a_beneficiary);
             $em->flush();
 
@@ -918,12 +905,12 @@ class MembershipController extends AbstractController
 
             $event_dispatcher->dispatch(new BeneficiaryAddEvent($beneficiary), BeneficiaryAddEvent::NAME);
 
-            $session->getFlashBag()->add('success', 'Merci ' . $beneficiary->getFirstname() . ' ! Ton adhésion est maintenant finalisée');
+            $this->addFlash('success', 'Merci ' . $beneficiary->getFirstname() . ' ! Ton adhésion est maintenant finalisée');
             return $this->redirectToRoute('fos_user_registration_check_email');
 
         } elseif ($form->isSubmitted()) {
             foreach ($form->getErrors(true) as $key => $error) {
-                $session->getFlashBag()->add('error', 'Erreur ' . ($key + 1) . " : " . $error->getMessage());
+                $this->addFlash('error', 'Erreur ' . ($key + 1) . " : " . $error->getMessage());
             }
         }
 
@@ -949,19 +936,18 @@ class MembershipController extends AbstractController
         $form->handleRequest($request);
 
         $em = $this->getDoctrine()->getManager();
-        $session = new Session();
 
         if ($form->isSubmitted() && $form->isValid()) {
             $fromMember = $form->get('from_text')->getData()->getMembership();
             $destMember = $form->get('dest_text')->getData()->getMembership();
             if ($fromMember == $destMember) {
-                $session->getFlashBag()->add('error', 'Impossible de joindre deux comptes identiques.');
+                $this->addFlash('error', 'Impossible de joindre deux comptes identiques.');
             } else if ($fromMember->getBeneficiaries()->count() >= $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
-                $session->getFlashBag()->add('error', 'Le compte à lier a déjà le nombre maximum de bénéficiaires.');
+                $this->addFlash('error', 'Le compte à lier a déjà le nombre maximum de bénéficiaires.');
             }else if ($destMember->getBeneficiaries()->count() >= $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
-                $session->getFlashBag()->add('error', 'Le compte de destination a déjà le nombre maximum de bénéficiaires.');
+                $this->addFlash('error', 'Le compte de destination a déjà le nombre maximum de bénéficiaires.');
             } else if ($fromMember->getBeneficiaries()->count() + $destMember->getBeneficiaries()->count() > $this->getParameter('maximum_nb_of_beneficiaries_in_membership')) {
-                $session->getFlashBag()->add('error', 'La somme des bénéficiaires du compte à lier (' . $destMember->getBeneficiaries()->count() . ') et du compte de destination (' . $fromMember->getBeneficiaries()->count() . ') dépasse le nombre maximum de bénéficiaires.');
+                $this->addFlash('error', 'La somme des bénéficiaires du compte à lier (' . $destMember->getBeneficiaries()->count() . ') et du compte de destination (' . $fromMember->getBeneficiaries()->count() . ') dépasse le nombre maximum de bénéficiaires.');
             } else {
                 foreach ($fromMember->getBeneficiaries() as $beneficiary) {
                     $destMember->addBeneficiary($beneficiary); //in
@@ -975,7 +961,7 @@ class MembershipController extends AbstractController
                 $em->remove($fromMember);
                 $em->flush();
 
-                $session->getFlashBag()->add('success', 'Les deux comptes adhérents ont bien été fusionnés !');
+                $this->addFlash('success', 'Les deux comptes adhérents ont bien été fusionnés !');
 
                 return $this->redirectToShow($destMember);
             }
@@ -1003,14 +989,14 @@ class MembershipController extends AbstractController
             if ($note_form->isValid()) {
                 $existing_note = $em->getRepository(Note::class)->findOneBy(array("subject" => null, "author" => $this->getCurrentAppUser(), "text" => $note->getText()));
                 if ($existing_note) {
-                    $session->getFlashBag()->add('error', 'Ce post-it existe déjà');
+                    $this->addFlash('error', 'Ce post-it existe déjà');
                 } else {
                     $em->persist($note);
                     $em->flush();
-                    $session->getFlashBag()->add('success', 'Post-it ajouté');
+                    $this->addFlash('success', 'Post-it ajouté');
                 }
             } else {
-                $session->getFlashBag()->add('error', 'Impossible d\'ajouter le post-it');
+                $this->addFlash('error', 'Impossible d\'ajouter le post-it');
             }
         }
 
@@ -1212,11 +1198,10 @@ class MembershipController extends AbstractController
         if (!$securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             return $this->redirectToRoute('homepage');
         }
-        $session = new Session();
         if ($this->get('security.authorization_checker')->isGranted('ROLE_USER_MANAGER'))
             return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
         else
-            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $member->getTmpToken($this->get('request_stack')->getCurrentRequest()->getSession()->get('token_key') . $this->getCurrentAppUser()->getUsername())));
     }
 
     /**

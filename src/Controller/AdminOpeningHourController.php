@@ -12,7 +12,6 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use App\Entity\OpeningHourKind;
 
@@ -50,7 +49,6 @@ class AdminOpeningHourController extends AbstractController
      */
     public function newAction(Request $request)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $openingHour = new OpeningHour();
@@ -67,7 +65,7 @@ class AdminOpeningHourController extends AbstractController
             $em->persist($openingHour);
             $em->flush();
 
-            $session->getFlashBag()->add('success', "L'horaire a bien été crée !");
+            $this->addFlash('success', "L'horaire a bien été crée !");
             return $this->redirectToRoute('admin_openinghour_index');
         }
 
@@ -84,7 +82,6 @@ class AdminOpeningHourController extends AbstractController
      */
     public function editAction(Request $request, OpeningHour $openingHour)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $form = $this->createForm(OpeningHourType::class, $openingHour);
@@ -106,7 +103,7 @@ class AdminOpeningHourController extends AbstractController
             $em->persist($openingHour);
             $em->flush();
 
-            $session->getFlashBag()->add('success', "L'horaire a bien été éditée !");
+            $this->addFlash('success', "L'horaire a bien été éditée !");
             return $this->redirectToRoute('admin_openinghour_index');
         }
 
@@ -124,7 +121,6 @@ class AdminOpeningHourController extends AbstractController
      */
     public function deleteAction(Request $request, OpeningHour $openingHour)
     {
-        $session = new Session();
 
         $form = $this->getDeleteForm($openingHour);
         $form->handleRequest($request);
@@ -134,7 +130,7 @@ class AdminOpeningHourController extends AbstractController
             $em->remove($openingHour);
             $em->flush();
 
-            $session->getFlashBag()->add('success', "L'horaire a bien été supprimée !");
+            $this->addFlash('success', "L'horaire a bien été supprimée !");
             return $this->redirectToRoute('admin_openinghour_index');
         }
 

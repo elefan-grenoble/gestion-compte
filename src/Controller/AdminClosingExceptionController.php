@@ -13,7 +13,6 @@ use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Component\HttpFoundation\Session\Session;
 
 
 /**
@@ -85,7 +84,6 @@ class AdminClosingExceptionController extends AbstractController
      */
     public function newAction(Request $request)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -100,7 +98,7 @@ class AdminClosingExceptionController extends AbstractController
             $em->persist($closingException);
             $em->flush();
 
-            $session->getFlashBag()->add('success', "La fermeture exceptionnelle a bien été crée !");
+            $this->addFlash('success', "La fermeture exceptionnelle a bien été crée !");
             return $this->redirectToRoute('admin_closingexception_index');
         }
 
@@ -117,7 +115,6 @@ class AdminClosingExceptionController extends AbstractController
      */
     public function deleteAction(Request $request, ClosingException $closingException)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $form = $this->getDeleteForm($closingException);
@@ -127,7 +124,7 @@ class AdminClosingExceptionController extends AbstractController
             $em->remove($closingException);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'La fermeture exceptionnelle a bien été supprimée !');
+            $this->addFlash('success', 'La fermeture exceptionnelle a bien été supprimée !');
         }
 
         return $this->redirectToRoute('admin_closingexception_index');
