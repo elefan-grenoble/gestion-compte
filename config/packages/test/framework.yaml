@@ -1,5 +1,7 @@
 framework:
   test: true
   session:
-    cookie_domain: "localhost"
+    # Override main config: let the browser use the current host so Cypress
+    # E2E tests work regardless of the hostname (localhost, membres.yourcoop.local, ...)
+    cookie_domain: ~
     storage_id: session.storage.mock_file
