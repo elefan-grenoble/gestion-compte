@@ -33,6 +33,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use App\Entity\Beneficiary;
 
 
 /**
@@ -146,7 +147,7 @@ class ShiftController extends AbstractController
         $beneficiaryId = $content->beneficiaryId;
         $isFixe = $content->typeService;
 
-        $beneficiary = $em->getRepository('App:Beneficiary')->find($beneficiaryId);
+        $beneficiary = $em->getRepository(Beneficiary::class)->find($beneficiaryId);
 
         // Check if the shift is bookable by the given beneficiary
         // Also check if the beneficiary belongs to the same membership as the current user
@@ -308,7 +309,7 @@ class ShiftController extends AbstractController
 
             $session->getFlashBag()->add('success', "Le créneau a été annulé !");
             if ($this->use_time_log_saving) {
-                if (count($em->getRepository('App:TimeLog')->findAll($member, $shift, TimeLog::TYPE_SAVING))) {
+                if (count($em->getRepository(TimeLog::class)->findAll($member, $shift, TimeLog::TYPE_SAVING))) {
                     $session->getFlashBag()->add("warning", "Grâce au compteur épargne, votre créneau a été comptabilisé !<br />En échange, votre compteur épargne a été décrémenté de la durée du créneau.");
                 }
             }
@@ -375,7 +376,7 @@ class ShiftController extends AbstractController
                 $message = "Le créneau a bien été libéré !";
 
                 if ($this->use_time_log_saving) {
-                    if (count($em->getRepository('App:TimeLog')->findAll($member, $shift, TimeLog::TYPE_SAVING))) {
+                    if (count($em->getRepository(TimeLog::class)->findAll($member, $shift, TimeLog::TYPE_SAVING))) {
                         $message += "Grâce au compteur épargne, le créneau a été comptabilisé (en échange, le compteur épargne a été décrémenté de la durée du créneau).";
                     }
                 }
@@ -624,14 +625,14 @@ class ShiftController extends AbstractController
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
-        $coShifters = $em->getRepository('App:Beneficiary')->findCoShifters($shift);
+        $coShifters = $em->getRepository(Beneficiary::class)->findCoShifters($shift);
         $form = $this->createShiftContactForm($shift, $coShifters);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $beneficiaries = $form->get('to')->getData();
             $from = $form->get('from')->getData();
-            $from = $em->getRepository('App:Beneficiary')->findOneBy(array('id' => $from));
+            $from = $em->getRepository(Beneficiary::class)->findOneBy(array('id' => $from));
             $emails = array();
             $firstnames = array();
             foreach ($beneficiaries as $beneficiary) {
@@ -691,9 +692,9 @@ class ShiftController extends AbstractController
 
         if ($job_id) {
             $em = $this->getDoctrine()->getManager();
-            $job = $em->getRepository('App:Job')->find($job_id);
+            $job = $em->getRepository(Job::class)->find($job_id);
             if ($job) {
-                $shifts = $em->getRepository('App:Shift')->findFutures(null, $job);
+                $shifts = $em->getRepository(Shift::class)->findFutures(null, $job);
                 foreach ($shifts as $shift) {
                     $day = $shift->getStart()->format("d m Y");
                     $interval = $shift->getIntervalCode();

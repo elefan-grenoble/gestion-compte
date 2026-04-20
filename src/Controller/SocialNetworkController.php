@@ -33,7 +33,7 @@ class SocialNetworkController extends AbstractController
     public function listAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
-        $socialNetworks = $em->getRepository('App:SocialNetwork')->findAll();
+        $socialNetworks = $em->getRepository(SocialNetwork::class)->findAll();
 
         return $this->render('admin/socialnetwork/list.html.twig', array(
             'socialNetworks' => $socialNetworks

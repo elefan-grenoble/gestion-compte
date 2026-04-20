@@ -21,6 +21,7 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 use Symfony\Component\Templating\EngineInterface;
+use App\Entity\Code;
 
 class VerifyCodeChangeCommand extends Command
 {
@@ -73,7 +74,7 @@ class VerifyCodeChangeCommand extends Command
         $last_run_date->modify("-".$last_run." hours");
 
         ////////////////////////
-        $codeRepository = $this->em->getRepository('App:Code');
+        $codeRepository = $this->em->getRepository(Code::class);
         $qb = $codeRepository
             ->createQueryBuilder('c');
         $qb->where('c.closed = :closed')

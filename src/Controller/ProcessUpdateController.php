@@ -35,7 +35,7 @@ class ProcessUpdateController extends AbstractController
         //todo paginate
 
         $em = $this->getDoctrine()->getManager();
-        $processUpdates = $em->getRepository('App:ProcessUpdate')->findBy(array(),array('date'=>'DESC'));
+        $processUpdates = $em->getRepository(ProcessUpdate::class)->findBy(array(),array('date'=>'DESC'));
 
         $delete_forms = array();
         foreach ($processUpdates as $update){

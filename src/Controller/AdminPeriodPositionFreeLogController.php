@@ -84,7 +84,7 @@ class AdminPeriodPositionFreeLogController extends AbstractController
         $sort = 'createdAt';
         $order = 'DESC';
 
-        $qb = $em->getRepository('App:PeriodPositionFreeLog')->createQueryBuilder('ppfl')
+        $qb = $em->getRepository(PeriodPositionFreeLog::class)->createQueryBuilder('ppfl')
             ->orderBy('ppfl.' . $sort, $order);
 
         if ($filter["created_at"]) {

@@ -105,7 +105,7 @@ class AdminShiftFreeLogController extends AbstractController
         $sort = 'createdAt';
         $order = 'DESC';
 
-        $qb = $em->getRepository('App:ShiftFreeLog')->createQueryBuilder('sfl')
+        $qb = $em->getRepository(ShiftFreeLog::class)->createQueryBuilder('sfl')
             ->orderBy('sfl.' . $sort, $order);
 
         if ($filter["created_at"]) {

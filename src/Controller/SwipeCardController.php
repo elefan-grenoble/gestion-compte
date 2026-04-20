@@ -23,6 +23,7 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
+use App\Entity\SwipeCard;
 
 /**
  * User controller.
@@ -57,11 +58,11 @@ class SwipeCardController extends AbstractController
         $em = $this->getDoctrine()->getManager();
 
         $code = $this->swipeCardHelper->vigenereDecode($code);
-        $card = $em->getRepository('App:SwipeCard')->findLastEnable($code);
+        $card = $em->getRepository(SwipeCard::class)->findLastEnable($code);
 
         if (!$card) {
             $session->getFlashBag()->add("error","Oups, ce badge n'est pas actif ou n'est pas associé à un compte");
-            $card = $em->getRepository('App:SwipeCard')->findOneBy(array("code"=>$code));
+            $card = $em->getRepository(SwipeCard::class)->findOneBy(array("code"=>$code));
             if ($card && !$card->getEnable() && !$card->getDisabledAt())
                 $session->getFlashBag()->add("warning","Si c'est le tiens, <a href=\"".$this->generateUrl('fos_user_security_login')."\">connecte toi</a> sur ton espace membre pour l'activer");
         } else {
@@ -110,7 +111,7 @@ class SwipeCardController extends AbstractController
 
         // get beneficiary
         /** @var Beneficiary|null $beneficiary */
-        $beneficiary = $em->getRepository('App:Beneficiary')->find($beneficiaryId);
+        $beneficiary = $em->getRepository(Beneficiary::class)->find($beneficiaryId);
 
         // beneficiary should have 0 enabled cards
         $beneficiaryCards = $beneficiary->getEnabledSwipeCards();
@@ -124,7 +125,7 @@ class SwipeCardController extends AbstractController
         }
 
         // card should not be already in use
-        $card = $em->getRepository('App:SwipeCard')->findOneBy(array('code' => $code));
+        $card = $em->getRepository(SwipeCard::class)->findOneBy(array('code' => $code));
         if ($card) {
             if ($beneficiary != $card->getBeneficiary()) {
                 $session->getFlashBag()->add('error', 'Ce badge est déjà associé à un autre utilisateur 👮');
@@ -134,7 +135,7 @@ class SwipeCardController extends AbstractController
             return new RedirectResponse($referer);
         }
 
-        $lastCard = $em->getRepository('App:SwipeCard')->findLast($beneficiary);
+        $lastCard = $em->getRepository(SwipeCard::class)->findLast($beneficiary);
         $card = new SwipeCardEntity();
         $card->setBeneficiary($beneficiary);
         $card->setCode($code);
@@ -166,7 +167,7 @@ class SwipeCardController extends AbstractController
 
         // get beneficiary
         /** @var Beneficiary|null $beneficiary */
-        $beneficiary = $em->getRepository('App:Beneficiary')->find($beneficiaryId);
+        $beneficiary = $em->getRepository(Beneficiary::class)->find($beneficiaryId);
 
         // beneficiary should have 0 enabled cards
         $beneficiaryCards = $beneficiary->getEnabledSwipeCards();
@@ -175,7 +176,7 @@ class SwipeCardController extends AbstractController
             return new RedirectResponse($referer);
         }
 
-        $card = $em->getRepository('App:SwipeCard')->findOneBy(array('code' => $code));
+        $card = $em->getRepository(SwipeCard::class)->findOneBy(array('code' => $code));
         if ($card) {
             $this->denyAccessUnlessGranted(SwipeCardVoter::ENABLE, $card);
             if ($beneficiary != $card->getBeneficiary()) {
@@ -216,9 +217,9 @@ class SwipeCardController extends AbstractController
 
         // get beneficiary
         /** @var Beneficiary|null $beneficiary */
-        $beneficiary = $em->getRepository('App:Beneficiary')->find($beneficiaryId);
+        $beneficiary = $em->getRepository(Beneficiary::class)->find($beneficiaryId);
 
-        $card = $em->getRepository('App:SwipeCard')->findOneBy(array('code'=>$code));
+        $card = $em->getRepository(SwipeCard::class)->findOneBy(array('code'=>$code));
         if ($card) {
             $this->denyAccessUnlessGranted(SwipeCardVoter::DISABLE, $card);
             if ($beneficiary != $card->getBeneficiary()) {
@@ -254,7 +255,7 @@ class SwipeCardController extends AbstractController
         $code = $request->get("code");
         $code = $this->swipeCardHelper->vigenereDecode($code);
 
-        $card = $em->getRepository('App:SwipeCard')->findOneBy(array('code'=>$code));
+        $card = $em->getRepository(SwipeCard::class)->findOneBy(array('code'=>$code));
 
         if ($card) {
             $this->denyAccessUnlessGranted(SwipeCardVoter::DELETE, $card);
@@ -310,7 +311,7 @@ class SwipeCardController extends AbstractController
         $code = urldecode($code);
         $code = $this->swipeCardHelper->vigenereDecode($code);
         $em = $this->getDoctrine()->getManager();
-        $card = $em->getRepository('App:SwipeCard')->findOneBy(array('code'=>$code));
+        $card = $em->getRepository(SwipeCard::class)->findOneBy(array('code'=>$code));
         if (!$card){
             throw $this->createAccessDeniedException();
         }
@@ -338,7 +339,7 @@ class SwipeCardController extends AbstractController
         $code = urldecode($code);
         $code = $this->swipeCardHelper->vigenereDecode($code);
         $em = $this->getDoctrine()->getManager();
-        $card = $em->getRepository('App:SwipeCard')->findOneBy(array('code'=>$code));
+        $card = $em->getRepository(SwipeCard::class)->findOneBy(array('code'=>$code));
         if (!$card instanceof SwipeCardEntity){
             throw $this->createAccessDeniedException();
         }

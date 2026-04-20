@@ -39,7 +39,7 @@ class CommissionController extends AbstractController
      */
     public function indexAction(Request $request)
     {
-        $commissions = $this->getDoctrine()->getManager()->getRepository('App:Commission')->findAll();
+        $commissions = $this->getDoctrine()->getManager()->getRepository(Commission::class)->findAll();
         return $this->render('admin/commission/list.html.twig',array('commissions'=>$commissions));
     }
 
@@ -201,7 +201,7 @@ class CommissionController extends AbstractController
         }
 
         $em = $this->getDoctrine()->getManager();
-        $beneficiary = $em->getRepository('App:Beneficiary')->find($_POST['beneficiary']);
+        $beneficiary = $em->getRepository(Beneficiary::class)->find($_POST['beneficiary']);
         /** @var Beneficiary $beneficiary */
         if ($beneficiary->getId()){
             $beneficiary->removeCommission($commission);

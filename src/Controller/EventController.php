@@ -15,6 +15,7 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Session\Session;
+use App\Entity\EventKind;
 
 
 /**
@@ -48,10 +49,10 @@ class EventController extends AbstractController
 
         $filter_event_kind_id = $request->get('event_kind_id');
         if ($filter_event_kind_id) {
-            $eventKind = $em->getRepository('App:EventKind')->find($filter_event_kind_id);
+            $eventKind = $em->getRepository(EventKind::class)->find($filter_event_kind_id);
         }
 
-        $events = $em->getRepository('App:Event')->findFutureOrOngoing($eventKind, false, $eventDateMax, $filter_limit);
+        $events = $em->getRepository(Event::class)->findFutureOrOngoing($eventKind, false, $eventDateMax, $filter_limit);
 
         return $this->render('event/_partial/widget.html.twig', [
             'events' => $events,
@@ -72,9 +73,9 @@ class EventController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $eventsFuture = $em->getRepository('App:Event')->findFutures();
-        $eventsOngoing = $em->getRepository('App:Event')->findOngoing();
-        $eventsPast = $em->getRepository('App:Event')->findPast();
+        $eventsFuture = $em->getRepository(Event::class)->findFutures();
+        $eventsOngoing = $em->getRepository(Event::class)->findOngoing();
+        $eventsPast = $em->getRepository(Event::class)->findPast();
 
         return $this->render('event/index.html.twig', array(
             'eventsFuture' => $eventsFuture,
@@ -111,7 +112,7 @@ class EventController extends AbstractController
         $max_event_proxy_per_member = $this->getParameter("max_event_proxy_per_member");
 
         // check if member hasn't already given a proxy
-        $member_given_proxy = $em->getRepository('App:Proxy')->findOneBy(array("event" => $event, "giver" => $current_app_user->getBeneficiary()->getMembership()));
+        $member_given_proxy = $em->getRepository(Proxy::class)->findOneBy(array("event" => $event, "giver" => $current_app_user->getBeneficiary()->getMembership()));
         if ($member_given_proxy) {
             $session->getFlashBag()->add('error', 'Oups, tu as déjà donné une procuration');
             return $this->redirectToRoute('homepage');
@@ -123,7 +124,7 @@ class EventController extends AbstractController
         $beneficiariesId = array_map(function(Beneficiary $beneficiary) {
             return $beneficiary->getId();
         }, $beneficiaries->toArray());
-        $member_received_proxies = $em->getRepository('App:Proxy')->findBy(
+        $member_received_proxies = $em->getRepository(Proxy::class)->findBy(
             array(
                 "owner" => $beneficiariesId,
                 "event" => $event
@@ -175,7 +176,7 @@ class EventController extends AbstractController
 
         // anonymousProxy ?
         if ($form->isSubmitted() && $form->isValid()) {
-            $proxy = $em->getRepository('App:Proxy')->findOneBy(array("event"=>$event, "giver"=>null));
+            $proxy = $em->getRepository(Proxy::class)->findOneBy(array("event"=>$event, "giver"=>null));
             if (!$proxy) {
                 $proxy = new Proxy();
                 $proxy->setEvent($event);
@@ -197,10 +198,10 @@ class EventController extends AbstractController
         // proxy with a given beneficiary
         if ($request->get("beneficiary") > 0) {
             $em = $this->getDoctrine()->getManager();
-            $beneficiary = $em->getRepository('App:Beneficiary')->find($request->get("beneficiary"));
+            $beneficiary = $em->getRepository(Beneficiary::class)->find($request->get("beneficiary"));
             if ($beneficiary) {
                 // check if member hasn't already given a proxy
-                $member_giver_proxies = $em->getRepository('App:Proxy')->findBy(
+                $member_giver_proxies = $em->getRepository(Proxy::class)->findBy(
                     array("giver" => $beneficiary->getMembership(), "event" => $event)
                 );
                 if (count($member_giver_proxies) > 0) {
@@ -213,7 +214,7 @@ class EventController extends AbstractController
                 foreach ($beneficiary->getMembership()->getBeneficiaries() as $b) {
                     $beneficiaries_ids[] = $b;
                 }
-                $member_owner_proxies = $em->getRepository('App:Proxy')->findBy(
+                $member_owner_proxies = $em->getRepository(Proxy::class)->findBy(
                     array("owner" => $beneficiaries_ids, "event" => $event)
                 );
                 if (count($member_owner_proxies) >= $max_event_proxy_per_member) {
@@ -383,7 +384,7 @@ class EventController extends AbstractController
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
         // check if member hasn't already given a proxy
-        $myproxy = $em->getRepository('App:Proxy')->findOneBy(
+        $myproxy = $em->getRepository(Proxy::class)->findOneBy(
             array("event" => $event, "giver" => $current_app_user->getBeneficiary()->getMembership())
         );
         if ($myproxy) {
@@ -410,7 +411,7 @@ class EventController extends AbstractController
             return $this->redirectToRoute('homepage');
         }
 
-        $proxy = $em->getRepository('App:Proxy')->findOneBy(array("event" => $event, "owner" => null));
+        $proxy = $em->getRepository(Proxy::class)->findOneBy(array("event" => $event, "owner" => null));
         if (!$proxy) {
             $proxy = new Proxy();
             $proxy->setEvent($event);
@@ -421,7 +422,7 @@ class EventController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             // check if member doesn't already have the maximum nomber of proxies (%max_event_proxy_per_member%)
             $max_event_proxy_per_member = $this->getParameter("max_event_proxy_per_member");
-            $myproxy = $em->getRepository('App:Proxy')->findBy(array("event" => $event, "owner" => $form->getData()->getOwner()));
+            $myproxy = $em->getRepository(Proxy::class)->findBy(array("event" => $event, "owner" => $form->getData()->getOwner()));
             if (count($myproxy) >= $max_event_proxy_per_member) {
                 $session->getFlashBag()->add('error', $myproxy->getOwner()->getFirstname().' accepte déjà '. $max_event_proxy_per_member .' procuration.');
                 return $this->redirectToRoute('event_proxy_take', array('id'=>$event->getId()));

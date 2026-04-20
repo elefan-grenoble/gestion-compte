@@ -26,7 +26,7 @@ class AdminShiftExemptionController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $shiftExemptions = $em->getRepository('App:ShiftExemption')->findAll();
+        $shiftExemptions = $em->getRepository(ShiftExemption::class)->findAll();
 
         return $this->render('admin/shiftexemption/index.html.twig', array(
             'shiftExemptions' => $shiftExemptions,

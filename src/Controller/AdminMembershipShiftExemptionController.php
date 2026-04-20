@@ -85,7 +85,7 @@ class AdminMembershipShiftExemptionController extends AbstractController
         $sort = 'createdAt';
         $order = 'DESC';
 
-        $qb = $em->getRepository('App:MembershipShiftExemption')->createQueryBuilder('mse')
+        $qb = $em->getRepository(MembershipShiftExemption::class)->createQueryBuilder('mse')
             ->orderBy('mse.' . $sort, $order);
 
         if ($filter['membership']) {

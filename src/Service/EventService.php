@@ -6,6 +6,7 @@ use App\Entity\Beneficiary;
 use App\Entity\Event;
 use App\Entity\Membership;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\Proxy;
 
 class EventService
 {
@@ -21,7 +22,7 @@ class EventService
 
     public function getGivenProxyOfMembershipForAnEvent(Event $event, Membership $membership)
     {
-        $qb = $this->em->getRepository('App:Proxy')->createQueryBuilder('p');
+        $qb = $this->em->getRepository(Proxy::class)->createQueryBuilder('p');
 
         $qb->where('p.event = :event')
             ->andWhere('p.giver = :membership')
@@ -33,7 +34,7 @@ class EventService
 
     public function getReceivedProxiesOfBeneficiaryForAnEvent(Event $event, Beneficiary $beneficiary)
     {
-        $qb = $this->em->getRepository('App:Proxy')->createQueryBuilder('p');
+        $qb = $this->em->getRepository(Proxy::class)->createQueryBuilder('p');
 
         $qb->where('p.event = :event')
             ->andWhere('p.owner IN (:beneficiaries)')

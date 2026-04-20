@@ -19,6 +19,7 @@ use Symfony\Component\Form\FormBuilder;
 use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Constraints\LessThanOrEqual;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use App\Entity\Membership;
 
 class SearchUserFormHelper
 {
@@ -382,7 +383,7 @@ class SearchUserFormHelper
      * @return QueryBuilder
      */
     public function initSearchQuery($doctrineManager, $type = null) {
-        $qb = $doctrineManager->getRepository("App:Membership")->createQueryBuilder('m');
+        $qb = $doctrineManager->getRepository(Membership::class)->createQueryBuilder('m');
         $qb = $qb->leftJoin("m.beneficiaries", "b")->addSelect("b")
             ->leftJoin("b.user", "u")->addSelect("u")
             ->leftJoin("m.registrations", "r")->addSelect("r")

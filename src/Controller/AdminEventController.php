@@ -86,9 +86,9 @@ class AdminEventController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $eventsFuture = $em->getRepository('App:Event')->findFutures();
-        $eventsOngoing = $em->getRepository('App:Event')->findOngoing();
-        $eventsPast = $em->getRepository('App:Event')->findPast(null, 10);  # only the 10 last
+        $eventsFuture = $em->getRepository(Event::class)->findFutures();
+        $eventsOngoing = $em->getRepository(Event::class)->findOngoing();
+        $eventsPast = $em->getRepository(Event::class)->findPast(null, 10);  # only the 10 last
 
         return $this->render('admin/event/index.html.twig', array(
             'eventsFuture' => $eventsFuture,
@@ -111,7 +111,7 @@ class AdminEventController extends AbstractController
         $sort = 'date';
         $order = 'DESC';
 
-        $qb = $em->getRepository('App:Event')->createQueryBuilder('e')
+        $qb = $em->getRepository(Event::class)->createQueryBuilder('e')
             ->orderBy('e.' . $sort, $order);
 
         if ($filter['kind']) {
@@ -235,7 +235,7 @@ class AdminEventController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $proxies = $em->getRepository('App:Proxy')->findAll();
+        $proxies = $em->getRepository(Proxy::class)->findAll();
 
 
         return $this->render('admin/event/proxy/list.html.twig', array(
@@ -277,21 +277,21 @@ class AdminEventController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($proxy->getOwner()) {
-                $existing_proxy = $em->getRepository('App:Proxy')->findOneBy(array("event"=>$event,"owner"=>$proxy->getOwner()));
+                $existing_proxy = $em->getRepository(Proxy::class)->findOneBy(array("event"=>$event,"owner"=>$proxy->getOwner()));
                 if ($existing_proxy && $existing_proxy != $proxy) {
                     $session->getFlashBag()->add('error', $existing_proxy->getOwner()->getFirstname().' accepte déjà une procuration.');
                     return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
                 }
             }
             if ($proxy->getGiver()) {
-                $existing_proxy = $em->getRepository('App:Proxy')->findOneBy(array("event"=>$event,"giver"=>$proxy->getGiver()));
+                $existing_proxy = $em->getRepository(Proxy::class)->findOneBy(array("event"=>$event,"giver"=>$proxy->getGiver()));
                 if ($existing_proxy && $existing_proxy != $proxy) {
                     $session->getFlashBag()->add('error', $existing_proxy->getGiver()->getFirstname().' donne déjà une procuration.');
                     return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
                 }
             }
             if (!$proxy->getOwner() && $proxy->getGiver()) {
-                $proxy_waiting = $em->getRepository('App:Proxy')->findOneBy(array("event"=>$event,"giver"=>null));
+                $proxy_waiting = $em->getRepository(Proxy::class)->findOneBy(array("event"=>$event,"giver"=>null));
                 if ($proxy_waiting && $proxy_waiting != $proxy){
                     $proxy_waiting->setGiver($proxy->getGiver());
                     $em->persist($proxy_waiting);
@@ -311,7 +311,7 @@ class AdminEventController extends AbstractController
                 $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' saved');
                 return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
             } elseif ($proxy->getOwner() && !$proxy->getGiver()) {
-                $proxy_waiting = $em->getRepository('App:Proxy')->findOneBy(array("event"=>$event,"owner"=>null));
+                $proxy_waiting = $em->getRepository(Proxy::class)->findOneBy(array("event"=>$event,"owner"=>null));
                 if ($proxy_waiting instanceof Proxy && $proxy_waiting !== $proxy) {
                     $proxy_waiting->setOwner($proxy->getOwner());
                     $em->persist($proxy_waiting);
@@ -388,7 +388,7 @@ class AdminEventController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $beneficiaries_request = $em->getRepository("App:Beneficiary")->createQueryBuilder('b')
+        $beneficiaries_request = $em->getRepository(Beneficiary::class)->createQueryBuilder('b')
             ->leftJoin('b.membership', 'm')
             ->leftJoin("m.registrations", "r")
             ->andWhere("r.date is NOT NULL" )

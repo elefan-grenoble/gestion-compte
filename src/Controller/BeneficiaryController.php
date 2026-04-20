@@ -126,7 +126,7 @@ class BeneficiaryController extends AbstractController
             $em->persist($member);
 
             // check if there is a existing membership with this main beneficiary (artefact ?)
-            $existing_member = $em->getRepository('App:Membership')->findOneBy(array('mainBeneficiary' => $beneficiary));
+            $existing_member = $em->getRepository(Membership::class)->findOneBy(array('mainBeneficiary' => $beneficiary));
             if ($existing_member) {
                 $new_member = $existing_member;
                 $new_member->setMainBeneficiary($beneficiary);
@@ -134,7 +134,7 @@ class BeneficiaryController extends AbstractController
                 // then we create a new membership
                 $new_member = new Membership();
                 // init member id
-                $m = $em->getRepository('App:Membership')->findBy([], ['member_number' => 'DESC'], 1)[0];
+                $m = $em->getRepository(Membership::class)->findBy([], ['member_number' => 'DESC'], 1)[0];
                 $mm = 1;
                 if ($m instanceof Membership)
                     $mm = $m->getMemberNumber() + 1;

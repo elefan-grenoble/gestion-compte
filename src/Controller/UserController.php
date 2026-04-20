@@ -64,7 +64,7 @@ class UserController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
         $session = new Session();
-        $user = $em->getRepository('App:User')->findByRole('ROLE_SUPER_ADMIN');
+        $user = $em->getRepository(User::class)->findByRole('ROLE_SUPER_ADMIN');
 
         if (count($user) > 0) { //main super admin exist
             if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
@@ -282,7 +282,7 @@ class UserController extends AbstractController
             throw $this->createAccessDeniedException();
         }
         if ($client_id) {
-            $client = $this->getDoctrine()->getManager()->getRepository('App:Client')->find($client_id);
+            $client = $this->getDoctrine()->getManager()->getRepository(Client::class)->find($client_id);
             if ($client->getId()) {
                 if ($user->getClients()->contains($client)) {
                     $user->removeClient($client);

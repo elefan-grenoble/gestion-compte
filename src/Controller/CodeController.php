@@ -20,6 +20,7 @@ use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Core\Authorization\AuthorizationChecker;
 use Symfony\Component\Validator\Constraints\DateTime;
+use App\Entity\User;
 
 /**
  * Code controller.
@@ -39,7 +40,7 @@ class CodeController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $codes = $em->getRepository('App:Code')->findBy(array('closed' => 0), array('createdAt' => 'DESC'));
+        $codes = $em->getRepository(Code::class)->findBy(array('closed' => 0), array('createdAt' => 'DESC'));
         if (!$codes) {
             $codes[] = new Code();
         }
@@ -61,11 +62,11 @@ class CodeController extends AbstractController
         $this->logger->info('CODE : codes_list',array('username'=>$this->getUser()->getUsername()));
 
         if ($this->getUser()->hasRole('ROLE_ADMIN')){
-            $codes = $em->getRepository('App:Code')->findBy(array(),array('createdAt'=>'DESC'),100);
+            $codes = $em->getRepository(Code::class)->findBy(array(),array('createdAt'=>'DESC'),100);
             $old_codes =  null;
         }else{
-            $codes = $em->getRepository('App:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'),10);
-            $old_codes = $em->getRepository('App:Code')->findBy(array('closed'=>1),array('createdAt'=>'DESC'),3);
+            $codes = $em->getRepository(Code::class)->findBy(array('closed'=>0),array('createdAt'=>'DESC'),10);
+            $old_codes = $em->getRepository(Code::class)->findBy(array('closed'=>1),array('createdAt'=>'DESC'),3);
         }
 
         if (!count($codes)){
@@ -115,7 +116,7 @@ class CodeController extends AbstractController
 
             if ($codeform->get('close_old_codes')->getData()) {
                 //close old codes
-                $open_codes = $em->getRepository('App:Code')->findBy(array('closed' => 0));
+                $open_codes = $em->getRepository(Code::class)->findBy(array('closed' => 0));
                 foreach ($open_codes as $open_code) {
                     $open_code->setClosed(true);
                     $em->persist($code);
@@ -147,8 +148,8 @@ class CodeController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
-        $my_open_codes = $em->getRepository('App:Code')->findBy(array('closed'=>0,'registrar'=>$current_app_user),array('createdAt'=>'DESC'));
-        $old_codes = $em->getRepository('App:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'));
+        $my_open_codes = $em->getRepository(Code::class)->findBy(array('closed'=>0,'registrar'=>$current_app_user),array('createdAt'=>'DESC'));
+        $old_codes = $em->getRepository(Code::class)->findBy(array('closed'=>0),array('createdAt'=>'DESC'));
 
         $granted = false;
         foreach ($old_codes as $code){
@@ -250,7 +251,7 @@ class CodeController extends AbstractController
         }else{
             $token = $request->get('token');
             $username = explode(',',$swipeCardHelper->vigenereDecode($token))[0];
-            $current_app_user = $em->getRepository('App:User')->findOneBy(array('username'=>$username));
+            $current_app_user = $em->getRepository(User::class)->findOneBy(array('username'=>$username));
             if ($current_app_user){
                 $previousToken = $this->get("security.token_storage")->getToken();
                 $logged_out = true;
@@ -263,9 +264,9 @@ class CodeController extends AbstractController
             }
         }
 
-        $my_open_codes = $em->getRepository('App:Code')->findBy(array('closed'=>0,'registrar'=>$current_app_user),array('createdAt'=>'DESC'));
+        $my_open_codes = $em->getRepository(Code::class)->findBy(array('closed'=>0,'registrar'=>$current_app_user),array('createdAt'=>'DESC'));
         $myLastCode = $my_open_codes[0];
-        $codes = $em->getRepository('App:Code')->findBy(array('closed'=>0),array('createdAt'=>'DESC'));
+        $codes = $em->getRepository(Code::class)->findBy(array('closed'=>0),array('createdAt'=>'DESC'));
         foreach ($codes as $code){
             if ($myLastCode->getCreatedAt()>$code->getCreatedAt()){ // only older than mine
                 if ($code->getRegistrar() != $current_app_user){ // not mine

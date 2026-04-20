@@ -49,7 +49,7 @@ class PeriodController extends AbstractController
 
         $periodsByDay = array();
         foreach (Period::DAYS_OF_WEEK as $i => $value) {
-            $periodsByDay[$i] = $em->getRepository('App:Period')->findAll($i, $job_filter, false);
+            $periodsByDay[$i] = $em->getRepository(Period::class)->findAll($i, $job_filter, false);
         }
 
         return $this->render('period/index.html.twig', array(

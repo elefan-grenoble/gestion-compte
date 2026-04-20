@@ -300,7 +300,7 @@ class BeneficiaryServiceTest extends TestCase
             ->willReturn(new ArrayCollection([$shift1, $shift2]));
 
         $this->em->method('getRepository')
-            ->with('App:Shift')
+            ->with(Shift::class)
             ->willReturn($shiftRepo);
 
         $sum = $service->getCycleShiftDurationSum($beneficiary, 0);
@@ -324,7 +324,7 @@ class BeneficiaryServiceTest extends TestCase
             ->willReturn(new ArrayCollection());
 
         $this->em->method('getRepository')
-            ->with('App:Shift')
+            ->with(Shift::class)
             ->willReturn($shiftRepo);
 
         $sum = $service->getCycleShiftDurationSum($beneficiary, 0);

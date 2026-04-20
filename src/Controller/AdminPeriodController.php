@@ -73,7 +73,7 @@ class AdminPeriodController extends AbstractController
 
         $periodsByDay = array();
         foreach (Period::DAYS_OF_WEEK as $i => $value) {
-            $periodsByDay[$i] = $em->getRepository('App:Period')->findAll($i, $job_filter, true);
+            $periodsByDay[$i] = $em->getRepository(Period::class)->findAll($i, $job_filter, true);
         }
 
         return $this->render('admin/period/index.html.twig', array(
@@ -397,7 +397,7 @@ class AdminPeriodController extends AbstractController
             $from = $form->get('day_of_week_from')->getData();
             $to = $form->get('day_of_week_to')->getData();
 
-            $periods = $em->getRepository('App:Period')->findBy(array('dayOfWeek'=>$from));
+            $periods = $em->getRepository(Period::class)->findBy(array('dayOfWeek'=>$from));
 
             $count = 0;
             foreach ($periods as $period) {

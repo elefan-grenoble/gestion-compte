@@ -25,7 +25,7 @@ class DynamicContentController extends AbstractController
     public function listAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
-        $dynamicContents = $em->getRepository('App:DynamicContent')->findAll();
+        $dynamicContents = $em->getRepository(DynamicContent::class)->findAll();
         $dynamicContentsByType = array();
 
         foreach ($dynamicContents as $dynamicContent) {

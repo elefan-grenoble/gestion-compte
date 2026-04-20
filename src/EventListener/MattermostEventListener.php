@@ -8,6 +8,7 @@ use GuzzleHttp\Client;
 use GuzzleHttp\RequestOptions;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
+use App\Entity\DynamicContent;
 
 class MattermostEventListener
 {
@@ -37,7 +38,7 @@ class MattermostEventListener
 
         if ($alerts && $event->getMattermostHookUrl()) {
             $template = null;
-            $dynamicContent = $this->em->getRepository('App:DynamicContent')->findOneByCode($event->getTemplate());
+            $dynamicContent = $this->em->getRepository(DynamicContent::class)->findOneByCode($event->getTemplate());
             if ($dynamicContent) {
                 $template = $this->container->get('twig')->createTemplate($dynamicContent->getContent());
             } else {

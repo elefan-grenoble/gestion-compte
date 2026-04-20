@@ -174,7 +174,7 @@ class MembershipController extends AbstractController
         $period_positions = $membership_service->getPeriodPositions($member);
         $previous_cycle_start = $membership_service->getStartOfCycle($member, -1 * $this->getParameter('max_nb_of_past_cycles_to_display'));
         $next_cycle_end = $membership_service->getEndOfCycle($member, 1);
-        $shifts_by_cycle = $em->getRepository('App:Shift')->findShiftsByCycles($member, $previous_cycle_start, $next_cycle_end);
+        $shifts_by_cycle = $em->getRepository(Shift::class)->findShiftsByCycles($member, $previous_cycle_start, $next_cycle_end);
         $shifts_by_cycle = array_reverse($shifts_by_cycle, true);  // from latest to oldest
 
         $shiftFreeForms = [];
@@ -186,7 +186,7 @@ class MembershipController extends AbstractController
             }
         }
 
-        $in_progress_and_upcoming_shifts = $em->getRepository('App:Shift')->findInProgressAndUpcomingShiftsForMembership($member);
+        $in_progress_and_upcoming_shifts = $em->getRepository(Shift::class)->findInProgressAndUpcomingShiftsForMembership($member);
 
         return $this->render('member/show.html.twig', array(
             'member' => $member,
@@ -279,7 +279,7 @@ class MembershipController extends AbstractController
         $id = $request->request->get("registration_id");
         if ($id) {
             $em = $this->getDoctrine()->getManager();
-            $registration = $em->getRepository('App:Registration')->find($id);
+            $registration = $em->getRepository(Registration::class)->find($id);
             if ($registration) {
                 $form = $this->createForm(RegistrationType::class, $registration);
                 $form->handleRequest($request);
@@ -400,9 +400,9 @@ class MembershipController extends AbstractController
             $em = $this->getDoctrine()->getManager();
             $member = null;
             if ($username)
-                $member = $em->getRepository('App:User')->findOneBy(array('username' => $username));
+                $member = $em->getRepository(User::class)->findOneBy(array('username' => $username));
             else if ($member_number) {
-                $member = $em->getRepository('App:Membership')->findOneBy(array('member_number' => $member_number));
+                $member = $em->getRepository(Membership::class)->findOneBy(array('member_number' => $member_number));
             }
 
             if ($member && ($this->isGranted('view', $member))) {
@@ -465,7 +465,7 @@ class MembershipController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $member_number = $form->get('member_number')->getData();
             $em = $this->getDoctrine()->getManager();
-            $ms = $em->getRepository('App:Membership')->findOneBy(array('member_number' => $member_number));
+            $ms = $em->getRepository(Membership::class)->findOneBy(array('member_number' => $member_number));
 
             if (!$ms){
                 $request->getSession()->getFlashBag()->add('warning', 'Oups, aucun membre trouvé avec ce numéro d\'adhérent');
@@ -729,7 +729,7 @@ class MembershipController extends AbstractController
         if ($code) {
             $email = $swipeCardHelper->vigenereDecode($code);
             if ($email) {
-                $a_beneficiary = $em->getRepository('App:AnonymousBeneficiary')->findOneBy(array('email'=>$email));
+                $a_beneficiary = $em->getRepository(AnonymousBeneficiary::class)->findOneBy(array('email'=>$email));
             }
             if (!$a_beneficiary) {
                 $session->getFlashBag()->add('error', 'Cette url n\'est plus valide');
@@ -756,7 +756,7 @@ class MembershipController extends AbstractController
         }
 
         // init member_number
-        $m = $em->getRepository('App:Membership')->findOneBy(array(), array('member_number' => 'DESC'));
+        $m = $em->getRepository(Membership::class)->findOneBy(array(), array('member_number' => 'DESC'));
         $mm = 1;
         if ($m)
             $mm = $m->getMemberNumber() + 1;
@@ -858,7 +858,7 @@ class MembershipController extends AbstractController
         if ($code) {
             $email = $swipeCardHelper->vigenereDecode($code);
             if ($email) {
-                $a_beneficiary = $em->getRepository('App:AnonymousBeneficiary')->findOneBy(array('email' => $email));
+                $a_beneficiary = $em->getRepository(AnonymousBeneficiary::class)->findOneBy(array('email' => $email));
             }
             if (!$a_beneficiary) {
                 $session->getFlashBag()->add('error', 'Cette url n\'est plus valide');
@@ -1001,7 +1001,7 @@ class MembershipController extends AbstractController
 
         if ($note_form->isSubmitted()) {
             if ($note_form->isValid()) {
-                $existing_note = $em->getRepository('App:Note')->findOneBy(array("subject" => null, "author" => $this->getCurrentAppUser(), "text" => $note->getText()));
+                $existing_note = $em->getRepository(Note::class)->findOneBy(array("subject" => null, "author" => $this->getCurrentAppUser(), "text" => $note->getText()));
                 if ($existing_note) {
                     $session->getFlashBag()->add('error', 'Ce post-it existe déjà');
                 } else {
@@ -1014,7 +1014,7 @@ class MembershipController extends AbstractController
             }
         }
 
-        $notes = $em->getRepository('App:Note')->findBy(array("subject" => null));
+        $notes = $em->getRepository(Note::class)->findBy(array("subject" => null));
         $noteEditForms = array();
         $noteDeleteForms = array();
         $new_notes_form = array();
@@ -1047,7 +1047,7 @@ class MembershipController extends AbstractController
      */
     public function exportEmails(Request $request, MailerService $mailer_service)
     {
-        $beneficiaries = $this->getDoctrine()->getRepository("App:Beneficiary")->findAll();
+        $beneficiaries = $this->getDoctrine()->getRepository(Beneficiary::class)->findAll();
         $return = '';
         if ($beneficiaries) {
             $d = ','; // this is the default but i like to be explicit

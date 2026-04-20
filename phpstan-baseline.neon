@@ -709,12 +709,6 @@ parameters:
 			path: src/Controller/AdminController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:User\>, string given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Controller/AdminController.php
-
-		-
 			message: '#^Parameter \#1 \$doctrineManager of method App\\Service\\SearchUserFormHelper\:\:initSearchQuery\(\) expects Doctrine\\ORM\\EntityManager, Doctrine\\Persistence\\ObjectManager given\.$#'
 			identifier: argument.type
 			count: 1
@@ -829,30 +823,6 @@ parameters:
 			path: src/Controller/AdminEventController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Beneficiary\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/AdminEventController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Event\>, string given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Controller/AdminEventController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Proxy\>, string given\.$#'
-			identifier: argument.type
-			count: 5
-			path: src/Controller/AdminEventController.php
-
-		-
-			message: '#^Parameter \#1 \$proxy of class App\\Event\\EventProxyCreatedEvent constructor expects App\\Entity\\Proxy, App\:Proxy given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/AdminEventController.php
-
-		-
 			message: '#^Parameter \#1 \$user of method App\\Entity\\Event\:\:setCreatedBy\(\) expects App\\Entity\\User\|null, string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface given\.$#'
 			identifier: argument.type
 			count: 1
@@ -907,12 +877,6 @@ parameters:
 			path: src/Controller/AdminEventKindController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:EventKind\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/AdminEventKindController.php
-
-		-
 			message: '#^Method App\\Controller\\AdminMembershipShiftExemptionController\:\:deleteAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -945,12 +909,6 @@ parameters:
 		-
 			message: '#^Method App\\Controller\\AdminMembershipShiftExemptionController\:\:newAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Controller/AdminMembershipShiftExemptionController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:MembershipShiftExemption\>, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Controller/AdminMembershipShiftExemptionController.php
 
@@ -997,18 +955,6 @@ parameters:
 			path: src/Controller/AdminOpeningHourController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:OpeningHour\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/AdminOpeningHourController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:OpeningHourKind\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/AdminOpeningHourController.php
-
-		-
 			message: '#^Method App\\Controller\\AdminOpeningHourKindController\:\:deleteAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1039,12 +985,6 @@ parameters:
 			path: src/Controller/AdminOpeningHourKindController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:OpeningHourKind\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/AdminOpeningHourKindController.php
-
-		-
 			message: '#^Parameter \#1 \$user of method App\\Entity\\OpeningHourKind\:\:setCreatedBy\(\) expects App\\Entity\\User\|null, string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface given\.$#'
 			identifier: argument.type
 			count: 1
@@ -1055,12 +995,6 @@ parameters:
 			identifier: argument.type
 			count: 1
 			path: src/Controller/AdminOpeningHourKindController.php
-
-		-
-			message: '#^Cloning object of an unknown class App\:Period\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Controller/AdminPeriodController.php
 
 		-
 			message: '#^If condition is always true\.$#'
@@ -1159,12 +1093,6 @@ parameters:
 			path: src/Controller/AdminPeriodController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Period\>, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Controller/AdminPeriodController.php
-
-		-
 			message: '#^Parameter \#1 \$user of method App\\Entity\\Period\:\:setCreatedBy\(\) expects App\\Entity\\User\|null, string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface given\.$#'
 			identifier: argument.type
 			count: 1
@@ -1219,12 +1147,6 @@ parameters:
 			path: src/Controller/AdminPeriodPositionFreeLogController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:PeriodPositionFreeLog\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/AdminPeriodPositionFreeLogController.php
-
-		-
 			message: '#^Method App\\Controller\\AdminShiftExemptionController\:\:deleteAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1255,12 +1177,6 @@ parameters:
 			path: src/Controller/AdminShiftExemptionController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:ShiftExemption\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/AdminShiftExemptionController.php
-
-		-
 			message: '#^Method App\\Controller\\AdminShiftFreeLogController\:\:filterFormFactory\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -1269,12 +1185,6 @@ parameters:
 		-
 			message: '#^Method App\\Controller\\AdminShiftFreeLogController\:\:indexAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Controller/AdminShiftFreeLogController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:ShiftFreeLog\>, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Controller/AdminShiftFreeLogController.php
 
@@ -1381,12 +1291,6 @@ parameters:
 			path: src/Controller/BeneficiaryController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Membership\>, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Controller/BeneficiaryController.php
-
-		-
 			message: '#^Parameter \#1 \$form of method App\\Controller\\BeneficiaryController\:\:getErrorMessages\(\) expects Symfony\\Component\\Form\\Form, Symfony\\Component\\Form\\FormInterface given\.$#'
 			identifier: argument.type
 			count: 1
@@ -1400,12 +1304,6 @@ parameters:
 
 		-
 			message: '#^Call to an undefined method App\\Repository\\JobRepository\<App\\Entity\\Job\>\:\:findByEnabled\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Controller/BookingController.php
-
-		-
-			message: '#^Call to an undefined method Doctrine\\ORM\\EntityRepository\<App\:Shift\>\:\:findFrom\(\)\.$#'
 			identifier: method.notFound
 			count: 1
 			path: src/Controller/BookingController.php
@@ -1495,16 +1393,16 @@ parameters:
 			path: src/Controller/BookingController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Shift\>, string given\.$#'
-			identifier: argument.type
-			count: 6
-			path: src/Controller/BookingController.php
-
-		-
 			message: '#^Property App\\Controller\\BookingController\:\:\$display_name_shifters has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
 			path: src/Controller/BookingController.php
+
+		-
+			message: '#^Call to an undefined method App\\Repository\\DynamicContentRepository\<App\\Entity\\DynamicContent\>\:\:findOneByCode\(\)\.$#'
+			identifier: method.notFound
+			count: 1
+			path: src/Controller/CardReaderController.php
 
 		-
 			message: '#^Method App\\Controller\\CardReaderController\:\:checkAction\(\) has no return type specified\.$#'
@@ -1515,30 +1413,6 @@ parameters:
 		-
 			message: '#^Method App\\Controller\\CardReaderController\:\:indexAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Controller/CardReaderController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:DynamicContent\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/CardReaderController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Shift\>, string given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Controller/CardReaderController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:SwipeCard\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/CardReaderController.php
-
-		-
-			message: '#^Parameter \#1 \$swipeCard of class App\\Event\\SwipeCardEvent constructor expects App\\Entity\\SwipeCard\|null, App\:SwipeCard\|null given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Controller/CardReaderController.php
 
@@ -1585,20 +1459,8 @@ parameters:
 			path: src/Controller/ClientController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Client\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/ClientController.php
-
-		-
 			message: '#^Method App\\Controller\\ClosingExceptionController\:\:widgetAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Controller/ClosingExceptionController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:ClosingException\>, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Controller/ClosingExceptionController.php
 
@@ -1663,18 +1525,6 @@ parameters:
 			path: src/Controller/CodeController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Code\>, string given\.$#'
-			identifier: argument.type
-			count: 9
-			path: src/Controller/CodeController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:User\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/CodeController.php
-
-		-
 			message: '#^Parameter \#1 \$form of method App\\Controller\\CodeController\:\:getErrorMessages\(\) expects Symfony\\Component\\Form\\Form, Symfony\\Component\\Form\\FormInterface given\.$#'
 			identifier: argument.type
 			count: 1
@@ -1682,12 +1532,6 @@ parameters:
 
 		-
 			message: '#^Parameter \#1 \$registrar of method App\\Entity\\Code\:\:setRegistrar\(\) expects App\\Entity\\User\|null, string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/CodeController.php
-
-		-
-			message: '#^Parameter \#1 \$user of class Symfony\\Component\\Security\\Core\\Authentication\\Token\\UsernamePasswordToken constructor expects string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface, App\:User given\.$#'
 			identifier: argument.type
 			count: 1
 			path: src/Controller/CodeController.php
@@ -1753,16 +1597,10 @@ parameters:
 			path: src/Controller/CommissionController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Beneficiary\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/CommissionController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Commission\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/CommissionController.php
+			message: '#^Call to an undefined method App\\Repository\\DynamicContentRepository\<App\\Entity\\DynamicContent\>\:\:findOneByCode\(\)\.$#'
+			identifier: method.notFound
+			count: 2
+			path: src/Controller/DefaultController.php
 
 		-
 			message: '#^Method App\\Controller\\DefaultController\:\:aboutAction\(\) has no return type specified\.$#'
@@ -1789,30 +1627,6 @@ parameters:
 			path: src/Controller/DefaultController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:DynamicContent\>, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Controller/DefaultController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Event\>, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Controller/DefaultController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Shift\>, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Controller/DefaultController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:SocialNetwork\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/DefaultController.php
-
-		-
 			message: '#^Method App\\Controller\\DynamicContentController\:\:dynamicContentEditAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1821,12 +1635,6 @@ parameters:
 		-
 			message: '#^Method App\\Controller\\DynamicContentController\:\:listAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Controller/DynamicContentController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:DynamicContent\>, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Controller/DynamicContentController.php
 
@@ -1855,12 +1663,6 @@ parameters:
 			path: src/Controller/EmailTemplateController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:EmailTemplate\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/EmailTemplateController.php
-
-		-
 			message: '#^Parameter \#1 \$user of method App\\Entity\\EmailTemplate\:\:setCreatedBy\(\) expects App\\Entity\\User\|null, string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface given\.$#'
 			identifier: argument.type
 			count: 1
@@ -1879,9 +1681,15 @@ parameters:
 			path: src/Controller/EventController.php
 
 		-
+			message: '#^Cannot call method getOwner\(\) on list\<object\>\.$#'
+			identifier: method.nonObject
+			count: 1
+			path: src/Controller/EventController.php
+
+		-
 			message: '#^Left side of && is always true\.$#'
 			identifier: booleanAnd.leftAlwaysTrue
-			count: 3
+			count: 1
 			path: src/Controller/EventController.php
 
 		-
@@ -1927,39 +1735,9 @@ parameters:
 			path: src/Controller/EventController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Beneficiary\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/EventController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Event\>, string given\.$#'
-			identifier: argument.type
-			count: 4
-			path: src/Controller/EventController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:EventKind\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/EventController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Proxy\>, string given\.$#'
-			identifier: argument.type
-			count: 8
-			path: src/Controller/EventController.php
-
-		-
-			message: '#^Parameter \#1 \$owner of method App\\Entity\\Proxy\:\:setOwner\(\) expects App\\Entity\\Beneficiary\|null, App\:Beneficiary given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/EventController.php
-
-		-
 			message: '#^Right side of && is always true\.$#'
 			identifier: booleanAnd.rightAlwaysTrue
-			count: 3
+			count: 1
 			path: src/Controller/EventController.php
 
 		-
@@ -1989,12 +1767,6 @@ parameters:
 		-
 			message: '#^Method App\\Controller\\FormationController\:\:newAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Controller/FormationController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Formation\>, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Controller/FormationController.php
 
@@ -2079,18 +1851,6 @@ parameters:
 		-
 			message: '#^Method App\\Controller\\HelloassoController\:\:resolveOrphan\(\) has parameter \$code with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: src/Controller/HelloassoController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:HelloassoPayment\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/HelloassoController.php
-
-		-
-			message: '#^Parameter \#1 \$payment of method App\\Controller\\HelloassoController\:\:getPaymentDeleteForm\(\) expects App\\Entity\\HelloassoPayment, App\:HelloassoPayment given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Controller/HelloassoController.php
 
@@ -2193,12 +1953,6 @@ parameters:
 		-
 			message: '#^Method App\\Controller\\MailController\:\:sendAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Controller/MailController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:User\>, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Controller/MailController.php
 
@@ -2323,66 +2077,6 @@ parameters:
 			path: src/Controller/MembershipController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:AnonymousBeneficiary\>, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Controller/MembershipController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Membership\>, string given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Controller/MembershipController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Note\>, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Controller/MembershipController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Registration\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/MembershipController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Shift\>, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Controller/MembershipController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:User\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/MembershipController.php
-
-		-
-			message: '#^Parameter \#1 \$member of method App\\Controller\\MembershipController\:\:redirectToShow\(\) expects App\\Entity\\Membership, App\:Membership\|App\:User given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/MembershipController.php
-
-		-
-			message: '#^Parameter \#1 \$note of method App\\Controller\\MembershipController\:\:createNoteDeleteForm\(\) expects App\\Entity\\Note, App\:Note given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/MembershipController.php
-
-		-
-			message: '#^Parameter \#1 \$parent of method App\\Entity\\Note\:\:setParent\(\) expects App\\Entity\\Note\|null, App\:Note given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/MembershipController.php
-
-		-
-			message: '#^Parameter \#1 \$persistentObject of method Doctrine\\Persistence\\ManagerRegistry\:\:getRepository\(\) expects class\-string\<App\:Beneficiary\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/MembershipController.php
-
-		-
 			message: '#^Parameter \#1 \$registrar of method App\\Entity\\Registration\:\:setRegistrar\(\) expects App\\Entity\\User\|null, string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface given\.$#'
 			identifier: argument.type
 			count: 3
@@ -2467,26 +2161,8 @@ parameters:
 			path: src/Controller/OpeningHourController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:OpeningHour\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/OpeningHourController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:OpeningHourKind\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/OpeningHourController.php
-
-		-
 			message: '#^Method App\\Controller\\PeriodController\:\:indexAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Controller/PeriodController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Period\>, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Controller/PeriodController.php
 
@@ -2521,18 +2197,6 @@ parameters:
 			path: src/Controller/ProcessUpdateController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:ProcessUpdate\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/ProcessUpdateController.php
-
-		-
-			message: '#^Parameter \#1 \$processUpdate of method App\\Controller\\ProcessUpdateController\:\:createDeleteForm\(\) expects App\\Entity\\ProcessUpdate, App\:ProcessUpdate given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/ProcessUpdateController.php
-
-		-
 			message: '#^If condition is always true\.$#'
 			identifier: if.alwaysTrue
 			count: 1
@@ -2559,12 +2223,6 @@ parameters:
 		-
 			message: '#^Method App\\Controller\\RegistrationsController\:\:removeRegistrationAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Controller/RegistrationsController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:AbstractRegistration\>, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Controller/RegistrationsController.php
 
@@ -2644,12 +2302,6 @@ parameters:
 			message: '#^Method App\\Controller\\ServiceController\:\:newAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Controller/ServiceController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Service\>, string given\.$#'
-			identifier: argument.type
-			count: 2
 			path: src/Controller/ServiceController.php
 
 		-
@@ -2797,45 +2449,9 @@ parameters:
 			path: src/Controller/ShiftController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Beneficiary\>, string given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Controller/ShiftController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Job\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/ShiftController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Shift\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/ShiftController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:TimeLog\>, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Controller/ShiftController.php
-
-		-
 			message: '#^Parameter \#1 \$createdBy of method App\\Entity\\Shift\:\:setCreatedBy\(\) expects App\\Entity\\User\|null, string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface given\.$#'
 			identifier: argument.type
 			count: 2
-			path: src/Controller/ShiftController.php
-
-		-
-			message: '#^Parameter \#1 \$shifter of method App\\Entity\\Shift\:\:setShifter\(\) expects App\\Entity\\Beneficiary\|null, App\:Beneficiary given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/ShiftController.php
-
-		-
-			message: '#^Parameter \#2 \$beneficiary of method App\\Service\\ShiftService\:\:isShiftBookable\(\) expects App\\Entity\\Beneficiary\|null, App\:Beneficiary given\.$#'
-			identifier: argument.type
-			count: 1
 			path: src/Controller/ShiftController.php
 
 		-
@@ -2935,12 +2551,6 @@ parameters:
 			path: src/Controller/SocialNetworkController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:SocialNetwork\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/SocialNetworkController.php
-
-		-
 			message: '#^Method App\\Controller\\SwipeCardController\:\:_getQr\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2986,18 +2596,6 @@ parameters:
 			message: '#^Parameter \#1 \$backgroundColor of method Endroid\\QrCode\\QrCode\:\:setBackgroundColor\(\) expects Endroid\\QrCode\\Color\\ColorInterface, array\<string, int\> given\.$#'
 			identifier: argument.type
 			count: 1
-			path: src/Controller/SwipeCardController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Beneficiary\>, string given\.$#'
-			identifier: argument.type
-			count: 3
-			path: src/Controller/SwipeCardController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:SwipeCard\>, string given\.$#'
-			identifier: argument.type
-			count: 9
 			path: src/Controller/SwipeCardController.php
 
 		-
@@ -3061,12 +2659,6 @@ parameters:
 			path: src/Controller/TaskController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Commission\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/TaskController.php
-
-		-
 			message: '#^Parameter \#1 \$form of method App\\Controller\\TaskController\:\:getErrorMessages\(\) expects Symfony\\Component\\Form\\Form, Symfony\\Component\\Form\\FormInterface given\.$#'
 			identifier: argument.type
 			count: 1
@@ -3099,12 +2691,6 @@ parameters:
 		-
 			message: '#^Method App\\Controller\\TimeLogController\:\:timelogDeleteAction\(\) has parameter \$timelog_id with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: src/Controller/TimeLogController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:TimeLog\>, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Controller/TimeLogController.php
 
@@ -3211,24 +2797,6 @@ parameters:
 			path: src/Controller/UserController.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Client\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/UserController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:User\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/UserController.php
-
-		-
-			message: '#^Parameter \#1 \$client of method App\\Entity\\User\:\:removeClient\(\) expects App\\Entity\\Client, App\:Client\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/UserController.php
-
-		-
 			message: '#^Parameter \#1 \$form of method App\\Controller\\UserController\:\:getErrorMessages\(\) expects Symfony\\Component\\Form\\Form, Symfony\\Component\\Form\\FormInterface given\.$#'
 			identifier: argument.type
 			count: 1
@@ -3243,18 +2811,6 @@ parameters:
 		-
 			message: '#^Method App\\Controller\\WidgetController\:\:widgetAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Controller/WidgetController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Job\>, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/WidgetController.php
-
-		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Shift\>, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Controller/WidgetController.php
 
@@ -9565,12 +9121,6 @@ parameters:
 			path: src/Service/EventService.php
 
 		-
-			message: '#^Parameter \#1 \$className of method Doctrine\\Persistence\\ObjectManager\:\:getRepository\(\) expects class\-string\<App\:Proxy\>, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: src/Service/EventService.php
-
-		-
 			message: '#^Method App\\Service\\FixtureGroupConsoleService\:\:getGroups\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -10107,12 +9657,6 @@ parameters:
 		-
 			message: '#^Method App\\Service\\SearchUserFormHelper\:\:initSearchQuery\(\) has parameter \$type with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: src/Service/SearchUserFormHelper.php
-
-		-
-			message: '#^Parameter \#1 \$entityName of method Doctrine\\ORM\\EntityManager\:\:getRepository\(\) expects class\-string\<App\:Membership\>, string given\.$#'
-			identifier: argument.type
 			count: 1
 			path: src/Service/SearchUserFormHelper.php
 

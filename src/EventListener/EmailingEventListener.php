@@ -26,6 +26,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
+use App\Entity\DynamicContent;
 
 class EmailingEventListener
 {
@@ -71,7 +72,7 @@ class EmailingEventListener
         $emailObject = 'Bienvenue à ' . $this->container->getParameter('project_name') . ', tu te présentes ?';
         $emailTo = $event->getAnonymousBeneficiary()->getEmail();
 
-        $dynamicContent = $this->em->getRepository('App:DynamicContent')->findOneByCode("PRE_MEMBERSHIP_EMAIL")->getContent();
+        $dynamicContent = $this->em->getRepository(DynamicContent::class)->findOneByCode("PRE_MEMBERSHIP_EMAIL")->getContent();
 
         $router = $this->container->get('router');
         if (!$event->getAnonymousBeneficiary()->getJoinTo()) {
@@ -108,7 +109,7 @@ class EmailingEventListener
         $emailObject = 'Bienvenue à ' . $this->container->getParameter('project_name') . ', souhaites-tu te présenter ?';
         $emailTo = $event->getAnonymousBeneficiary()->getEmail();
 
-        $dynamicContent = $this->em->getRepository('App:DynamicContent')->findOneByCode("PRE_MEMBERSHIP_EMAIL")->getContent();
+        $dynamicContent = $this->em->getRepository(DynamicContent::class)->findOneByCode("PRE_MEMBERSHIP_EMAIL")->getContent();
 
         $router = $this->container->get('router');
         if (!$event->getAnonymousBeneficiary()->getJoinTo()) {
@@ -404,7 +405,7 @@ class EmailingEventListener
         $router = $this->container->get('router');
         $home_url = $router->generate('homepage', array(), UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $dynamicContent = $this->em->getRepository('App:DynamicContent')->findOneByCode("SHIFT_REMINDER_EMAIL")->getContent();
+        $dynamicContent = $this->em->getRepository(DynamicContent::class)->findOneByCode("SHIFT_REMINDER_EMAIL")->getContent();
         $template = $this->container->get('twig')->createTemplate($dynamicContent);
         $dynamicContent = $this->container->get('twig')->render($template, array('beneficiary' => $beneficiary));
 
@@ -482,7 +483,7 @@ class EmailingEventListener
             $emailObject = '[ALERTE CRENEAUX] ' . strftime("%A %e %B", $date->getTimestamp());
             $emailTo = $recipients;
 
-            $dynamicContent = $this->em->getRepository('App:DynamicContent')->findOneByCode($event->getTemplate());
+            $dynamicContent = $this->em->getRepository(DynamicContent::class)->findOneByCode($event->getTemplate());
             $template = null;
             if ($dynamicContent) {
                 $template = $this->container->get('twig')->createTemplate($dynamicContent->getContent());

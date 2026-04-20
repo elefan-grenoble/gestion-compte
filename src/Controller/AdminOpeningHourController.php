@@ -14,6 +14,7 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use App\Entity\OpeningHourKind;
 
 /**
  * Admin OpeningHour controller
@@ -32,8 +33,8 @@ class AdminOpeningHourController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $openingHours = $em->getRepository('App:OpeningHour')->findAll();
-        $openingHourKinds = $em->getRepository('App:OpeningHourKind')->findAll();
+        $openingHours = $em->getRepository(OpeningHour::class)->findAll();
+        $openingHourKinds = $em->getRepository(OpeningHourKind::class)->findAll();
 
         return $this->render('admin/openinghour/index.html.twig', array(
             'openingHours' => $openingHours,

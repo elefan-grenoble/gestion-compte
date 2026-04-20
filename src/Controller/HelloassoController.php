@@ -48,7 +48,7 @@ class HelloassoController extends AbstractController
         }
 
         $payments = $this->getDoctrine()->getManager()
-            ->getRepository('App:HelloassoPayment')
+            ->getRepository(HelloassoPayment::class)
             ->findBy(array(), array('createdAt' => 'DESC', 'date' => 'DESC'), $limit, ($currentPage - 1) * $limit);
 
         $delete_forms = array();

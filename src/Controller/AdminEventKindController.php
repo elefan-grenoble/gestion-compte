@@ -28,7 +28,7 @@ class AdminEventKindController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $eventKinds = $em->getRepository('App:EventKind')->findAll();
+        $eventKinds = $em->getRepository(EventKind::class)->findAll();
 
         return $this->render('admin/event/kind/list.html.twig', array(
             'eventKinds' => $eventKinds,

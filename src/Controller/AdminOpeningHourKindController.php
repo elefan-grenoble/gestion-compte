@@ -28,7 +28,7 @@ class AdminOpeningHourKindController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $openingHourKinds = $em->getRepository('App:OpeningHourKind')->findAll();
+        $openingHourKinds = $em->getRepository(OpeningHourKind::class)->findAll();
 
         return $this->render('admin/openinghour/kind/list.html.twig', array(
             'openingHourKinds' => $openingHourKinds,

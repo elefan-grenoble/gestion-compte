@@ -111,7 +111,7 @@ class ShiftServiceTest extends TestCase
         // Mock the getRepository() method of the EntityManager
         $this->em->expects($this->any())
             ->method('getRepository')
-            ->with('App:Shift')
+            ->with(Shift::class)
             ->willReturn($shiftRepositoryMock);
 
         $membershipService = new MembershipService($this->container, $this->em);

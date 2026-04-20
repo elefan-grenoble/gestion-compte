@@ -8,6 +8,7 @@ use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use App\Entity\Shift;
 
 /**
  * Works only for coops with 'reserve_new_shift_to_prior_shifter' true.
@@ -57,7 +58,7 @@ class FreeReservedShiftsCommand extends Command
         $output->writeln('<fg=cyan;>'.$date->format('d M Y').'</>');
 
         $count = 0;
-        $shifts = $this->em->getRepository('App:Shift')->findReservedAt($date);
+        $shifts = $this->em->getRepository(Shift::class)->findReservedAt($date);
         foreach ($shifts as $shift) {
             $shift->setLastShifter(null);
             $this->em->persist($shift);

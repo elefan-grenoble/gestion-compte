@@ -10,6 +10,7 @@ use Symfony\Component\Mime\Email;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
 use Symfony\Component\Routing\Router;
+use App\Entity\DynamicContent;
 
 class MailerService implements FOSMailerInterface
 {
@@ -79,7 +80,7 @@ class MailerService implements FOSMailerInterface
         $emailObject = 'Bienvenue à ' . $this->project_name;
         $emailTo = $user->getEmail();
 
-        $dynamicContent = $this->entity_manager->getRepository('App:DynamicContent')->findOneByCode("WELCOME_EMAIL")->getContent();
+        $dynamicContent = $this->entity_manager->getRepository(DynamicContent::class)->findOneByCode("WELCOME_EMAIL")->getContent();
 
         $login_url = $url = $this->router->generate('fos_user_registration_confirm', array('token' => $user->getConfirmationToken()), UrlGeneratorInterface::ABSOLUTE_URL);
         $welcome = (new Email())

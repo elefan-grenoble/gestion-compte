@@ -31,7 +31,7 @@ class ClientController extends AbstractController
      */
     public function listAction()
     {
-        $clients = $this->getDoctrine()->getManager()->getRepository('App:Client')->findAll();
+        $clients = $this->getDoctrine()->getManager()->getRepository(Client::class)->findAll();
 
         return $this->render('admin/client/list.html.twig',array('clients'=>$clients));
     }

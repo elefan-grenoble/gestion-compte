@@ -79,7 +79,7 @@ class TimeLogController extends AbstractController
     {
         $session = new Session();
         $em = $this->getDoctrine()->getManager();
-        $timeLog = $this->getDoctrine()->getManager()->getRepository('App:TimeLog')->find($timelog_id);
+        $timeLog = $this->getDoctrine()->getManager()->getRepository(TimeLog::class)->find($timelog_id);
         if ($timeLog->getMembership() === $member) {
             $em->remove($timeLog);
             $em->flush();

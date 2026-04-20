@@ -102,7 +102,7 @@ class RegistrationsController extends AbstractController
             ->getSingleScalarResult();
         $pageCount = intval($max / $limit);
         $pageCount += (($max % $limit) > 0) ? 1 : 0;
-        $repository = $em->getRepository('App:AbstractRegistration');
+        $repository = $em->getRepository(AbstractRegistration::class);
         $queryb = $repository->createQueryBuilder('r')
             ->where('r.date >= :from')
             ->setParameter('from', $from);

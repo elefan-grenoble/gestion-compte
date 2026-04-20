@@ -42,7 +42,7 @@ class FixTimeLogCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $members = $this->em->getRepository('App:Membership')->findAll();
+        $members = $this->em->getRepository(Membership::class)->findAll();
 
         $countShiftLogs = 0;
 
@@ -50,7 +50,7 @@ class FixTimeLogCommand extends Command
             if ($member->getFirstShiftDate()) {
                 $previous_cycle_start = $this->membership_service->getStartOfCycle($member, -1);
                 $current_cycle_end = $this->membership_service->getEndOfCycle($member, 0);
-                $shifts = $this->em->getRepository('App:Shift')->findShiftsForMembership($member, $previous_cycle_start, $current_cycle_end);
+                $shifts = $this->em->getRepository(Shift::class)->findShiftsForMembership($member, $previous_cycle_start, $current_cycle_end);
 
                 foreach ($shifts as $shift) {
                     $logs = $member->getTimeLogs()->filter(function ($log) use ($shift) {

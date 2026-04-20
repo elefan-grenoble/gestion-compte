@@ -16,6 +16,10 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
+use App\Entity\DynamicContent;
+use App\Entity\Event;
+use App\Entity\Shift;
+use App\Entity\SocialNetwork;
 
 
 class DefaultController extends AbstractController
@@ -91,7 +95,7 @@ class DefaultController extends AbstractController
             $from = new \Datetime('today');
             $to = new \DateTime();
             $to->modify('+7 days');
-            $shifts = $em->getRepository('App:Shift')->findFrom($from, $to);
+            $shifts = $em->getRepository(Shift::class)->findFrom($from, $to);
             $bucketsByDay = $shift_service->generateShiftBucketsByDayAndJob($shifts);
 
             return $this->render('default/index_anon.html.twig', [
@@ -100,10 +104,10 @@ class DefaultController extends AbstractController
             ]);
         }
 
-        $eventsFutureOrOngoing = $em->getRepository('App:Event')->findFutureOrOngoing();
-        $eventsFutureOrOngoingDisplayedHome = $em->getRepository('App:Event')->findFutureOrOngoing(null, true);
-        $dynamicContentTop = $em->getRepository('App:DynamicContent')->findOneByCode("HOME_TOP")->getContent();
-        $dynamicContentBottom = $em->getRepository('App:DynamicContent')->findOneByCode("HOME_BOTTOM")->getContent();
+        $eventsFutureOrOngoing = $em->getRepository(Event::class)->findFutureOrOngoing();
+        $eventsFutureOrOngoingDisplayedHome = $em->getRepository(Event::class)->findFutureOrOngoing(null, true);
+        $dynamicContentTop = $em->getRepository(DynamicContent::class)->findOneByCode("HOME_TOP")->getContent();
+        $dynamicContentBottom = $em->getRepository(DynamicContent::class)->findOneByCode("HOME_BOTTOM")->getContent();
 
         return $this->render('default/index.html.twig', [
             'eventsFutureOrOngoing' => $eventsFutureOrOngoing,
@@ -117,7 +121,7 @@ class DefaultController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $socialNetworks = $em->getRepository('App:SocialNetwork')->findAllDisplayedFooter();
+        $socialNetworks = $em->getRepository(SocialNetwork::class)->findAllDisplayedFooter();
 
         return $this->render('_partial/footer.html.twig', [
             'socialNetworks' => $socialNetworks,
@@ -144,7 +148,7 @@ class DefaultController extends AbstractController
         $from = new \Datetime('today');
         $to = new \DateTime();
         $to->modify('+7 days');
-        $shifts = $em->getRepository('App:Shift')->findFrom($from, $to);
+        $shifts = $em->getRepository(Shift::class)->findFrom($from, $to);
         $bucketsByDay = $shift_service->generateShiftBucketsByDayAndJob($shifts);
 
         return $this->render('booking/schedule.html.twig', [

@@ -26,7 +26,7 @@ class EmailTemplateController extends AbstractController
     public function listAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
-        $emailTemplates = $em->getRepository('App:EmailTemplate')->findAll();
+        $emailTemplates = $em->getRepository(EmailTemplate::class)->findAll();
         return $this->render('admin/mail/template/list.html.twig', array(
             'emailTemplates' => $emailTemplates,
         ));

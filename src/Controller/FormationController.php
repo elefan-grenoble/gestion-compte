@@ -29,7 +29,7 @@ class FormationController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $formations = $em->getRepository('App:Formation')->findAll();
+        $formations = $em->getRepository(Formation::class)->findAll();
 
         return $this->render('admin/formation/list.html.twig',array('formations'=>$formations));
     }

@@ -44,7 +44,7 @@ class ServiceController extends AbstractController
     public function listAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
-        $services = $em->getRepository('App:Service')->findAll();
+        $services = $em->getRepository(Service::class)->findAll();
         return $this->render('admin/service/list.html.twig', array(
             'services' => $services
         ));
@@ -60,7 +60,7 @@ class ServiceController extends AbstractController
     public function navlistAction()
     {
         $em = $this->getDoctrine()->getManager();
-        $services = $em->getRepository('App:Service')->findBy(array('public'=>1));
+        $services = $em->getRepository(Service::class)->findBy(array('public'=>1));
         return $this->render('admin/service/navlist.html.twig', array(
             'services' => $services
         ));

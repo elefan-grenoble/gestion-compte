@@ -12,6 +12,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\DateTime;
+use App\Entity\Commission;
 
 /**
  * Task controller.
@@ -31,7 +32,7 @@ class TaskController extends AbstractController
         $this->denyAccessUnlessGranted('view', new Task());
 
         $em = $this->getDoctrine()->getManager();
-        $commissions = $em->getRepository('App:Commission')->findAll();
+        $commissions = $em->getRepository(Commission::class)->findAll();
         return $this->render('default/task/list.html.twig', array(
             'commissions' => $commissions,
             'task' => new Task(),

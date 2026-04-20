@@ -81,7 +81,7 @@ class BookingController extends AbstractController
         $period_positions = $membership_service->getPeriodPositions($member);
         $preceding_previous_cycle_start = $membership_service->getStartOfCycle($member, -1 * $this->getParameter('max_nb_of_past_cycles_to_display'));
         $next_cycle_end = $membership_service->getEndOfCycle($member, 1);
-        $shifts_by_cycle = $em->getRepository('App:Shift')->findShiftsByCycles($member, $preceding_previous_cycle_start, $next_cycle_end);
+        $shifts_by_cycle = $em->getRepository(Shift::class)->findShiftsByCycles($member, $preceding_previous_cycle_start, $next_cycle_end);
 
         $shiftFreeForms = [];
         foreach ($shifts_by_cycle as $key => $shifts) {
@@ -147,7 +147,7 @@ class BookingController extends AbstractController
                 $beneficiary = $beneficiaries->first();
             }
 
-            $shifts = $em->getRepository('App:Shift')->findFutures(null, null, $this->display_name_shifters);
+            $shifts = $em->getRepository(Shift::class)->findFutures(null, null, $this->display_name_shifters);
             $bucketsByDay = $shift_service->generateShiftBucketsByDayAndJob($shifts);
 
             $hours = array();
@@ -216,7 +216,7 @@ class BookingController extends AbstractController
         $max = clone $day;
         $max->modify("+ 1 day");
 
-        $shifts = $em->getRepository('App:Shift')->findFrom($day, $max , null, $this->display_name_shifters);
+        $shifts = $em->getRepository(Shift::class)->findFrom($day, $max , null, $this->display_name_shifters);
         $bucketsByDay = $shift_service->generateShiftBucketsByDayAndJob($shifts);
 
         $bucketsByJob = $bucketsByDay[$day->format("d m Y")];
@@ -401,7 +401,7 @@ class BookingController extends AbstractController
     public function showBucketForAdminAction(Request $request, Shift $bucket): Response
     {
         $em = $this->getDoctrine()->getManager();
-        $shifts = $em->getRepository('App:Shift')->findBucket($bucket);
+        $shifts = $em->getRepository(Shift::class)->findBucket($bucket);
 
         $shiftBookForms = [];
         $shiftDeleteForms = [];
@@ -446,7 +446,7 @@ class BookingController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $shifts = $em->getRepository('App:Shift')->findBy([
+            $shifts = $em->getRepository(Shift::class)->findBy([
                 'job' => $bucket->getJob(),
                 'start' => $bucket->getStart(),
                 'end' => $bucket->getEnd()
@@ -544,7 +544,7 @@ class BookingController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var Shift[] $shifts */
-            $shifts = $em->getRepository('App:Shift')->findBy([
+            $shifts = $em->getRepository(Shift::class)->findBy([
                 'job' => $bucket->getJob(),
                 'start' => $bucket->getStart(),
                 'end' => $bucket->getEnd()
