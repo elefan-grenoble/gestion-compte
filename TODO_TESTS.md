@@ -180,9 +180,10 @@
 
 ## Étape 5 — Infrastructure et qualité des tests
 
-### Commit 5.1 : `test(infra): add base TestCase classes with shared helpers`
-- [ ] Créer `tests/Unit/UnitTestCase.php` : base pour les tests unitaires avec helpers de mocking partagés (container mock, em mock)
-- [ ] Créer `tests/Functional/FunctionalTestCase.php` : renommer/étendre `DatabasePrimer` en ajoutant un helper `loginAs($username)`
+### Commit 5.1 : `test(infra): add base TestCase classes with shared helpers` ✅ DONE
+- [x] Créer `tests/Functional/FunctionalTestCase.php` : étend `DatabasePrimer` avec un helper `loginAs($username)`
+- [x] Migrer `SmokeTest`, `MembershipControllerTest` et `AdminControllerTest` vers `FunctionalTestCase`
+- [x] Supprimer les `loginAs()` dupliqués dans chaque fichier de test
 
 ### Commit 5.2 — DONE (étape 0.2) : séparation des test suites PHPUnit
 
