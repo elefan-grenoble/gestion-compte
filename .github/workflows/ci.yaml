@@ -1,4 +1,11 @@
-name: Integration and Functional tests
+# ------------------------------------------------------------------
+# CI pipeline — mirrors local Makefile targets
+#
+# All test/lint/build commands go through `make` so that the Makefile
+# remains the single source of truth for how things are run.
+# ------------------------------------------------------------------
+
+name: CI
 
 on:
   push:
@@ -9,6 +16,9 @@ on:
       - dev
 
 jobs:
+  # ================================================================
+  # 1. Setup — install deps, build assets, upload artifacts
+  # ================================================================
   setup:
     runs-on: ubuntu-22.04
     strategy:
@@ -16,8 +26,7 @@ jobs:
       matrix:
         php-versions: ['7.4']
     steps:
-#       REMOVE RESIDUAL CONTAINERS ( for local debug with act only )
-      - name: Remove all mysql containers when working with act
+      - name: Remove residual containers (act only)
         if: ${{ env.ACT }}
         run: |
           CONTAINERS=$(docker ps -a -q --filter ancestor=mariadb:10.4.10)
@@ -27,134 +36,112 @@ jobs:
             echo "No containers to remove."
           fi
 
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-#       INSTALL DEPENDENCIES ----------------
-      - name: Setup PHP, extensions and composer with shivammathur/setup-php
+      - name: Setup PHP
         uses: shivammathur/setup-php@verbose
         with:
           php-version: ${{ matrix.php-versions }}
           tools: composer:2.2
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, iconv, json
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.11.0'
 
-      - name: Get composer cache directory
-        id: composer-cache
-        run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_ENV
-
       - name: Cache composer dependencies
         uses: actions/cache@v4
         with:
           path: |
-            ${{ env.dir }}
+            ~/.composer/cache
             ./vendor
           key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
           restore-keys: ${{ runner.os }}-composer-
 
-#      INSTALL PACKAGES ----------------
-      - name: Clean node_modules
-        run: rm -rf node_modules
-
       - name: Install NPM packages
-        run: npm ci
+        run: make npm-install
 
       - name: Install Composer dependencies
-        run: composer install --no-progress --prefer-dist --optimize-autoloader
+        run: make vendor
 
-#       BUILD FRONT-END ASSETS ----------------
       - name: Build front-end assets
-        run: ./node_modules/.bin/encore production --progress
+        run: make encore-build
 
-#       UPLOAD CACHED DIRECTORIES ----------------
-      - name: Upload Vendor Directory as Artifact
+      - name: Upload vendor/
         uses: actions/upload-artifact@v4
         with:
           name: vendor-dir
           path: vendor/
 
-      - name: Upload Build Directory as Artifact
+      - name: Upload public/build/
         uses: actions/upload-artifact@v4
         with:
           name: build-dir
           path: public/build/
 
+  # ================================================================
+  # 2. Unit + integration tests (no DB)
+  # ================================================================
   fast-tests:
     needs: setup
     runs-on: ubuntu-22.04
-
     steps:
       - uses: actions/checkout@v4
 
-#       GET CACHED DIRECTORIES ----------------
-      - name: Download Vendor Directory
+      - name: Download vendor/
         uses: actions/download-artifact@v4
         with:
           name: vendor-dir
           path: vendor/
 
-#       INSTALL DEPENDENCIES ----------------
-      - name: Setup PHP, extensions and composer with shivammathur/setup-php
+      - name: Setup PHP
         uses: shivammathur/setup-php@verbose
         with:
           php-version: '7.4'
           tools: composer:2.2
           extensions: mbstring, xml, ctype, iconv, intl, dom, filter, gd, json
 
-#       SET ENVIRONMENT VARIABLES ----------------
-      - name: Set up test environment variables
-        run: cp .env.test .env
+      - name: Set up environment
+        run: make env-ci
 
-#       RUN UNIT + INTEGRATION TESTS (no DB needed) ----------------
       - name: Run unit and integration tests
-        run: php ./vendor/bin/phpunit --configuration phpunit.xml.dist --testsuite unit,integration
+        run: make test-unit
 
-  phpStan:
+  # ================================================================
+  # 3. PHPStan
+  # ================================================================
+  phpstan:
     needs: setup
     runs-on: ubuntu-22.04
-
     steps:
       - uses: actions/checkout@v4
 
-#       GET CACHED DIRECTORIES ----------------
-      - name: Download Vendor Directory
+      - name: Download vendor/
         uses: actions/download-artifact@v4
         with:
           name: vendor-dir
           path: vendor/
 
-#       INSTALL DEPENDENCIES ----------------
-      - name: Setup PHP, extensions and composer with shivammathur/setup-php
+      - name: Setup PHP
         uses: shivammathur/setup-php@verbose
         with:
           php-version: '7.4'
           tools: composer:2.2
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, iconv, json
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, json
 
-#       SET ENVIRONMENT VARIABLES ----------------
-      - name: Set up environment variables
-        run: cp .env.test .env
+      - name: Set up environment
+        run: make env-ci
 
-#       WARM UP CACHE (generates container XML needed by phpstan-symfony) ----
-      - name: Warm up Symfony cache
-        run: php bin/console cache:warmup --env=dev
-
-      - name: Set executable permissions for PHPStan
-        run: chmod +x ./vendor/bin/phpstan
-
-#       RUN PHPSTAN ----------------
       - name: Run PHPStan
-        run: ./vendor/bin/phpstan analyse src
+        run: make lint
 
-
+  # ================================================================
+  # 4. Functional tests (with DB)
+  # ================================================================
   symfony-tests:
     needs: setup
     runs-on: ubuntu-22.04
-
     services:
       mariadb:
         image: mariadb:10.4
@@ -170,48 +157,43 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-
     steps:
       - uses: actions/checkout@v4
 
-#       GET CACHED DIRECTORIES ----------------
-      - name: Download Vendor Directory
+      - name: Download vendor/
         uses: actions/download-artifact@v4
         with:
           name: vendor-dir
           path: vendor/
 
-      - name: Download Build Directory
+      - name: Download public/build/
         uses: actions/download-artifact@v4
         with:
           name: build-dir
           path: public/build/
 
-#      INSTALL DEPENDENCIES ----------------
-      - name: Setup PHP, extensions and composer with shivammathur/setup-php
+      - name: Setup PHP
         uses: shivammathur/setup-php@verbose
         with:
           php-version: '7.4'
           tools: composer:2.2
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, iconv, json
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, json
 
-#       SET ENVIRONMENT VARIABLES ----------------
-      - name: Set up test environment variables
-        run: cp .env.test .env
+      - name: Set up environment
+        run: make env-ci
 
-#       RUN MIGRATIONS ----------------
       - name: Run migrations
-        run: php bin/console doctrine:migrations:migrate --no-interaction
+        run: make db-migrate
 
-#       RUN TESTS ----------------
       - name: Run functional tests
-        run: php ./vendor/bin/phpunit --configuration phpunit.xml.dist --testsuite functional
+        run: make test-func
 
-
+  # ================================================================
+  # 5. Cypress E2E tests
+  # ================================================================
   cypress-tests:
     needs: setup
     runs-on: ubuntu-22.04
-
     services:
       mariadb:
         image: mariadb:10.4
@@ -227,56 +209,49 @@ jobs:
           --health-interval=10s
           --health-timeout=5s
           --health-retries=5
-
     steps:
       - uses: actions/checkout@v4
 
-#       GET CACHED DIRECTORIES ----------------
-      - name: Download Vendor Directory
+      - name: Download vendor/
         uses: actions/download-artifact@v4
         with:
           name: vendor-dir
           path: vendor/
 
-#       INSTALL DEPENDENCIES ----------------
-      - name: Install Cypress dependencies
+      - name: Download public/build/
+        uses: actions/download-artifact@v4
+        with:
+          name: build-dir
+          path: public/build/
+
+      - name: Install Cypress system dependencies
         run: sudo apt-get update && sudo apt-get install -y xvfb libgtk2.0-0 libgtk-3-0 libgbm-dev libnotify-dev libnss3 libxss1 libasound2 libxtst6 xauth
 
-      - name: Setup PHP, extensions and composer with shivammathur/setup-php
+      - name: Setup PHP
         uses: shivammathur/setup-php@verbose
         with:
           php-version: '7.4'
           tools: composer:2.2
-          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, iconv, json
+          extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, json
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.11.0'
 
-      - name: Install Symfony CLI globally
+      - name: Install Symfony CLI
         run: |
           curl -sS https://get.symfony.com/cli/installer | bash
           sudo mv /home/runner/.symfony5/bin/symfony /usr/local/bin/symfony
 
-#       SET ENVIRONMENT VARIABLES ----------------
-      - name: Set up test environment variables
-        run: cp .env.test .env
+      - name: Set up environment
+        run: make env-ci
 
-#       RUN MIGRATIONS ----------------
       - name: Run migrations
-        run: php bin/console doctrine:migrations:migrate --no-interaction
+        run: make db-migrate
 
-#       FILL DATABASE ----------------
-      - name: Run fixture
-        run: php bin/console doctrine:fixtures:load --no-interaction
-
-#       BUILD FRONT ----------------
-      - name: Download Build Directory
-        uses: actions/download-artifact@v4
-        with:
-          name: build-dir
-          path: public/build/
+      - name: Load fixtures
+        run: make db-fixtures-load
 
       - name: Cache Cypress binary
         uses: actions/cache@v4
@@ -286,27 +261,23 @@ jobs:
           restore-keys: ${{ runner.os }}-cypress-
 
       - name: Install NPM packages
-        run: npm ci
+        run: make npm-install
 
-#       START SYMFONY SERVER ----------------
       - name: Start Symfony server
-        run: symfony server:start --no-tls -d --port=8000
+        run: make serve
 
-#       RUN CYPRESS TESTS ----------------
       - name: Run Cypress main tests
-        run: CYPRESS_BASE_URL=http://localhost:8000 npm run cy:test:main
+        run: make test-e2e-main
 
       - name: Run Cypress shift tests
-        run: CYPRESS_BASE_URL=http://localhost:8000 npm run cy:test:shift
+        run: make test-e2e-shift
 
       - name: Run Cypress membership tests
-        run: CYPRESS_BASE_URL=http://localhost:8000 npm run cy:test:membership
+        run: make test-e2e-membership
 
-#       CHANGE ENV VARIABLES ----------------
-      - name: Set up test environment variables
-        run: cp .env.oidc.test .env.test
+      - name: Set up OIDC environment
+        run: make env-ci-oidc
 
-#       START KEYCLOAK ----------------
       - name: Start Keycloak
         run: |
           docker run -d \
@@ -318,8 +289,7 @@ jobs:
           quay.io/keycloak/keycloak:26.0 \
           start-dev --import-realm
 
-#       Wait for Keycloak to start
-      - name: Wait for Keycloak to be ready
+      - name: Wait for Keycloak
         run: |
           echo "Waiting for Keycloak..."
           for i in $(seq 1 60); do
@@ -331,11 +301,9 @@ jobs:
             sleep 5
           done
 
-#       RUN CYPRESS TESTS ----------------
       - name: Run Cypress OIDC tests
-        run: CYPRESS_BASE_URL=http://localhost:8000 CYPRESS_KEYCLOAK_URL=http://localhost:8080 npm run cy:test:oidc
+        run: make test-e2e-oidc
 
-#       UPLOAD SCREENSHOTS ON FAILURE ----------------
       - name: Upload Cypress screenshots on failure
         if: failure()
         uses: actions/upload-artifact@v4
