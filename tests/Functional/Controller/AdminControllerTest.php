@@ -2,6 +2,9 @@
 
 namespace App\Tests\Functional\Controller;
 
+use App\Entity\Beneficiary;
+use App\Entity\Membership;
+use App\Entity\User;
 use App\Tests\Functional\DatabasePrimer;
 use Exception;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -16,8 +19,6 @@ class AdminControllerTest extends DatabasePrimer
      */
     public function testCsvImportForEmptyBaseWithCommas()
     {
-        echo "\n\033[32m testCsvImportForEmptyBaseWithCommas \033[0m\n";
-
         $client = static::createClient();
 
         // Path to the mock CSV file
@@ -43,17 +44,17 @@ class AdminControllerTest extends DatabasePrimer
 
         // Fetch data from the test database and assert
         $em = $client->getContainer()->get('doctrine')->getManager();
-        $users = $em->getRepository('App:User')->findAll();
+        $users = $em->getRepository(User::class)->findAll();
 
         // Assert that the number of users in the database matches the number in the CSV
         $this->assertCount(50, $users);
 
-        $Beneficiaries = $em->getRepository('App:Beneficiary')->findAll();
+        $beneficiaries = $em->getRepository(Beneficiary::class)->findAll();
 
         // Assert that the number of beneficiaries in the database matches the number in the CSV
-        $this->assertCount(50, $Beneficiaries);
+        $this->assertCount(50, $beneficiaries);
 
-        $memberships = $em->getRepository('App:Membership')->findAll();
+        $memberships = $em->getRepository(Membership::class)->findAll();
 
         // Assert that the number of memberships in the database matches the number in the CSV
         $this->assertCount(50, $memberships);
@@ -66,9 +67,6 @@ class AdminControllerTest extends DatabasePrimer
      */
     public function testCsvImportForEmptyBaseWithSemiColons()
     {
-        echo "\n\033[32m testCsvImportForEmptyBaseWithSemiColons \033[0m\n";
-
-
         $client = static::createClient();
 
         // Path to the mock CSV file
@@ -94,17 +92,17 @@ class AdminControllerTest extends DatabasePrimer
 
         // Fetch data from the test database and assert
         $em = $client->getContainer()->get('doctrine')->getManager();
-        $users = $em->getRepository('App:User')->findAll();
+        $users = $em->getRepository(User::class)->findAll();
 
         // Assert that the number of users in the database matches the number in the CSV
         $this->assertCount(50, $users);
 
-        $Beneficiaries = $em->getRepository('App:Beneficiary')->findAll();
+        $beneficiaries = $em->getRepository(Beneficiary::class)->findAll();
 
         // Assert that the number of beneficiaries in the database matches the number in the CSV
-        $this->assertCount(50, $Beneficiaries);
+        $this->assertCount(50, $beneficiaries);
 
-        $memberships = $em->getRepository('App:Membership')->findAll();
+        $memberships = $em->getRepository(Membership::class)->findAll();
 
         // Assert that the number of memberships in the database matches the number in the CSV
         $this->assertCount(50, $memberships);
@@ -117,9 +115,6 @@ class AdminControllerTest extends DatabasePrimer
      */
     public function testCsvImportForCommissionFiledBaseWithCommas()
     {
-
-        echo "\n\033[32m testCsvImportForCommissionFiledBaseWithCommas \033[0m\n";
-
         $this->loadFixturesWithGroups(['commission']);
 
         $client = static::createClient();
@@ -141,7 +136,7 @@ class AdminControllerTest extends DatabasePrimer
 
         // Fetch data from the test database and assert
         $em = $client->getContainer()->get('doctrine')->getManager();
-        $beneficiaries = $em->getRepository('App:Beneficiary')->findAll();
+        $beneficiaries = $em->getRepository(Beneficiary::class)->findAll();
 
         // Assert that the number of beneficiaries in the database matches the number in the CSV
         $this->assertCount(50, $beneficiaries);
@@ -164,9 +159,6 @@ class AdminControllerTest extends DatabasePrimer
      */
     public function testCsvImportForCommissionFiledBaseWithSemicolons()
     {
-
-        echo "\n\033[32m testCsvImportForCommissionFiledBaseWithSemicolons \033[0m\n";
-
         $this->loadFixturesWithGroups(['commission']);
 
         $client = static::createClient();
@@ -188,7 +180,7 @@ class AdminControllerTest extends DatabasePrimer
 
         // Fetch data from the test database and assert
         $em = $client->getContainer()->get('doctrine')->getManager();
-        $beneficiaries = $em->getRepository('App:Beneficiary')->findAll();
+        $beneficiaries = $em->getRepository(Beneficiary::class)->findAll();
 
         // Assert that the number of beneficiaries in the database matches the number in the CSV
         $this->assertCount(50, $beneficiaries);
