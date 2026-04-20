@@ -10,7 +10,7 @@ services:
       MARIADB_USER: symfony
       MARIADB_PASSWORD: symfony
     volumes:
-      - ./mysql:/var/lib/mysql
+      - db_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", '-u', 'root', '-psecret']
       timeout: 20s
@@ -71,4 +71,5 @@ services:
     ports:
     - "8080:8080"
 
-
+volumes:
+  db_data:

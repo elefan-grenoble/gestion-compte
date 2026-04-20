@@ -94,5 +94,5 @@ Raccourci : `make setup-test` puis `make test` (voir le `Makefile` à la racine)
 ### Erreurs de permission sur les volumes avec un système immuable
 
 Testé sur fedora silverblue, ajouter `:rw,z` sur les volumes.
-Par exemple `./mysql:/var/lib/mysql:rw,z`
+Par exemple `db_data:/var/lib/mysql:rw,z`
 https://docs.docker.com/reference/compose-file/services/#short-syntax-5
