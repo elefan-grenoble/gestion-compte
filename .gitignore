@@ -90,3 +90,8 @@ phpstan.neon
 npm-debug.log
 yarn-error.log
 ###< symfony/webpack-encore-bundle ###
+
+# Cypress — runtime artifacts
+/cypress/screenshots/
+/cypress/videos/
+/cypress/downloads/
