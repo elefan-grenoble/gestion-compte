@@ -237,3 +237,17 @@ Améliorations du fichier `.github/workflows/ci.yaml` existant :
 | Entités testées | 0/42 | 4/42 (les plus critiques) |
 | Contrôleurs testés | 1/43 | Smoke test global + 1-2 détaillés |
 | Specs Cypress | 3 | 5 |
+
+---
+
+## Annexe — Problèmes détectés dans le code fonctionnel
+
+> Liste des anomalies rencontrées dans `src/` pendant le travail sur les tests.
+> Ces problèmes ne sont **pas corrigés** ici (sauf mention contraire) pour respecter
+> la règle « ne pas toucher au code fonctionnel ».
+
+| # | Fichier(s) | Problème | Sévérité | Corrigé ? |
+|---|-----------|----------|----------|-----------|
+| 1 | `src/Entity/Beneficiary.php` | `openid` et `openid_member_number` : annotation ORM `nullable=true` manquante alors que la migration SQL (`f4eaf753`) crée des colonnes nullables → `doctrine:schema:create` échoue en test | 🔴 Bloquant | ✅ commit `5bd1c5cf` (exception à la règle, bug avéré) |
+| 2 | `src/Service/ShiftService.php`, `src/Service/BeneficiaryService.php`, `src/Service/MembershipService.php`, `src/Command/*.php`, `src/EventListener/*.php` | Utilisation systématique de la syntaxe Doctrine dépréciée `'App:Entity'` au lieu de `Entity::class` dans les appels `getRepository()` (~20+ occurrences) | 🟡 Moyenne | ❌ |
+| 3 | `src/Service/MembershipService.php:13` | `use phpDocumentor\Reflection\Types\Array_;` — import inutilisé | 🟢 Faible | ❌ |
