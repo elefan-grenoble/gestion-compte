@@ -226,9 +226,9 @@ Améliorations du fichier `.github/workflows/ci.yaml` existant :
 - [x] Vérifier la redirection vers la page d'accueil avec message de succès
 - [x] Ajouter le script npm `cy:test:shift` et l'intégrer dans le job CI `cypress-tests`
 
-### Commit 6.4 : `test(cypress): add E2E tests for membership registration flow`
-- [ ] Créer `cypress/e2e/membership/member_can_register.cy.js`
-- [ ] Tester : login → accéder à la page d'adhésion → formulaire → confirmation
+### Commit 6.4 : `test(cypress): add E2E tests for membership registration flow` ✅ DONE
+- [x] Créer `cypress/e2e/membership/member_can_register.cy.js`
+- [x] Tester : login → accéder à la page d'adhésion → formulaire → confirmation
 
 ---
 
@@ -255,7 +255,7 @@ Améliorations du fichier `.github/workflows/ci.yaml` existant :
 | Services testés | 1/14 | 5/14 | 5/14 |
 | Entités testées | 0/42 | 4/42 | 4/42 (les plus critiques) |
 | Contrôleurs testés | 1/43 | Smoke (70 routes) + MembershipController | Smoke + 1-2 détaillés |
-| Specs Cypress | 3 | 4 | 5 |
+| Specs Cypress | 3 | 5 | 5 |
 | Jobs CI | 3 | 4 (+ fast-tests) | 4 |
 
 ---

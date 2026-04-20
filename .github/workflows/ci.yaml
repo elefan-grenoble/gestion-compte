@@ -299,6 +299,9 @@ jobs:
       - name: Run Cypress shift tests
         run: CYPRESS_BASE_URL=http://localhost:8000 npm run cy:test:shift
 
+      - name: Run Cypress membership tests
+        run: CYPRESS_BASE_URL=http://localhost:8000 npm run cy:test:membership
+
 #       CHANGE ENV VARIABLES ----------------
       - name: Set up test environment variables
         run: cp .env.oidc.test .env.test
