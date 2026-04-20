@@ -169,10 +169,12 @@
 - [x] Vérifier les codes de retour (200, 403 pour accès interdit)
 
 ### Commit 4.3 : `test(functional): add MembershipController tests`
-- [ ] Créer `tests/Functional/Controller/MembershipControllerTest.php`
-- [ ] Tester l'affichage de la page membership
-- [ ] Tester la soumission de formulaire de registration
-- [ ] Tester les cas d'erreur (formulaire invalide)
+- [x] Créer `tests/Functional/Controller/MembershipControllerTest.php`
+- [x] Tester l'affichage de la page membership (`/member/find_me`, `/member/office_tools`, `/member/emails_csv`)
+- [x] Tester la soumission de formulaire (`/member/find_me` avec numéro invalide)
+- [x] Tester les cas d'erreur (accès anonyme, accès regular user → 403)
+- [x] Documenter les 13 routes bloquées par `new Session()` (annexe #7) via `markTestSkipped`
+- [x] Ajouter les routes testables au SmokeTest (`find_me`, `office_tools`, `emails_csv`)
 
 ---
 
@@ -238,11 +240,11 @@ Améliorations du fichier `.github/workflows/ci.yaml` existant :
 
 | Métrique | Initial | Actuel | Cible après TODO |
 |----------|---------|--------|------------------|
-| Fichiers de test PHP | 2 | 14 | ~20 |
-| Méthodes de test | 16 | 320 | ~350+ |
+| Fichiers de test PHP | 2 | 13 | ~20 |
+| Tests PHPUnit (exécutés) | 16 | 108 (dont 13 skipped) | ~120+ |
 | Services testés | 1/14 | 5/14 | 5/14 |
 | Entités testées | 0/42 | 4/42 | 4/42 (les plus critiques) |
-| Contrôleurs testés | 1/43 | Smoke test (67 routes) | Smoke test + 1-2 détaillés |
+| Contrôleurs testés | 1/43 | Smoke (70 routes) + MembershipController | Smoke + 1-2 détaillés |
 | Specs Cypress | 3 | 3 | 5 |
 | Jobs CI | 3 | 4 (+ fast-tests) | 4 |
 
@@ -263,3 +265,5 @@ Améliorations du fichier `.github/workflows/ci.yaml` existant :
 | 5 | `templates/layoutlight.html.twig:9` | `{% include "_partial" %}` inclut un répertoire au lieu d'un fichier. Devrait être `{% include "_partial/style_config.html.twig" %}` comme dans `layout.html.twig`. Provoque un 500 sur toutes les pages utilisant `layoutlight` (widgets). | 🔴 Bug | ✅ corrigé (exception à la règle, bug avéré) |
 | 6 | `templates/openinghour/_partial/widget.html.twig:8` | `{% if kind_title %}` accède à `openingHourKind.name` sans vérifier que `openingHourKind` n'est pas `null`. Le contrôleur passe `null` quand aucun `opening_hour_kind_id` n'est fourni → 500. Devrait être `{% if kind_title and openingHourKind %}`. | 🔴 Bug | ✅ corrigé (exception à la règle, bug avéré) |
 | 7 | `src/Controller/*.php` (quasi tous) | Utilise `new Session()` (~120 occurrences) au lieu de `$request->getSession()`. Cela instancie un `NativeSessionStorage` qui contourne la configuration `session.storage.mock_file` de l'env test → 500 en test ("headers already sent"). Les routes GET qui passent par du code appelant `new Session()` (ex: `/` authentifié, `/codes/`) sont en erreur. **Les smoke tests de ces routes sont désactivés en attendant la correction.** | 🟡 Moyenne | ❌ |
+| 8 | `src/Controller/MembershipController.php:454` | `findUserHelpAction` fait un `render('default/find_user_number.html.twig')` mais le template n'existe pas → 500 systématique sur `/member/help_find_user`. | 🔴 Bug | ❌ |
+| 9 | `src/Controller/MembershipController.php:463` | `findUserAction` contient `die($request->getName())` — code de debug/mort qui retourne une réponse vide → route `/member/find_user` inutilisable. | 🔴 Bug | ❌ |

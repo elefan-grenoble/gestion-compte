@@ -68,6 +68,7 @@ class SmokeTest extends DatabasePrimer
             'resetting request' => ['/resetting/request'],
             'about' => ['/about'],
             'homepage (anonymous)' => ['/'],
+            'member find_me' => ['/member/find_me'],
         ];
     }
 
@@ -270,6 +271,8 @@ class SmokeTest extends DatabasePrimer
             'process updates' => ['/process/updates/'],
             'booking' => ['/booking/'],
             'card reader' => ['/card_reader/'],
+            'member office_tools' => ['/member/office_tools'],
+            'member emails_csv' => ['/member/emails_csv'],
         ];
     }
 
