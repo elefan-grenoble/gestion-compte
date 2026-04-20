@@ -2,8 +2,6 @@
 
 import {login} from "../login_reusables.cytools";
 
-const base_url = Cypress.config('baseUrl')
-
 // temporarily disable uncaught exception handling
 Cypress.on('uncaught:exception', (err, runnable) => {
     return false
@@ -20,30 +18,42 @@ describe('super admin can freeze and unfreeze user', function () {
         // navigate to users page
         cy.get('[data-cy=users_link]').click()
 
-        cy.get('[data-cy^=member_]').first().click()
+        // select a member that is NOT already frozen (no .frozen class on the row)
+        cy.get('[data-cy^=member_]').not('.frozen').first().click()
 
-        // open on freeze options
-        cy.get('[data-cy=freeze]').click()
-        cy.log('click on freeze immediately option')
-        cy.get('[data-cy=open_freeze_member_confirmation_modal]').click()
+        // wait for the member show page to be fully loaded
+        cy.get('[data-cy=freeze]').should('exist')
 
-        cy.log('click on modal confirmation button')
-        cy.get('[data-cy=freeze_member_confirmation_modal_confirm]').click()
+        // ---- FREEZE ----
+        cy.log('open freeze collapsible')
+        cy.get('[data-cy=freeze] .collapsible-header').click()
 
-        cy.log('search for "gelé" text')
-        cy.contains('gelé')
+        cy.log('wait for the "freeze immediately" button to be visible')
+        cy.get('[data-cy=open_freeze_member_confirmation_modal]').should('be.visible').click()
 
-        cy.log('open on freeze options')
-        cy.get('[data-cy=freeze]').click()
+        cy.log('wait for modal to open, then confirm')
+        cy.get('[data-cy=freeze_member_confirmation_modal_confirm]').should('be.visible').click()
 
-        cy.log('click on unfreeze button')
-        cy.get('[data-cy=open_unfreeze_member_confirmation_modal]').click()
+        cy.log('verify freeze succeeded: badge "gelé" should appear in the beneficiary card')
+        // wait for page reload after POST+redirect: the collapsible header text changes
+        cy.get('[data-cy=freeze] .collapsible-header').should('contain', 'Dégeler')
+        // the beneficiary card badge should contain "gelé"
+        cy.get('.card .badge').should('contain', 'gelé')
 
-        cy.log('click on modal confirmation button')
-        cy.get('[data-cy=unfreeze_member_confirmation_modal_confirm]').click()
+        // ---- UNFREEZE ----
+        cy.log('open freeze collapsible')
+        cy.get('[data-cy=freeze] .collapsible-header').click()
 
-        cy.log('the text "gelé" should not be on the page')
-        cy.contains(/(?<!dé)gelé/).should('not.exist')
+        cy.log('wait for the "unfreeze immediately" button to be visible')
+        cy.get('[data-cy=open_unfreeze_member_confirmation_modal]').should('be.visible').click()
+
+        cy.log('wait for modal to open, then confirm')
+        cy.get('[data-cy=unfreeze_member_confirmation_modal_confirm]').should('be.visible').click()
+
+        cy.log('verify unfreeze succeeded: header text should revert to "Geler"')
+        cy.get('[data-cy=freeze] .collapsible-header').should('contain', 'Geler')
+        // the "gelé" badge should no longer exist
+        cy.get('.card .badge').should('not.contain', 'gelé')
     })
 
 })
