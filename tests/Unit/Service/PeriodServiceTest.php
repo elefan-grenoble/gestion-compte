@@ -148,12 +148,7 @@ class PeriodServiceTest extends TestCase
         $position->setShifter($beneficiary);
         $period->addPosition($position);
 
-        // BUG: due to operator precedence ('and'/'or' vs '&&'/'||'),
-        // $shifterIsFlying is always false when fly_and_fixed_entity_flying == 'Membership'.
-        // The 'or' branch result is not assigned to $shifterIsFlying.
-        // Expected: true. Actual: false (bug).
-        // See issue #4 in TODO_TESTS.md
-        $this->assertFalse($service->hasWarningStatus($period));
+        $this->assertTrue($service->hasWarningStatus($period));
     }
 
     public function testHasWarningStatusWithFlyingBeneficiary(): void

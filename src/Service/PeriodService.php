@@ -46,7 +46,7 @@ class PeriodService
         if ($this->use_fly_and_fixed) {
             foreach ($period->getPositions() as $position) {
                 if ($shifter = $position->getShifter()) {
-                    $shifterIsFlying = ($this->fly_and_fixed_entity_flying == 'Beneficiary' and $shifter->isFlying()) or ($this->fly_and_fixed_entity_flying == 'Membership' and $shifter->getMembership()->isFlying());
+                    $shifterIsFlying = ($this->fly_and_fixed_entity_flying == 'Beneficiary' && $shifter->isFlying()) || ($this->fly_and_fixed_entity_flying == 'Membership' && $shifter->getMembership()->isFlying());
                     if ((($weekCycle && $position->getWeekCycle()==$weekCycle) or !$weekCycle)
                         and ($shifterIsFlying
                         or $shifter->getMembership()->isFrozen()
