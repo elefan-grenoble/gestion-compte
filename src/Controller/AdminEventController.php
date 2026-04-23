@@ -20,7 +20,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 
@@ -86,9 +85,9 @@ class AdminEventController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $eventsFuture = $em->getRepository('App:Event')->findFutures();
-        $eventsOngoing = $em->getRepository('App:Event')->findOngoing();
-        $eventsPast = $em->getRepository('App:Event')->findPast(null, 10);  # only the 10 last
+        $eventsFuture = $em->getRepository(Event::class)->findFutures();
+        $eventsOngoing = $em->getRepository(Event::class)->findOngoing();
+        $eventsPast = $em->getRepository(Event::class)->findPast(null, 10);  # only the 10 last
 
         return $this->render('admin/event/index.html.twig', array(
             'eventsFuture' => $eventsFuture,
@@ -111,7 +110,7 @@ class AdminEventController extends AbstractController
         $sort = 'date';
         $order = 'DESC';
 
-        $qb = $em->getRepository('App:Event')->createQueryBuilder('e')
+        $qb = $em->getRepository(Event::class)->createQueryBuilder('e')
             ->orderBy('e.' . $sort, $order);
 
         if ($filter['kind']) {
@@ -148,7 +147,6 @@ class AdminEventController extends AbstractController
      */
     public function newAction(Request $request)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -161,7 +159,7 @@ class AdminEventController extends AbstractController
             $em->persist($event);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'L\'événement a bien été créé !');
+            $this->addFlash('success', 'L\'événement a bien été créé !');
             return $this->redirectToRoute('admin_event_edit', array('id' => $event->getId()));
         }
 
@@ -178,7 +176,6 @@ class AdminEventController extends AbstractController
      */
     public function editAction(Request $request, Event $event)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -190,7 +187,7 @@ class AdminEventController extends AbstractController
             $em->persist($event);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'L\'événement a bien été édité !');
+            $this->addFlash('success', 'L\'événement a bien été édité !');
             return $this->redirectToRoute('admin_event_index');
         }
 
@@ -209,7 +206,6 @@ class AdminEventController extends AbstractController
      */
     public function deleteAction(Request $request, Event $event)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $form = $this->getDeleteForm($event);
@@ -219,7 +215,7 @@ class AdminEventController extends AbstractController
             $em->remove($event);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'L\'événement a bien été supprimé !');
+            $this->addFlash('success', 'L\'événement a bien été supprimé !');
         }
 
         return $this->redirectToRoute('admin_event_index');
@@ -235,7 +231,7 @@ class AdminEventController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $proxies = $em->getRepository('App:Proxy')->findAll();
+        $proxies = $em->getRepository(Proxy::class)->findAll();
 
 
         return $this->render('admin/event/proxy/list.html.twig', array(
@@ -268,7 +264,6 @@ class AdminEventController extends AbstractController
      */
     public function editEventProxyAction(Event $event, Proxy $proxy, Request $request, EventDispatcherInterface $event_dispatcher)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $event = $proxy->getEvent();
@@ -277,21 +272,21 @@ class AdminEventController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($proxy->getOwner()) {
-                $existing_proxy = $em->getRepository('App:Proxy')->findOneBy(array("event"=>$event,"owner"=>$proxy->getOwner()));
+                $existing_proxy = $em->getRepository(Proxy::class)->findOneBy(array("event"=>$event,"owner"=>$proxy->getOwner()));
                 if ($existing_proxy && $existing_proxy != $proxy) {
-                    $session->getFlashBag()->add('error', $existing_proxy->getOwner()->getFirstname().' accepte déjà une procuration.');
+                    $this->addFlash('error', $existing_proxy->getOwner()->getFirstname().' accepte déjà une procuration.');
                     return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
                 }
             }
             if ($proxy->getGiver()) {
-                $existing_proxy = $em->getRepository('App:Proxy')->findOneBy(array("event"=>$event,"giver"=>$proxy->getGiver()));
+                $existing_proxy = $em->getRepository(Proxy::class)->findOneBy(array("event"=>$event,"giver"=>$proxy->getGiver()));
                 if ($existing_proxy && $existing_proxy != $proxy) {
-                    $session->getFlashBag()->add('error', $existing_proxy->getGiver()->getFirstname().' donne déjà une procuration.');
+                    $this->addFlash('error', $existing_proxy->getGiver()->getFirstname().' donne déjà une procuration.');
                     return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
                 }
             }
             if (!$proxy->getOwner() && $proxy->getGiver()) {
-                $proxy_waiting = $em->getRepository('App:Proxy')->findOneBy(array("event"=>$event,"giver"=>null));
+                $proxy_waiting = $em->getRepository(Proxy::class)->findOneBy(array("event"=>$event,"giver"=>null));
                 if ($proxy_waiting && $proxy_waiting != $proxy){
                     $proxy_waiting->setGiver($proxy->getGiver());
                     $em->persist($proxy_waiting);
@@ -300,18 +295,18 @@ class AdminEventController extends AbstractController
 
                     $event_dispatcher->dispatch(new EventProxyCreatedEvent($proxy_waiting), EventProxyCreatedEvent::NAME);
 
-                    $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' deleted');
-                    $session->getFlashBag()->add('success', 'proxy '.$proxy_waiting->getId().' updated');
-                    $session->getFlashBag()->add('success', $proxy_waiting->getGiver().' => '.$proxy_waiting->getOwner());
+                    $this->addFlash('success', 'proxy '.$proxy->getId().' deleted');
+                    $this->addFlash('success', 'proxy '.$proxy_waiting->getId().' updated');
+                    $this->addFlash('success', $proxy_waiting->getGiver().' => '.$proxy_waiting->getOwner());
                     return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
                 }
                 $em->persist($proxy);
                 $em->flush();
 
-                $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' saved');
+                $this->addFlash('success', 'proxy '.$proxy->getId().' saved');
                 return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
             } elseif ($proxy->getOwner() && !$proxy->getGiver()) {
-                $proxy_waiting = $em->getRepository('App:Proxy')->findOneBy(array("event"=>$event,"owner"=>null));
+                $proxy_waiting = $em->getRepository(Proxy::class)->findOneBy(array("event"=>$event,"owner"=>null));
                 if ($proxy_waiting instanceof Proxy && $proxy_waiting !== $proxy) {
                     $proxy_waiting->setOwner($proxy->getOwner());
                     $em->persist($proxy_waiting);
@@ -320,15 +315,15 @@ class AdminEventController extends AbstractController
 
                     $event_dispatcher->dispatch(new EventProxyCreatedEvent($proxy_waiting), EventProxyCreatedEvent::NAME);
 
-                    $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' deleted');
-                    $session->getFlashBag()->add('success', 'proxy '.$proxy_waiting->getId().' updated');
-                    $session->getFlashBag()->add('success', $proxy_waiting->getGiver().' => '.$proxy_waiting->getOwner());
+                    $this->addFlash('success', 'proxy '.$proxy->getId().' deleted');
+                    $this->addFlash('success', 'proxy '.$proxy_waiting->getId().' updated');
+                    $this->addFlash('success', $proxy_waiting->getGiver().' => '.$proxy_waiting->getOwner());
                     return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
                 }
                 $em->persist($proxy);
                 $em->flush();
 
-                $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' saved');
+                $this->addFlash('success', 'proxy '.$proxy->getId().' saved');
                 return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
             } elseif ($proxy->getOwner() && $proxy->getGiver()) {
                 $em->persist($proxy);
@@ -336,8 +331,8 @@ class AdminEventController extends AbstractController
 
                 $event_dispatcher->dispatch(new EventProxyCreatedEvent($proxy), EventProxyCreatedEvent::NAME);
 
-                $session->getFlashBag()->add('success', 'proxy '.$proxy->getId().' saved');
-                $session->getFlashBag()->add('success', $proxy->getGiver().' => '.$proxy->getOwner());
+                $this->addFlash('success', 'proxy '.$proxy->getId().' saved');
+                $this->addFlash('success', $proxy->getGiver().' => '.$proxy->getOwner());
                 return $this->redirectToRoute('admin_event_proxies_list',array('id'=>$event->getId()));
             }
 
@@ -359,7 +354,6 @@ class AdminEventController extends AbstractController
      */
     public function deleteEventProxyAction(Event $event, Proxy $proxy, Request $request)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $form = $this->getProxyDeleteForm($proxy);
@@ -369,7 +363,7 @@ class AdminEventController extends AbstractController
             $em->remove($proxy);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'La procuration a bien été supprimée !');
+            $this->addFlash('success', 'La procuration a bien été supprimée !');
         }
 
         return $this->redirectToRoute('admin_event_proxies_list', array('id' => $proxy->getEvent()->getId()));
@@ -388,7 +382,7 @@ class AdminEventController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $beneficiaries_request = $em->getRepository("App:Beneficiary")->createQueryBuilder('b')
+        $beneficiaries_request = $em->getRepository(Beneficiary::class)->createQueryBuilder('b')
             ->leftJoin('b.membership', 'm')
             ->leftJoin("m.registrations", "r")
             ->andWhere("r.date is NOT NULL" )

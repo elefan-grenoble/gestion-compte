@@ -39,7 +39,7 @@ class InitShiftFreeLogShiftStringFieldCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $countShiftFreeLogs = 0;
-        $shiftFreeLogs = $this->em->getRepository('App:ShiftFreeLog')->findAll();
+        $shiftFreeLogs = $this->em->getRepository(ShiftFreeLog::class)->findAll();
 
         foreach ($shiftFreeLogs as $shiftFreeLog) {
             if (!$shiftFreeLog->getShiftString()) {

@@ -50,7 +50,7 @@ class InitTimeLogCommand extends Command
     {
         $countShiftLogs = 0;
         $countCycleBeginning = 0;
-        $members = $this->em->getRepository('App:Membership')->findAll();
+        $members = $this->em->getRepository(Membership::class)->findAll();
         $beginningOfLastCycle = new \DateTime('28 days ago');
         $beginningOfLastCycle->setTime(0, 0, 0);
 
@@ -58,7 +58,7 @@ class InitTimeLogCommand extends Command
             if ($member->getFirstShiftDate()) {
                 $previous_cycle_start = $this->membership_service->getStartOfCycle($member, -1);
                 $current_cycle_end = $this->membership_service->getEndOfCycle($member, 0);
-                $shifts = $this->em->getRepository('App:Shift')->findShiftsForMembership($member, $previous_cycle_start, $current_cycle_end);
+                $shifts = $this->em->getRepository(Shift::class)->findShiftsForMembership($member, $previous_cycle_start, $current_cycle_end);
                 foreach ($shifts as $shift) {
                     $log = $this->time_log_service->initShiftValidatedTimeLog($shift, $shift->getStart());
                     $this->em->persist($log);

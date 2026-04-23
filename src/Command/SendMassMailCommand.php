@@ -16,6 +16,8 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Validator\Constraints\Date;
+use App\Entity\Membership;
+use App\Entity\User;
 
 class SendMassMailCommand extends Command
 {
@@ -90,7 +92,7 @@ class SendMassMailCommand extends Command
             /*$template = $this->getContainer()->get('twig')->createTemplate($body);
             $body = $template->render(array());*/
         }
-        $qb = $this->em->getRepository("App:Membership")->createQueryBuilder('m');
+        $qb = $this->em->getRepository(Membership::class)->createQueryBuilder('m');
         $qb = $qb->andWhere('m.withdrawn = 0'); //do not include withdrawn
         if (!$frozen){
             $output->writeln('<fg=cyan;>>>></><fg=yellow;> ne pas inclure les comptes gelés </>');
@@ -122,7 +124,7 @@ class SendMassMailCommand extends Command
                 $to[] = $beneficiary->getEmail();
         }
         if (!$exclude_non_member){
-            $non_members = $this->em->getRepository("App:User")->findNonMembers(true);
+            $non_members = $this->em->getRepository(User::class)->findNonMembers(true);
             foreach ($non_members as $user){
                 $to[] = $user->getEmail();
             }

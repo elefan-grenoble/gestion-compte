@@ -12,7 +12,6 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
@@ -93,7 +92,6 @@ class JobController extends AbstractController
      */
     public function newAction(Request $request)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -109,7 +107,7 @@ class JobController extends AbstractController
             $em->persist($job);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le nouveau poste a été créé !');
+            $this->addFlash('success', 'Le nouveau poste a été créé !');
             return $this->redirectToRoute('job_list');
         }
 
@@ -126,7 +124,6 @@ class JobController extends AbstractController
      */
     public function editAction(Request $request, Job $job)
     {
-        $session = new Session();
 
         $em = $this->getDoctrine()->getManager();
         $form = $this->createForm(JobType::class, $job);
@@ -137,7 +134,7 @@ class JobController extends AbstractController
             $em->persist($job);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le poste a bien été édité !');
+            $this->addFlash('success', 'Le poste a bien été édité !');
             return $this->redirectToRoute('job_list');
         }
 
@@ -157,7 +154,6 @@ class JobController extends AbstractController
      */
     public function deleteAction(Request $request,Job $job)
     {
-        $session = new Session();
 
         $form = $this->getDeleteForm($job);
         $form->handleRequest($request);
@@ -166,7 +162,7 @@ class JobController extends AbstractController
             $em = $this->getDoctrine()->getManager();
             $em->remove($job);
             $em->flush();
-            $session->getFlashBag()->add('success', 'Le poste a bien été supprimée !');
+            $this->addFlash('success', 'Le poste a bien été supprimée !');
         }
 
         return $this->redirectToRoute('job_list');

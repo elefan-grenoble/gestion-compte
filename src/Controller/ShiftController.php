@@ -26,13 +26,13 @@ use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\RedirectResponse;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use App\Entity\Beneficiary;
 
 
 /**
@@ -66,14 +66,13 @@ class ShiftController extends AbstractController
      */
     public function newAction(Request $request, ShiftService $shift_service)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         $job = $em->getRepository(Job::class)->findOneBy(array());
 
         if (!$job) {
-            $session->getFlashBag()->add('warning', 'Commençons par créer un poste de bénévolat');
+            $this->addFlash('warning', 'Commençons par créer un poste de bénévolat');
             return $this->redirectToRoute('job_new');
         }
 
@@ -118,11 +117,11 @@ class ShiftController extends AbstractController
             }
         } else {
             if ($success) {
-                $session->getFlashBag()->add('success', $message);
+                $this->addFlash('success', $message);
                 return $this->redirectToRoute('booking_admin');
             } else {
                 if ($form->isSubmitted()) {
-                    $session->getFlashBag()->add('error', $message);
+                    $this->addFlash('error', $message);
                 }
                 return $this->render('admin/shift/new.html.twig', array(
                     "form" => $form->createView()
@@ -139,7 +138,6 @@ class ShiftController extends AbstractController
      */
     public function bookShiftAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher): Response
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -147,7 +145,7 @@ class ShiftController extends AbstractController
         $beneficiaryId = $content->beneficiaryId;
         $isFixe = $content->typeService;
 
-        $beneficiary = $em->getRepository('App:Beneficiary')->find($beneficiaryId);
+        $beneficiary = $em->getRepository(Beneficiary::class)->find($beneficiaryId);
 
         // Check if the shift is bookable by the given beneficiary
         // Also check if the beneficiary belongs to the same membership as the current user
@@ -155,7 +153,7 @@ class ShiftController extends AbstractController
             || !$shift_service->isShiftBookable($shift, $beneficiary)
             || !$this->isGranted(MembershipVoter::BOOK, $beneficiary->getMembership())
         ) {
-            $session->getFlashBag()->add("error", "Impossible de réserver ce créneau");
+            $this->addFlash("error", "Impossible de réserver ce créneau");
             return new Response($this->generateUrl('booking'), 205);
         }
 
@@ -180,7 +178,7 @@ class ShiftController extends AbstractController
 
         $event_dispatcher->dispatch(new ShiftBookedEvent($shift, false), ShiftBookedEvent::NAME);
 
-        $session->getFlashBag()->add("success", "Ce créneau a bien été réservé !");
+        $this->addFlash("success", "Ce créneau a bien été réservé !");
         return new Response($this->generateUrl('homepage'), 200);
     }
 
@@ -192,7 +190,6 @@ class ShiftController extends AbstractController
      */
     public function bookShiftAdminAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -262,7 +259,7 @@ class ShiftController extends AbstractController
                 return new JsonResponse(array('message' => $message), 400);
             }
         } else {
-            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+            $this->addFlash($success ? 'success' : 'error', $message);
             return $this->redirectToRoute('booking_admin');
         }
     }
@@ -275,7 +272,6 @@ class ShiftController extends AbstractController
      */
     public function freeShiftAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -289,7 +285,7 @@ class ShiftController extends AbstractController
             // check if beneficiary can free this shift
             $shift_can_be_freed = $shift_service->canFreeShift($current_user->getBeneficiary(), $shift);
             if (!$shift_can_be_freed['result']) {
-                $session->getFlashBag()->add("error", $shift_can_be_freed['message'] || "Impossible d'annuler ce créneau.");
+                $this->addFlash("error", $shift_can_be_freed['message'] || "Impossible d'annuler ce créneau.");
                 return $this->redirectToRoute("homepage");
             }
 
@@ -307,10 +303,10 @@ class ShiftController extends AbstractController
 
             $event_dispatcher->dispatch(new ShiftFreedEvent($shift, $beneficiary, $fixe, $reason), ShiftFreedEvent::NAME);
 
-            $session->getFlashBag()->add('success', "Le créneau a été annulé !");
+            $this->addFlash('success', "Le créneau a été annulé !");
             if ($this->use_time_log_saving) {
-                if (count($em->getRepository('App:TimeLog')->findAll($member, $shift, TimeLog::TYPE_SAVING))) {
-                    $session->getFlashBag()->add("warning", "Grâce au compteur épargne, votre créneau a été comptabilisé !<br />En échange, votre compteur épargne a été décrémenté de la durée du créneau.");
+                if (count($em->getRepository(TimeLog::class)->findAll($member, $shift, TimeLog::TYPE_SAVING))) {
+                    $this->addFlash("warning", "Grâce au compteur épargne, votre créneau a été comptabilisé !<br />En échange, votre compteur épargne a été décrémenté de la durée du créneau.");
                 }
             }
         }
@@ -326,7 +322,6 @@ class ShiftController extends AbstractController
      */
     public function freeShiftAdminAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -376,7 +371,7 @@ class ShiftController extends AbstractController
                 $message = "Le créneau a bien été libéré !";
 
                 if ($this->use_time_log_saving) {
-                    if (count($em->getRepository('App:TimeLog')->findAll($member, $shift, TimeLog::TYPE_SAVING))) {
+                    if (count($em->getRepository(TimeLog::class)->findAll($member, $shift, TimeLog::TYPE_SAVING))) {
                         $message += "Grâce au compteur épargne, le créneau a été comptabilisé (en échange, le compteur épargne a été décrémenté de la durée du créneau).";
                     }
                 }
@@ -403,7 +398,7 @@ class ShiftController extends AbstractController
                 return new JsonResponse(array('message' => $message), 400);
             }
         } else {
-            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+            $this->addFlash($success ? 'success' : 'error', $message);
             $referer = $request->headers->get('referer');
             return new RedirectResponse($referer);
         }
@@ -417,7 +412,6 @@ class ShiftController extends AbstractController
      */
     public function validateShiftAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -482,7 +476,7 @@ class ShiftController extends AbstractController
                 return new JsonResponse(array('message' => $message), 400);
             }
         } else {
-            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+            $this->addFlash($success ? 'success' : 'error', $message);
             $referer = $request->headers->get('referer');
             return new RedirectResponse($referer);
         }
@@ -495,20 +489,19 @@ class ShiftController extends AbstractController
      */
     public function acceptReservedShiftAction(Request $request, Shift $shift, EventDispatcherInterface $event_dispatcher)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         if (!$shift->getId()) {
-            $session->getFlashBag()->add('error', "Créneau pas trouvé");
+            $this->addFlash('error', "Créneau pas trouvé");
             return $this->redirectToRoute("homepage");
         }
         if (!$shift->getLastShifter()) {
-            $session->getFlashBag()->add('error', "Oups, ce créneau a déjà été confirmé / refusé, ou le délai de reservation est écoulé.");
+            $this->addFlash('error', "Oups, ce créneau a déjà été confirmé / refusé, ou le délai de reservation est écoulé.");
             return $this->redirectToRoute("homepage");
         }
         if (!$this->isGranted('accept', $shift)) {
-            $session->getFlashBag()->add("error", "Impossible d'accepter la réservation");
+            $this->addFlash("error", "Impossible d'accepter la réservation");
             return $this->redirectToRoute("homepage");
         }
 
@@ -524,7 +517,7 @@ class ShiftController extends AbstractController
 
         $event_dispatcher->dispatch(new ShiftBookedEvent($shift, false), ShiftBookedEvent::NAME);
 
-        $session->getFlashBag()->add('success', "Créneau réservé ! Merci " . $shift->getShifter()->getFirstname());
+        $this->addFlash('success', "Créneau réservé ! Merci " . $shift->getShifter()->getFirstname());
         return $this->redirectToRoute('homepage');
     }
 
@@ -535,20 +528,19 @@ class ShiftController extends AbstractController
      */
     public function rejectReservedShiftAction(Request $request, Shift $shift)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
         if (!$shift->getId()) {
-            $session->getFlashBag()->add('error', "Créneau pas trouvé");
+            $this->addFlash('error', "Créneau pas trouvé");
             return $this->redirectToRoute("homepage");
         }
         if (!$shift->getLastShifter()) {
-            $session->getFlashBag()->add('error', "Oups, ce créneau a déjà été confirmé / refusé, ou le délai de reservation est écoulé.");
+            $this->addFlash('error', "Oups, ce créneau a déjà été confirmé / refusé, ou le délai de reservation est écoulé.");
             return $this->redirectToRoute("homepage");
         }
         if (!$this->isGranted('reject', $shift)) {
-            $session->getFlashBag()->add("error", "Impossible de rejeter la réservation");
+            $this->addFlash("error", "Impossible de rejeter la réservation");
             return $this->redirectToRoute("homepage");
         }
 
@@ -558,8 +550,8 @@ class ShiftController extends AbstractController
         $em->persist($shift);
         $em->flush();
 
-        $session->getFlashBag()->add('success', "Créneau libéré !");
-        $session->getFlashBag()->add('warning', "Pense à revenir dans quelques jours choisir un autre créneau pour ton bénévolat :)");
+        $this->addFlash('success', "Créneau libéré !");
+        $this->addFlash('warning', "Pense à revenir dans quelques jours choisir un autre créneau pour ton bénévolat :)");
         return $this->redirectToRoute('homepage');
     }
 
@@ -571,7 +563,6 @@ class ShiftController extends AbstractController
      */
     public function deleteShiftAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $form = $this->createShiftDeleteForm($shift);
@@ -612,7 +603,7 @@ class ShiftController extends AbstractController
                 return new JsonResponse(array('message'=>$message), 400);
             }
         } else {
-            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+            $this->addFlash($success ? 'success' : 'error', $message);
             return $this->redirectToRoute('booking_admin');
         }
     }
@@ -622,17 +613,16 @@ class ShiftController extends AbstractController
      */
     public function contactFormAction(Request $request, Shift $shift, MailerInterface $mailer)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
-        $coShifters = $em->getRepository('App:Beneficiary')->findCoShifters($shift);
+        $coShifters = $em->getRepository(Beneficiary::class)->findCoShifters($shift);
         $form = $this->createShiftContactForm($shift, $coShifters);
 
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             $beneficiaries = $form->get('to')->getData();
             $from = $form->get('from')->getData();
-            $from = $em->getRepository('App:Beneficiary')->findOneBy(array('id' => $from));
+            $from = $em->getRepository(Beneficiary::class)->findOneBy(array('id' => $from));
             $emails = array();
             $firstnames = array();
             foreach ($beneficiaries as $beneficiary) {
@@ -665,7 +655,7 @@ class ShiftController extends AbstractController
                 $firstnames = $firstnames[0];
             }
 
-            $session->getFlashBag()->add('success', 'Ton message a été transmis à ' . $firstnames);
+            $this->addFlash('success', 'Ton message a été transmis à ' . $firstnames);
             return $this->redirectToRoute('homepage');
         }
 
@@ -692,9 +682,9 @@ class ShiftController extends AbstractController
 
         if ($job_id) {
             $em = $this->getDoctrine()->getManager();
-            $job = $em->getRepository('App:Job')->find($job_id);
+            $job = $em->getRepository(Job::class)->find($job_id);
             if ($job) {
-                $shifts = $em->getRepository('App:Shift')->findFutures(null, $job);
+                $shifts = $em->getRepository(Shift::class)->findFutures(null, $job);
                 foreach ($shifts as $shift) {
                     $day = $shift->getStart()->format("d m Y");
                     $interval = $shift->getIntervalCode();

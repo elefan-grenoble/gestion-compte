@@ -7,7 +7,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Component\HttpFoundation\Session\Session;
 
 /**
  * Admin Shiftexemption controller.
@@ -26,7 +25,7 @@ class AdminShiftExemptionController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $shiftExemptions = $em->getRepository('App:ShiftExemption')->findAll();
+        $shiftExemptions = $em->getRepository(ShiftExemption::class)->findAll();
 
         return $this->render('admin/shiftexemption/index.html.twig', array(
             'shiftExemptions' => $shiftExemptions,
@@ -41,7 +40,6 @@ class AdminShiftExemptionController extends AbstractController
      */
     public function newAction(Request $request)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $shiftExemption = new Shiftexemption();
@@ -52,7 +50,7 @@ class AdminShiftExemptionController extends AbstractController
             $em->persist($shiftExemption);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le nouveau motif d\'exemption a été créé !');
+            $this->addFlash('success', 'Le nouveau motif d\'exemption a été créé !');
             return $this->redirectToRoute('admin_shiftexemption_index');
         }
 
@@ -70,7 +68,6 @@ class AdminShiftExemptionController extends AbstractController
      */
     public function editAction(Request $request, ShiftExemption $shiftExemption)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $form = $this->createForm('App\Form\ShiftExemptionType', $shiftExemption);
@@ -79,7 +76,7 @@ class AdminShiftExemptionController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le motif d\'exemption a bien été édité !');
+            $this->addFlash('success', 'Le motif d\'exemption a bien été édité !');
             return $this->redirectToRoute('admin_shiftexemption_index');
         }
 
@@ -98,7 +95,6 @@ class AdminShiftExemptionController extends AbstractController
      */
     public function deleteAction(Request $request, ShiftExemption $shiftExemption)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $form = $this->getDeleteForm($shiftExemption);
@@ -108,7 +104,7 @@ class AdminShiftExemptionController extends AbstractController
             // TODO: error 500 if shiftExemption is used in membershipShiftExemption
             $em->remove($shiftExemption);
             $em->flush();
-            $session->getFlashBag()->add('success', 'Le motif d\'exemption bien été supprimé !');
+            $this->addFlash('success', 'Le motif d\'exemption bien été supprimé !');
         }
 
         return $this->redirectToRoute('admin_shiftexemption_index');

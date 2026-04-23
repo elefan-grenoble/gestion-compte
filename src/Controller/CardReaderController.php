@@ -13,7 +13,8 @@ use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Session;
+use App\Entity\DynamicContent;
+use App\Entity\Shift;
 
 /**
  * Booking controller.
@@ -40,13 +41,13 @@ class CardReaderController extends AbstractController
         $em = $this->getDoctrine()->getManager();
 
         // in progress shifts
-        $shifts_in_progress = $em->getRepository('App:Shift')->findInProgress();
+        $shifts_in_progress = $em->getRepository(Shift::class)->findInProgress();
         $buckets_in_progress = $shift_service->generateShiftBuckets($shifts_in_progress);
         // upcoming shifts
-        $shifts_upcoming = $em->getRepository('App:Shift')->findUpcomingToday();
+        $shifts_upcoming = $em->getRepository(Shift::class)->findUpcomingToday();
         $buckets_upcoming = $shift_service->generateShiftBuckets($shifts_upcoming);
 
-        $dynamicContent = $em->getRepository('App:DynamicContent')->findOneByCode('CARD_READER')->getContent();
+        $dynamicContent = $em->getRepository(DynamicContent::class)->findOneByCode('CARD_READER')->getContent();
 
         return $this->render('card_reader/index.html.twig', [
             "buckets_in_progress" => $buckets_in_progress,
@@ -60,7 +61,6 @@ class CardReaderController extends AbstractController
      */
     public function checkAction(Request $request, MembershipService $membership_service, EventDispatcherInterface $event_dispatcher)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $code = $request->get('swipe_code');
@@ -73,9 +73,9 @@ class CardReaderController extends AbstractController
             return $this->redirectToRoute('card_reader_index');
         }
         $code = substr($code, 0, -1);  // remove controle
-        $card = $em->getRepository('App:SwipeCard')->findOneBy(array('code' => $code, 'enable' => 1));
+        $card = $em->getRepository(SwipeCard::class)->findOneBy(array('code' => $code, 'enable' => 1));
         if (!$card) {
-            $session->getFlashBag()->add("error", "Oups, ce badge n'est pas actif ou n'existe pas");
+            $this->addFlash("error", "Oups, ce badge n'est pas actif ou n'existe pas");
             return $this->redirectToRoute('card_reader_index');
         }
 
@@ -86,7 +86,7 @@ class CardReaderController extends AbstractController
         // validate beneficiary ongoing shift(s)
         $now = new \Datetime('now');
         $now_plus_ten = new \Datetime('now +10 minutes');
-        $ongoingShifts = $em->getRepository('App:Shift')->findShiftsForBeneficiaries(new ArrayCollection([$beneficiary]), null, null, $now_plus_ten, $now);
+        $ongoingShifts = $em->getRepository(Shift::class)->findShiftsForBeneficiaries(new ArrayCollection([$beneficiary]), null, null, $now_plus_ten, $now);
         $ongoingShiftsValidated = 0;
         if ($ongoingShifts) {
             foreach ($ongoingShifts as $shift) {

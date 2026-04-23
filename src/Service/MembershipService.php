@@ -10,9 +10,11 @@ use App\Entity\Shift;
 use App\Entity\ShiftBucket;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
-use phpDocumentor\Reflection\Types\Array_;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use \Datetime;
+use App\Entity\PeriodPosition;
+use App\Entity\PeriodPositionFreeLog;
+use App\Entity\ShiftFreeLog;
 
 class MembershipService
 {
@@ -41,7 +43,7 @@ class MembershipService
     public function getAutocompleteMemberships()
     {
         $returnArray = array();
-        $memberships = $this->em->getRepository('App:Membership')->findAllActive();
+        $memberships = $this->em->getRepository(Membership::class)->findAllActive();
 
         foreach ($memberships as $membership) {
             $returnArray[$membership->getMemberNumberWithBeneficiaryListString()] = '';
@@ -185,14 +187,14 @@ class MembershipService
         $shift_cycle = $this->getCycleNumber($member, $date);
         $cycle_start = $this->getStartOfCycle($member, $shift_cycle);
         $cycle_end = $this->getEndOfCycle($member, $shift_cycle);
-        return $this->em->getRepository('App:Shift')->getMemberShiftMissedCount($member, $cycle_start, $cycle_end);
+        return $this->em->getRepository(Shift::class)->getMemberShiftMissedCount($member, $cycle_start, $cycle_end);
     }
 
     public function getCycleShiftFreedCount(Membership $member, $date, $less_than_min_time_in_advance_days = null) {
         $shift_cycle = $this->getCycleNumber($member, $date);
         $cycle_start = $this->getStartOfCycle($member, $shift_cycle);
         $cycle_end = $this->getEndOfCycle($member, $shift_cycle);
-        return $this->em->getRepository('App:ShiftFreeLog')->getMemberShiftFreedCount($member, $cycle_start, $cycle_end, $less_than_min_time_in_advance_days);
+        return $this->em->getRepository(ShiftFreeLog::class)->getMemberShiftFreedCount($member, $cycle_start, $cycle_end, $less_than_min_time_in_advance_days);
     }
 
     /**
@@ -214,22 +216,22 @@ class MembershipService
 
     public function getPeriodPositions(Membership $member)
     {
-        return $this->em->getRepository('App:PeriodPosition')->findByBeneficiaries($member->getBeneficiaries());
+        return $this->em->getRepository(PeriodPosition::class)->findByBeneficiaries($member->getBeneficiaries());
     }
 
     public function getShiftFreeLogs(Membership $member)
     {
-        return $this->em->getRepository('App:ShiftFreeLog')->getMemberShiftFreed($member);
+        return $this->em->getRepository(ShiftFreeLog::class)->getMemberShiftFreed($member);
     }
 
     public function getPeriodPositionFreeLogs(Membership $member)
     {
-        return $this->em->getRepository('App:PeriodPositionFreeLog')->getMemberPeriodPositionFreed($member);
+        return $this->em->getRepository(PeriodPositionFreeLog::class)->getMemberPeriodPositionFreed($member);
     }
 
     public function memberHasShiftsOnExemptionPeriod(MembershipShiftExemption $membershipShiftExemption)
     {
-        $shifts = $this->em->getRepository('App:Shift')->findInProgressAndUpcomingShiftsForMembership($membershipShiftExemption->getMembership());
+        $shifts = $this->em->getRepository(Shift::class)->findInProgressAndUpcomingShiftsForMembership($membershipShiftExemption->getMembership());
         return $shifts->exists(function($key, $value) use ($membershipShiftExemption) {
             return $membershipShiftExemption->isCurrent($value->getStart());
         });

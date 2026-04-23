@@ -10,7 +10,6 @@ use App\Entity\ShiftBucket;
 use App\Service\MembershipService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
-use phpDocumentor\Reflection\Types\Array_;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 class BeneficiaryService
@@ -36,7 +35,7 @@ class BeneficiaryService
     public function getAutocompleteBeneficiaries()
     {
         $returnArray = array();
-        $beneficiaries = $this->em->getRepository('App:Beneficiary')->findAllActive();
+        $beneficiaries = $this->em->getRepository(Beneficiary::class)->findAllActive();
 
         foreach ($beneficiaries as $beneficiary) {
             $returnArray[$beneficiary->getDisplayNameWithMemberNumber()] = '';
@@ -51,7 +50,7 @@ class BeneficiaryService
         $cycle_start = $this->membershipService->getStartOfCycle($member, $cycle);
         $cycle_end = $this->membershipService->getEndOfCycle($member, $cycle);
 
-        $shifts = $this->em->getRepository('App:Shift')->findShiftsForBeneficiary($beneficiary, $cycle_start, $cycle_end);
+        $shifts = $this->em->getRepository(Shift::class)->findShiftsForBeneficiary($beneficiary, $cycle_start, $cycle_end);
 
         $counter = 0;
         foreach ($shifts as $shift) {

@@ -31,7 +31,6 @@ use Symfony\Component\Form\Extension\Core\Type\SubmitType;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
@@ -182,7 +181,7 @@ class AdminController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $non_members = $em->getRepository("App:User")->findNonMembers();
+        $non_members = $em->getRepository(User::class)->findNonMembers();
 
         return $this->render('admin/user/non_member_list.html.twig', array(
             'non_members' => $non_members,
@@ -201,7 +200,7 @@ class AdminController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $admins = $em->getRepository("App:User")->findByRole('ROLE_ADMIN');
+        $admins = $em->getRepository(User::class)->findByRole('ROLE_ADMIN');
         $delete_forms = array();
         foreach ($admins as $admin) {
             $delete_forms[$admin->getId()] = $this->createFormBuilder()
@@ -240,7 +239,7 @@ class AdminController extends AbstractController
             $role["icon"] = $this->get("twig")->getGlobals()[strtolower($role_icon_key)] ?? "";
             $role["name"] = $this->get("twig")->getGlobals()[strtolower($role_name_key)] ?? "";
             $role["children"] = in_array($role_code, array_keys($roles_hierarchy)) ? implode(", ", $roles_hierarchy[$role_code]) : "";
-            $role["user_count"] = count($em->getRepository("App:User")->findByRole($role_code));
+            $role["user_count"] = count($em->getRepository(User::class)->findByRole($role_code));
             array_push($roles_list_enriched, $role);
         }
 
@@ -299,7 +298,7 @@ class AdminController extends AbstractController
             // return the output, don't use if you used NullOutput()
             $content = $output->fetch();
 
-            $request->getSession()->getFlashBag()->add('notice', 'Le fichier a été traité.');
+            $this->addFlash('notice', 'Le fichier a été traité.');
 
             return $this->render('admin/user/import_return.html.twig', array(
                 'content' => $content,

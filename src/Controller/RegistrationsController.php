@@ -26,7 +26,6 @@ use Symfony\Component\Console\Output\BufferedOutput;
 use Symfony\Component\DependencyInjection\ContainerBuilder;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpKernel\KernelInterface;
 use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
 use Symfony\Component\Security\Http\Event\InteractiveLoginEvent;
@@ -54,7 +53,6 @@ class RegistrationsController extends AbstractController
      */
     public function registrationsAction(Request $request)
     {
-        $session = new Session();
 
         $qfrom = $request->query->get('from');
         if (!$qfrom) {
@@ -64,7 +62,7 @@ class RegistrationsController extends AbstractController
         }else{
             $from = date_create_from_format('Y-m-d', $qfrom );
             if (!$from || $from->format('Y-m-d') != $qfrom) {
-                $session->getFlashBag()->add('warning','la date "'.$qfrom.'"" n\'est pas au bon format (Y-m-d)');
+                $this->addFlash('warning','la date "'.$qfrom.'"" n\'est pas au bon format (Y-m-d)');
                 $monday = strtotime('last monday', strtotime('tomorrow'));
                 $from = new DateTime();
                 $from->setTimestamp($monday);
@@ -76,7 +74,7 @@ class RegistrationsController extends AbstractController
         if ($qto) {
             $to = date_create_from_format('Y-m-d', $qto );
             if (!$to || $to->format('Y-m-d') != $qto) {
-                $session->getFlashBag()->add('warning','la date "'.$qto.'"" n\'est pas au bon format (Y-m-d)');
+                $this->addFlash('warning','la date "'.$qto.'"" n\'est pas au bon format (Y-m-d)');
                 $to = null;
             }else{
                 $to = $to->setTime('0','0','0');
@@ -102,7 +100,7 @@ class RegistrationsController extends AbstractController
             ->getSingleScalarResult();
         $pageCount = intval($max / $limit);
         $pageCount += (($max % $limit) > 0) ? 1 : 0;
-        $repository = $em->getRepository('App:AbstractRegistration');
+        $repository = $em->getRepository(AbstractRegistration::class);
         $queryb = $repository->createQueryBuilder('r')
             ->where('r.date >= :from')
             ->setParameter('from', $from);
@@ -192,14 +190,13 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
      */
     public function editRegistrationAction(Request $request, Registration $registration)
     {
-        $session = new Session();
         $edit_form = $this->createForm(RegistrationType::class, $registration);
         $edit_form->handleRequest($request);
         if ($edit_form->isSubmitted() && $edit_form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->persist($registration);
             $em->flush();
-            $session->getFlashBag()->add('success', 'La ligne a bien été éditée !');
+            $this->addFlash('success', 'La ligne a bien été éditée !');
             return $this->redirectToRoute("registrations");
         }
 
@@ -214,12 +211,11 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
      */
     public function removeRegistrationAction(Request $request, Registration $registration)
     {
-        $session = new Session();
         $form = $this->getRegistrationDeleteForm($registration->getId());
         $form->handleRequest($request);
         if ($form->isSubmitted() && $form->isValid()) {
             if ($registration->getMembership() && count($registration->getMembership()->getRegistrations()) === 1 && $registration === $registration->getMembership()->getLastRegistration()) {
-                $session->getFlashBag()->add('error', 'C\'est la seule adhésion de cette adhérent, corrigez là plutôt que de la supprimer');
+                $this->addFlash('error', 'C\'est la seule adhésion de cette adhérent, corrigez là plutôt que de la supprimer');
             } else {
                 $em = $this->getDoctrine()->getManager();
                 if ($registration->getMembership()) {
@@ -232,7 +228,7 @@ WHERE date >= :from ".(($to) ? "AND date <= :to" : "").";");
                 }
                 $em->remove($registration);
                 $em->flush();
-                $session->getFlashBag()->add('success', 'L\'adhésion a bien été supprimée !');
+                $this->addFlash('success', 'L\'adhésion a bien été supprimée !');
             }
         }
         return $this->redirectToRoute('registrations');

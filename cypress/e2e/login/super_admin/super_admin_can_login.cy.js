@@ -1,8 +1,6 @@
 // NO PERMANENT CHANGE TO DATABASE
 
 // temporarily disable uncaught exception handling
-import {login} from "../login_reusables.cytools";
-
 Cypress.on('uncaught:exception', (err, runnable) => {
     return false
 })
@@ -10,7 +8,7 @@ Cypress.on('uncaught:exception', (err, runnable) => {
 describe('super admin can login', function () {
     it('super admin path', function () {
 
-        login("admin", "password")
+        cy.login('admin', 'password')
 
         cy.log('go to settings page')
         cy.get('[data-cy=settings_link]').click()

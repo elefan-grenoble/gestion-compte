@@ -22,7 +22,6 @@ use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpKernel\KernelInterface;
 
@@ -73,7 +72,7 @@ class AdminPeriodController extends AbstractController
 
         $periodsByDay = array();
         foreach (Period::DAYS_OF_WEEK as $i => $value) {
-            $periodsByDay[$i] = $em->getRepository('App:Period')->findAll($i, $job_filter, true);
+            $periodsByDay[$i] = $em->getRepository(Period::class)->findAll($i, $job_filter, true);
         }
 
         return $this->render('admin/period/index.html.twig', array(
@@ -93,7 +92,6 @@ class AdminPeriodController extends AbstractController
      */
     public function newPeriodAction(Request $request)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -101,7 +99,7 @@ class AdminPeriodController extends AbstractController
         $job = $em->getRepository(Job::class)->findOneBy(array());
 
         if (!$job) {
-            $session->getFlashBag()->add('warning', 'Commençons par créer un poste de bénévolat');
+            $this->addFlash('warning', 'Commençons par créer un poste de bénévolat');
             return $this->redirectToRoute('job_new');
         }
 
@@ -118,7 +116,7 @@ class AdminPeriodController extends AbstractController
             $em->persist($period);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le nouveau créneau type ' . $period . ' a bien été créé !');
+            $this->addFlash('success', 'Le nouveau créneau type ' . $period . ' a bien été créé !');
             return $this->redirectToRoute('admin_period_edit',array('id'=>$period->getId()));
         }
 
@@ -135,7 +133,6 @@ class AdminPeriodController extends AbstractController
      */
     public function editPeriodAction(Request $request, Period $period)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -157,7 +154,7 @@ class AdminPeriodController extends AbstractController
             $em->persist($period);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le créneau type ' . $period . ' a bien été édité !');
+            $this->addFlash('success', 'Le créneau type ' . $period . ' a bien été édité !');
             return $this->redirectToRoute('admin_period_index');
         }
 
@@ -203,7 +200,6 @@ class AdminPeriodController extends AbstractController
      */
     public function newPeriodPositionAction(Request $request, Period $period)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -238,7 +234,7 @@ class AdminPeriodController extends AbstractController
             $em->persist($period);
             $em->flush();
 
-            $session->getFlashBag()->add('success', $count . ' poste' . (($count>1) ? 's':'') . ' ajouté ' . (($count>1) ? 's':'') . (($this->cycle_type == "abcd") ? ' (pour chaque cycle sélectionné) !':' !'));
+            $this->addFlash('success', $count . ' poste' . (($count>1) ? 's':'') . ' ajouté ' . (($count>1) ? 's':'') . (($this->cycle_type == "abcd") ? ' (pour chaque cycle sélectionné) !':' !'));
         }
 
         return $this->redirectToRoute('admin_period_edit', array('id' => $period->getId()));
@@ -252,7 +248,6 @@ class AdminPeriodController extends AbstractController
      */
     public function deletePeriodPositionAction(Request $request, Period $period, PeriodPosition $position)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $form = $this->createPeriodPositionDeleteForm($period, $position);
@@ -262,7 +257,7 @@ class AdminPeriodController extends AbstractController
             $em->remove($position);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le poste ' . $position . ' a bien été supprimé !');
+            $this->addFlash('success', 'Le poste ' . $position . ' a bien été supprimé !');
         }
 
         return $this->redirectToRoute('admin_period_edit', array('id' => $period->getId()));
@@ -276,7 +271,6 @@ class AdminPeriodController extends AbstractController
      */
     public function bookPeriodPositionAction(Request $request, Period $period, PeriodPosition $position): Response
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -285,13 +279,13 @@ class AdminPeriodController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($position->getShifter()) {
-                $session->getFlashBag()->add("error", "Désolé, ce créneau est déjà réservé");
+                $this->addFlash("error", "Désolé, ce créneau est déjà réservé");
                 return new Response($this->generateUrl('admin_period_edit',array('id'=>$period->getId())), 205);
             }
 
             $beneficiary = $form->get("shifter")->getData();
             if ($position->getFormation() && !$beneficiary->getFormations()->contains($position->getFormation())) {
-                $session->getFlashBag()->add("error", "Désolé, ce bénévole n'a pas la qualification nécessaire (" . $position->getFormation()->getName() . ")");
+                $this->addFlash("error", "Désolé, ce bénévole n'a pas la qualification nécessaire (" . $position->getFormation()->getName() . ")");
                 return new Response($this->generateUrl('admin_period_edit',array('id'=>$period->getId())), 205);
             }
 
@@ -305,7 +299,7 @@ class AdminPeriodController extends AbstractController
             $em->persist($position);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Créneau fixe réservé avec succès pour ' . $position->getShifter() . ' : ' . $position);
+            $this->addFlash('success', 'Créneau fixe réservé avec succès pour ' . $position->getShifter() . ' : ' . $position);
         }
 
         return $this->redirectToRoute('admin_period_edit',array('id'=>$period->getId()));
@@ -319,7 +313,6 @@ class AdminPeriodController extends AbstractController
      */
     public function freePeriodPositionAction(Request $request, Period $period, PeriodPosition $position, EventDispatcherInterface $event_dispatcher)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -340,7 +333,7 @@ class AdminPeriodController extends AbstractController
 
             $event_dispatcher->dispatch(new PeriodPositionFreedEvent($position, $beneficiary, $bookedTime), PeriodPositionFreedEvent::NAME);
 
-            $session->getFlashBag()->add('success', 'Le poste ' . $position . ' a bien été libéré !');
+            $this->addFlash('success', 'Le poste ' . $position . ' a bien été libéré !');
         }
 
         return $this->redirectToRoute('admin_period_edit',array('id'=>$position->getPeriod()->getId()));
@@ -354,7 +347,6 @@ class AdminPeriodController extends AbstractController
      */
     public function deletePeriodAction(Request $request, Period $period)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $form = $this->createPeriodDeleteForm($period);
@@ -364,7 +356,7 @@ class AdminPeriodController extends AbstractController
             $em->remove($period);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le créneau type ' . $period . ' a bien été supprimé !');
+            $this->addFlash('success', 'Le créneau type ' . $period . ' a bien été supprimé !');
         }
 
         return $this->redirectToRoute('admin_period_index');
@@ -378,7 +370,6 @@ class AdminPeriodController extends AbstractController
      */
     public function copyPeriodAction(Request $request)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -397,7 +388,7 @@ class AdminPeriodController extends AbstractController
             $from = $form->get('day_of_week_from')->getData();
             $to = $form->get('day_of_week_to')->getData();
 
-            $periods = $em->getRepository('App:Period')->findBy(array('dayOfWeek'=>$from));
+            $periods = $em->getRepository(Period::class)->findBy(array('dayOfWeek'=>$from));
 
             $count = 0;
             foreach ($periods as $period) {
@@ -420,7 +411,7 @@ class AdminPeriodController extends AbstractController
             }
             $em->flush();
 
-            $session->getFlashBag()->add('success', $count . ' créneaux copiés de ' . array_search($from, Period::DAYS_OF_WEEK_LIST_WITH_INT) . ' à ' . array_search($to, Period::DAYS_OF_WEEK_LIST_WITH_INT));
+            $this->addFlash('success', $count . ' créneaux copiés de ' . array_search($from, Period::DAYS_OF_WEEK_LIST_WITH_INT) . ' à ' . array_search($to, Period::DAYS_OF_WEEK_LIST_WITH_INT));
             return $this->redirectToRoute('admin_period_index');
         }
 
@@ -437,7 +428,6 @@ class AdminPeriodController extends AbstractController
      */
     public function generateShiftsForDateAction(Request $request, KernelInterface $kernel)
     {
-        $session = new Session();
 
         $form = $this->createFormBuilder()
             ->setAction($this->generateUrl('admin_shifts_generation'))
@@ -464,7 +454,7 @@ class AdminPeriodController extends AbstractController
             $application->run($input, $output);
             $content = $output->fetch();
 
-            $session->getFlashBag()->add('success',$content);
+            $this->addFlash('success',$content);
             return $this->redirectToRoute('admin_period_index');
         }
 

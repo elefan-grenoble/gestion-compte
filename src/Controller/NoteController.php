@@ -13,7 +13,6 @@ use App\Entity\TimeLog;
 use App\Entity\User;
 use App\Form\NoteType;
 use Symfony\Component\Form\Form;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\Email as EmailConstraint;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
@@ -57,15 +56,14 @@ class NoteController extends AbstractController
         $note_form->handleRequest($request);
 
         if ($note_form->isSubmitted() && $note_form->isValid()) {
-            $session = new Session();
             $em = $this->getDoctrine()->getManager();
             $em->persist($new_note);
             $em->flush();
             if ($new_note->getSubject()) {
-                $session->getFlashBag()->add('success', 'réponse enregistrée');
+                $this->addFlash('success', 'réponse enregistrée');
                 return $this->redirectToShow($note->getSubject());
             }
-            $session->getFlashBag()->add('success', 'Post-it réponse enregistré');
+            $this->addFlash('success', 'Post-it réponse enregistré');
         }
         return $this->redirectToRoute('user_office_tools');
     }
@@ -83,15 +81,14 @@ class NoteController extends AbstractController
         $note_form->handleRequest($request);
 
         if ($note_form->isSubmitted() && $note_form->isValid()) {
-            $session = new Session();
             $em = $this->getDoctrine()->getManager();
             $em->persist($note);
             $em->flush();
             if ($note->getSubject()) {
-                $session->getFlashBag()->add('success', 'note éditée');
+                $this->addFlash('success', 'note éditée');
                 return $this->redirectToShow($note->getSubject());
             }
-            $session->getFlashBag()->add('success', 'Post-it édité');
+            $this->addFlash('success', 'Post-it édité');
         }
         return $this->redirectToRoute('user_office_tools');
     }
@@ -122,7 +119,6 @@ class NoteController extends AbstractController
 
         $form = $this->createNoteDeleteForm($note);
         $form->handleRequest($request);
-        $session = new Session();
 
         $member = $note->getSubject();
 
@@ -130,7 +126,7 @@ class NoteController extends AbstractController
             $em = $this->getDoctrine()->getManager();
             $em->remove($note);
             $em->flush();
-            $session->getFlashBag()->add('success', "la note a bien été supprimée");
+            $this->addFlash('success', "la note a bien été supprimée");
         }
 
         if ($member) {
@@ -142,10 +138,9 @@ class NoteController extends AbstractController
     private function redirectToShow(Membership $member)
     {
         $user = $member->getMainBeneficiary()->getUser(); // FIXME
-        $session = new Session();
         if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
             return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
         else
-            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($this->get('request_stack')->getCurrentRequest()->getSession()->get('token_key') . $this->getCurrentAppUser()->getUsername())));
     }
 }

@@ -25,7 +25,6 @@ use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Routing\Generator\UrlGeneratorInterface;
@@ -63,8 +62,7 @@ class UserController extends AbstractController
     public function installAdminAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
-        $session = new Session();
-        $user = $em->getRepository('App:User')->findByRole('ROLE_SUPER_ADMIN');
+        $user = $em->getRepository(User::class)->findByRole('ROLE_SUPER_ADMIN');
 
         if (count($user) > 0) { //main super admin exist
             if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
@@ -77,7 +75,7 @@ class UserController extends AbstractController
                     $em->persist($new_admin);
                     $em->flush();
 
-                    $session->getFlashBag()->add('success', 'new user admin created with success !');
+                    $this->addFlash('success', 'new user admin created with success !');
                     return $this->redirectToRoute('admin');
                 } else {
                     return $this->render('admin/user/new_admin.html.twig', array(
@@ -85,7 +83,7 @@ class UserController extends AbstractController
                     ));
                 }
             } else {
-                $session->getFlashBag()->add('error', 'Main super admin user already exist !');
+                $this->addFlash('error', 'Main super admin user already exist !');
                 return $this->redirectToRoute('homepage');
             }
         } else { //main super user not created yet
@@ -98,7 +96,7 @@ class UserController extends AbstractController
             $em->persist($admin);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'user super admin created with success !');
+            $this->addFlash('success', 'user super admin created with success !');
 
             return $this->redirectToRoute('homepage');
         }
@@ -135,13 +133,11 @@ class UserController extends AbstractController
                 $event = new UserEvent($this->getUser(), $request);
                 $event_dispatcher->dispatch($event, FOSUserEvents::USER_PASSWORD_CHANGED);
 
-                $session = new Session();
-                $session->getFlashBag()->add('success', 'Mot de passe enregistré, merci !');
+                $this->addFlash('success', 'Mot de passe enregistré, merci !');
 
                 return $this->redirectToRoute('homepage');
             }else{
-                $session = new Session();
-                $session->getFlashBag()->add('error','Attention : tes deux mots de passe ne sont pas identique !');
+                $this->addFlash('error','Attention : tes deux mots de passe ne sont pas identique !');
             }
 
         }
@@ -157,7 +153,6 @@ class UserController extends AbstractController
      */
     public function quickNewAction(Request $request, MailerInterface $mailer, EventDispatcherInterface $event_dispatcher)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $ab = new AnonymousBeneficiary();
@@ -172,7 +167,7 @@ class UserController extends AbstractController
 
             $event_dispatcher->dispatch(new AnonymousBeneficiaryCreatedEvent($ab), AnonymousBeneficiaryCreatedEvent::NAME);
 
-            $session->getFlashBag()->add('success', 'La nouvelle adhésion a bien été prise en compte !');
+            $this->addFlash('success', 'La nouvelle adhésion a bien été prise en compte !');
             return $this->redirectToRoute('user_quick_new');
         }
 
@@ -193,18 +188,17 @@ class UserController extends AbstractController
      */
     public function removeRoleAction(User $user, $role)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->getCurrentAppUser();
 
         // cannot remove a nonexistant role
         if (!$user->hasRole($role)) {
-            $session->getFlashBag()->add('warning', $user . ' ne possède pas le rôle ' . $role);
+            $this->addFlash('warning', $user . ' ne possède pas le rôle ' . $role);
             return $this->redirectToShow($user);
         }
         // only ROLE_SUPER_ADMIN can remove ROLE_ADMIN to users
         if ($role == 'ROLE_ADMIN' && !$current_user->hasRole('ROLE_SUPER_ADMIN')) {
-            $session->getFlashBag()->add('warning', 'Vous n\'avez pas les droits pour retirer le rôle ' . $role);
+            $this->addFlash('warning', 'Vous n\'avez pas les droits pour retirer le rôle ' . $role);
             return $this->redirectToShow($user);
         }
 
@@ -212,7 +206,7 @@ class UserController extends AbstractController
         $em->persist($user);
         $em->flush();
 
-        $session->getFlashBag()->add('success', 'Le rôle ' . $role . ' a bien été retiré à ' . $user);
+        $this->addFlash('success', 'Le rôle ' . $role . ' a bien été retiré à ' . $user);
         return $this->redirectToShow($user);
     }
 
@@ -227,18 +221,17 @@ class UserController extends AbstractController
      */
     public function addRoleAction(User $user, $role)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->getCurrentAppUser();
 
         // cannot add an existing role
         if ($user->hasRole($role)) {
-            $session->getFlashBag()->add('warning', $user . ' possède déjà le rôle ' . $role);
+            $this->addFlash('warning', $user . ' possède déjà le rôle ' . $role);
             return $this->redirectToShow($user);
         }
         // only ROLE_SUPER_ADMIN can add ROLE_ADMIN to users
         if ($role == 'ROLE_ADMIN' && !$current_user->hasRole('ROLE_SUPER_ADMIN')) {
-            $session->getFlashBag()->add('warning', 'Vous n\'avez pas les droits pour ajouter le rôle ' . $role);
+            $this->addFlash('warning', 'Vous n\'avez pas les droits pour ajouter le rôle ' . $role);
             return $this->redirectToShow($user);
         }
 
@@ -246,7 +239,7 @@ class UserController extends AbstractController
         $em->persist($user);
         $em->flush();
 
-        $session->getFlashBag()->add('success', 'Le rôle ' . $role . ' a bien été ajouté à ' . $user);
+        $this->addFlash('success', 'Le rôle ' . $role . ' a bien été ajouté à ' . $user);
         return $this->redirectToShow($user);
     }
 
@@ -258,10 +251,9 @@ class UserController extends AbstractController
      */
     public function selfRegistrationAction(MembershipService $membership_service)
     {
-        $session = new Session();
         $membership = $this->getCurrentAppUser()->getBeneficiary()->getMembership();
         if (!$membership_service->canRegister($membership)) {
-            $session->getFlashBag()->add('warning', 'Pas besoin de ré-adhérer pour le moment :)');
+            $this->addFlash('warning', 'Pas besoin de ré-adhérer pour le moment :)');
             return $this->redirectToRoute('homepage');
         }
         return $this->render('user/self_register.html.twig');
@@ -274,7 +266,6 @@ class UserController extends AbstractController
      */
     public function removeClientUserAction(User $user, $client_id)
     {
-        $session = new Session();
         if (!$this->get('security.authorization_checker')->isGranted('IS_AUTHENTICATED_FULLY')) {
             throw $this->createAccessDeniedException();
         }
@@ -282,20 +273,20 @@ class UserController extends AbstractController
             throw $this->createAccessDeniedException();
         }
         if ($client_id) {
-            $client = $this->getDoctrine()->getManager()->getRepository('App:Client')->find($client_id);
+            $client = $this->getDoctrine()->getManager()->getRepository(Client::class)->find($client_id);
             if ($client->getId()) {
                 if ($user->getClients()->contains($client)) {
                     $user->removeClient($client);
                     $this->getDoctrine()->getManager()->flush($user);
-                    $session->getFlashBag()->add('success', 'Le service a bien été supprimé de votre compte');
+                    $this->addFlash('success', 'Le service a bien été supprimé de votre compte');
                 } else {
-                    $session->getFlashBag()->add('error', 'ce client n\'est pas associé à votre compte');
+                    $this->addFlash('error', 'ce client n\'est pas associé à votre compte');
                 }
             } else {
-                $session->getFlashBag()->add('error', 'ce client n\'existe pas');
+                $this->addFlash('error', 'ce client n\'existe pas');
             }
         } else {
-            $session->getFlashBag()->add('error', 'ce client n\'existe pas');
+            $this->addFlash('error', 'ce client n\'existe pas');
         }
 
         return $this->redirectToRoute('fos_user_profile_show');
@@ -312,7 +303,6 @@ class UserController extends AbstractController
      */
     public function deleteAction(Request $request, User $user)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $form = $this->createDeleteForm($user);
@@ -322,7 +312,7 @@ class UserController extends AbstractController
             $em->remove($user);
             $em->flush();
 
-            $session->getFlashBag()->add('success', "L'utilisateur a bien été supprimé");
+            $this->addFlash('success', "L'utilisateur a bien été supprimé");
         }
 
         return $this->redirectToRoute('user_index');
@@ -362,8 +352,7 @@ class UserController extends AbstractController
         $em->persist($anonymousBeneficiary);
         $em->flush();
 
-        $session = new Session();
-        $session->getFlashBag()->add('success', 'La relance a été envoyée !');
+        $this->addFlash('success', 'La relance a été envoyée !');
 
         $referer = $request->headers->get('referer');
 
@@ -381,7 +370,7 @@ class UserController extends AbstractController
         $this->getDoctrine()->getManager()->remove($anonymousBeneficiary);
         $this->getDoctrine()->getManager()->flush();
 
-        $session->getFlashBag()->add('success', "La pré-adhésion a bien été supprimée");
+        $this->addFlash('success', "La pré-adhésion a bien été supprimée");
 
         return $this->redirectToRoute('pre_user_index');
     }
@@ -426,12 +415,11 @@ class UserController extends AbstractController
     private function redirectToShow(User $user)
     {
         if ($user->getBeneficiary()) {
-            $session = new Session();
             $memberNumber = $user->getBeneficiary()->getMembership()->getMemberNumber();
             if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
                 return $this->redirectToRoute('member_show', array('member_number' => $memberNumber));
             else
-                return $this->redirectToRoute('member_show', array('member_number' => $memberNumber, 'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+                return $this->redirectToRoute('member_show', array('member_number' => $memberNumber, 'token' => $user->getTmpToken($this->get('request_stack')->getCurrentRequest()->getSession()->get('token_key') . $this->getCurrentAppUser()->getUsername())));
         } else {
             return $this->redirectToRoute("homepage");
         }

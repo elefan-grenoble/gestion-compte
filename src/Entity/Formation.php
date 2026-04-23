@@ -84,7 +84,9 @@ class Formation
      */
     public function __toString()
     {
-        return $this->getName();
+        /** @var string|null $name */
+        $name = $this->getName();
+        return $name ?? '';
     }
 
     /**

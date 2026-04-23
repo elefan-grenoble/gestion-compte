@@ -10,6 +10,7 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use App\Entity\Membership;
 
 class CycleStartCommand extends Command
 {
@@ -60,7 +61,7 @@ class CycleStartCommand extends Command
 
         $cycle_type = $this->params->get('cycle_type');
 
-        $members_with_cycle_starting_today = $this->em->getRepository('App:Membership')->findWithNewCycleStarting($date, $cycle_type);
+        $members_with_cycle_starting_today = $this->em->getRepository(Membership::class)->findWithNewCycleStarting($date, $cycle_type);
         $count = 0;
         foreach ($members_with_cycle_starting_today as $member) {
             $this->event_dispatcher->dispatch(new MemberCycleEndEvent($member, $date), MemberCycleEndEvent::NAME);

@@ -31,7 +31,6 @@ use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\Security\Core\Security as SecurityUser;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
@@ -81,7 +80,7 @@ class BookingController extends AbstractController
         $period_positions = $membership_service->getPeriodPositions($member);
         $preceding_previous_cycle_start = $membership_service->getStartOfCycle($member, -1 * $this->getParameter('max_nb_of_past_cycles_to_display'));
         $next_cycle_end = $membership_service->getEndOfCycle($member, 1);
-        $shifts_by_cycle = $em->getRepository('App:Shift')->findShiftsByCycles($member, $preceding_previous_cycle_start, $next_cycle_end);
+        $shifts_by_cycle = $em->getRepository(Shift::class)->findShiftsByCycles($member, $preceding_previous_cycle_start, $next_cycle_end);
 
         $shiftFreeForms = [];
         foreach ($shifts_by_cycle as $key => $shifts) {
@@ -103,21 +102,20 @@ class BookingController extends AbstractController
      */
     public function indexAction(Request $request, MembershipService $membership_service, ShiftService $shift_service)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $mode = null;
         if ($this->getUser()->getBeneficiary() == null) {
-            $session->getFlashBag()->add('error', 'Oups, tu n\'as pas de bénéficiaire enregistré ! MODE ADMIN');
+            $this->addFlash('error', 'Oups, tu n\'as pas de bénéficiaire enregistré ! MODE ADMIN');
             return $this->redirectToRoute('booking_admin');
         } else {
             if (!$membership_service->isUptodate($this->getUser()->getBeneficiary()->getMembership())) {
 +               $remainder = $membership_service->getRemainder($this->getUser()->getBeneficiary()->getMembership());
-                $session->getFlashBag()->add('warning', 'Oups, ton adhésion a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer pour effectuer ton bénévolat !');
+                $this->addFlash('warning', 'Oups, ton adhésion a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer pour effectuer ton bénévolat !');
                 return $this->redirectToRoute('homepage');
             }
             if ($this->getUser()->getBeneficiary()->getMembership()->getFrozen()){
-                $session->getFlashBag()->add('warning', 'Oups, ton compte est gelé ❄️ !<br />Dégel pour réserver 😉');
+                $this->addFlash('warning', 'Oups, ton compte est gelé ❄️ !<br />Dégel pour réserver 😉');
                 return $this->redirectToRoute('homepage');
             }
         }
@@ -147,7 +145,7 @@ class BookingController extends AbstractController
                 $beneficiary = $beneficiaries->first();
             }
 
-            $shifts = $em->getRepository('App:Shift')->findFutures(null, null, $this->display_name_shifters);
+            $shifts = $em->getRepository(Shift::class)->findFutures(null, null, $this->display_name_shifters);
             $bucketsByDay = $shift_service->generateShiftBucketsByDayAndJob($shifts);
 
             $hours = array();
@@ -216,7 +214,7 @@ class BookingController extends AbstractController
         $max = clone $day;
         $max->modify("+ 1 day");
 
-        $shifts = $em->getRepository('App:Shift')->findFrom($day, $max , null, $this->display_name_shifters);
+        $shifts = $em->getRepository(Shift::class)->findFrom($day, $max , null, $this->display_name_shifters);
         $bucketsByDay = $shift_service->generateShiftBucketsByDayAndJob($shifts);
 
         $bucketsByJob = $bucketsByDay[$day->format("d m Y")];
@@ -401,7 +399,7 @@ class BookingController extends AbstractController
     public function showBucketForAdminAction(Request $request, Shift $bucket): Response
     {
         $em = $this->getDoctrine()->getManager();
-        $shifts = $em->getRepository('App:Shift')->findBucket($bucket);
+        $shifts = $em->getRepository(Shift::class)->findBucket($bucket);
 
         $shiftBookForms = [];
         $shiftDeleteForms = [];
@@ -437,7 +435,6 @@ class BookingController extends AbstractController
      */
     public function editBucketAction(Request $request,Shift $shift)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $form = $this->createForm(ShiftType::class, $shift);
@@ -446,7 +443,7 @@ class BookingController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $shifts = $em->getRepository('App:Shift')->findBy([
+            $shifts = $em->getRepository(Shift::class)->findBy([
                 'job' => $bucket->getJob(),
                 'start' => $bucket->getStart(),
                 'end' => $bucket->getEnd()
@@ -459,7 +456,7 @@ class BookingController extends AbstractController
             }
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le créneau a bien été édité !');
+            $this->addFlash('success', 'Le créneau a bien été édité !');
             return $this->redirectToRoute('booking_admin');
         }
 
@@ -480,7 +477,6 @@ class BookingController extends AbstractController
     {
         $this->denyAccessUnlessGranted(ShiftVoter::LOCK, $shift);
 
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $form = $this->createBucketLockUnlockForm($shift);
@@ -522,7 +518,7 @@ class BookingController extends AbstractController
                 return new JsonResponse(array('message'=>$message), 400);
             }
         } else {
-            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+            $this->addFlash($success ? 'success' : 'error', $message);
             return $this->redirectToRoute('booking_admin');
         }
     }
@@ -536,7 +532,6 @@ class BookingController extends AbstractController
      */
     public function deleteBucketAction(Request $request, Shift $bucket, EventDispatcherInterface $event_dispatcher)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $form = $this->createBucketDeleteForm($bucket);
@@ -544,7 +539,7 @@ class BookingController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             /** @var Shift[] $shifts */
-            $shifts = $em->getRepository('App:Shift')->findBy([
+            $shifts = $em->getRepository(Shift::class)->findBy([
                 'job' => $bucket->getJob(),
                 'start' => $bucket->getStart(),
                 'end' => $bucket->getEnd()
@@ -566,8 +561,7 @@ class BookingController extends AbstractController
         if ($request->isXmlHttpRequest()) {
             return new JsonResponse(array('message'=>$message), $success ? 200 : 400);
         } else {
-            $session = new Session();
-            $session->getFlashBag()->add($success ? 'success' : 'error', $message);
+            $this->addFlash($success ? 'success' : 'error', $message);
             return $this->redirectToRoute('booking_admin');
         }
     }

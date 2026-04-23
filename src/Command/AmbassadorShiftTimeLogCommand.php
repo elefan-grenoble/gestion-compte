@@ -13,6 +13,8 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
 use Symfony\Component\Templating\EngineInterface;
+use App\Entity\DynamicContent;
+use App\Entity\Membership;
 
 class AmbassadorShiftTimeLogCommand extends Command
 {
@@ -54,7 +56,7 @@ class AmbassadorShiftTimeLogCommand extends Command
 
         $time_after_which_members_are_late_with_shifts = $this->params->get('time_after_which_members_are_late_with_shifts');
 
-        $alerts = $this->em->getRepository("App:Membership")
+        $alerts = $this->em->getRepository(Membership::class)
                      ->findLateShifters($time_after_which_members_are_late_with_shifts);
         $nbAlerts = count($alerts);
         if ($nbAlerts > 0) {
@@ -74,7 +76,7 @@ class AmbassadorShiftTimeLogCommand extends Command
             $subject = '[ALERTE RETARDS] Membres en retard de créneaux';
             $shiftEmail = $this->params->get('emails.shift');
 
-            $dynamicContent = $this->em->getRepository('App:DynamicContent')->findOneByCode($template);
+            $dynamicContent = $this->em->getRepository(DynamicContent::class)->findOneByCode($template);
 
             if ($dynamicContent) {
                 $template = $this->twig->createTemplate($dynamicContent->getContent());

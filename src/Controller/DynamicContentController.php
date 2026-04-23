@@ -5,7 +5,6 @@ namespace App\Controller;
 use App\Entity\DynamicContent;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
@@ -25,7 +24,7 @@ class DynamicContentController extends AbstractController
     public function listAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
-        $dynamicContents = $em->getRepository('App:DynamicContent')->findAll();
+        $dynamicContents = $em->getRepository(DynamicContent::class)->findAll();
         $dynamicContentsByType = array();
 
         foreach ($dynamicContents as $dynamicContent) {
@@ -49,7 +48,6 @@ class DynamicContentController extends AbstractController
      */
     public function dynamicContentEditAction(Request $request, DynamicContent $dynamicContent)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -64,7 +62,7 @@ class DynamicContentController extends AbstractController
             $em->persist($dynamicContent);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Contenu dynamique édité !');
+            $this->addFlash('success', 'Contenu dynamique édité !');
             return $this->redirectToRoute('dynamic_content_list');
         }
 

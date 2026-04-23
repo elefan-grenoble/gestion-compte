@@ -10,7 +10,6 @@ use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -48,7 +47,6 @@ class BeneficiaryController extends AbstractController
      */
     public function editBeneficiaryAction(Request $request, Beneficiary $beneficiary)
     {
-        $session = new Session();
         $member = $beneficiary->getMembership();
         $this->denyAccessUnlessGranted('edit', $member);
 
@@ -59,7 +57,7 @@ class BeneficiaryController extends AbstractController
             $em = $this->getDoctrine()->getManager();
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Mise à jour effectuée');
+            $this->addFlash('success', 'Mise à jour effectuée');
             return $this->redirectToShow($member);
         }
 
@@ -78,7 +76,6 @@ class BeneficiaryController extends AbstractController
      */
     public function setAsMainBeneficiaryAction(Beneficiary $beneficiary): RedirectResponse
     {
-        $session = new Session();
         $member = $beneficiary->getMembership();
 
         $this->denyAccessUnlessGranted('edit', $member);
@@ -88,7 +85,7 @@ class BeneficiaryController extends AbstractController
         $em->persist($member);
         $em->flush();
 
-        $session->getFlashBag()->add('success', 'Le changement de bénéficiaire principal a été effectué');
+        $this->addFlash('success', 'Le changement de bénéficiaire principal a été effectué');
         return $this->redirectToShow($member);
     }
 
@@ -102,13 +99,12 @@ class BeneficiaryController extends AbstractController
      */
     public function detachBeneficiaryAction(Request $request, Beneficiary $beneficiary): RedirectResponse
     {
-        $session = new Session();
         $member = $beneficiary->getMembership();
 
         $this->denyAccessUnlessGranted('edit', $member);
 
         if ($beneficiary->isMain()) {
-            $session->getFlashBag()->add('error', 'Un bénéficiaire principal ne peut pas être détaché');
+            $this->addFlash('error', 'Un bénéficiaire principal ne peut pas être détaché');
             return $this->redirectToShow($member);
         }
 
@@ -126,7 +122,7 @@ class BeneficiaryController extends AbstractController
             $em->persist($member);
 
             // check if there is a existing membership with this main beneficiary (artefact ?)
-            $existing_member = $em->getRepository('App:Membership')->findOneBy(array('mainBeneficiary' => $beneficiary));
+            $existing_member = $em->getRepository(Membership::class)->findOneBy(array('mainBeneficiary' => $beneficiary));
             if ($existing_member) {
                 $new_member = $existing_member;
                 $new_member->setMainBeneficiary($beneficiary);
@@ -134,7 +130,7 @@ class BeneficiaryController extends AbstractController
                 // then we create a new membership
                 $new_member = new Membership();
                 // init member id
-                $m = $em->getRepository('App:Membership')->findBy([], ['member_number' => 'DESC'], 1)[0];
+                $m = $em->getRepository(Membership::class)->findBy([], ['member_number' => 'DESC'], 1)[0];
                 $mm = 1;
                 if ($m instanceof Membership)
                     $mm = $m->getMemberNumber() + 1;
@@ -152,7 +148,7 @@ class BeneficiaryController extends AbstractController
 
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le bénéficiaire a été détaché ! Il a maintenant son propre compte.');
+            $this->addFlash('success', 'Le bénéficiaire a été détaché ! Il a maintenant son propre compte.');
             return $this->redirectToShow($new_member);
         }
 
@@ -271,10 +267,9 @@ class BeneficiaryController extends AbstractController
     private function redirectToShow(Membership $member):RedirectResponse
     {
         $user = $member->getMainBeneficiary()->getUser(); // FIXME
-        $session = new Session();
         if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
             return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
         else
-            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($session->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($this->get('request_stack')->getCurrentRequest()->getSession()->get('token_key') . $this->getCurrentAppUser()->getUsername())));
     }
 }
