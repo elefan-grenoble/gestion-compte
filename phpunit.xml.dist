@@ -33,12 +33,15 @@
       <!-- ###- symfony/framework-bundle ### -->
   </php>
   <testsuites>
+    <!-- unit: pure PHP tests, no Symfony Kernel, no DB. Fast. -->
     <testsuite name="unit">
       <directory>tests/Unit</directory>
     </testsuite>
+    <!-- integration: tests with the Symfony Kernel booted but no DB access. -->
     <testsuite name="integration">
       <directory>tests/Integration</directory>
     </testsuite>
+    <!-- functional: HTTP-level tests with the Kernel booted and a real DB (fixtures loaded). -->
     <testsuite name="functional">
       <directory>tests/Functional</directory>
     </testsuite>

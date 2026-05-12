@@ -77,7 +77,7 @@ class ShiftTest extends TestCase
 
     // ── Interval Code ────────────────────────────────────────────────
 
-    public function testGetIntervalCode(): void
+    public function testGetIntervalCodeMorning(): void
     {
         $shift = $this->createShift(
             new \DateTime('2024-06-15 09:30'),
@@ -85,6 +85,38 @@ class ShiftTest extends TestCase
         );
 
         $this->assertSame('09-3012-00', $shift->getIntervalCode());
+    }
+
+    public function testGetIntervalCodeAfternoon(): void
+    {
+        $shift = $this->createShift(
+            new \DateTime('2024-06-15 14:00'),
+            new \DateTime('2024-06-15 17:30')
+        );
+
+        $this->assertSame('14-0017-30', $shift->getIntervalCode());
+    }
+
+    /**
+     * Guard against a regression where morning and evening shifts at the
+     * "same" hours (e.g. 6:30→8:00 vs 18:30→20:00) produce the same code.
+     */
+    public function testGetIntervalCodeDiffersBetweenMorningAndEvening(): void
+    {
+        $morningShift = $this->createShift(
+            new \DateTime('2024-06-15 06:30'),
+            new \DateTime('2024-06-15 08:00')
+        );
+
+        $eveningShift = $this->createShift(
+            new \DateTime('2024-06-15 18:30'),
+            new \DateTime('2024-06-15 20:00')
+        );
+
+        $this->assertNotSame(
+            $morningShift->getIntervalCode(),
+            $eveningShift->getIntervalCode()
+        );
     }
 
     // ── Temporal checks ──────────────────────────────────────────────
