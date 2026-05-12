@@ -7,11 +7,12 @@ use App\Entity\Shift;
 use DateInterval;
 use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
+use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
 use Exception;
 
-class ShiftFixtures extends Fixture implements OrderedFixtureInterface
+class ShiftFixtures extends Fixture implements OrderedFixtureInterface, FixtureGroupInterface
 {
     /**
      * @throws Exception
@@ -88,5 +89,10 @@ class ShiftFixtures extends Fixture implements OrderedFixtureInterface
     public function getOrder(): int
     {
         return 15;
+    }
+
+    public static function getGroups(): array
+    {
+        return ['period'];
     }
 }
