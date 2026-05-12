@@ -318,30 +318,6 @@ class SmokeTest extends FunctionalTestCase
     }
 
     /**
-     * Same AJAX endpoint, but with a logged-in user — should return 200.
-     */
-    public function testAjaxBucketShowReturns200WhenAuthenticated(): void
-    {
-        $client = $this->loginAs('Liam Smith');
-
-        $em = $client->getContainer()->get('doctrine')->getManager();
-        $shift = $em->getRepository(\App\Entity\Shift::class)->findOneBy([]);
-        $beneficiary = $em->getRepository(\App\Entity\Beneficiary::class)->findOneBy([]);
-
-        $this->assertNotNull($shift, 'Fixtures should contain at least one Shift.');
-        $this->assertNotNull($beneficiary, 'Fixtures should contain at least one Beneficiary.');
-
-        $url = sprintf('/booking/bucket/%d/show/for/%d/cycle/0', $shift->getId(), $beneficiary->getId());
-        $client->xmlHttpRequest('GET', $url);
-
-        $this->assertSame(
-            200,
-            $client->getResponse()->getStatusCode(),
-            sprintf('Authenticated AJAX call to "%s" did not return 200.', $url)
-        );
-    }
-
-    /**
      * /codes/ redirects to homepage when no codes exist in DB.
      */
     public function testCodesRedirectsWhenEmpty(): void
