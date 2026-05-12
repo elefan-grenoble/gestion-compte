@@ -216,13 +216,47 @@ class SmokeTest extends FunctionalTestCase
     }
 
     // -------------------------------------------------------
-    // Authenticated routes — regular user
+    // Authenticated routes — regular user (ROLE_USER)
     // -------------------------------------------------------
 
     /**
-     * @dataProvider authenticatedUrlProvider
+     * @dataProvider regularUserUrlProvider
      */
-    public function testAuthenticatedUrlReturns200(string $url): void
+    public function testRegularUserUrlReturns200(string $url): void
+    {
+        $client = $this->loginAs('Liam Smith');
+        $client->request('GET', $url);
+
+        $this->assertSame(
+            200,
+            $client->getResponse()->getStatusCode(),
+            sprintf('Regular user URL "%s" did not return 200.', $url)
+        );
+    }
+
+    public function regularUserUrlProvider(): array
+    {
+        return [
+            'homepage authenticated' => ['/'],
+            'profile' => ['/profile/'],
+            'schedule' => ['/schedule'],
+            'events' => ['/events/'],
+            'period index' => ['/period/'],
+            'tasks list' => ['/tasks/'],
+            'process updates' => ['/process/updates/'],
+            'booking' => ['/booking/'],
+            'card reader' => ['/card_reader/'],
+        ];
+    }
+
+    // -------------------------------------------------------
+    // Authenticated routes — staff (requires elevated role)
+    // -------------------------------------------------------
+
+    /**
+     * @dataProvider staffUrlProvider
+     */
+    public function testStaffUrlReturns200(string $url): void
     {
         $client = $this->loginAs('admin');
         $client->request('GET', $url);
@@ -230,30 +264,78 @@ class SmokeTest extends FunctionalTestCase
         $this->assertSame(
             200,
             $client->getResponse()->getStatusCode(),
-            sprintf('Authenticated URL "%s" did not return 200.', $url)
+            sprintf('Staff URL "%s" did not return 200.', $url)
         );
     }
 
-    public function authenticatedUrlProvider(): array
+    public function staffUrlProvider(): array
     {
         return [
-            'homepage authenticated' => ['/'],
-            'profile' => ['/profile/'],
-            'schedule' => ['/schedule'],
-            'events' => ['/events/'],
             'commissions' => ['/commissions/'],
             'services' => ['/services/'],
             'dynamic content list' => ['/content/'],
             'email templates' => ['/emailTemplate/'],
             'registrations' => ['/registrations/'],
-            'period index' => ['/period/'],
-            'tasks list' => ['/tasks/'],
-            'process updates' => ['/process/updates/'],
-            'booking' => ['/booking/'],
-            'card reader' => ['/card_reader/'],
             'member office_tools' => ['/member/office_tools'],
             'member emails_csv' => ['/member/emails_csv'],
         ];
+    }
+
+    // -------------------------------------------------------
+    // AJAX routes — authentication required
+    // -------------------------------------------------------
+
+    /**
+     * AJAX-only partials (e.g. bucket_show_for_beneficiary, fetched from
+     * the booking page) must require authentication too — an anonymous
+     * XMLHttpRequest should be redirected to /login like any other
+     * protected route.
+     */
+    public function testAjaxBucketShowRequiresAuthentication(): void
+    {
+        $client = static::createClient();
+
+        $em = $client->getContainer()->get('doctrine')->getManager();
+        $shift = $em->getRepository(\App\Entity\Shift::class)->findOneBy([]);
+        $beneficiary = $em->getRepository(\App\Entity\Beneficiary::class)->findOneBy([]);
+
+        $this->assertNotNull($shift, 'Fixtures should contain at least one Shift.');
+        $this->assertNotNull($beneficiary, 'Fixtures should contain at least one Beneficiary.');
+
+        $url = sprintf('/bucket/%d/show/for/%d/cycle/0', $shift->getId(), $beneficiary->getId());
+        $client->xmlHttpRequest('GET', $url);
+
+        $response = $client->getResponse();
+        $this->assertTrue(
+            $response->isRedirection(),
+            sprintf('Anonymous AJAX call to "%s" should redirect, got %d.', $url, $response->getStatusCode())
+        );
+        $this->assertStringContainsString(
+            '/login',
+            $response->headers->get('Location'),
+            'Anonymous AJAX call should redirect to /login.'
+        );
+    }
+
+    /**
+     * Same AJAX endpoint, but with a logged-in user — should return 200.
+     */
+    public function testAjaxBucketShowReturns200WhenAuthenticated(): void
+    {
+        $client = $this->loginAs('Liam Smith');
+
+        $em = $client->getContainer()->get('doctrine')->getManager();
+        $shift = $em->getRepository(\App\Entity\Shift::class)->findOneBy([]);
+        $beneficiary = $em->getRepository(\App\Entity\Beneficiary::class)->findOneBy([]);
+
+        $url = sprintf('/bucket/%d/show/for/%d/cycle/0', $shift->getId(), $beneficiary->getId());
+        $client->xmlHttpRequest('GET', $url);
+
+        $this->assertSame(
+            200,
+            $client->getResponse()->getStatusCode(),
+            sprintf('Authenticated AJAX call to "%s" did not return 200.', $url)
+        );
     }
 
     /**
