@@ -328,6 +328,9 @@ class SmokeTest extends FunctionalTestCase
         $shift = $em->getRepository(\App\Entity\Shift::class)->findOneBy([]);
         $beneficiary = $em->getRepository(\App\Entity\Beneficiary::class)->findOneBy([]);
 
+        $this->assertNotNull($shift, 'Fixtures should contain at least one Shift.');
+        $this->assertNotNull($beneficiary, 'Fixtures should contain at least one Beneficiary.');
+
         $url = sprintf('/bucket/%d/show/for/%d/cycle/0', $shift->getId(), $beneficiary->getId());
         $client->xmlHttpRequest('GET', $url);
 
