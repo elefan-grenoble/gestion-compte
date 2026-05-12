@@ -302,7 +302,7 @@ class SmokeTest extends FunctionalTestCase
         $this->assertNotNull($shift, 'Fixtures should contain at least one Shift.');
         $this->assertNotNull($beneficiary, 'Fixtures should contain at least one Beneficiary.');
 
-        $url = sprintf('/bucket/%d/show/for/%d/cycle/0', $shift->getId(), $beneficiary->getId());
+        $url = sprintf('/booking/bucket/%d/show/for/%d/cycle/0', $shift->getId(), $beneficiary->getId());
         $client->xmlHttpRequest('GET', $url);
 
         $response = $client->getResponse();
@@ -331,7 +331,7 @@ class SmokeTest extends FunctionalTestCase
         $this->assertNotNull($shift, 'Fixtures should contain at least one Shift.');
         $this->assertNotNull($beneficiary, 'Fixtures should contain at least one Beneficiary.');
 
-        $url = sprintf('/bucket/%d/show/for/%d/cycle/0', $shift->getId(), $beneficiary->getId());
+        $url = sprintf('/booking/bucket/%d/show/for/%d/cycle/0', $shift->getId(), $beneficiary->getId());
         $client->xmlHttpRequest('GET', $url);
 
         $this->assertSame(
