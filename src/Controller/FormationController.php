@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\Formation;
 use App\Form\FormationType;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
@@ -29,7 +28,7 @@ class FormationController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $formations = $em->getRepository('App:Formation')->findAll();
+        $formations = $em->getRepository(Formation::class)->findAll();
 
         return $this->render('admin/formation/list.html.twig',array('formations'=>$formations));
     }
@@ -42,7 +41,6 @@ class FormationController extends AbstractController
      */
     public function newAction(Request $request)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -57,7 +55,7 @@ class FormationController extends AbstractController
             $em->persist($formation);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'La nouvelle formation a bien été créée !');
+            $this->addFlash('success', 'La nouvelle formation a bien été créée !');
             return $this->redirectToRoute('formation_list');
         }
 
@@ -75,7 +73,6 @@ class FormationController extends AbstractController
      */
     public function editAction(Request $request, Formation $formation)
     {
-        $session = new Session();
 
         $form = $this->createForm(FormationType::class, $formation);
         $form->handleRequest($request);
@@ -85,7 +82,7 @@ class FormationController extends AbstractController
             $em->persist($formation);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'La formation a bien été éditée !');
+            $this->addFlash('success', 'La formation a bien été éditée !');
             return $this->redirectToRoute('formation_list');
         }
 
@@ -104,7 +101,6 @@ class FormationController extends AbstractController
      */
     public function deleteAction(Request $request, Formation $formation)
     {
-        $session = new Session();
 
         $form = $this->getDeleteForm($formation);
         $form->handleRequest($request);
@@ -114,7 +110,7 @@ class FormationController extends AbstractController
             $em->remove($formation);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'La formation a bien été supprimée !');
+            $this->addFlash('success', 'La formation a bien été supprimée !');
         }
 
         return $this->redirectToRoute('formation_list');

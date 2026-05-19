@@ -14,6 +14,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use App\Entity\Period;
+use App\Entity\User;
 
 class ShiftGenerateCommand extends Command
 {
@@ -49,7 +51,7 @@ class ShiftGenerateCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
-        $admin = $this->em->getRepository('App:User')->findSuperAdminAccount();
+        $admin = $this->em->getRepository(User::class)->findSuperAdminAccount();
         $use_fly_and_fixed = $this->params->get('use_fly_and_fixed');
         $reserve_new_shift_to_prior_shifter = $this->params->get('reserve_new_shift_to_prior_shifter');
         $cycle_type = $this->params->get('cycle_type');
@@ -84,12 +86,12 @@ class ShiftGenerateCommand extends Command
             $count_existing_period = 0;
             $output->writeln('<fg=cyan;>'.$date->format('D d M Y').'</>');
 
-            $closingException = $this->em->getRepository('App:ClosingException')->findBy(['date' => $date]);
+            $closingException = $this->em->getRepository(ClosingException::class)->findBy(['date' => $date]);
             if ($closingException) {
                 $output->writeln('<fg=cyan;>>>></><fg=red;> FERMETURE EXCEPTIONNELLE : aucun créneau ne sera généré</>');
             } else {
                 $dayOfWeek = $date->format('N') - 1; // 0 = 1-1 (for Monday) through 6 = 7-1 (for Sunday)
-                $periods = $this->em->getRepository('App:Period')->createQueryBuilder('p')
+                $periods = $this->em->getRepository(Period::class)->createQueryBuilder('p')
                     ->where('p.dayOfWeek = :dow')
                     ->setParameter('dow', $dayOfWeek)
                     ->orderBy('p.start')
@@ -112,11 +114,11 @@ class ShiftGenerateCommand extends Command
                             }
                         }
 
-                        $already_generated = $this->em->getRepository('App:Shift')->findBy(array('start' => $start, 'end' => $end, 'job' => $period->getJob(), 'position' => $position));
+                        $already_generated = $this->em->getRepository(Shift::class)->findBy(array('start' => $start, 'end' => $end, 'job' => $period->getJob(), 'position' => $position));
                         if (!$already_generated) {
                             $lastStart = $this->lastCycleDate($start);
                             $lastEnd = $this->lastCycleDate($end);
-                            $last_cycle_shift = $this->em->getRepository('App:Shift')->findOneBy(array('start' => $lastStart, 'end' => $lastEnd, 'job' => $period->getJob(), 'position' => $position));
+                            $last_cycle_shift = $this->em->getRepository(Shift::class)->findOneBy(array('start' => $lastStart, 'end' => $lastEnd, 'job' => $period->getJob(), 'position' => $position));
                             $current_shift = clone $shift;
                             $current_shift->setJob($period->getJob());
                             $current_shift->setFormation($position->getFormation());

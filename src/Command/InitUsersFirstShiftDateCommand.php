@@ -7,6 +7,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use App\Entity\Shift;
 
 class InitUsersFirstShiftDateCommand extends Command
 {
@@ -32,7 +33,7 @@ class InitUsersFirstShiftDateCommand extends Command
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
         $count = 0;
-        $shifts = $this->em->getRepository('App:Shift')->findFirstShiftWithUserNotInitialized();
+        $shifts = $this->em->getRepository(Shift::class)->findFirstShiftWithUserNotInitialized();
         $last_member_id = null;
         foreach ($shifts as $shift) {
             $membership = $shift->getShifter()->getMembership();

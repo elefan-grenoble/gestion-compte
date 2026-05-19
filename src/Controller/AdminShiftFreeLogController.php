@@ -9,7 +9,6 @@ use Sensio\Bundle\FrameworkExtraBundle\Configuration\Method;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Form\Extension\Core\Type\DateType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
@@ -105,7 +104,7 @@ class AdminShiftFreeLogController extends AbstractController
         $sort = 'createdAt';
         $order = 'DESC';
 
-        $qb = $em->getRepository('App:ShiftFreeLog')->createQueryBuilder('sfl')
+        $qb = $em->getRepository(ShiftFreeLog::class)->createQueryBuilder('sfl')
             ->orderBy('sfl.' . $sort, $order);
 
         if ($filter["created_at"]) {

@@ -7,6 +7,8 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use App\Entity\Job;
+use App\Entity\Shift;
 
 /**
  * Widget controller.
@@ -33,9 +35,9 @@ class WidgetController extends AbstractController
         $job = null;
         if ($job_id) {
             $em = $this->getDoctrine()->getManager();
-            $job = $em->getRepository('App:Job')->find($job_id);
+            $job = $em->getRepository(Job::class)->find($job_id);
             if ($job) {
-                $shifts = $em->getRepository('App:Shift')->findFutures(null, $job);
+                $shifts = $em->getRepository(Shift::class)->findFutures(null, $job);
                 foreach ($shifts as $shift) {
                     $day = $shift->getStart()->format("d m Y");
                     $interval = $shift->getIntervalCode();

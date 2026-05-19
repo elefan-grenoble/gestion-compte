@@ -10,6 +10,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Validator\Constraints\Date;
+use App\Entity\Membership;
 
 class DoctorCommand extends Command
 {
@@ -45,7 +46,7 @@ class DoctorCommand extends Command
         if ($fix_phone){
             $counter = 0;
             $debug = array();
-            $members = $this->em->getRepository('App:Membership')->findAll();
+            $members = $this->em->getRepository(Membership::class)->findAll();
             foreach ($members as $member){
                 foreach ($member->getBeneficiaries() as $beneficiary){
                     $phone = $beneficiary->getPhone();
@@ -103,7 +104,7 @@ class DoctorCommand extends Command
 
         if ($fix_status) {
             $counter = 0;
-            $members = $this->em->getRepository('App:Membership')->findAll();
+            $members = $this->em->getRepository(Membership::class)->findAll();
             foreach ($members as $member) {
                 if (($member->getFrozen() === null)||($member->getWithdrawn() === null)){
                     if ($member->getFrozen() === null)
@@ -121,7 +122,7 @@ class DoctorCommand extends Command
 
         if ($fix_registration) {
             $counter = 0;
-            $members = $this->em->getRepository('App:Membership')->findAll();
+            $members = $this->em->getRepository(Membership::class)->findAll();
             foreach ($members as $member) {
                 foreach ($member->getRegistrations() as $registration) {
                     if ($registration->getCreatedAt()->format('Y') < 0) {

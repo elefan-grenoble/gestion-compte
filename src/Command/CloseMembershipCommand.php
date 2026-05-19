@@ -53,7 +53,7 @@ class CloseMembershipCommand extends Command
             $date->modify('-' . $delay);
         }
 
-        $members = $this->em->getRepository('App:Membership')->findWithExpiredRegistrationFrom($date);
+        $members = $this->em->getRepository(Membership::class)->findWithExpiredRegistrationFrom($date);
         $count = 0;
         /** @var Membership $member */
         foreach ($members as $member) {

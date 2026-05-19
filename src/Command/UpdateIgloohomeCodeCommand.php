@@ -14,6 +14,7 @@ use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
+use App\Entity\User;
 
 class UpdateIgloohomeCodeCommand extends Command
 {
@@ -72,14 +73,14 @@ class UpdateIgloohomeCodeCommand extends Command
         $output->writeln('<fg=cyan;>>>></><fg=green;> Code créé avec succès via l\'API Igloohome : ' . $newCodeValue . '</>');
 
         // Get the old open codes
-        $codeRepository = $this->em->getRepository('App:Code');
+        $codeRepository = $this->em->getRepository(Code::class);
         $qb = $codeRepository->createQueryBuilder('c');
         $qb->where('c.closed = :closed')->setParameter('closed', 0);
         $open_codes = $qb->getQuery()->getResult();
 
         // Get the admin user
         $adminUsername = $this->params->get('super_admin.username');
-        $userRepository = $this->em->getRepository('App:User');
+        $userRepository = $this->em->getRepository(User::class);
         $adminUser = $userRepository->findOneByUsername($adminUsername);
 
         // Insert the new code created from the Igloohome API

@@ -11,6 +11,8 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use App\Entity\Membership;
+use App\Entity\Shift;
 
 class CycleHalfCommand extends Command
 {
@@ -64,12 +66,12 @@ class CycleHalfCommand extends Command
 
         $cycle_type = $this->params->get('cycle_type');
 
-        $members_with_half_cycle = $this->em->getRepository('App:Membership')->findWithHalfCyclePast($date, $cycle_type);
+        $members_with_half_cycle = $this->em->getRepository(Membership::class)->findWithHalfCyclePast($date, $cycle_type);
         $count = 0;
         foreach ($members_with_half_cycle as $member) {
             $current_cycle_start = $this->membership_service->getStartOfCycle($member, 0);
             $current_cycle_end = $this->membership_service->getEndOfCycle($member, 0);
-            $currentCycleShifts = $this->em->getRepository('App:Shift')->findShiftsForMembership($member, $current_cycle_start, $current_cycle_end);
+            $currentCycleShifts = $this->em->getRepository(Shift::class)->findShiftsForMembership($member, $current_cycle_start, $current_cycle_end);
             $this->event_dispatcher->dispatch(new MemberCycleHalfEvent($member, $date, $currentCycleShifts), MemberCycleHalfEvent::NAME);
             $message = 'Generate ' . MemberCycleHalfEvent::NAME . ' event for member #' . $member->getMemberNumber();
             $output->writeln($message);

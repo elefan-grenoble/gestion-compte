@@ -32,7 +32,7 @@ class HelloassoEventListener
     public function onPaymentAfterSave(HelloassoEvent $event)
     {
         $payment = $event->getPayment();
-        $user = $this->em->getRepository('App:User')->findOneBy(array('email' => strtolower($payment->getEmail())));
+        $user = $this->em->getRepository(User::class)->findOneBy(array('email' => strtolower($payment->getEmail())));
         if ($user){
             $this->linkPaymentToUser($user,$payment);
         } else {

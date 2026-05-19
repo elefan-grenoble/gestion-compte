@@ -4,6 +4,7 @@ namespace App\EventListener;
 
 use Doctrine\ORM\EntityManager;
 use FOS\OAuthServerBundle\Event\OAuthEvent;
+use App\Entity\User;
 
 class OAuthEventListener
 {
@@ -37,6 +38,6 @@ class OAuthEventListener
 
     protected function getUser(OAuthEvent $event)
     {
-        return $this->em->getRepository('App:User')->findOneBy(array('username'=>$event->getUser()->getUsername()));
+        return $this->em->getRepository(User::class)->findOneBy(array('username'=>$event->getUser()->getUsername()));
     }
 }

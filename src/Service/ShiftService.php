@@ -12,8 +12,8 @@ use App\Service\MembershipService;
 use App\Service\BeneficiaryService;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\Common\Collections\ArrayCollection;
-use phpDocumentor\Reflection\Types\Array_;
 use Symfony\Component\DependencyInjection\Container;
+use App\Entity\ShiftFreeLog;
 
 class ShiftService
 {
@@ -356,7 +356,7 @@ class ShiftService
      */
     public function isShiftEmpty($shift)
     {
-        $shifts = $this->em->getRepository('App:Shift')->findAlreadyBookedShiftsOfBucket($shift);
+        $shifts = $this->em->getRepository(Shift::class)->findAlreadyBookedShiftsOfBucket($shift);
         return count($shifts) === 0;
     }
 
@@ -516,7 +516,7 @@ class ShiftService
     public function getShiftBucketFromShift(Shift $shift)
     {
         $shiftBucket = new ShiftBucket();
-        $shifts = $this->em->getRepository('App:Shift')->findBy([
+        $shifts = $this->em->getRepository(Shift::class)->findBy([
             'job' => $shift->getJob(),
             'start' => $shift->getStart(),
             'end' => $shift->getEnd()
@@ -554,7 +554,7 @@ class ShiftService
      */
     public function isBeneficiaryHasShifts(Beneficiary $beneficiary, \Datetime $start_after, \Datetime $start_before, \Datetime $end_after)
     {
-        $beneficiaryShifts = $this->em->getRepository('App:Shift')->findShiftsForBeneficiary(
+        $beneficiaryShifts = $this->em->getRepository(Shift::class)->findShiftsForBeneficiary(
             $beneficiary,
             $start_after,
             null,
@@ -573,7 +573,7 @@ class ShiftService
      */
     public function getBeneficiaryShiftCount(Beneficiary $beneficiary, PeriodPosition $position = null, $wasCarriedOut = null, $endBeforeNow = false)
     {
-        return $this->em->getRepository('App:Shift')->getBeneficiaryShiftCount(
+        return $this->em->getRepository(Shift::class)->getBeneficiaryShiftCount(
             $beneficiary,
             $position,
             $wasCarriedOut,
@@ -588,7 +588,7 @@ class ShiftService
      */
     public function getBeneficiaryShiftFreedCount(Beneficiary $beneficiary, PeriodPosition $position = null)
     {
-        return $this->em->getRepository('App:ShiftFreeLog')->getBeneficiaryShiftFreedCount(
+        return $this->em->getRepository(ShiftFreeLog::class)->getBeneficiaryShiftFreedCount(
             $beneficiary,
             $position
         );

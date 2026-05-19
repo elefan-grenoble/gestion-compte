@@ -5,6 +5,7 @@ namespace App\Service;
 use DateTime;
 use App\Entity\OpeningHour;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\OpeningHourKind;
 
 class OpeningHourKindService
 {
@@ -17,7 +18,7 @@ class OpeningHourKindService
 
     public function hasEnabled()
     {
-        $openingHourKindEnabled = $this->em->getRepository('App:OpeningHourKind')->findEnabled();
+        $openingHourKindEnabled = $this->em->getRepository(OpeningHourKind::class)->findEnabled();
         return count($openingHourKindEnabled) > 0;
     }
 }

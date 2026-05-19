@@ -12,7 +12,7 @@ services:
     ports:
       - "3306:3306"
     volumes:
-      - ./mysql:/var/lib/mysql
+      - db_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin" ,"ping", "-h", "localhost", '-u', 'root', '-psecret']
       timeout: 20s
@@ -76,3 +76,6 @@ services:
       - DB_VENDOR=h2
     ports:
       - "8081:8080"
+
+volumes:
+  db_data:

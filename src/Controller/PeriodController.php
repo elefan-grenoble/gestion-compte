@@ -9,7 +9,6 @@ use App\Service\PeriodFormHelper;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 /**
@@ -49,7 +48,7 @@ class PeriodController extends AbstractController
 
         $periodsByDay = array();
         foreach (Period::DAYS_OF_WEEK as $i => $value) {
-            $periodsByDay[$i] = $em->getRepository('App:Period')->findAll($i, $job_filter, false);
+            $periodsByDay[$i] = $em->getRepository(Period::class)->findAll($i, $job_filter, false);
         }
 
         return $this->render('period/index.html.twig', array(

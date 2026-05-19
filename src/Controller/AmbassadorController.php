@@ -18,7 +18,6 @@ use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\DateTime;
 
 /**
@@ -330,7 +329,6 @@ class AmbassadorController extends AbstractController
     public function newNoteAction(Membership $member, Request $request)
     {
         $this->denyAccessUnlessGranted('annotate', $member);
-        $session = new Session();
         $note = new Note();
         $form = $this->createForm(NoteType::class, $note);
         $form->handleRequest($request);
@@ -343,9 +341,9 @@ class AmbassadorController extends AbstractController
             $em->persist($note);
             $em->flush();
 
-            $session->getFlashBag()->add('success','La note a bien été ajoutée');
+            $this->addFlash('success','La note a bien été ajoutée');
         } else {
-            $session->getFlashBag()->add('error', 'Impossible d\'ajouter une note');
+            $this->addFlash('error', 'Impossible d\'ajouter une note');
         }
 
         return $this->redirectToRoute("ambassador_phone_show", array('member_number'=>$member->getMemberNumber()));

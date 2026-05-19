@@ -7,7 +7,6 @@ use App\Form\EventKindType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 
 
@@ -28,7 +27,7 @@ class AdminEventKindController extends AbstractController
     {
         $em = $this->getDoctrine()->getManager();
 
-        $eventKinds = $em->getRepository('App:EventKind')->findAll();
+        $eventKinds = $em->getRepository(EventKind::class)->findAll();
 
         return $this->render('admin/event/kind/list.html.twig', array(
             'eventKinds' => $eventKinds,
@@ -43,7 +42,6 @@ class AdminEventKindController extends AbstractController
      */
     public function newAction(Request $request)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $eventKind = new EventKind();
@@ -54,7 +52,7 @@ class AdminEventKindController extends AbstractController
             $em->persist($eventKind);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le type d\'événement a bien été créé !');
+            $this->addFlash('success', 'Le type d\'événement a bien été créé !');
             return $this->redirectToRoute('admin_event_kind_list');
         }
 
@@ -71,7 +69,6 @@ class AdminEventKindController extends AbstractController
      */
     public function editAction(Request $request, EventKind $eventKind)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $form = $this->createForm(EventKindType::class, $eventKind);
@@ -81,7 +78,7 @@ class AdminEventKindController extends AbstractController
             $em->persist($eventKind);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le type d\'événement a bien été édité !');
+            $this->addFlash('success', 'Le type d\'événement a bien été édité !');
             return $this->redirectToRoute('admin_event_kind_list');
         }
 
@@ -100,7 +97,6 @@ class AdminEventKindController extends AbstractController
      */
     public function deleteAction(Request $request, EventKind $eventKind)
     {
-        $session = new Session();
         $em = $this->getDoctrine()->getManager();
 
         $form = $this->getDeleteForm($eventKind);
@@ -110,7 +106,7 @@ class AdminEventKindController extends AbstractController
             $em->remove($eventKind);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le type d\'événement a bien été supprimé !');
+            $this->addFlash('success', 'Le type d\'événement a bien été supprimé !');
         }
 
         return $this->redirectToRoute('admin_event_kind_list');

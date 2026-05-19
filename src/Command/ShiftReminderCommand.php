@@ -47,7 +47,7 @@ class ShiftReminderCommand extends Command
         }
         $output->writeln('<fg=cyan;>'.$from->format('d M Y').'</>');
 
-        $qb = $this->em->getRepository('App:Shift')->createQueryBuilder('s')
+        $qb = $this->em->getRepository(Shift::class)->createQueryBuilder('s')
             ->where('s.start >= :start')
             ->andWhere('s.end < :end')
             ->setParameter('start', $from->format('Y-m-d'))

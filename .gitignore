@@ -1,61 +1,3 @@
-# Email spool folder
-/app/spool/*
-
-# Cache, session files and logs (Symfony3)
-/var
-
-# Parameters
-/app/config/parameters.yml
-/app/config/parameters.ini
-
-/bin
-/web/bundles
-/web/css
-/web/fonts
-/web/images
-/web/js
-/web/config.php
-/web/uploads
-/web/media
-/vendor
-
-# PHPUnit
-/app/phpunit.xml
-/phpunit.xml
-.phpunit.result.cache
-
-# Build data
-/build/
-
-# Backup entities generated with doctrine:generate:entities command
-**/Entity/*~
-
-# Embedded web-server pid file
-/.web-server-pid
-
-/.idea
-/*.iml
-LICENSE
-docker-compose.yml
-compose.yaml
-/.docker/keycloak/data
-
-.!
-.buildpath
-.gitignore.swp
-.project
-.env
-.settings/
-
-/mysql
-
-#script to download and import last prod DB to develop in local env
-/updateLocalDbFromProd.sh
-
-**/*~
-
-.direnv
-.devenv
 ###> symfony/framework-bundle ###
 /.env.local
 /.env.local.php
@@ -79,14 +21,39 @@ phpstan.neon
 .phpunit.result.cache
 ###< phpunit/phpunit ###
 
-###> symfony/phpunit-bridge ###
-.phpunit.result.cache
-/phpunit.xml
-###< symfony/phpunit-bridge ###
-
 ###> symfony/webpack-encore-bundle ###
 /node_modules/
 /public/build/
 npm-debug.log
 yarn-error.log
 ###< symfony/webpack-encore-bundle ###
+
+# Cypress — runtime artifacts
+/cypress/screenshots/
+/cypress/videos/
+/cypress/downloads/
+
+# Docker — local compose override and data
+docker-compose.yml
+compose.yaml
+/mysql
+/.docker/keycloak/data
+
+# IDE
+/.idea
+/*.iml
+.buildpath
+.project
+.settings/
+
+# OS / editor
+**/*~
+**/Entity/*~
+.direnv
+.devenv
+
+# Project-specific
+.env
+/build/
+/.web-server-pid
+/updateLocalDbFromProd.sh

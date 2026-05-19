@@ -8,6 +8,8 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
+use App\Entity\PeriodPosition;
+use App\Entity\Shift;
 
 class FixShiftMissingPositionCommand extends Command
 {
@@ -43,7 +45,7 @@ class FixShiftMissingPositionCommand extends Command
             $output->writeln("<comment>Dry run: won't impact the database</comment>");
         }
 
-        $shifts_without_position = $this->em->getRepository('App:Shift')->findBy(array('position' => null), array('start' => 'ASC'));
+        $shifts_without_position = $this->em->getRepository(Shift::class)->findBy(array('position' => null), array('start' => 'ASC'));
         $output->writeln(count($shifts_without_position) . ' créneau' . ((count($shifts_without_position)>1) ? 'x':'') . ' sans poste type trouvé' . ((count($shifts_without_position)>1) ? 's':'') . '...');
 
         if ($cycle_type == 'abcd') {
@@ -59,7 +61,7 @@ class FixShiftMissingPositionCommand extends Command
 
             $shifts_without_position_fixed = 0;
             // faster to loop on periodPositions
-            $period_positions = $this->em->getRepository('App:PeriodPosition')
+            $period_positions = $this->em->getRepository(PeriodPosition::class)
                 ->createQueryBuilder('pp')
                 ->leftJoin('pp.period', 'p')->addSelect('p')
                 ->getQuery()
@@ -68,7 +70,7 @@ class FixShiftMissingPositionCommand extends Command
 
             foreach ($period_positions as $period_position) {
                 // find shifts_without_position corresponding to this period_position
-                $period_position_shifts_without_position = $this->em->getRepository('App:Shift')->createQueryBuilder('s')
+                $period_position_shifts_without_position = $this->em->getRepository(Shift::class)->createQueryBuilder('s')
                     // ->set('DATEFIRST', 1)
                     ->where('s.position is null')
                     ->andWhere("DATE_FORMAT(s.start, '%H:%i') = :period_start_time")

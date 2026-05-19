@@ -14,7 +14,6 @@ use Symfony\Component\Filesystem\Filesystem;
 use Symfony\Component\Form\Form;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Validator\Constraints\DateTime;
 use Vich\UploaderBundle\Templating\Helper\UploaderHelper;
 
@@ -44,7 +43,7 @@ class ServiceController extends AbstractController
     public function listAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
-        $services = $em->getRepository('App:Service')->findAll();
+        $services = $em->getRepository(Service::class)->findAll();
         return $this->render('admin/service/list.html.twig', array(
             'services' => $services
         ));
@@ -60,7 +59,7 @@ class ServiceController extends AbstractController
     public function navlistAction()
     {
         $em = $this->getDoctrine()->getManager();
-        $services = $em->getRepository('App:Service')->findBy(array('public'=>1));
+        $services = $em->getRepository(Service::class)->findBy(array('public'=>1));
         return $this->render('admin/service/navlist.html.twig', array(
             'services' => $services
         ));
@@ -74,7 +73,6 @@ class ServiceController extends AbstractController
      */
     public function newAction(Request $request)
     {
-        $session = new Session();
 
         $service = new Service();
 
@@ -90,7 +88,7 @@ class ServiceController extends AbstractController
                 $this->resolveLogo($service);
             }
 
-            $session->getFlashBag()->add('success', 'Le nouveau service a bien été créée !');
+            $this->addFlash('success', 'Le nouveau service a bien été créée !');
             return $this->redirectToRoute('service_list');
         }
 
@@ -107,7 +105,6 @@ class ServiceController extends AbstractController
      */
     public function editAction(Request $request, Service $service)
     {
-        $session = new Session();
 
         $form = $this->createForm(ServiceType::class, $service);
         $form->handleRequest($request);
@@ -121,7 +118,7 @@ class ServiceController extends AbstractController
                 $this->resolveLogo($service);
             }
 
-            $session->getFlashBag()->add('success', 'Le service a bien été édité !');
+            $this->addFlash('success', 'Le service a bien été édité !');
             return $this->redirectToRoute('service_list');
         }
 
@@ -139,7 +136,6 @@ class ServiceController extends AbstractController
      */
     public function deleteAction(Request $request,Service $service)
     {
-        $session = new Session();
 
         $form = $this->getDeleteForm($service);
         $form->handleRequest($request);
@@ -149,7 +145,7 @@ class ServiceController extends AbstractController
             $em->remove($service);
             $em->flush();
 
-            $session->getFlashBag()->add('success', 'Le service a bien été supprimé !');
+            $this->addFlash('success', 'Le service a bien été supprimé !');
         }
 
         return $this->redirectToRoute('service_list');

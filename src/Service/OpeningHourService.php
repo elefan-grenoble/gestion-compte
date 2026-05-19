@@ -5,6 +5,7 @@ namespace App\Service;
 use DateTime;
 use App\Entity\OpeningHour;
 use Doctrine\ORM\EntityManagerInterface;
+use App\Entity\ClosingException;
 
 class OpeningHourService
 {
@@ -22,7 +23,7 @@ class OpeningHourService
         }
 
         // filter on day
-        $openingHoursEnabledDay = $this->em->getRepository('App:OpeningHour')->findByDay($date, null, true, true);
+        $openingHoursEnabledDay = $this->em->getRepository(OpeningHour::class)->findByDay($date, null, true, true);
 
         // filter on time
         if (count($openingHoursEnabledDay) > 0) {
@@ -34,7 +35,7 @@ class OpeningHourService
 
             // final check on closing exceptions
             if (count($openingHoursEnabledDayTime) > 0) {
-                $closingExceptions = $this->em->getRepository('App:ClosingException')->findOngoing($date);
+                $closingExceptions = $this->em->getRepository(ClosingException::class)->findOngoing($date);
                 if (!$closingExceptions) {
                     return True;
                 }

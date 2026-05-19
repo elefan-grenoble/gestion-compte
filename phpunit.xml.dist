@@ -16,6 +16,9 @@
       <directory>src/*Bundle/Resources</directory>
       <directory>src/*/*Bundle/Resources</directory>
       <directory>src/*/Bundle/*Bundle/Resources</directory>
+      <directory>src/Migrations</directory>
+      <directory>src/DataFixtures</directory>
+      <file>src/Kernel.php</file>
     </exclude>
   </coverage>
   <php>
@@ -30,8 +33,17 @@
       <!-- ###- symfony/framework-bundle ### -->
   </php>
   <testsuites>
-    <testsuite name="Project Test Suite">
-      <directory>tests</directory>
+    <!-- unit: pure PHP tests, no Symfony Kernel, no DB. Fast. -->
+    <testsuite name="unit">
+      <directory>tests/Unit</directory>
+    </testsuite>
+    <!-- integration: tests with the Symfony Kernel booted but no DB access. -->
+    <testsuite name="integration">
+      <directory>tests/Integration</directory>
+    </testsuite>
+    <!-- functional: HTTP-level tests with the Kernel booted and a real DB (fixtures loaded). -->
+    <testsuite name="functional">
+      <directory>tests/Functional</directory>
     </testsuite>
   </testsuites>
 </phpunit>

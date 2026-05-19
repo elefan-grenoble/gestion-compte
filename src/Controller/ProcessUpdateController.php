@@ -10,7 +10,6 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpFoundation\Session\Session;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Component\Validator\Constraints\Date;
@@ -35,7 +34,7 @@ class ProcessUpdateController extends AbstractController
         //todo paginate
 
         $em = $this->getDoctrine()->getManager();
-        $processUpdates = $em->getRepository('App:ProcessUpdate')->findBy(array(),array('date'=>'DESC'));
+        $processUpdates = $em->getRepository(ProcessUpdate::class)->findBy(array(),array('date'=>'DESC'));
 
         $delete_forms = array();
         foreach ($processUpdates as $update){
@@ -95,7 +94,6 @@ class ProcessUpdateController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $session = new Session();
 
             $emailTemplate->setDate(new \DateTime());
             $emailTemplate->setAuthor($this->getUser());
@@ -103,7 +101,7 @@ class ProcessUpdateController extends AbstractController
             $em = $this->getDoctrine()->getManager();
             $em->persist($emailTemplate);
             $em->flush();
-            $session->getFlashBag()->add('success', "Mise à jour de procédure créée");
+            $this->addFlash('success', "Mise à jour de procédure créée");
             return $this->redirectToRoute('process_update_list');
 
         }
@@ -127,11 +125,10 @@ class ProcessUpdateController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $session = new Session();
             $em = $this->getDoctrine()->getManager();
             $em->persist($processUpdate);
             $em->flush();
-            $session->getFlashBag()->add('success', 'Mise à jour de procédure éditée');
+            $this->addFlash('success', 'Mise à jour de procédure éditée');
             return $this->redirectToRoute('process_update_list');
 
         }
@@ -168,13 +165,12 @@ class ProcessUpdateController extends AbstractController
 
         $form = $this->createDeleteForm($processUpdate);
         $form->handleRequest($request);
-        $session = new Session();
 
         if ($form->isSubmitted() && $form->isValid()) {
             $em = $this->getDoctrine()->getManager();
             $em->remove($processUpdate);
             $em->flush();
-            $session->getFlashBag()->add('success', "l'entrée a bien été supprimée");
+            $this->addFlash('success', "l'entrée a bien été supprimée");
         }
 
         return $this->redirectToRoute('process_update_list');

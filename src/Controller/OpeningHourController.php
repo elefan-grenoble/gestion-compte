@@ -6,6 +6,7 @@ use App\Entity\OpeningHour;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
+use App\Entity\OpeningHourKind;
 
 /**
  * OpeningHour controller
@@ -31,10 +32,10 @@ class OpeningHourController extends AbstractController
 
         $filter_opening_hour_kind_id = $request->get('opening_hour_kind_id');
         if ($filter_opening_hour_kind_id) {
-            $openingHourKind = $em->getRepository('App:OpeningHourKind')->find($filter_opening_hour_kind_id);
+            $openingHourKind = $em->getRepository(OpeningHourKind::class)->find($filter_opening_hour_kind_id);
         }
 
-        $openingHours = $em->getRepository('App:OpeningHour')->findAll($openingHourKind);
+        $openingHours = $em->getRepository(OpeningHour::class)->findAll($openingHourKind);
 
         return $this->render('openinghour/_partial/widget.html.twig', [
             'openingHours' => $openingHours,

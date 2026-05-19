@@ -14,6 +14,7 @@ use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
+use App\Entity\Shift;
 
 class SendShiftAlertsCommand extends Command
 {
@@ -85,7 +86,7 @@ class SendShiftAlertsCommand extends Command
     }
 
     private function computeAlerts(DateTime $date, $jobs) {
-        $shifts = $this->em->getRepository('App:Shift')->findAt($date, $jobs);
+        $shifts = $this->em->getRepository(Shift::class)->findAt($date, $jobs);
 
         // Build buckets from shifts
         $buckets = array();
