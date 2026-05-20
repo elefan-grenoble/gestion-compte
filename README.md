@@ -44,6 +44,7 @@ _cliquez pour voir l'image en grand_
   * MySQL/MariaDB
 
 [Guide du développeur](doc/dev.md)
+[Lancer les tests en local sous docker (ISO CI)](doc/install.tests.linux.md)
 
 ## Liste des fonctionnalités
 
