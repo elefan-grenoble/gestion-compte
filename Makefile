@@ -76,7 +76,6 @@ compose.yaml:
 	@sed -e '/^version:/d' \
 	     -e 's|^\(\s*\)- \./mysql:/var/lib/mysql|\1- db_data:/var/lib/mysql|' \
 	     docker-compose.symfony_server.yml.dist > compose.yaml
-	@printf '\nvolumes:\n  db_data:\n' >> compose.yaml
 	@echo "✔ compose.yaml créé (version retirée, volume nommé db_data)"
 
 .env:
