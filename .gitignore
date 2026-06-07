@@ -57,3 +57,9 @@ compose.yaml
 /build/
 /.web-server-pid
 /updateLocalDbFromProd.sh
+claude.local.md
+AUDIT.md
+TODO-audit.md
+rector-dead-code.php
+phpstan-dead-code.neon
+.claude/settings.local.json
