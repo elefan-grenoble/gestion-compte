@@ -25,7 +25,7 @@ Cet audit est un **état des lieux**. Il ne modifie pas le code, ne fait pas de 
 
 ## Contexte métier (critique pour l'audit)
 
-Outil de gestion coopérative (créneaux de travail, adhérents, cotisations) utilisé par **plusieurs instances indépendantes** : Elefan (Grenoble), Scopely (Nantes), et d'autres coopératives. Chaque instance déploie sa propre version. Toutes les features ne sont pas utilisées partout.
+Outil de gestion coopérative (créneaux de travail, adhérents, cotisations) utilisé par **plusieurs instances indépendantes** : Elefan (Grenoble), Scopeli (Nantes), et d'autres coopératives. Chaque instance déploie sa propre version. Toutes les features ne sont pas utilisées partout.
 
 Conséquences pour l'audit :
 - Une route "inutilisée" statiquement peut être active chez une instance. **Ne pas conclure à du dead code sans données runtime.**
@@ -1691,7 +1691,7 @@ Sections Opus : **AP, SEC, SPEC, SYN**. Opus ponctuel : **SF-PREP.2**.
   >
   > ### 5. `OidcFirewallListener` — URLs hardcodées, 76 lignes (🟡)
   >
-  > Liste de 14 chemins d'URL hardcodés (L43–62) pour le contrôle d'accès OIDC. Aucune référence aux noms de routes Symfony — si une route est renommée, la protection ne suit pas. Concerne une fonctionnalité instance-specific (Scopely utilise OIDC, Elefan non). PHPDoc erroné ligne 28–30 (`@param PeriodPositionFreedEvent`) — copie de l'autre listener.
+  > Liste de 14 chemins d'URL hardcodés (L43–62) pour le contrôle d'accès OIDC. Aucune référence aux noms de routes Symfony — si une route est renommée, la protection ne suit pas. Concerne une fonctionnalité instance-specific (Scopeli utilise OIDC, Elefan non). PHPDoc erroné ligne 28–30 (`@param PeriodPositionFreedEvent`) — copie de l'autre listener.
   >
   > ---
   >
@@ -2276,7 +2276,7 @@ Sections Opus : **AP, SEC, SPEC, SYN**. Opus ponctuel : **SF-PREP.2**.
   >     $this->denyAccessUnlessGranted('ROLE_USER');
   > ```
   >
-  > Sans paramètre `{beneficiary}`, la route est accessible anonymement et rend les créneaux du jour (noms des bénéficiaires inclus si `display_name_shifters=true`). Croiser avec **CONFIG.2** pour savoir si `display_name_shifters` est activé chez Elefan/Scopely.
+  > Sans paramètre `{beneficiary}`, la route est accessible anonymement et rend les créneaux du jour (noms des bénéficiaires inclus si `display_name_shifters=true`). Croiser avec **CONFIG.2** pour savoir si `display_name_shifters` est activé chez Elefan/Scopeli.
   >
   > → Note pour **SYN.2** (mineur, à confirmer selon config)
   >
@@ -2807,7 +2807,7 @@ Sections Opus : **AP, SEC, SPEC, SYN**. Opus ponctuel : **SF-PREP.2**.
   > **Valeur commitée** : `APP_SECRET=4814f742d29ec73fd902ad2a0d360b76` (hex 32 chars, entropie élevée).
   > **Correctif existant** : commit `c30e1f36` (2023-12-20) remplace la valeur par le placeholder `ThisTokenIsNotSoSecretChangeIt`. L'état actuel (HEAD) est sain.
   > **Risque résiduel** : le secret reste accessible dans l'historique git public (`git show a408661e:.env.dist`). Toute instance qui a cloné entre 2020 et 2023 sans régénérer `APP_SECRET` utilise cette valeur publique. L'`APP_SECRET` Symfony sert à signer les CSRF tokens, les URLs signées, les cookies "remember-me" et les sessions.
-  > **Recommandation TODO** : documenter dans le README/guide d'installation que `APP_SECRET` doit être régénéré à chaque déploiement (`openssl rand -hex 32`). Alerter les instances existantes (Elefan, Scopely) de vérifier leur valeur deployée. L'historique ne peut pas être réécrit sans coordination.
+  > **Recommandation TODO** : documenter dans le README/guide d'installation que `APP_SECRET` doit être régénéré à chaque déploiement (`openssl rand -hex 32`). Alerter les instances existantes (Elefan, Scopeli) de vérifier leur valeur deployée. L'historique ne peut pas être réécrit sans coordination.
   >
   > ### F2 — Credentials de test faibles dans les fichiers CI committé 🔵
   >
@@ -2984,7 +2984,7 @@ Sections Opus : **AP, SEC, SPEC, SYN**. Opus ponctuel : **SF-PREP.2**.
   > | Controller | Lignes | Note |
   > |-----------|--------|------|
   > | `ApiController` | ~80 | Endpoints OAuth API (`/api/oauth/user`, `/api/v4/user`), 0 % |
-  > | `OAuthController` | ~40 | Flow OAuth OIDC (`/oauth/login`, `/oauth/callback`, `/oauth/logout`) — instance-specific (Scopely), difficile à tester sans stub Keycloak |
+  > | `OAuthController` | ~40 | Flow OAuth OIDC (`/oauth/login`, `/oauth/callback`, `/oauth/logout`) — instance-specific (Scopeli), difficile à tester sans stub Keycloak |
   >
   > ---
   >
@@ -3481,7 +3481,7 @@ Sections Opus : **AP, SEC, SPEC, SYN**. Opus ponctuel : **SF-PREP.2**.
   `HELLOASSO_API_KEY` et `HELLOASSO_API_PASSWORD` sont définies dans `.env.oidc.test` mais jamais consommées par du code ou de la config. Probablement des reliquats de l'API HelloAsso v1 (auth par clé/mot de passe) remplacée par OAuth v5. **TODO : supprimer de `.env.oidc.test`.**
 
 - [x] **CONFIG.2** — Mécanisme de personnalisation par instance
-  > Comment Elefan et Scopely configurent-ils leur instance différemment ? Paramètres Symfony, table de config en base, feature flags ? `grep -rn "getParameter\|ParameterBagInterface" src/`. Résultat → documentation finale + specs (SPEC.9).
+  > Comment Elefan et Scopeli configurent-ils leur instance différemment ? Paramètres Symfony, table de config en base, feature flags ? `grep -rn "getParameter\|ParameterBagInterface" src/`. Résultat → documentation finale + specs (SPEC.9).
 
   **Résultat**
 
@@ -3489,7 +3489,7 @@ Sections Opus : **AP, SEC, SPEC, SYN**. Opus ponctuel : **SF-PREP.2**.
 
   ### Architecture de configuration : 3 couches, tout par variables d'environnement
 
-  Il n'existe **aucune table de configuration en base** (pas d'entité `Parameter`/`Config`/`Setting` dans `src/Entity/`), **aucun feature flag framework** (Flipper, Unleash, etc.), et **aucune variable `APP_INSTANCE`** ou mécanisme d'identification de déploiement au runtime. Elefan et Scopely sont deux déploiements indépendants du même code, différenciés uniquement par leur fichier `.env` (ou équivalent CI/CD).
+  Il n'existe **aucune table de configuration en base** (pas d'entité `Parameter`/`Config`/`Setting` dans `src/Entity/`), **aucun feature flag framework** (Flipper, Unleash, etc.), et **aucune variable `APP_INSTANCE`** ou mécanisme d'identification de déploiement au runtime. Elefan et Scopeli sont deux déploiements indépendants du même code, différenciés uniquement par leur fichier `.env` (ou équivalent CI/CD).
 
   **Couche 1 — Variables d'environnement** : définies dans `.env` / `.env.local` / secrets CI.
   **Couche 2 — Paramètres Symfony** : `config/services.yaml` déclare ~130 paramètres nommés (ex. `cycle_type`, `oidc_enable`) mappés depuis les vars via `%env(TYPE:VAR)%`.
@@ -3503,7 +3503,7 @@ Sections Opus : **AP, SEC, SPEC, SYN**. Opus ponctuel : **SF-PREP.2**.
   | Catégorie | Variables clés | Exemple de différenciation |
   |---|---|---|
   | **Infrastructure** | `APP_ENV`, `DATABASE_URL`, `MAILER_DSN`, `PHP_*` | Docker/déploiement, non applicatif |
-  | **Identité coopérative** | `SITE_NAME`, `PROJECT_NAME`, `MAIN_COLOR`, `LOCAL_CURRENCY_NAME` | Branding Elefan vs Scopely |
+  | **Identité coopérative** | `SITE_NAME`, `PROJECT_NAME`, `MAIN_COLOR`, `LOCAL_CURRENCY_NAME` | Branding Elefan vs Scopeli |
   | **Membres/adhésion** | `REGISTRATION_DURATION`, `MAXIMUM_NB_OF_BENEFICIARIES_IN_MEMBERSHIP`, `REGISTRATION_EVERY_CIVIL_YEAR` | Règles d'adhésion propres à chaque coop |
   | **Créneaux** | `CYCLE_DURATION`, `CYCLE_TYPE`, `DUE_DURATION_BY_CYCLE`, `MIN_SHIFT_DURATION`, `FORBID_SHIFT_OVERLAP_TIME` | Règles métier des créneaux |
   | **Feature flags booléens** | voir tableau ci-dessous | Activation/désactivation de modules |
@@ -3559,7 +3559,7 @@ Sections Opus : **AP, SEC, SPEC, SYN**. Opus ponctuel : **SF-PREP.2**.
   Consommé comme globale Twig (`twig.yaml:19`) mais **non déclaré en paramètre Symfony** dans `services.yaml`. La var d'env `REGISTRATION_MANUAL_ENABLED` est accessible uniquement via Twig, pas via `getParameter()` dans le code PHP. Si du code PHP en a besoin, il doit faire `$this->getParameter('env(bool:REGISTRATION_MANUAL_ENABLED)')` (syntaxe non standard) — pas de bug actuel mais fragilité. **TODO mineur : déclarer en paramètre nommé dans `services.yaml`.**
 
   #### 🔵 Aucun mécanisme d'identification d'instance au runtime
-  Conséquence directe pour RT.1 : il faudra créer une variable (`APP_INSTANCE=elefan|scopely`) pour alimenter le tracking de routes recommandé en RT.2.
+  Conséquence directe pour RT.1 : il faudra créer une variable (`APP_INSTANCE=elefan|scopeli`) pour alimenter le tracking de routes recommandé en RT.2.
 
   #### 🔵 Anti-pattern `getParameter()` via `ContainerAwareTrait` (84 appels)
   L'injection par `getParameter()` depuis le container est un anti-pattern déprécié depuis Symfony 4 (et interdit dans Symfony 5+). La migration vers SF5 (SF-PREP) devra remplacer les 84 appels par injection constructeur ou `_defaults.bind`. À noter dans **SF-PREP.2**.
@@ -3637,7 +3637,7 @@ Sections Opus : **AP, SEC, SPEC, SYN**. Opus ponctuel : **SF-PREP.2**.
   | `MembershipService.php:170` | `"+27 days"` dans `getEndOfCycle()` | Fin de cycle = début + 27 j — **cassé si CYCLE_DURATION ≠ '28 days'** |
   | `MembershipService.php:181` | `"+28 days"` dans `getCycleNumber()` | Itération sur les cycles — **cassé si CYCLE_DURATION ≠ '28 days'** |
 
-  **Périmètre** : `CYCLE_TYPE=abcd` n'est **pas** affecté (branche dédiée qui calcule depuis la semaine ISO). Les valeurs hardcodées impactent uniquement `cycle_type != "abcd"` (cycles flottants depuis `firstShiftDate`). En pratique Elefan utilise `abcd` et Scopely probablement aussi — le bug est donc dormant, mais constitue une dette technique explicite (TODO dans le code) et un risque lors d'onboarding d'une nouvelle instance.
+  **Périmètre** : `CYCLE_TYPE=abcd` n'est **pas** affecté (branche dédiée qui calcule depuis la semaine ISO). Les valeurs hardcodées impactent uniquement `cycle_type != "abcd"` (cycles flottants depuis `firstShiftDate`). En pratique Elefan utilise `abcd` et Scopeli probablement aussi — le bug est donc dormant, mais constitue une dette technique explicite (TODO dans le code) et un risque lors d'onboarding d'une nouvelle instance.
 
   **TODO** : injecter `cycle_duration` dans `MembershipService` et remplacer les 5 occurrences de `28` (lignes 146, 147, 156, 170, 181) et `27` (ligne 170) par le paramètre. À noter dans **SF-PREP.2** (migration injection constructeur).
 
@@ -3925,7 +3925,7 @@ Sections Opus : **AP, SEC, SPEC, SYN**. Opus ponctuel : **SF-PREP.2**.
   >
   > → **TODO SYN.3** — Après `schema:create` en test, synchroniser le tracking Doctrine : `doctrine:migrations:version --add --all --no-interaction`. À ajouter dans la cible `db-reset` du Makefile juste après `schema:create`. Effort XS.
   >
-  > → **TODO SYN.4** — Rétablir les migrations en production : décommenter et compléter le bloc migration dans `dploy.sh` (ligne 74), en lançant `doctrine:migrations:version --add --all` une seule fois sur les instances existantes pour synchroniser l'état, puis `doctrine:migrations:migrate --no-interaction` à chaque déploiement. Effort S (coordination avec les deux instances, Elefan + Scopely).
+  > → **TODO SYN.4** — Rétablir les migrations en production : décommenter et compléter le bloc migration dans `dploy.sh` (ligne 74), en lançant `doctrine:migrations:version --add --all` une seule fois sur les instances existantes pour synchroniser l'état, puis `doctrine:migrations:migrate --no-interaction` à chaque déploiement. Effort S (coordination avec les deux instances, Elefan + Scopeli).
 
 - [x] **DB.3** — Qualité des migrations
   > Migrations avec `down()` vides, opérations irréversibles sans warning → TODO.
@@ -4196,7 +4196,7 @@ Sections Opus : **AP, SEC, SPEC, SYN**. Opus ponctuel : **SF-PREP.2**.
 > ```
 > ### [Domaine]
 > **Acteurs** : rôles concernés
-> **Instances** : Elefan / Scopely / toutes (à préciser si connu)
+> **Instances** : Elefan / Scopeli / toutes (à préciser si connu)
 > **Flux principal** : étapes
 > **Règles métier** : contraintes identifiées dans le code
 > **Données** : entités impliquées, champs clés
@@ -4231,7 +4231,7 @@ Sections Opus : **AP, SEC, SPEC, SYN**. Opus ponctuel : **SF-PREP.2**.
   > Croiser : OAuth exposé, Helloasso, Igloohome, Keycloak. `src/Providers/`.
 
 - [ ] **SPEC.9** — Annotations d'usage par instance
-  > Pour chaque spec : annoter "utilisé chez Elefan/Scopely" si identifiable via CONFIG.2 ou RT.
+  > Pour chaque spec : annoter "utilisé chez Elefan/Scopeli" si identifiable via CONFIG.2 ou RT.
 
 - [ ] **SPEC.10** — Glossaire métier
   > Termes du domaine (Shift, Period, Beneficiary, Swipe, Commission, Service…) — définition, entité associée.
@@ -4270,7 +4270,7 @@ Sections Opus : **AP, SEC, SPEC, SYN**. Opus ponctuel : **SF-PREP.2**.
 
 - [ ] **[DEP.3]** — `custom_animation.less` non importée dans `app.js` (absente des `require()` en bas des imports LESS) : les animations CSS ne sont pas bundlées par webpack. En parallèle, `templates/period/index.html.twig:13` référence `{{ asset('bundles/app/css/custom_animation.css') }}` — URL de l'ère pré-webpack, invalide avec Encore (qui output dans `public/build/`). À documenter dans **D.3** addendum et **SYN.2**.
 
-- [ ] **[DEP.3]** — `canvas-gauges` CDN HS : vérifier si `display_gauge` est activé chez Elefan et/ou Scopely (variable de config ou flag d'instance). Si désactivé partout, la feature peut être retirée plutôt que corrigée. À confirmer en **CONFIG.2**.
+- [ ] **[DEP.3]** — `canvas-gauges` CDN HS : vérifier si `display_gauge` est activé chez Elefan et/ou Scopeli (variable de config ou flag d'instance). Si désactivé partout, la feature peut être retirée plutôt que corrigée. À confirmer en **CONFIG.2**.
 
 - [ ] **[DC.2]** — `AuthenticationSuccessHandler::onAuthenticationSuccess()` viole `AuthenticationSuccessHandlerInterface` : quand `$target` est absent, la méthode retourne `null` implicitement alors que l'interface exige un `Response`. Le `return;` supprimé par Rector masque davantage ce chemin. Bug à classer dans **SYN.2** (bugs, effort XS).
 
@@ -4280,7 +4280,7 @@ Sections Opus : **AP, SEC, SPEC, SYN**. Opus ponctuel : **SF-PREP.2**.
 
 - [ ] **[TC.5]** — Aucune commande n'a d'option `--dry-run`, y compris les opérations irréversibles (`app:anonymize`, `app:member:close`, `app:shift:generate`). Recommandation UX opérationnelle : ajouter `--dry-run` aux commandes destructives (output de ce qui serait fait sans modifier la base). À porter dans **SYN.2** (ergonomie CLI, effort S par commande).
 
-- [ ] **[PERF.1, PERF.2]** — Volumétries de prod requises pour valider la sévérité des findings PERF. Les comptages de lignes utilisés pendant l'audit (beneficiary: 56, proxy: 0, closing_exception: 0, shift: 51, membership: 56, time_log: 0) sont issus de la base de test — ils ne reflètent pas la production Elefan ni Scopely. Avant de prioriser les correctifs PERF, refaire l'analyse avec une dump prod anonymisée (à fournir après anonymisation côté utilisateur). Les sévérités 🔴/🟡 sont des estimations raisonnées mais non confirmées sur données réelles.
+- [ ] **[PERF.1, PERF.2]** — Volumétries de prod requises pour valider la sévérité des findings PERF. Les comptages de lignes utilisés pendant l'audit (beneficiary: 56, proxy: 0, closing_exception: 0, shift: 51, membership: 56, time_log: 0) sont issus de la base de test — ils ne reflètent pas la production Elefan ni Scopeli. Avant de prioriser les correctifs PERF, refaire l'analyse avec une dump prod anonymisée (à fournir après anonymisation côté utilisateur). Les sévérités 🔴/🟡 sont des estimations raisonnées mais non confirmées sur données réelles.
 
 - [ ] **[CI.1] TODO CI.A** — `shivammathur/setup-php@verbose` dans `.github/workflows/ci.yaml` : `@verbose` est un alias comportemental flottant, pas un tag sémantique. Épingler à une version (`@v2` ou mieux un SHA digest) pour éliminer le risque supply chain. Effort XS.
 
