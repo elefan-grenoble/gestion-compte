@@ -4636,8 +4636,8 @@ Sections Opus : **AP, SEC, SPEC, SYN**. Opus ponctuel : **SF-PREP.2**.
   > ### Conséquences pour SPEC.2-10
   >
   > 1. **Ordre de traitement** : A (SPEC.2) et B (SPEC.3) sont les plus gros et les plus interdépendants (membre ↔ créneau via `TimeLog`/cycle). Les traiter en premier.
-  > 2. **Le domaine H (Gouvernance/AG) doit être tranché** avant SPEC.6 — sinon il sera traité en hors-scope par défaut.
-  > 3. **Le domaine J (accès physique)** sera ancré dans SPEC.4 avec cross-refs sécurité.
+  > 2. **Le domaine H (Gouvernance/AG)** → ✅ **tranché (session 52)** : spec dédiée **SPEC.11**.
+  > 3. **Le domaine J (accès physique)** → ✅ **tranché (session 52)** : sous-section transverse de **SPEC.4**.
   > 4. Chaque spec devra porter les **annotations multi-instance** (SPEC.9) : Helloasso, OIDC/Keycloak, Igloohome, `use_fly_and_fixed` sont des features instance-specific déjà identifiées (CONFIG.2/CONFIG.3).
 
 - [x] **SPEC.2** — Spec : Adhérents / Bénéficiaires
@@ -4869,6 +4869,7 @@ Sections Opus : **AP, SEC, SPEC, SYN**. Opus ponctuel : **SF-PREP.2**.
 
 - [ ] **SPEC.4** — Spec : Authentification & Autorisation
   > Croiser : `security.yaml`, `AuthenticationSuccessHandler`, `KeycloakController`, voters, `SwipeCard`.
+  > **✅ Décision (session 52)** : inclure le **domaine J — Contrôle d'accès physique** comme **sous-section transverse dédiée** de SPEC.4 (`CodeController`, `SwipeCardController`, `CardReaderController`, Igloohome), avec cross-refs sécurité (SEC.1.7 Vigenère, SEC.2.2) et fonctionnelles (validation créneau → SPEC.3, gestion codes → SPEC.6, Igloohome → SPEC.8).
 
 - [ ] **SPEC.5** — Spec : Cotisations & Paiements
   > Croiser : `HelloassoController`, `HelloassoClient`, events `HelloassoEvent`, entités paiement.
@@ -4887,6 +4888,10 @@ Sections Opus : **AP, SEC, SPEC, SYN**. Opus ponctuel : **SF-PREP.2**.
 
 - [ ] **SPEC.10** — Glossaire métier
   > Termes du domaine (Shift, Period, Beneficiary, Swipe, Commission, Service…) — définition, entité associée.
+
+- [ ] **SPEC.11** — Spec : Gouvernance & Assemblées générales
+  > **✅ Décision (session 52)** : domaine H (gap SPEC.1) traité dans une spec dédiée plutôt que dilué dans SPEC.6.
+  > Croiser : `EventController`, `AdminEventController`, `AdminEventKindController`, entités `Event`/`EventKind`/`Proxy`, event `EventProxyCreatedEvent`, PERF cas #2 (proxy list N+1). Couvre : événements associatifs (AG), procurations (give/take/find), émargement/signatures, widgets event. ~16 routes.
 
 ---
 
