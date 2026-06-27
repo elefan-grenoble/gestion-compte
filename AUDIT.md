@@ -6868,7 +6868,7 @@ Sections Opus : **AP, SEC, SPEC, SYN**. Opus ponctuel : **SF-PREP.2**.
 ## SYN — Synthèse et livrables finaux
 > 🔀 **Modèle : Opus.** Rappeler `/model opus` avant SYN.1, `/model sonnet` après SYN.4.
 
-- [ ] **SYN.1** — Documentation mise à jour
+- [x] **SYN.1** — Documentation mise à jour
   > Consolider les findings de D.1-5, CONFIG.1-3, LOG.1. Produire un `DOCUMENTATION.md` (gitignored pour l'instant) : architecture, setup, variables d'env, mécanisme multi-instance, observabilité.
 
 - [ ] **SYN.2** — TODO priorisée
