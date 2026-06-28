@@ -83,7 +83,7 @@ class ShiftService
      */
     public function canBookExtraShift(Beneficiary $beneficiary, Shift $shift)
     {
-        if (true === $this->allowExtraShifts && NULL === $this->maxTimeInAdvanceToBookExtraShifts) {
+        if (true === $this->allowExtraShifts && empty($this->maxTimeInAdvanceToBookExtraShifts)) {
             return true;
         }
         return true === $this->allowExtraShifts && $shift->isBefore($this->maxTimeInAdvanceToBookExtraShifts);
@@ -143,7 +143,7 @@ class ShiftService
      */
     public function canBookDuration(Beneficiary $beneficiary, $duration, $cycle = 0)
     {
-        if (true === $this->allowExtraShifts && NULL === $this->maxTimeInAdvanceToBookExtraShifts) {
+        if (true === $this->allowExtraShifts && empty($this->maxTimeInAdvanceToBookExtraShifts)) {
             return true;
         }
 
