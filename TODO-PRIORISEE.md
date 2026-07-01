@@ -137,6 +137,7 @@
 | m-SEC-9 | Pas de révocation de consentement OAuth (RGPD) ; `api_gitlab_user` accessible par session (hors flux token) ; `api_swipe_in` sans garde login-as (incohérence mineure). | M / XS | [SPEC.8](audit/SPEC.8.md) |
 | m-SEC-10 | **Flow d'onboarding public = surface d'énumération de membres** (`find_member_number`, `confirm`, `find_me` : recherche par prénom → ID → nom complet + email masqué). Intentionnel mais sans garde-fou. Fix : Symfony RateLimiter. | S | [SEC.2.6](audit/SEC.2.md#SEC.2-6) |
 | m-SEC-11 | **`CodeVoter` : fall-through `case OPEN → DELETE`** (switch sans `break`) → asymétrie ouvrir/fermer non documentée ; `isLocationOk()` dupliqué (suppression couverte par m-DC-1). Clarifier l'intention ou corriger. | XS | [SPEC.4](audit/SPEC.4.md) |
+| m-SEC-12 | **`anonymous_proxy` : gap d'autorisation UI-only.** Le flag masque/affiche les boutons de don/prise anonyme de procuration (`give.html.twig`, `card_action.html.twig`) mais n'est vérifié nulle part côté serveur — `giveProxyAction` (branche formulaire vide) et `acceptProxyAction` (`event_proxy_take`) ne testent jamais `$event->getAnonymousProxy()`. Un membre connaissant l'URL peut donner/prendre une procuration anonyme même si l'AG a `anonymous_proxy=false`. Fix : ajouter la vérification du flag dans les deux actions. | XS | [SPEC.11](audit/SPEC.11.md), [EXTRA #51](audit/EXTRA.md#extra-51) |
 
 ### Dead code & nettoyage
 

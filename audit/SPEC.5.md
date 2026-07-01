@@ -151,7 +151,7 @@ Modes de paiement (`Registration.mode`) :
 | TYPE_CHECK | 2 | Manuel | Oui |
 | TYPE_LOCAL | 3 | Manuel (monnaie locale) | Oui |
 | TYPE_CREDIT_CARD | 4 | Défini, commenté | Non (commenté dans form) |
-| TYPE_DEFAULT | 5 | Historique ? | Non (jamais assigné) |
+| TYPE_DEFAULT | 5 | Provisioning OIDC | Non (assigné uniquement par `KeycloakAuthenticator::createMembership`, l.260 — pas via formulaire) |
 | TYPE_HELLOASSO | 6 | Webhook / CLI | Oui (non-SUPER_ADMIN seulement) |
 
 Variables d'env Helloasso (toutes `default::` → optionnelles) :
@@ -220,7 +220,7 @@ Variables d'env Helloasso (toutes `default::` → optionnelles) :
 
 **Code / dette** :
 - 🟠 **Dead code : `fromActionObj()` et `fromPaymentObj()`** dans `HelloassoPayment` : deux anciens mappings (API Helloasso v3) abandonnés au profit de `createFromPayementObject()` (v5). À supprimer après vérification dans les migrations.
-- 🟠 **`TYPE_CREDIT_CARD` (4) et `TYPE_DEFAULT` (5)** : définis dans les constantes `Registration`, jamais assignés en production (formulaire commenté, aucun dispatch système). Dead code probable — à confirmer avant suppression.
+- 🟠 **`TYPE_CREDIT_CARD` (4)** : défini dans les constantes `Registration`, jamais assigné en production (formulaire commenté, aucun dispatch système). Dead code probable — à confirmer avant suppression. *(`TYPE_DEFAULT` (5), initialement suspecté dead code également, est en réalité assigné par `KeycloakAuthenticator::createMembership` lors du provisioning OIDC — confirmé en SPEC.8, ne pas supprimer.)*
 - 🟡 **`Registration.amount` stockée en `string`** : incohérence de type avec `HelloassoPayment.amount` (`float`). La conversion implicite float→string dépend de la locale PHP.
 - 🟡 **`UpdateHelloAssoPaymentsCommand` : `formType` hardcodé à `'Membership'`** et une seule `helloasso_campaign_slug`. Ne supporte pas plusieurs campagnes. Pas de mode `--dry-run`.
 - 🟡 **`canRegister` fenêtre de 28 jours hardcodée** : `new \DateTime('+28 days')` non exposé en configuration.
@@ -234,7 +234,7 @@ Variables d'env Helloasso (toutes `default::` → optionnelles) :
 - `helloasso_resolve_orphan` / `helloasso_confirm_resolve_orphan` : validation Vigenère, cas orphelin déjà résolu.
 
 **Ambigu / à clarifier** :
-- `view_abstract_registration` : quelle requête SQL sous-jacente ? Quelles tables agrège-t-elle ? (`AbstractRegistration.TYPE_ANONYMOUS` = 2 — qui crée ces enregistrements anonymes ? Probablement les achats en caisse sans adhésion — à croiser avec le domaine Shift/Caisse).
+- ~~`view_abstract_registration` : quelle requête SQL sous-jacente ?~~ **Résolu** : migration `Version20190214200309.php` — `UNION ALL` de `registration` (type=1, TYPE_MEMBER) et `anonymous_beneficiary` (type=2, TYPE_ANONYMOUS, une ligne par bénéficiaire anonyme, sans jointure `Membership`).
 - Scopeli : Helloasso activé ou non ? Si oui, même campagne ou slug différent ?
 - `member_new_registration` dispatche-t-il un événement `member_new_registration` ? Non vu dans `MembershipController::newRegistration` — l'event du même nom semble dispatché ailleurs (cross SPEC.2 à confirmer).
 
