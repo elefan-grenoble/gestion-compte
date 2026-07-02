@@ -4,7 +4,7 @@
 
 **✅ Décision (session 52)** : domaine H (gap SPEC.1) traité dans une spec dédiée plutôt que dilué dans SPEC.6.
 Sources lues : `EventController` (441 l.), `AdminEventController` (494 l.), `AdminEventKindController` (126 l.) ; entités `Event` (698 l.), `EventKind`, `Proxy` ; `EventService`, `EventRepository`, `ProxyRepository` (vide), `EventExtension` (Twig) ; forms `EventType`, `ProxyType`, `EventKindType` ; event `EventProxyCreatedEvent` + listener `EmailingEventListener::onEventProxyCreated` (AP.7) ; relations `Membership::given_proxies` / `Beneficiary::received_proxies`.
-Croisé avec : SPEC.10 cluster G (giver/owner/event), PERF cas #2 (`Proxy::findAll()` N+1, voir [PERF.2](audit/PERF.2.md)), AP.7 (emailing event-driven), CONFIG.3 (`max_event_proxy_per_member`, `registration_duration`), SPEC.2 (Membership/Beneficiary), SPEC.6 (CRUD admin).
+Croisé avec : SPEC.10 cluster G (giver/owner/event), PERF cas #2 (`Proxy::findAll()` N+1, voir [PERF.2](PERF.2.md)), AP.7 (emailing event-driven), CONFIG.3 (`max_event_proxy_per_member`, `registration_duration`), SPEC.2 (Membership/Beneficiary), SPEC.6 (CRUD admin).
 
 ---
 
@@ -146,7 +146,7 @@ Couverture **quasi nulle sur le métier** :
 6. **`event_proxy_lite_delete` en verbe GET sans CSRF** : suppression d'une procuration rejouable par simple lien. Passer en POST/DELETE + token. (Cohérent avec les findings GET-mutant SPEC.3/SPEC.4.)
 
 🧹 **Dette / cohérence** (→ SYN.2) :
-7. **PERF cas #2 (déjà tracé, voir [PERF.2](audit/PERF.2.md))** : `admin_proxies_list` appelle `Proxy::findAll()` sans pagination ni `JOIN FETCH` → N+1 (chaque proxy lazy-load event/owner/giver) et croissance non bornée (~100-500/an). Correctif : `ProxyRepository::findAllWithAssociations()` (JOIN FETCH) + `Paginator` (25/page), à l'image de `admin_event_list`.
+7. **PERF cas #2 (déjà tracé, voir [PERF.2](PERF.2.md))** : `admin_proxies_list` appelle `Proxy::findAll()` sans pagination ni `JOIN FETCH` → N+1 (chaque proxy lazy-load event/owner/giver) et croissance non bornée (~100-500/an). Correctif : `ProxyRepository::findAllWithAssociations()` (JOIN FETCH) + `Paginator` (25/page), à l'image de `admin_event_list`.
 8. **`ProxyRepository` vide → logique éparpillée** : les requêtes proxy vivent inline dans `EventController` (≥ 8 `findOneBy`/`findBy` répétés), dans `EventService` (2 méthodes pure délégation query builder, 47 l.) et dans les filtres de collection de `Event`. Candidat à **consolider dans `ProxyRepository`** (`findGivenBy`, `findReceivedBy`, `findWaiting`, `findAllWithAssociations`). `EventService` deviendrait une fine façade ou disparaîtrait.
 9. **`editEventProxyAction` (`AdminEventController` l.265-347)** : ~80 lignes, 4 branches d'appariement quasi dupliquées, **flash messages en anglais** exposés à l'admin (« proxy 12 saved », « proxy 7 deleted ») — incohérent avec l'UI FR et avec la règle de langue. Candidat refactor + i18n.
 10. **Création d'AG en deux temps** : `need_proxy` / `anonymous_proxy` / `max_date_of_last_registration` indisponibles à la création (`EventType` ne les ajoute que si `getId()`). UX piégeuse pour créer une AG. À documenter a minima.
