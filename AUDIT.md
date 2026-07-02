@@ -226,7 +226,7 @@ L'audit est découpé en un fichier par item sous `audit/`. Ce fichier reste l'i
 |------|-------|--------|
 | **SYN.1** | Documentation mise à jour | ✅ |
 | **SYN.2** | TODO priorisée | ✅ |
-| **SYN.3** | Vérifier la cohérence des specs | ⬜ |
+| **SYN.3** | Vérifier la cohérence des specs | ✅ |
 | **SYN.4** | PR de l'audit | ⬜ |
 
 Détail : [`audit/SYN.md`](audit/SYN.md)
