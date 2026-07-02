@@ -227,9 +227,17 @@ L'audit est découpé en un fichier par item sous `audit/`. Ce fichier reste l'i
 | **SYN.1** | Documentation mise à jour | ✅ |
 | **SYN.2** | TODO priorisée | ✅ |
 | **SYN.3** | Vérifier la cohérence des specs | ✅ |
-| **SYN.4** | PR de l'audit | ⬜ |
+| **SYN.4** | PR de l'audit | ✅ |
 
 Détail : [`audit/SYN.md`](audit/SYN.md)
+
+---
+
+## Livrables finaux
+
+- **Documentation mise à jour** : [`DOCUMENTATION.md`](DOCUMENTATION.md) (architecture, setup, env vars, multi-instance, observabilité)
+- **Spécifications fonctionnelles** : [`audit/SPEC.1.md`](audit/SPEC.1.md) — [`audit/SPEC.11.md`](audit/SPEC.11.md) + [`audit/SPEC.10.md`](audit/SPEC.10.md) glossaire + [`audit/SPEC.9.md`](audit/SPEC.9.md) usage par instance
+- **TODO priorisée** : [`TODO-PRIORISEE.md`](TODO-PRIORISEE.md) (95 entrées : sécurité, dead code, antipatterns, tests, migration Symfony)
 
 ### EXTRA — Pistes découvertes en cours d'audit
 
