@@ -224,4 +224,6 @@ Refaire l'analyse PERF (sévérités 🔴/🟡) sur un **dump prod anonymisé** 
 
 ### Documentation (déjà partiellement traité en SYN.1)
 
+`DOCUMENTATION.md` est voué à **remplacer `README.md`** à terme (décision post-audit) ; en attendant, il fait foi en cas de divergence — les inexactitudes du README sont recensées dans ses §2.1 et §4.
+
 Gotchas à documenter signalés en cours d'audit : nommage trompeur `CycleStartCommand → MemberCycleEndEvent`, `HelloassoEvent::RE_REGISTRATION_SUCCESS` couvrant aussi la 1re adhésion, `KeycloakAuthenticator` RAZ des rôles à chaque login OIDC, création d'AG en deux temps, SSTI via `DynamicContent` (acceptable si `ROLE_PROCESS_MANAGER` restreint). Cf. [SPEC.7](audit/SPEC.7.md), [SPEC.8](audit/SPEC.8.md), [SPEC.11](audit/SPEC.11.md).

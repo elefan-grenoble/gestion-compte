@@ -1,5 +1,5 @@
 # Audit technique — gestion-compte
-<!-- État d'avancement. Committé sur la branche d'audit à chaque session (checkpoint/rollback). À SUPPRIMER avant le merge de la branche, une fois la TODO et les specs générées. -->
+<!-- Index de l'audit technique (juin 2026). Conservé dans le repo comme livrable : les specs (audit/SPEC.*.md), les analyses par section et la TODO-PRIORISEE.md s'appuient sur cette navigation. Utile aux contributeurs pour comprendre l'état des lieux du code. -->
 <!-- Statuts : [ ] todo | [~] en cours | [x] fait | [!] bloquant / à décider -->
 
 **Projet** : github.com/elefan-grenoble/gestion-compte
