@@ -1,7 +1,7 @@
 # TODO priorisée — gestion-compte
 
-> Consolidation des findings actionnables de l'audit technique (`AUDIT.md`, sections D → SPEC + EXTRA).
-> Produit en **SYN.2**. Chaque entrée référence sa section d'origine entre `[crochets]` pour retrouver le détail dans `AUDIT.md`.
+> Consolidation des findings actionnables de l'audit technique (`audit/AUDIT.md`, sections D → SPEC + EXTRA).
+> Produit en **SYN.2**. Chaque entrée référence sa section d'origine entre `[crochets]` pour retrouver le détail dans `audit/AUDIT.md`.
 >
 > Cette TODO est un **backlog d'état des lieux**, pas un plan d'exécution. Aucun code métier n'a été modifié pendant l'audit.
 

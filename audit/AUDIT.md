@@ -229,17 +229,17 @@ L'audit est découpé en un fichier par item sous `audit/`. Ce fichier reste l'i
 | **SYN.3** | Vérifier la cohérence des specs | ✅ |
 | **SYN.4** | PR de l'audit | ✅ |
 
-Détail : [`audit/SYN.md`](audit/SYN.md)
+Détail : [`./SYN.md`](./SYN.md)
 
 ---
 
 ## Livrables finaux
 
-- **Documentation mise à jour** : [`DOCUMENTATION.md`](DOCUMENTATION.md) (architecture, setup, env vars, multi-instance, observabilité)
-- **Spécifications fonctionnelles** : [`audit/SPEC.1.md`](audit/SPEC.1.md) — [`audit/SPEC.11.md`](audit/SPEC.11.md) + [`audit/SPEC.10.md`](audit/SPEC.10.md) glossaire + [`audit/SPEC.9.md`](audit/SPEC.9.md) usage par instance
-- **TODO priorisée** : [`TODO-PRIORISEE.md`](TODO-PRIORISEE.md) (95 entrées : sécurité, dead code, antipatterns, tests, migration Symfony)
+- **Documentation mise à jour** : [`./DOCUMENTATION.md`](./DOCUMENTATION.md) (architecture, setup, env vars, multi-instance, observabilité)
+- **Spécifications fonctionnelles** : [`./SPEC.1.md`](./SPEC.1.md) — [`./SPEC.11.md`](./SPEC.11.md) + [`./SPEC.10.md`](./SPEC.10.md) glossaire + [`./SPEC.9.md`](./SPEC.9.md) usage par instance
+- **TODO priorisée** : [`../TODO-PRIORISEE.md`](../TODO-PRIORISEE.md) (95 entrées : sécurité, dead code, antipatterns, tests, migration Symfony)
 
 ### EXTRA — Pistes découvertes en cours d'audit
 
-Pistes découvertes en cours d'audit, non planifiées initialement — voir [`audit/EXTRA.md`](audit/EXTRA.md).
+Pistes découvertes en cours d'audit, non planifiées initialement — voir [`./EXTRA.md`](./EXTRA.md).
 
