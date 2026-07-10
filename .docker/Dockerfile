@@ -1,4 +1,4 @@
-FROM php:8.1
+FROM php:7.4
 
 COPY --link \
     --from=ghcr.io/symfony-cli/symfony-cli:latest \
