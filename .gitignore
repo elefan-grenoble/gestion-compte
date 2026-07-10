@@ -61,4 +61,4 @@ claude.local.md
 TODO-audit.md
 rector-dead-code.php
 phpstan-dead-code.neon
-.claude/settings.local.json
+.claude/
