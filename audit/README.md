@@ -47,7 +47,7 @@ Sections Opus : **AP, SEC, SPEC, SYN**. Opus ponctuel : **SF-PREP.2**.
 - [x] **P0.1** — Environnement opérationnel
   > Docker up, DB healthy (healthcheck corrigé mariadb-admin), cache warmup dev OK.
 
-- [x] **P0.2** — AUDIT.md créé (ce fichier)
+- [x] **P0.2** — README.md créé (ce fichier, anciennement AUDIT.md)
 
 - [x] **P0.3** — Évaluer si l'upgrade PHP 8 est nécessaire pour l'analyse
   > **Décision : OUI — upgrader le Dockerfile vers PHP 8.1 pour l'analyse.**

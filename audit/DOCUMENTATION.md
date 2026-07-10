@@ -4,7 +4,7 @@
 >
 > **Ce document n'est pas la TODO.** La liste priorisée des correctifs vit dans la synthèse d'audit (SYN.2). Ici, un ⚠️ documente un piège à connaître, pas une tâche à planifier.
 >
-> **Sources** : sections D.1-5, CONFIG.1-3, LOG.1-3, SPEC.1-11 de l'[audit technique](./AUDIT.md) (`./D.1.md`…`./SPEC.11.md`, audit juin 2026). En cas de divergence avec le `README.md` actuel, ce document fait foi — le README comporte des inexactitudes recensées en [§4](#4-installation--exploitation).
+> **Sources** : sections D.1-5, CONFIG.1-3, LOG.1-3, SPEC.1-11 de l'[audit technique](./README.md) (`./D.1.md`…`./SPEC.11.md`, audit juin 2026). En cas de divergence avec le `README.md` actuel, ce document fait foi — le README comporte des inexactitudes recensées en [§4](#4-installation--exploitation).
 
 ---
 
@@ -82,7 +82,7 @@ Le dépôt est celui d'**Elefan** (Grenoble), l'instance d'origine. **Scopeli** 
 └─────────────────────────────────────────────────────────────┘
 ```
 
-> **Dette structurelle connue** (détail dans les items [`./AP.*.md`](./AUDIT.md#ap--antipatterns-analyse-uniquement)) : controllers volumineux portant de la logique métier ; `getParameter()` via `ContainerAwareTrait` (84 appels, anti-pattern depuis SF4) ; plusieurs EventListeners injectant le `Container` complet plutôt que des dépendances explicites ; logique de requête dispersée hors des Repositories. Ces points sont la cible du chantier de migration SF5 et ne bloquent pas l'exploitation actuelle.
+> **Dette structurelle connue** (détail dans les items [`./AP.*.md`](./README.md#ap--antipatterns-analyse-uniquement)) : controllers volumineux portant de la logique métier ; `getParameter()` via `ContainerAwareTrait` (84 appels, anti-pattern depuis SF4) ; plusieurs EventListeners injectant le `Container` complet plutôt que des dépendances explicites ; logique de requête dispersée hors des Repositories. Ces points sont la cible du chantier de migration SF5 et ne bloquent pas l'exploitation actuelle.
 
 ### 2.3 Mécanique événementielle
 
