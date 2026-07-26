@@ -57,3 +57,8 @@ compose.yaml
 /build/
 /.web-server-pid
 /updateLocalDbFromProd.sh
+
+###> php-cs-fixer/shim ###
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+###< php-cs-fixer/shim ###

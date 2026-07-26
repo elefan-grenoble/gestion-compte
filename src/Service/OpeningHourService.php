@@ -2,7 +2,6 @@
 
 namespace App\Service;
 
-use DateTime;
 use App\Entity\OpeningHour;
 use Doctrine\ORM\EntityManagerInterface;
 use App\Entity\ClosingException;
@@ -16,7 +15,7 @@ class OpeningHourService
         $this->em = $em;
     }
 
-    public function isOpen(\DateTime $date = null)
+    public function isOpen(?\DateTime $date = null)
     {
         if (!$date) {
             $date = new \DateTime('now');
@@ -27,9 +26,10 @@ class OpeningHourService
 
         // filter on time
         if (count($openingHoursEnabledDay) > 0) {
-            $openingHoursEnabledDayTime = array_filter($openingHoursEnabledDay, function($openingHour) use ($date) {
+            $openingHoursEnabledDayTime = array_filter($openingHoursEnabledDay, function ($openingHour) use ($date) {
                 $openingHourStart = $openingHour->getStart()->setDate($date->format('Y'), $date->format('m'), $date->format('d'));
                 $openingHourEnd = $openingHour->getEnd()->setDate($date->format('Y'), $date->format('m'), $date->format('d'));
+
                 return ($openingHourStart <= $date) && ($openingHourEnd >= $date);
             });
 
@@ -37,15 +37,15 @@ class OpeningHourService
             if (count($openingHoursEnabledDayTime) > 0) {
                 $closingExceptions = $this->em->getRepository(ClosingException::class)->findOngoing($date);
                 if (!$closingExceptions) {
-                    return True;
+                    return true;
                 }
             }
         }
 
-        return False;
+        return false;
     }
 
-    public function isClosed(\DateTime $date = null)
+    public function isClosed(?\DateTime $date = null)
     {
         return !$this->isOpen($date);
     }

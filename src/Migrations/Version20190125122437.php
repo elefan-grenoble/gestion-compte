@@ -1,4 +1,6 @@
-<?php declare(strict_types=1);
+<?php
+
+declare(strict_types=1);
 
 namespace app\Migrations;
 
@@ -10,7 +12,7 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20190125122437 extends AbstractMigration
 {
-    public function up(Schema $schema) : void
+    public function up(Schema $schema): void
     {
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
@@ -22,10 +24,10 @@ final class Version20190125122437 extends AbstractMigration
         $this->addSql("UPDATE time_log SET type = 4 WHERE description = 'Début de cycle (adhésion expirée)'");
         $this->addSql("UPDATE time_log SET type = 5 WHERE description = 'Régulation du bénévolat facultatif'");
         $this->addSql('ALTER TABLE time_log CHANGE description description VARCHAR(255) DEFAULT NULL');
-        $this->addSql("UPDATE time_log SET description = NULL");
+        $this->addSql('UPDATE time_log SET description = NULL');
     }
 
-    public function down(Schema $schema) : void
+    public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');

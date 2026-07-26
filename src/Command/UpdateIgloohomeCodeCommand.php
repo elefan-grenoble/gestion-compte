@@ -28,8 +28,7 @@ class UpdateIgloohomeCodeCommand extends Command
         ContainerBagInterface $params,
         MailerInterface $mailer,
         IgloohomeClient $client
-    )
-    {
+    ) {
         $this->em = $em;
         $this->params = $params;
         $this->mailer = $mailer;
@@ -54,6 +53,7 @@ class UpdateIgloohomeCodeCommand extends Command
     {
         $start = $input->getArgument('start');
         $end = $input->getArgument('end');
+
         try {
             $response = $this->client->regenerateCode($start, $end);
         } catch (ClientExceptionInterface $e) {
@@ -64,8 +64,10 @@ class UpdateIgloohomeCodeCommand extends Command
                 ->subject('[ESPACE MEMBRES] Echec de création du code du boitier')
                 ->from(new Address($shiftEmail['address'], $shiftEmail['from_name']))
                 ->to(...$recipients)
-                ->text('Echec de génération du code du boitier Igloohome');
+                ->text('Echec de génération du code du boitier Igloohome')
+            ;
             $this->mailer->send($mail);
+
             return 1;
         }
 
@@ -88,7 +90,7 @@ class UpdateIgloohomeCodeCommand extends Command
         $code->setValue($newCodeValue);
         $code->setClosed(false);
         $code->setRegistrar($adminUser);
-        
+
         $this->em->persist($code);
 
         // Close the old open codes
@@ -103,5 +105,4 @@ class UpdateIgloohomeCodeCommand extends Command
 
         return 0;
     }
-
 }

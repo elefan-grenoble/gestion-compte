@@ -2,7 +2,6 @@
 
 namespace App\DataFixtures\ORM;
 
-use DateTime;
 use App\DataFixtures\FixturesConstants;
 use App\DataFixtures\FixtureTools;
 use App\Entity\OpeningHour;
@@ -11,13 +10,11 @@ use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
-use Exception;
-
 
 class OpeningHourFixtures extends Fixture implements FixtureGroupInterface, OrderedFixtureInterface
 {
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     public function load(ObjectManager $manager)
     {
@@ -26,29 +23,29 @@ class OpeningHourFixtures extends Fixture implements FixtureGroupInterface, Orde
         $openingHourKindsStartDates = FixturesConstants::OPENING_HOUR_KINDS_START_DATES;
         $openingHourKindsEndDates = FixturesConstants::OPENING_HOUR_KINDS_END_DATES;
 
-        for ($i = 0; $i < count($openingHourKindsNames); $i++) {
+        for ($i = 0; $i < count($openingHourKindsNames); ++$i) {
 
             $openingType = new OpeningHourKind();
             $openingType->setName($openingHourKindsNames[$i]);
             $openingType->setEnabled(true);
 
             // first day of period
-            $startDateTime = new DateTime($openingHourKindsStartDates[$i]);
+            $startDateTime = new \DateTime($openingHourKindsStartDates[$i]);
             $openingType->setStartDate($startDateTime);
 
             // closing time
-            $endDateTime = new DateTime($openingHourKindsEndDates[$i]);
+            $endDateTime = new \DateTime($openingHourKindsEndDates[$i]);
             $openingType->setEndDate($endDateTime);
 
             // creator
             $creator = $this->getReference('admin_' . rand(1, FixturesConstants::ADMINS_COUNT));
             $openingType->setCreatedBy($creator);
 
-            $this->addReference('opening_hour_kind_' . ($i+1), $openingType);
+            $this->addReference('opening_hour_kind_' . ($i + 1), $openingType);
 
             $manager->persist($openingType);
 
-            for ($j = 0; $j < 7; $j++) {
+            for ($j = 0; $j < 7; ++$j) {
 
                 $openingHour = new OpeningHour();
 
@@ -56,23 +53,23 @@ class OpeningHourFixtures extends Fixture implements FixtureGroupInterface, Orde
                 $openingHour->setDayOfWeek($j % 7);
 
                 // opening time
-                $startDateTime = new DateTime();
-                $startDateTime->setTime(rand(14,17), 0);
+                $startDateTime = new \DateTime();
+                $startDateTime->setTime(rand(14, 17), 0);
                 $openingHour->setStart($startDateTime);
 
                 // closing time
-                $endDateTime = new DateTime();
-                $endDateTime->setTime(rand(19,22), 0);
+                $endDateTime = new \DateTime();
+                $endDateTime->setTime(rand(19, 22), 0);
                 $openingHour->setEnd($endDateTime);
 
                 // closed
-                $randBool = (bool)FixtureTools::biased_random(0, 1, 0.1);
+                $randBool = (bool) FixtureTools::biased_random(0, 1, 0.1);
                 $openingHour->setClosed($randBool);
 
                 // opening king
                 $openingHour->setKind($openingType);
 
-                $this->addReference('opening_hour_' . ($i+1) . ($j+1), $openingHour);
+                $this->addReference('opening_hour_' . ($i + 1) . ($j + 1), $openingHour);
 
 
                 $manager->persist($openingHour);
@@ -81,7 +78,7 @@ class OpeningHourFixtures extends Fixture implements FixtureGroupInterface, Orde
 
         }
 
-        echo count($openingHourKindsNames)." openingHourKinds created\n";
+        echo count($openingHourKindsNames) . " openingHourKinds created\n";
         echo "7 openingHours created\n";
 
         $manager->flush();

@@ -4,12 +4,16 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OrderBy;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 /**
- * Commission
+ * Commission.
  *
  * @ORM\Table(name="commission")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\CommissionRepository")
  */
 class Commission
@@ -18,7 +22,9 @@ class Commission
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -56,26 +62,27 @@ class Commission
      *
      * @ORM\Column(name="next_meeting_date", type="datetime", nullable=true)
      */
-    private $next_meeting_date = null;
+    private $next_meeting_date;
 
     /**
      * Many Commissions have Many Beneficiaries.
-     * 
+     *
      * @ORM\ManyToMany(targetEntity="Beneficiary", mappedBy="commissions")
      */
     private $beneficiaries;
 
     /**
      * Many Commissions have Many Tasks.
-     * 
+     *
      * @ORM\ManyToMany(targetEntity="Task", mappedBy="commissions")
+     *
      * @OrderBy({"closed" = "ASC","dueDate" = "ASC"})
      */
     private $tasks;
 
     /**
      * One Commission has Many Owners (Beneficiary).
-     * 
+     *
      * @ORM\OneToMany(targetEntity="Beneficiary", mappedBy="own",cascade={"persist"})
      */
     private $owners;
@@ -88,11 +95,11 @@ class Commission
     private $createdAt;
 
     /**
-     * Constructor
+     * Constructor.
      */
     public function __construct()
     {
-        $this->beneficiaries = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->beneficiaries = new ArrayCollection();
     }
 
     /**
@@ -114,7 +121,7 @@ class Commission
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -124,7 +131,7 @@ class Commission
     }
 
     /**
-     * Set name
+     * Set name.
      *
      * @param string $name
      *
@@ -138,7 +145,7 @@ class Commission
     }
 
     /**
-     * Get name
+     * Get name.
      *
      * @return string
      */
@@ -148,13 +155,11 @@ class Commission
     }
 
     /**
-     * Add beneficiary
-     *
-     * @param \App\Entity\Beneficiary $beneficiary
+     * Add beneficiary.
      *
      * @return Commission
      */
-    public function addBeneficiary(\App\Entity\Beneficiary $beneficiary)
+    public function addBeneficiary(Beneficiary $beneficiary)
     {
         $this->beneficiaries[] = $beneficiary;
 
@@ -162,19 +167,17 @@ class Commission
     }
 
     /**
-     * Remove beneficiary
-     *
-     * @param \App\Entity\Beneficiary $beneficiary
+     * Remove beneficiary.
      */
-    public function removeBeneficiary(\App\Entity\Beneficiary $beneficiary)
+    public function removeBeneficiary(Beneficiary $beneficiary)
     {
         $this->beneficiaries->removeElement($beneficiary);
     }
 
     /**
-     * Get beneficiaries
+     * Get beneficiaries.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getBeneficiaries()
     {
@@ -182,7 +185,7 @@ class Commission
     }
 
     /**
-     * Set description
+     * Set description.
      *
      * @param string $description
      *
@@ -196,7 +199,7 @@ class Commission
     }
 
     /**
-     * Get description
+     * Get description.
      *
      * @return string
      */
@@ -206,13 +209,11 @@ class Commission
     }
 
     /**
-     * Add owner
-     *
-     * @param \App\Entity\Beneficiary $owner
+     * Add owner.
      *
      * @return Commission
      */
-    public function addOwner(\App\Entity\Beneficiary $owner)
+    public function addOwner(Beneficiary $owner)
     {
         $this->owners[] = $owner;
 
@@ -220,19 +221,17 @@ class Commission
     }
 
     /**
-     * Remove owner
-     *
-     * @param \App\Entity\Beneficiary $owner
+     * Remove owner.
      */
-    public function removeOwner(\App\Entity\Beneficiary $owner)
+    public function removeOwner(Beneficiary $owner)
     {
         $this->owners->removeElement($owner);
     }
 
     /**
-     * Get owners
+     * Get owners.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getOwners()
     {
@@ -240,7 +239,7 @@ class Commission
     }
 
     /**
-     * Set email
+     * Set email.
      *
      * @param string $email
      *
@@ -254,7 +253,7 @@ class Commission
     }
 
     /**
-     * Get email
+     * Get email.
      *
      * @return string
      */
@@ -264,13 +263,11 @@ class Commission
     }
 
     /**
-     * Add task
-     *
-     * @param \App\Entity\Task $task
+     * Add task.
      *
      * @return Commission
      */
-    public function addTask(\App\Entity\Task $task)
+    public function addTask(Task $task)
     {
         $this->tasks[] = $task;
 
@@ -278,19 +275,17 @@ class Commission
     }
 
     /**
-     * Remove task
-     *
-     * @param \App\Entity\Task $task
+     * Remove task.
      */
-    public function removeTask(\App\Entity\Task $task)
+    public function removeTask(Task $task)
     {
         $this->tasks->removeElement($task);
     }
 
     /**
-     * Get tasks
+     * Get tasks.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getTasks()
     {
@@ -346,7 +341,7 @@ class Commission
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */

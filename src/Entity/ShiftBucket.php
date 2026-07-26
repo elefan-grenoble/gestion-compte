@@ -2,14 +2,11 @@
 
 namespace App\Entity;
 
-use App\Entity\Shift;
-use App\Entity\User;
-use App\Entity\Beneficiary;
 use Doctrine\Common\Collections\ArrayCollection;
 
 /**
  * Shift Bucket
- * List of shift sharing the same start, end and job
+ * List of shift sharing the same start, end and job.
  *
  * /!\ ATTENTION /!\
  * Le comportement implémenté repose sur l'hypothèse qu'il ne peut y avoir qu'un seul
@@ -18,12 +15,11 @@ use Doctrine\Common\Collections\ArrayCollection;
  */
 class ShiftBucket
 {
-
-    var $shifts;
+    public $shifts;
 
     public function __construct()
     {
-        $this->shifts = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->shifts = new ArrayCollection();
     }
 
     public function addShift(Shift $shift)
@@ -43,13 +39,13 @@ class ShiftBucket
     public function removeEmptyShift()
     {
         foreach ($this->shifts as $shiftKey => $shift) {
-            if ($shift->getShifter() == NULL && count($this->shifts) > 1) {
+            if ($shift->getShifter() == null && count($this->shifts) > 1) {
                 unset($this->shifts[$shiftKey]);
             }
         }
     }
 
-    static public function compareShifts(Shift $a, Shift $b, Beneficiary $beneficiary = null)
+    public static function compareShifts(Shift $a, Shift $b, ?Beneficiary $beneficiary = null)
     {
         if (!$beneficiary) {
             if (!$a->getFormation()) {
@@ -57,30 +53,34 @@ class ShiftBucket
                     if (!$a->getShifter()) {
                         if (!$b->getShifter()) {
                             return 0;
-                        } else {
-                            return 1;
                         }
-                    } else {
-                        if (!$b->getShifter()) {
-                            return -1;
-                        } else {
-                            return $a->getBookedTime() < $b->getBookedTime();
-                        }
+
+                        return 1;
+
                     }
-                } else {
-                    return 1;
-                }
-            } else {
-                if (!$b->getFormation()) {
-                    return -1;
-                } else {
-                    if ($a->getFormation()->getId() != $b->getFormation()->getId()) {
-                        return $a->getFormation()->getId() < $b->getFormation()->getId();
-                    } else {
-                        return $a->getBookedTime() < $b->getBookedTime();
+                    if (!$b->getShifter()) {
+                        return -1;
                     }
+
+                    return $a->getBookedTime() < $b->getBookedTime();
+
+
                 }
+
+                return 1;
+
             }
+            if (!$b->getFormation()) {
+                return -1;
+            }
+            if ($a->getFormation()->getId() != $b->getFormation()->getId()) {
+                return $a->getFormation()->getId() < $b->getFormation()->getId();
+            }
+
+            return $a->getBookedTime() < $b->getBookedTime();
+
+
+
         }
         if ($a->getLastShifter() && $a->getLastShifter()->getId() == $beneficiary->getId()) {
             return -1;
@@ -88,6 +88,7 @@ class ShiftBucket
         if ($b->getLastShifter() && $b->getLastShifter()->getId() == $beneficiary->getId()) {
             return 1;
         }
+
         return 0;
     }
 
@@ -96,33 +97,39 @@ class ShiftBucket
         return $this->shifts;
     }
 
-    public function getShiftIds(){
-        $ids = array();
-        foreach ($this->getShifts() as $shift){
+    public function getShiftIds()
+    {
+        $ids = [];
+        foreach ($this->getShifts() as $shift) {
             $ids[] = $shift->getId();
         }
+
         return $ids;
     }
 
-    public function getId(){
+    public function getId()
+    {
         return min($this->getShiftIds());
     }
 
-    public function getShiftWithMinId(){
+    public function getShiftWithMinId()
+    {
         $min = $this->shifts->first();
-        foreach ($this->getShifts() as $shift){
+        foreach ($this->getShifts() as $shift) {
             if ($min->getId() > $shift->getId()) {
                 $min = $shift;
             }
         }
+
         return $min;
     }
 
     public function getShifterCount()
     {
         $bookedShifts = $this->getShifts()->filter(function (Shift $shift) {
-            return ($shift->getShifter() != NULL);
+            return $shift->getShifter() != null;
         });
+
         return count($bookedShifts);
     }
 
@@ -132,7 +139,8 @@ class ShiftBucket
         $iterator->uasort(function (Shift $a, Shift $b) {
             return ShiftBucket::compareShifts($a, $b);
         });
-        $sorted = new \Doctrine\Common\Collections\ArrayCollection(iterator_to_array($iterator));
+        $sorted = new ArrayCollection(iterator_to_array($iterator));
+
         return $sorted->isEmpty() ? null : $sorted;
 
     }
@@ -167,7 +175,7 @@ class ShiftBucket
 
     /**
      * - check that none of the shifts belong to the beneficiary
-     * - check that the beneficiary doesn't already have a shift in the same interval
+     * - check that the beneficiary doesn't already have a shift in the same interval.
      */
     public function canBookInterval(Beneficiary $beneficiary)
     {
@@ -177,6 +185,7 @@ class ShiftBucket
         $alreadyReserved = $beneficiary->getReservedShifts()->exists(function ($key, Shift $shift) {
             return $shift->getStart() == $this->getStart() && $shift->getEnd() == $this->getEnd();
         });
+
         return !$alreadyBooked && !$alreadyReserved;
     }
 
@@ -188,8 +197,11 @@ class ShiftBucket
     /**
      * Return true if the intersection between $formations and
      * the shifts' formations is not empty.
+     *
+     * @param mixed $shifts
+     * @param mixed $formations
      */
-    static public function shiftIntersectFormations($shifts, $formations)
+    public static function shiftIntersectFormations($shifts, $formations)
     {
         $formationsIds = [];
         foreach ($formations as $formation) {
@@ -198,6 +210,7 @@ class ShiftBucket
 
         $formationInFormationIdsCallback = function ($key, Shift $shift) use ($formationsIds) {
             $formation = $shift->getFormation();
+
             return !$formation ? false : in_array($formation->getId(), $formationsIds);
         };
 
@@ -211,11 +224,15 @@ class ShiftBucket
      * on renvoie seulement les shifts qui ont un formation.
      *
      * Sinon, on renvoie seulement les shifts qui n'ont pas de formation.
+     *
+     * @param mixed $shifts
+     * @param mixed $formations
      */
-    static public function filterByFormations($shifts, $formations)
+    public static function filterByFormations($shifts, $formations)
     {
         $intersectionNotEmpty = ShiftBucket::shiftIntersectFormations($shifts, $formations);
         $filterCallback = ShiftBucket::createShiftFilterCallback($intersectionNotEmpty);
+
         return $shifts->filter($filterCallback);
     }
 
@@ -225,27 +242,31 @@ class ShiftBucket
      *
      * Else, return a callback which return true if the shift
      * doesn't have a formation.
+     *
+     * @param mixed $withFormations
      */
-    static public function createShiftFilterCallback($withFormations)
+    public static function createShiftFilterCallback($withFormations)
     {
         if ($withFormations) {
             return function (Shift $shift) {
-                if ($shift->getFormation())
+                if ($shift->getFormation()) {
                     return true;
+                }
             };
         } else {
             return function (Shift $shift) {
-                if (!$shift->getFormation())
+                if (!$shift->getFormation()) {
                     return true;
+                }
             };
         }
     }
 
     /**
-     * Example: "vendredi 22 juillet de 09h30 à 12h30"
+     * Example: "vendredi 22 juillet de 09h30 à 12h30".
      */
     public function getDisplayDateLongWithTime()
     {
-        return strftime("%A %e %B", $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
+        return strftime('%A %e %B', $this->getStart()->getTimestamp()) . ' de ' . $this->getStart()->format('G\hi') . ' à ' . $this->getEnd()->format('G\hi');
     }
 }

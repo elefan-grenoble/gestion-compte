@@ -1,8 +1,9 @@
 <?php
+
 // src/App/Security/ShiftVoter.php
+
 namespace App\Security;
 
-use App\Entity\Membership;
 use App\Entity\Shift;
 use App\Entity\User;
 use App\Service\ShiftService;
@@ -13,12 +14,12 @@ use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class ShiftVoter extends Voter
 {
-    const BOOK = 'book';
-    const FREE = 'free';
-    const REJECT = 'reject';
-    const ACCEPT = 'accept';
-    const LOCK = 'lock';
-    const VALIDATE = 'validate';
+    public const BOOK = 'book';
+    public const FREE = 'free';
+    public const REJECT = 'reject';
+    public const ACCEPT = 'accept';
+    public const LOCK = 'lock';
+    public const VALIDATE = 'validate';
     private $decisionManager;
     private $container;
 
@@ -31,13 +32,13 @@ class ShiftVoter extends Voter
     {
         $this->container = $container;
         $this->decisionManager = $decisionManager;
-        $this->shiftService = $container->get("shift_service");
+        $this->shiftService = $container->get('shift_service');
     }
 
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::BOOK, self::REJECT, self::FREE, self::ACCEPT, self::LOCK, self::VALIDATE))) {
+        if (!in_array($attribute, [self::BOOK, self::REJECT, self::FREE, self::ACCEPT, self::LOCK, self::VALIDATE])) {
             return false;
         }
 
@@ -56,14 +57,15 @@ class ShiftVoter extends Voter
         // in most cases, the user must be logged in
         // exceptions for accept and reject: can be done without login
         if (!$user instanceof User) {
-            if (!in_array($attribute, array(self::REJECT, self::ACCEPT)))
+            if (!in_array($attribute, [self::REJECT, self::ACCEPT])) {
                 return false;
-            else
-                $user = null;
+            }
+
+            $user = null;
         }
 
         // ROLE_SUPER_ADMIN can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
+        if ($this->decisionManager->decide($token, ['ROLE_SUPER_ADMIN'])) {
             return true;
         }
 
@@ -74,53 +76,65 @@ class ShiftVoter extends Voter
         // you know $subject is a Post object, thanks to supports
         switch ($attribute) {
             case self::BOOK:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
+                if ($this->decisionManager->decide($token, ['ROLE_ADMIN', 'ROLE_SHIFT_MANAGER'])) {
                     return true;
                 }
+
                 return $this->shiftService->isShiftBookable($shift, $user->getBeneficiary());
+
             case self::FREE:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
+                if ($this->decisionManager->decide($token, ['ROLE_ADMIN', 'ROLE_SHIFT_MANAGER'])) {
                     return true;
                 }
+
                 return $this->isShifter($shift, $user);
+
             case self::LOCK:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
+                if ($this->decisionManager->decide($token, ['ROLE_ADMIN', 'ROLE_SHIFT_MANAGER'])) {
                     return true;
                 }
+
                 return false;
+
             case self::REJECT:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
+                if ($this->decisionManager->decide($token, ['ROLE_ADMIN', 'ROLE_SHIFT_MANAGER'])) {
                     return true;
                 }
+
                 return $this->canReject($shift, $user);
+
             case self::ACCEPT:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
+                if ($this->decisionManager->decide($token, ['ROLE_ADMIN', 'ROLE_SHIFT_MANAGER'])) {
                     return true;
                 }
+
                 return $this->canAccept($shift, $user);
+
             case self::VALIDATE:
-                if ($this->decisionManager->decide($token, array('ROLE_ADMIN','ROLE_SHIFT_MANAGER'))) {
+                if ($this->decisionManager->decide($token, ['ROLE_ADMIN', 'ROLE_SHIFT_MANAGER'])) {
                     return true;
                 }
+
                 return false;
         }
 
         throw new \LogicException('This code should not be reached!');
     }
 
-    private function isShifter(Shift $shift, User $user = null)
+    private function isShifter(Shift $shift, ?User $user = null)
     {
         if ($user instanceof User) {
             return $user->getBeneficiary() === $shift->getShifter();
         }
+
         return false;
     }
 
     /**
      * Accept / Reject reserved shifts
-     * We check if the user corresponds to the shift's last shifter
+     * We check if the user corresponds to the shift's last shifter.
      */
-    private function canReject(Shift $shift, User $user = null)
+    private function canReject(Shift $shift, ?User $user = null)
     {
         // user is logged in: we don't check the token
         if ($user instanceof User) {
@@ -131,10 +145,11 @@ class ShiftVoter extends Voter
         if ($shift->getId() && $shift->getLastShifter() && $token) {
             return $token == $shift->getTmpToken($shift->getLastShifter()->getId());
         }
+
         return false;
     }
 
-    private function canAccept(Shift $shift, User $user = null)
+    private function canAccept(Shift $shift, ?User $user = null)
     {
         return $this->canReject($shift, $user);
     }

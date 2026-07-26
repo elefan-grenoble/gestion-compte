@@ -17,7 +17,6 @@ class BeneficiaryInitializationSubscriber implements EventSubscriberInterface
      */
     private $em;
 
-
     public function __construct(EntityManagerInterface $em)
     {
         $this->em = $em;
@@ -25,9 +24,9 @@ class BeneficiaryInitializationSubscriber implements EventSubscriberInterface
 
     public static function getSubscribedEvents()
     {
-        return array(
+        return [
             FormEvents::SUBMIT       => 'postInitializeMembership',
-        );
+        ];
     }
 
     public function onBeforePersist(BeneficiaryCreatedEvent $event)
@@ -40,7 +39,8 @@ class BeneficiaryInitializationSubscriber implements EventSubscriberInterface
         $this->makeUser($event->getData());
     }
 
-    private function makeUser(Beneficiary $beneficiary){
+    private function makeUser(Beneficiary $beneficiary)
+    {
         if ($beneficiary) {
             if (!$beneficiary->getUser()) {
                 $user = new User();
@@ -72,11 +72,13 @@ class BeneficiaryInitializationSubscriber implements EventSubscriberInterface
             ->where($qb->expr()->like('u.username', $qb->expr()->literal($username . '%')))
             ->orderBy('u.username', 'DESC')
             ->getQuery()
-            ->getResult();
+            ->getResult()
+        ;
 
         if (count($usernames)) {
             $username = $username . + count($usernames);
         }
+
         return $username;
     }
 }

@@ -12,6 +12,11 @@ use App\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class BeneficiaryTest extends TestCase
 {
     private function createBeneficiary(
@@ -184,7 +189,7 @@ class BeneficiaryTest extends TestCase
     {
         $b = $this->createBeneficiary();
 
-        for ($i = 0; $i < 3; $i++) {
+        for ($i = 0; $i < 3; ++$i) {
             $shift = $this->createMock(Shift::class);
             $b->addShift($shift);
         }
@@ -197,7 +202,7 @@ class BeneficiaryTest extends TestCase
     {
         $b = $this->createBeneficiary();
 
-        for ($i = 0; $i < 4; $i++) {
+        for ($i = 0; $i < 4; ++$i) {
             $shift = $this->createMock(Shift::class);
             $b->addShift($shift);
         }
@@ -226,11 +231,13 @@ class BeneficiaryTest extends TestCase
 
         $ownedCommission = $this->createMock(Commission::class);
         $ownedCommission->method('getOwners')
-            ->willReturn(new ArrayCollection([$b]));
+            ->willReturn(new ArrayCollection([$b]))
+        ;
 
         $otherCommission = $this->createMock(Commission::class);
         $otherCommission->method('getOwners')
-            ->willReturn(new ArrayCollection());
+            ->willReturn(new ArrayCollection())
+        ;
 
         $b->addCommission($ownedCommission);
         $b->addCommission($otherCommission);

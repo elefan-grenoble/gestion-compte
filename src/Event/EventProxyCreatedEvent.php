@@ -3,11 +3,11 @@
 namespace App\Event;
 
 use App\Entity\Proxy;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class EventProxyCreatedEvent extends \Symfony\Contracts\EventDispatcher\Event
+class EventProxyCreatedEvent extends Event
 {
-    const NAME = 'event.proxy.created';
+    public const NAME = 'event.proxy.created';
 
     private $proxy;
 

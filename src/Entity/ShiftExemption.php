@@ -3,12 +3,15 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
 
 /**
- * ShiftExemption
+ * ShiftExemption.
  *
  * @ORM\Table(name="shift_exemption")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\ShiftExemptionRepository")
  */
 class ShiftExemption
@@ -17,7 +20,9 @@ class ShiftExemption
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -96,9 +101,9 @@ class ShiftExemption
     }
 
     /**
-     * Get membershipShiftExemptions
+     * Get membershipShiftExemptions.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getMembershipShiftExemptions()
     {
@@ -106,7 +111,7 @@ class ShiftExemption
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */

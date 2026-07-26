@@ -3,18 +3,20 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
-use Doctrine\ORM\Mapping\OrderBy;
 use Symfony\Component\Validator\Constraints as Assert;
 use App\Validator\Constraints as AppAssert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
- * AnonymousBeneficiary
+ * AnonymousBeneficiary.
  *
  * @ORM\Table(name="anonymous_beneficiary")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @UniqueEntity("email")
+ *
  * @ORM\Entity(repositoryClass="App\Repository\AnonymousBeneficiaryRepository")
  */
 class AnonymousBeneficiary
@@ -23,7 +25,9 @@ class AnonymousBeneficiary
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -32,15 +36,20 @@ class AnonymousBeneficiary
      * @var string
      *
      * @ORM\Column(name="email", type="string", length=191, unique=true)
+     *
      * @Assert\Email(strict="true")
+     *
      * @Assert\NotBlank(message="L'email doit être saisie")
+     *
      * @AppAssert\UniqueEmail
      */
     private $email;
 
     /**
      * @ORM\OneToOne(targetEntity="Beneficiary", fetch="EAGER")
+     *
      * @ORM\JoinColumn(name="join_to", referencedColumnName="id", onDelete="SET NULL")
+     *
      * @AppAssert\BeneficiaryCanHost
      */
     private $join_to;
@@ -68,6 +77,7 @@ class AnonymousBeneficiary
 
     /**
      * @ORM\ManyToOne(targetEntity="User", fetch="EAGER")
+     *
      * @ORM\JoinColumn(name="registrar_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $registrar;
@@ -97,7 +107,7 @@ class AnonymousBeneficiary
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -107,7 +117,7 @@ class AnonymousBeneficiary
     }
 
     /**
-     * Set amount
+     * Set amount.
      *
      * @param string $amount
      *
@@ -121,7 +131,7 @@ class AnonymousBeneficiary
     }
 
     /**
-     * Get amount
+     * Get amount.
      *
      * @return string
      */
@@ -131,7 +141,7 @@ class AnonymousBeneficiary
     }
 
     /**
-     * Set beneficiaries_emails
+     * Set beneficiaries_emails.
      *
      * @param string $beneficiaries_emails
      *
@@ -145,7 +155,7 @@ class AnonymousBeneficiary
     }
 
     /**
-     * Get beneficiaries_emails
+     * Get beneficiaries_emails.
      *
      * @return string
      */
@@ -155,17 +165,17 @@ class AnonymousBeneficiary
     }
 
     /**
-     * Get beneficiaries_emails as array
+     * Get beneficiaries_emails as array.
      *
      * @return array
      */
     public function getBeneficiariesEmailsAsArray()
     {
-        return array_filter(explode(', ',$this->getBeneficiariesEmails()));
+        return array_filter(explode(', ', $this->getBeneficiariesEmails()));
     }
 
     /**
-     * Set mode
+     * Set mode.
      *
      * @param string $mode
      *
@@ -179,7 +189,7 @@ class AnonymousBeneficiary
     }
 
     /**
-     * Get mode
+     * Get mode.
      *
      * @return string
      */
@@ -189,7 +199,7 @@ class AnonymousBeneficiary
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */
@@ -199,9 +209,7 @@ class AnonymousBeneficiary
     }
 
     /**
-     * Set recallDate
-     *
-     * @param \DateTime $date
+     * Set recallDate.
      *
      * @return AnonymousBeneficiary
      */
@@ -213,7 +221,7 @@ class AnonymousBeneficiary
     }
 
     /**
-     * Get recallDate
+     * Get recallDate.
      *
      * @return \DateTime
      */
@@ -223,7 +231,7 @@ class AnonymousBeneficiary
     }
 
     /**
-     * Set email
+     * Set email.
      *
      * @param string $email
      *
@@ -237,7 +245,7 @@ class AnonymousBeneficiary
     }
 
     /**
-     * Get email
+     * Get email.
      *
      * @return string
      */
@@ -246,9 +254,8 @@ class AnonymousBeneficiary
         return $this->email;
     }
 
-
     /**
-     * Set join_to
+     * Set join_to.
      *
      * @param Beneficiary $beneficiary
      *
@@ -262,7 +269,7 @@ class AnonymousBeneficiary
     }
 
     /**
-     * Get join_to_email
+     * Get join_to_email.
      *
      * @return Beneficiary
      */
@@ -272,13 +279,11 @@ class AnonymousBeneficiary
     }
 
     /**
-     * Set registrar
-     *
-     * @param \App\Entity\User $registrar
+     * Set registrar.
      *
      * @return AnonymousBeneficiary
      */
-    public function setRegistrar(\App\Entity\User $registrar = null)
+    public function setRegistrar(?User $registrar = null)
     {
         $this->registrar = $registrar;
 
@@ -286,9 +291,9 @@ class AnonymousBeneficiary
     }
 
     /**
-     * Get registrar
+     * Get registrar.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getRegistrar()
     {
@@ -297,31 +302,37 @@ class AnonymousBeneficiary
 
     /**
      * @Assert\Callback
+     *
+     * @param mixed $payload
      */
     public function validate(ExecutionContextInterface $context, $payload)
     {
         // check data consistency
-        if (!$this->getJoinTo()){
-            if (!$this->getAmount()&&$this->getMode()!=Registration::TYPE_HELLOASSO) {
+        if (!$this->getJoinTo()) {
+            if (!$this->getAmount() && $this->getMode() != Registration::TYPE_HELLOASSO) {
                 $context->buildViolation('Pour une nouvelle adhésion, merci de saisir un montant')
                     ->atPath('amount')
-                    ->addViolation();
+                    ->addViolation()
+                ;
             }
             if (!$this->getMode()) {
                 $context->buildViolation('Merci de saisir le moyen de paiement')
                     ->atPath('mode')
-                    ->addViolation();
+                    ->addViolation()
+                ;
             }
-        }else{
+        } else {
             if ($this->getAmount()) {
                 $context->buildViolation('Pour un ajout de beneficiaire sur un compte existant, merci de ne pas enregistrer de paiement')
                     ->atPath('amount')
-                    ->addViolation();
+                    ->addViolation()
+                ;
             }
             if ($this->getMode()) {
                 $context->buildViolation('Pour un ajout de beneficiaire sur un compte existant, merci de ne pas enregistrer de mode paiement')
                     ->atPath('mode')
-                    ->addViolation();
+                    ->addViolation()
+                ;
             }
         }
     }

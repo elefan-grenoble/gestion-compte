@@ -12,19 +12,19 @@ use Doctrine\Migrations\AbstractMigration;
  */
 final class Version20230519151558 extends AbstractMigration
 {
-    public function getDescription() : string
+    public function getDescription(): string
     {
         return 'Add new dynamic content to be included in pre-membership email';
     }
 
-    public function up(Schema $schema) : void
+    public function up(Schema $schema): void
     {
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
         $this->addSql("INSERT INTO dynamic_content (code, name, description, content, created_at, updated_at) VALUES ('PRE_MEMBERSHIP_EMAIL', 'Email de pré-adhésion', 'Contenu du mail de pré-adhésion', '', NOW(), NOW())");
     }
 
-    public function down(Schema $schema) : void
+    public function down(Schema $schema): void
     {
         // this down() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');

@@ -3,11 +3,11 @@
 namespace App\Event;
 
 use App\Entity\Membership;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class MemberCycleEndEvent extends \Symfony\Contracts\EventDispatcher\Event
+class MemberCycleEndEvent extends Event
 {
-    const NAME = 'member.cycle.end';
+    public const NAME = 'member.cycle.end';
 
     private $membership;
     private $date;
@@ -33,5 +33,4 @@ class MemberCycleEndEvent extends \Symfony\Contracts\EventDispatcher\Event
     {
         return $this->date;
     }
-
 }

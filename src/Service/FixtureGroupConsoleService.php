@@ -6,7 +6,6 @@ use Symfony\Component\Console\Input\InputInterface;
 
 class FixtureGroupConsoleService
 {
-
     private $input;
 
     public function setInput(InputInterface $input): void
@@ -15,13 +14,10 @@ class FixtureGroupConsoleService
     }
 
     /**
-     * Returns the groups passed as options to the command
-     * @return array
+     * Returns the groups passed as options to the command.
      */
     public function getGroups(): array
     {
         return $this->input ? $this->input->getOption('group') : [];
     }
-
 }
-

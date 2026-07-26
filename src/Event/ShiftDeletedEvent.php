@@ -5,16 +5,16 @@ namespace App\Event;
 use App\Entity\Membership;
 use App\Entity\Beneficiary;
 use App\Entity\Shift;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class ShiftDeletedEvent extends \Symfony\Contracts\EventDispatcher\Event
+class ShiftDeletedEvent extends Event
 {
-    const NAME = 'shift.deleted';
+    public const NAME = 'shift.deleted';
 
     private $shift;
     private $beneficiary;
 
-    public function __construct(Shift $shift, Beneficiary $beneficiary = null)
+    public function __construct(Shift $shift, ?Beneficiary $beneficiary = null)
     {
         $this->shift = $shift;
         $this->beneficiary = $beneficiary;
@@ -26,7 +26,7 @@ class ShiftDeletedEvent extends \Symfony\Contracts\EventDispatcher\Event
     }
 
     /**
-     * @return Beneficiary|null
+     * @return null|Beneficiary
      */
     public function getBeneficiary()
     {
@@ -34,13 +34,14 @@ class ShiftDeletedEvent extends \Symfony\Contracts\EventDispatcher\Event
     }
 
     /**
-     * @return Membership|null
+     * @return null|Membership
      */
     public function getMember()
     {
         if ($this->beneficiary) {
             return $this->beneficiary->getMembership();
         }
+
         return null;
     }
 }

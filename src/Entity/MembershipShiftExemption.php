@@ -7,11 +7,14 @@ use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 /**
- * MembershipShiftExemption
+ * MembershipShiftExemption.
  *
  * @ORM\Table(name="membership_shift_exemption")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\MembershipShiftExemptionRepository")
+ *
  * @UniqueEntity(
  *     fields={"membership", "start"},
  * )
@@ -25,19 +28,23 @@ class MembershipShiftExemption
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
      * @ORM\ManyToOne(targetEntity="ShiftExemption", inversedBy="membershipShiftExemptions", fetch="EAGER")
+     *
      * @ORM\JoinColumn(name="shift_exemption_id", referencedColumnName="id")
      */
     private $shiftExemption;
 
     /**
      * @var string
+     *
      * @Assert\NotBlank
      *
      * @ORM\Column(name="description", type="string", length=255, nullable=false)
@@ -46,6 +53,7 @@ class MembershipShiftExemption
 
     /**
      * @ORM\ManyToOne(targetEntity="Membership", inversedBy="membershipShiftExemptions")
+     *
      * @ORM\JoinColumn(name="membership_id", referencedColumnName="id", onDelete="CASCADE", nullable=false)
      */
     private $membership;
@@ -59,6 +67,7 @@ class MembershipShiftExemption
 
     /**
      * @Assert\Date
+     *
      * @Assert\GreaterThan(propertyPath="start")
      *
      * @ORM\Column(name="end", type="date")
@@ -74,6 +83,7 @@ class MembershipShiftExemption
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
      */
     private $createdBy;
@@ -89,7 +99,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -99,13 +109,11 @@ class MembershipShiftExemption
     }
 
     /**
-     * Set shiftExemption
-     *
-     * @param \App\Entity\ShiftExemption $shiftExemption
+     * Set shiftExemption.
      *
      * @return MembershipShiftExemption
      */
-    public function setShiftExemption(\App\Entity\ShiftExemption $shiftExemption)
+    public function setShiftExemption(ShiftExemption $shiftExemption)
     {
         $this->shiftExemption = $shiftExemption;
 
@@ -113,7 +121,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * Get shiftExemption
+     * Get shiftExemption.
      *
      * @return ShiftExemption
      */
@@ -123,7 +131,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * Set description
+     * Set description.
      *
      * @param string $description
      *
@@ -137,7 +145,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * Get description
+     * Get description.
      *
      * @return string
      */
@@ -147,7 +155,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * Get membership
+     * Get membership.
      *
      * @return Membership
      */
@@ -157,9 +165,9 @@ class MembershipShiftExemption
     }
 
     /**
-     * Set membership
+     * Set membership.
      *
-     * @param \App\Entity\Membership $membership
+     * @param Membership $membership
      */
     public function setMembership($membership)
     {
@@ -167,7 +175,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * Set start
+     * Set start.
      *
      * @param \DateTime $start
      *
@@ -181,7 +189,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * Get start
+     * Get start.
      *
      * @return \DateTime
      */
@@ -191,7 +199,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * Set end
+     * Set end.
      *
      * @param \DateTime $end
      *
@@ -205,7 +213,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * Get end
+     * Get end.
      *
      * @return \DateTime
      */
@@ -215,7 +223,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * Set createdAt
+     * Set createdAt.
      *
      * @param \DateTime $date
      *
@@ -229,7 +237,7 @@ class MembershipShiftExemption
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */
@@ -239,22 +247,21 @@ class MembershipShiftExemption
     }
 
     /**
-     * Set createdBy
-     *
-     * @param \App\Entity\User $createBy
+     * Set createdBy.
      *
      * @return MembershipShiftExemption
      */
-    public function setCreatedBy(\App\Entity\User $createdBy = null)
+    public function setCreatedBy(?User $createdBy = null)
     {
         $this->createdBy = $createdBy;
+
         return $this;
     }
 
     /**
-     * Get createdBy
+     * Get createdBy.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getCreatedBy()
     {
@@ -270,44 +277,44 @@ class MembershipShiftExemption
     }
 
     /**
-     * Return if the membershipShiftExemption is past for a given date
+     * Return if the membershipShiftExemption is past for a given date.
      *
-     * @param \DateTime $date
-     * @return boolean
+     * @return bool
      */
-    public function isPast(\Datetime $date = null)
+    public function isPast(?\DateTime $date = null)
     {
         if (!$date) {
             $date = new \DateTime('now');
         }
+
         return $date > $this->end;
     }
 
     /**
-     * Return if the membershipShiftExemption is upcoming for a given date
+     * Return if the membershipShiftExemption is upcoming for a given date.
      *
-     * @param \DateTime $date
-     * @return boolean
+     * @return bool
      */
-    public function isUpcoming(\Datetime $date = null)
+    public function isUpcoming(?\DateTime $date = null)
     {
         if (!$date) {
             $date = new \DateTime('now');
         }
+
         return $date < $this->start;
     }
 
     /**
-     * Return if the membershipShiftExemption is current (ongoing) for a given date
+     * Return if the membershipShiftExemption is current (ongoing) for a given date.
      *
-     * @param \DateTime $date
-     * @return boolean
+     * @return bool
      */
-    public function isCurrent(\Datetime $date = null)
+    public function isCurrent(?\DateTime $date = null)
     {
         if (!$date) {
             $date = new \DateTime('now');
         }
+
         return !$this->isPast($date) && !$this->isUpcoming($date);
     }
 }

@@ -5,10 +5,12 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * Code
+ * Code.
  *
  * @ORM\Table(name="code")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\CodeRepository")
  */
 class Code
@@ -17,7 +19,9 @@ class Code
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -38,6 +42,7 @@ class Code
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="registrar_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $registrar;
@@ -50,11 +55,9 @@ class Code
     private $createdAt;
 
     /**
-     * Constructor
+     * Constructor.
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * @ORM\PrePersist
@@ -67,7 +70,7 @@ class Code
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -77,7 +80,7 @@ class Code
     }
 
     /**
-     * Set value
+     * Set value.
      *
      * @param string $value
      *
@@ -91,7 +94,7 @@ class Code
     }
 
     /**
-     * Get value
+     * Get value.
      *
      * @return string
      */
@@ -101,13 +104,11 @@ class Code
     }
 
     /**
-     * Set registrar
-     *
-     * @param \App\Entity\User $registrar
+     * Set registrar.
      *
      * @return Code
      */
-    public function setRegistrar(\App\Entity\User $registrar = null)
+    public function setRegistrar(?User $registrar = null)
     {
         $this->registrar = $registrar;
 
@@ -115,9 +116,9 @@ class Code
     }
 
     /**
-     * Get registrar
+     * Get registrar.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getRegistrar()
     {
@@ -125,9 +126,9 @@ class Code
     }
 
     /**
-     * Set closed
+     * Set closed.
      *
-     * @param boolean $closed
+     * @param bool $closed
      *
      * @return Code
      */
@@ -139,9 +140,9 @@ class Code
     }
 
     /**
-     * Get closed
+     * Get closed.
      *
-     * @return boolean
+     * @return bool
      */
     public function getClosed()
     {
@@ -149,7 +150,7 @@ class Code
     }
 
     /**
-     * Set createdAt
+     * Set createdAt.
      *
      * @param \DateTime $date
      *
@@ -163,7 +164,7 @@ class Code
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */

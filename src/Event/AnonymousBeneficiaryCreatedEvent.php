@@ -3,11 +3,11 @@
 namespace App\Event;
 
 use App\Entity\AnonymousBeneficiary;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class AnonymousBeneficiaryCreatedEvent extends \Symfony\Contracts\EventDispatcher\Event
+class AnonymousBeneficiaryCreatedEvent extends Event
 {
-    const NAME = 'anonymous_beneficiary.created';
+    public const NAME = 'anonymous_beneficiary.created';
 
     private $anonymous_beneficiary;
 
@@ -23,5 +23,4 @@ class AnonymousBeneficiaryCreatedEvent extends \Symfony\Contracts\EventDispatche
     {
         return $this->anonymous_beneficiary;
     }
-
 }

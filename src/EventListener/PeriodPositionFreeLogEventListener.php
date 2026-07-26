@@ -2,12 +2,11 @@
 
 namespace App\EventListener;
 
-use App\Entity\Membership;
-use App\Entity\PeriodPosition;
 use App\Event\PeriodPositionFreedEvent;
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
+use Doctrine\ORM\ORMException;
 
 class PeriodPositionFreeLogEventListener
 {
@@ -23,12 +22,11 @@ class PeriodPositionFreeLogEventListener
     }
 
     /**
-     * @param PeriodPositionFreedEvent $event
-     * @throws \Doctrine\ORM\ORMException
+     * @throws ORMException
      */
     public function onPeriodPositionFreed(PeriodPositionFreedEvent $event)
     {
-        $this->logger->info("PeriodPosition Free Log Listener: onPeriodPositionFreed");
+        $this->logger->info('PeriodPosition Free Log Listener: onPeriodPositionFreed');
         $log = $this->container->get('period_position_free_log_service')->initPeriodPositionFreeLog($event->getPeriodPosition(), $event->getBeneficiary(), $event->getBookedTime());
         $this->em->persist($log);
         $this->em->flush();

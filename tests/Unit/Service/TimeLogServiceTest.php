@@ -14,19 +14,26 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
+use App\Entity\User;
+use PHPUnit\Framework\MockObject\MockObject;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class TimeLogServiceTest extends TestCase
 {
-    /** @var EntityManagerInterface|\PHPUnit\Framework\MockObject\MockObject */
+    /** @var EntityManagerInterface|MockObject */
     private $em;
 
-    /** @var RequestStack|\PHPUnit\Framework\MockObject\MockObject */
+    /** @var MockObject|RequestStack */
     private $requestStack;
 
-    /** @var TokenStorageInterface|\PHPUnit\Framework\MockObject\MockObject */
+    /** @var MockObject|TokenStorageInterface */
     private $tokenStorage;
 
-    /** @var MembershipService|\PHPUnit\Framework\MockObject\MockObject */
+    /** @var MembershipService|MockObject */
     private $membershipService;
 
     protected function setUp(): void
@@ -36,7 +43,8 @@ class TimeLogServiceTest extends TestCase
         $this->tokenStorage = $this->createMock(TokenStorageInterface::class);
         $this->membershipService = $this->getMockBuilder(MembershipService::class)
             ->disableOriginalConstructor()
-            ->getMock();
+            ->getMock()
+        ;
 
         // Default: no authenticated user, no request
         $this->tokenStorage->method('getToken')->willReturn(null);
@@ -61,6 +69,7 @@ class TimeLogServiceTest extends TestCase
         $membership->setWithdrawn(false);
         $membership->setFrozen(false);
         $membership->setFlying(false);
+
         return $membership;
     }
 
@@ -120,7 +129,7 @@ class TimeLogServiceTest extends TestCase
 
     public function testInitTimeLogWithAuthenticatedUser(): void
     {
-        $user = new \App\Entity\User();
+        $user = new User();
 
         $token = $this->createMock(TokenInterface::class);
         $token->method('getUser')->willReturn($user);
@@ -220,7 +229,8 @@ class TimeLogServiceTest extends TestCase
         $cycleStart = new \DateTime('2025-02-03');
         $this->membershipService->method('getStartOfCycle')
             ->with($this->anything(), 0)
-            ->willReturn($cycleStart);
+            ->willReturn($cycleStart)
+        ;
 
         $service = $this->createService(180);
         $member = $this->createMembership();

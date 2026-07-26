@@ -10,13 +10,19 @@ use App\Service\PeriodService;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class PeriodServiceTest extends TestCase
 {
-    /** @var ContainerInterface|\PHPUnit\Framework\MockObject\MockObject */
+    /** @var ContainerInterface|MockObject */
     private $container;
 
-    /** @var EntityManagerInterface|\PHPUnit\Framework\MockObject\MockObject */
+    /** @var EntityManagerInterface|MockObject */
     private $em;
 
     protected function setUp(): void
@@ -36,7 +42,8 @@ class PeriodServiceTest extends TestCase
         $this->container->method('getParameter')
             ->willReturnCallback(function ($key) use ($params) {
                 return $params[$key] ?? null;
-            });
+            })
+        ;
 
         return new PeriodService($this->container, $this->em);
     }

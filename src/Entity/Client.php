@@ -1,10 +1,12 @@
 <?php
+
 // src/App/Entity/Client.php
 
 namespace App\Entity;
 
 use FOS\OAuthServerBundle\Entity\Client as BaseClient;
 use Doctrine\ORM\Mapping as ORM;
+use Doctrine\Common\Collections\Collection;
 
 /**
  * @ORM\Entity
@@ -13,19 +15,23 @@ class Client extends BaseClient
 {
     /**
      * @ORM\Id
+     *
      * @ORM\Column(type="integer")
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     protected $id;
 
     /**
      * @ORM\ManyToOne(targetEntity="Service", inversedBy="clients")
+     *
      * @ORM\JoinColumn(name="service_id", referencedColumnName="id")
      */
     private $service;
 
     /**
      * Many Clients have Many Users.
+     *
      * @ORM\ManyToMany(targetEntity="User", mappedBy="clients")
      */
     private $users;
@@ -37,22 +43,20 @@ class Client extends BaseClient
     }
 
     /**
-     *
-     * @return String
+     * @return string
      */
-    public function getUrls(){
-        return implode(',',$this->getRedirectUris());
+    public function getUrls()
+    {
+        return implode(',', $this->getRedirectUris());
 
     }
 
     /**
-     * Set service
-     *
-     * @param \App\Entity\Service $service
+     * Set service.
      *
      * @return Client
      */
-    public function setService(\App\Entity\Service $service = null)
+    public function setService(?Service $service = null)
     {
         $this->service = $service;
 
@@ -60,24 +64,21 @@ class Client extends BaseClient
     }
 
     /**
-     * Get service
+     * Get service.
      *
-     * @return \App\Entity\Service
+     * @return Service
      */
     public function getService()
     {
         return $this->service;
     }
 
-
     /**
-     * Add user
-     *
-     * @param \App\Entity\User $user
+     * Add user.
      *
      * @return Client
      */
-    public function addUser(\App\Entity\User $user)
+    public function addUser(User $user)
     {
         $this->users[] = $user;
 
@@ -85,19 +86,17 @@ class Client extends BaseClient
     }
 
     /**
-     * Remove user
-     *
-     * @param \App\Entity\User $user
+     * Remove user.
      */
-    public function removeUser(\App\Entity\User $user)
+    public function removeUser(User $user)
     {
         $this->users->removeElement($user);
     }
 
     /**
-     * Get users
+     * Get users.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getUsers()
     {

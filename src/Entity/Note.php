@@ -4,12 +4,16 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 /**
- * Note
+ * Note.
  *
  * @ORM\Table(name="note")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\NoteRepository")
  */
 class Note
@@ -18,7 +22,9 @@ class Note
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -27,24 +33,28 @@ class Note
      * @var string
      *
      * @Assert\NotBlank()
+     *
      * @ORM\Column(name="text", type="text")
      */
     private $text;
 
     /**
      * @ORM\ManyToOne(targetEntity="User", inversedBy="annotations")
+     *
      * @ORM\JoinColumn(name="author_id", referencedColumnName="id")
      */
     private $author;
 
     /**
      * @ORM\ManyToOne(targetEntity="Membership", inversedBy="notes")
+     *
      * @ORM\JoinColumn(name="membership_id", referencedColumnName="id")
      */
     private $subject;
 
     /**
      * @ORM\ManyToOne(targetEntity="Note", inversedBy="children")
+     *
      * @ORM\JoinColumn(name="parent_id", referencedColumnName="id", onDelete="SET NULL")
      */
     private $parent;
@@ -62,11 +72,11 @@ class Note
     private $createdAt;
 
     /**
-     * Constructor
+     * Constructor.
      */
     public function __construct()
     {
-        $this->children = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->children = new ArrayCollection();
     }
 
     /**
@@ -80,7 +90,7 @@ class Note
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -90,7 +100,7 @@ class Note
     }
 
     /**
-     * Set text
+     * Set text.
      *
      * @param string $text
      *
@@ -104,7 +114,7 @@ class Note
     }
 
     /**
-     * Get text
+     * Get text.
      *
      * @return string
      */
@@ -119,7 +129,7 @@ class Note
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */
@@ -129,13 +139,11 @@ class Note
     }
 
     /**
-     * Set author
-     *
-     * @param \App\Entity\User $author
+     * Set author.
      *
      * @return Note
      */
-    public function setAuthor(\App\Entity\User $author = null)
+    public function setAuthor(?User $author = null)
     {
         $this->author = $author;
 
@@ -143,9 +151,9 @@ class Note
     }
 
     /**
-     * Get author
+     * Get author.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getAuthor()
     {
@@ -153,22 +161,21 @@ class Note
     }
 
     /**
-     * Set subject
-     *
-     * @param \App\Entity\Membership $subject
+     * Set subject.
      *
      * @return Note
      */
-    public function setSubject(\App\Entity\Membership $subject = null)
+    public function setSubject(?Membership $subject = null)
     {
         $this->subject = $subject;
+
         return $this;
     }
 
     /**
-     * Get subject
+     * Get subject.
      *
-     * @return \App\Entity\Membership
+     * @return Membership
      */
     public function getSubject()
     {
@@ -176,13 +183,11 @@ class Note
     }
 
     /**
-     * Set parent
-     *
-     * @param \App\Entity\Note $parent
+     * Set parent.
      *
      * @return Note
      */
-    public function setParent(\App\Entity\Note $parent = null)
+    public function setParent(?Note $parent = null)
     {
         $this->parent = $parent;
 
@@ -190,9 +195,9 @@ class Note
     }
 
     /**
-     * Get parent
+     * Get parent.
      *
-     * @return \App\Entity\Note
+     * @return Note
      */
     public function getParent()
     {
@@ -200,13 +205,11 @@ class Note
     }
 
     /**
-     * Add child
-     *
-     * @param \App\Entity\Note $child
+     * Add child.
      *
      * @return Note
      */
-    public function addChild(\App\Entity\Note $child)
+    public function addChild(Note $child)
     {
         $this->children[] = $child;
 
@@ -214,19 +217,17 @@ class Note
     }
 
     /**
-     * Remove child
-     *
-     * @param \App\Entity\Note $child
+     * Remove child.
      */
-    public function removeChild(\App\Entity\Note $child)
+    public function removeChild(Note $child)
     {
         $this->children->removeElement($child);
     }
 
     /**
-     * Get children
+     * Get children.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getChildren()
     {

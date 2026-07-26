@@ -5,11 +5,11 @@ namespace App\Event;
 use App\Entity\Beneficiary;
 use App\Entity\Membership;
 use App\Entity\Shift;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class ShiftFreedEvent extends \Symfony\Contracts\EventDispatcher\Event
+class ShiftFreedEvent extends Event
 {
-    const NAME = 'shift.freed';
+    public const NAME = 'shift.freed';
 
     private $shift;
     private $beneficiary;
@@ -49,7 +49,7 @@ class ShiftFreedEvent extends \Symfony\Contracts\EventDispatcher\Event
     }
 
     /**
-     * @return boolean
+     * @return bool
      */
     public function getFixe()
     {
@@ -57,7 +57,7 @@ class ShiftFreedEvent extends \Symfony\Contracts\EventDispatcher\Event
     }
 
     /**
-     * @return string|null
+     * @return null|string
      */
     public function getReason()
     {

@@ -157,7 +157,7 @@ setup-test: check-hosts vendor encore-stubs db-fixtures cache-clear ## Bootstrap
 	@echo "  make test          Tous les tests"
 	@echo "  make test-unit     Unit + intégration"
 	@echo "  make test-func     Fonctionnels"
-	@echo "  make lint          PHPStan"
+	@echo "  make lint          Outils de linting"
 	@echo "  make test-e2e      Cypress E2E"
 
 # ------------------------------------------------------------------
@@ -180,9 +180,22 @@ test-coverage: ## Tests avec rapport de couverture HTML
 # Analyse statique
 # ------------------------------------------------------------------
 
-lint: ## Analyse PHPStan
+lint: warmup phpstan cs-fixer-check ## Analyse PHPStan
+
+warmup:
 	$(EXEC) php bin/console cache:warmup --env=dev
+
+phpstan:
 	$(EXEC) php vendor/bin/phpstan analyse src
+
+phpstan-generate-baseline:
+	$(EXEC) php vendor/bin/phpstan analyse src --generate-baseline
+
+cs-fixer-check:
+	$(EXEC) php vendor/bin/php-cs-fixer check
+
+cs-fixer-fix:
+	$(EXEC) php vendor/bin/php-cs-fixer fix
 
 # ------------------------------------------------------------------
 # Tests Cypress E2E

@@ -22,7 +22,7 @@ class SwipeCardEventListener implements EventSubscriberInterface
     public static function getSubscribedEvents()
     {
         return [
-            SwipeCardEvent::SWIPE_CARD_SCANNED => 'onSwipeCardScanned'
+            SwipeCardEvent::SWIPE_CARD_SCANNED => 'onSwipeCardScanned',
         ];
     }
 

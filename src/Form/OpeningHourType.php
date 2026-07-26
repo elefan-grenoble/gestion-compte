@@ -15,56 +15,49 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class OpeningHourType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('dayOfWeek', ChoiceType::class, array(
+            ->add('dayOfWeek', ChoiceType::class, [
                 'label' => 'Jour de la semaine',
-                'choices' => Period::DAYS_OF_WEEK_LIST_WITH_INT
-            ))
-            ->add('start', TextType::class, array(
+                'choices' => Period::DAYS_OF_WEEK_LIST_WITH_INT,
+            ])
+            ->add('start', TextType::class, [
                 'label' => 'Heure de début',
                 'required' => false,
-                'attr' => array('class' => 'timepicker')
-            ))
-            ->add('end', TextType::class, array(
+                'attr' => ['class' => 'timepicker'],
+            ])
+            ->add('end', TextType::class, [
                 'label' => 'Heure de fin',
                 'required' => false,
-                'attr' => array('class' => 'timepicker')
-            ))
-            ->add('closed', CheckboxType::class, array(
+                'attr' => ['class' => 'timepicker'],
+            ])
+            ->add('closed', CheckboxType::class, [
                 'required' => false,
                 'label' => 'Fermé ?',
-                'attr' => array('class' => 'filled-in')
-            ))
-            ->add('kind', EntityType::class, array(
+                'attr' => ['class' => 'filled-in'],
+            ])
+            ->add('kind', EntityType::class, [
                 'label' => 'Type d\'horaire d\'ouverture',
                 'class' => 'App:OpeningHourKind',
                 'choice_label' => 'name',
                 'multiple' => false,
                 'query_builder' => function (OpeningHourKindRepository $repository) {
                     return $repository->createQueryBuilder('ohk')
-                        ->orderBy('ohk.id', 'ASC');
+                        ->orderBy('ohk.id', 'ASC')
+                    ;
                 },
-            ));
+            ])
+        ;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
-            'data_class' => OpeningHour::class
-        ));
+        $resolver->setDefaults([
+            'data_class' => OpeningHour::class,
+        ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlockPrefix()
     {
         return 'App_opening_hour';

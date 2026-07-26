@@ -2,12 +2,11 @@
 
 namespace App\EventListener;
 
-use App\Entity\Membership;
-use App\Entity\Shift;
 use App\Event\ShiftFreedEvent;
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
+use Doctrine\ORM\ORMException;
 
 class ShiftFreeLogEventListener
 {
@@ -23,12 +22,11 @@ class ShiftFreeLogEventListener
     }
 
     /**
-     * @param ShiftFreedEvent $event
-     * @throws \Doctrine\ORM\ORMException
+     * @throws ORMException
      */
     public function onShiftFreed(ShiftFreedEvent $event)
     {
-        $this->logger->info("Shift Free Log Listener: onShiftFreed");
+        $this->logger->info('Shift Free Log Listener: onShiftFreed');
         $log = $this->container->get('shift_free_log_service')->initShiftFreeLog($event->getShift(), $event->getBeneficiary(), $event->getFixe(), $event->getReason());
         $this->em->persist($log);
         $this->em->flush();

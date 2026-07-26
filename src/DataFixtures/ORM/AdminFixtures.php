@@ -4,7 +4,6 @@ namespace App\DataFixtures\ORM;
 
 use App\DataFixtures\FixturesConstants;
 use App\Entity\User;
-use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
@@ -18,15 +17,15 @@ class AdminFixtures extends Fixture implements FixtureGroupInterface, OrderedFix
         $adminsCount = FixturesConstants::ADMINS_COUNT;
 
         // 5 admin ( ids = 51 to 55 )
-        for ($i = 1; $i <= $adminsCount; $i++) {
+        for ($i = 1; $i <= $adminsCount; ++$i) {
 
             $user = new User();
             $user->setUsername('admin' . $i);
             $user->setEmail('admin' . $i . '@email.com');
             $user->setPlainPassword('password');
             $user->setEnabled(true);
-            $user->setRoles(array('ROLE_ADMIN'));
-            $user->setLastLogin(new DateTime('now'));
+            $user->setRoles(['ROLE_ADMIN']);
+            $user->setLastLogin(new \DateTime('now'));
 
             $this->addReference('admin_' . $i, $user);
 
@@ -48,5 +47,4 @@ class AdminFixtures extends Fixture implements FixtureGroupInterface, OrderedFix
     {
         return 2;
     }
-
 }

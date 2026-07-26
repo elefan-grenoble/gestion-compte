@@ -4,7 +4,6 @@ namespace App\Controller;
 
 use App\Entity\MembershipShiftExemption;
 use App\Form\AutocompleteMembershipType;
-use App\Repository\ShiftExemptionRepository;
 use App\Service\MembershipService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
@@ -15,7 +14,6 @@ use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Routing\Annotation\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Doctrine\ORM\Tools\Pagination\Paginator;
-use \Datetime;
 
 /**
  * Admin MembershipShiftExemption controller.
@@ -31,40 +29,41 @@ class AdminMembershipShiftExemptionController extends AbstractController
     {
         // default values
         $res = [
-            "membership" => null,
-            "shiftExemption" => null,
+            'membership' => null,
+            'shiftExemption' => null,
             'page' => 1,
         ];
 
         // filter creation ----------------------
-        $res["form"] = $this->createFormBuilder()
+        $res['form'] = $this->createFormBuilder()
             ->setAction($this->generateUrl('admin_membershipshiftexemption_index'))
-            ->add('membership', AutocompleteMembershipType::class, array(
+            ->add('membership', AutocompleteMembershipType::class, [
                 'label' => 'Membre',
                 'required' => false,
-            ))
-            ->add('shiftExemption', EntityType::class, array(
+            ])
+            ->add('shiftExemption', EntityType::class, [
                 'label' => 'Motif',
                 'class' => 'App:ShiftExemption',
                 'choice_label' => 'name',
                 'multiple' => false,
                 'required' => false,
-            ))
-            ->add('page', HiddenType::class, [
-                'data' => '1'
             ])
-            ->add('submit', SubmitType::class, array(
+            ->add('page', HiddenType::class, [
+                'data' => '1',
+            ])
+            ->add('submit', SubmitType::class, [
                 'label' => 'Filtrer',
-                'attr' => array('class' => 'btn', 'value' => 'filtrer')
-            ))
-            ->getForm();
+                'attr' => ['class' => 'btn', 'value' => 'filtrer'],
+            ])
+            ->getForm()
+        ;
 
         $res['form']->handleRequest($request);
 
         if ($res['form']->isSubmitted() && $res['form']->isValid()) {
-            $res["membership"] = $res["form"]->get("membership")->getData();
-            $res["shiftExemption"] = $res["form"]->get("shiftExemption")->getData();
-            $res["page"] = $res["form"]->get("page")->getData();
+            $res['membership'] = $res['form']->get('membership')->getData();
+            $res['shiftExemption'] = $res['form']->get('shiftExemption')->getData();
+            $res['page'] = $res['form']->get('page')->getData();
         }
 
         return $res;
@@ -74,26 +73,30 @@ class AdminMembershipShiftExemptionController extends AbstractController
      * Lists all membershipShiftExemption entities.
      *
      * @Route("/", name="admin_membershipshiftexemption_index", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_USER_MANAGER')")
      */
     public function indexAction(Request $request)
     {
         $em = $this->getDoctrine()->getManager();
         $filter = $this->filterFormFactory($request);
-        $findByFilter = array();
+        $findByFilter = [];
         $sort = 'createdAt';
         $order = 'DESC';
 
         $qb = $em->getRepository(MembershipShiftExemption::class)->createQueryBuilder('mse')
-            ->orderBy('mse.' . $sort, $order);
+            ->orderBy('mse.' . $sort, $order)
+        ;
 
         if ($filter['membership']) {
             $qb = $qb->andWhere('mse.membership = :membership')
-                ->setParameter('membership', $filter['membership']);
+                ->setParameter('membership', $filter['membership'])
+            ;
         }
         if ($filter['shiftExemption']) {
             $qb = $qb->andWhere('mse.shiftExemption = :shiftExemption')
-                ->setParameter('shiftExemption', $filter['shiftExemption']);
+                ->setParameter('shiftExemption', $filter['shiftExemption'])
+            ;
         }
 
         $limitPerPage = 25;
@@ -105,22 +108,24 @@ class AdminMembershipShiftExemptionController extends AbstractController
 
         $paginator
             ->getQuery()
-            ->setFirstResult($limitPerPage * ($currentPage-1)) // set the offset
-            ->setMaxResults($limitPerPage); // set the limit
+            ->setFirstResult($limitPerPage * ($currentPage - 1)) // set the offset
+            ->setMaxResults($limitPerPage) // set the limit
+        ;
 
-        return $this->render('admin/membershipshiftexemption/index.html.twig', array(
+        return $this->render('admin/membershipshiftexemption/index.html.twig', [
             'membershipShiftExemptions' => $paginator,
             'filter_form' => $filter['form']->createView(),
             'result_count' => $resultCount,
             'current_page' => $currentPage,
             'page_count' => $pageCount,
-        ));
+        ]);
     }
 
     /**
      * Creates a new membershipShiftExemption entity.
      *
      * @Route("/new", name="admin_membershipshiftexemption_new", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_USER_MANAGER')")
      */
     public function newAction(Request $request, MembershipService $membership_service)
@@ -133,31 +138,33 @@ class AdminMembershipShiftExemptionController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $membership = $form->get("membership")->getData();
+            $membership = $form->get('membership')->getData();
             $membershipShiftExemption->setMembership($membership);
 
             if ($membership_service->memberHasShiftsOnExemptionPeriod($membershipShiftExemption)) {
-                $this->addFlash("error", "Désolé, le membre a déjà des créneaux planifiés sur la plage d'exemption.");
+                $this->addFlash('error', "Désolé, le membre a déjà des créneaux planifiés sur la plage d'exemption.");
             } else {
                 $membershipShiftExemption->setCreatedBy($current_user);
                 $em->persist($membershipShiftExemption);
                 $em->flush();
 
                 $this->addFlash('success', 'L\'exemption de créneau a bien été crée !');
+
                 return $this->redirectToRoute('admin_membershipshiftexemption_index');
             }
         }
 
-        return $this->render('admin/membershipshiftexemption/new.html.twig', array(
+        return $this->render('admin/membershipshiftexemption/new.html.twig', [
             'membershipShiftExemption' => $membershipShiftExemption,
             'form' => $form->createView(),
-        ));
+        ]);
     }
 
     /**
      * Displays a form to edit an existing membershipShiftExemption entity.
      *
      * @Route("/{id}/edit", name="admin_membershipshiftexemption_edit", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_USER_MANAGER')")
      */
     public function editAction(Request $request, MembershipShiftExemption $membershipShiftExemption, MembershipService $membership_service)
@@ -169,25 +176,27 @@ class AdminMembershipShiftExemptionController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             if ($membership_service->memberHasShiftsOnExemptionPeriod($membershipShiftExemption)) {
-                $this->addFlash("error", "Désolé, le membre a déjà des créneaux planifiés sur la plage d'exemption.");
+                $this->addFlash('error', "Désolé, le membre a déjà des créneaux planifiés sur la plage d'exemption.");
             } else {
                 $em->flush();
                 $this->addFlash('success', 'L\'exemption de créneau a bien été éditée !');
+
                 return $this->redirectToRoute('admin_membershipshiftexemption_index');
             }
         }
 
-        return $this->render('admin/membershipshiftexemption/edit.html.twig', array(
+        return $this->render('admin/membershipshiftexemption/edit.html.twig', [
             'membershipShiftExemption' => $membershipShiftExemption,
             'form' => $form->createView(),
             'delete_form' => $this->getDeleteForm($membershipShiftExemption)->createView(),
-        ));
+        ]);
     }
 
     /**
      * Deletes a membershipShiftExemption entity.
      *
      * @Route("/{id}", name="admin_membershipshiftexemption_delete", methods={"DELETE"})
+     *
      * @Security("is_granted('ROLE_USER_MANAGER')")
      */
     public function deleteAction(Request $request, MembershipShiftExemption $membershipShiftExemption)
@@ -199,11 +208,12 @@ class AdminMembershipShiftExemptionController extends AbstractController
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
-            $today = new Datetime('now');
+            $today = new \DateTime('now');
             $today->setTime(0, 0, 0);
             if (($membershipShiftExemption->getStart() < $today) && !$current_user->hasRole('ROLE_SUPER_ADMIN')) {
                 $this->addFlash('warning', 'Vous n\'avez pas les droits pour supprimer une exemption déjà commencée');
-                return $this->redirectToRoute('admin_membershipshiftexemption_edit', array('id' => $membershipShiftExemption->getId()));
+
+                return $this->redirectToRoute('admin_membershipshiftexemption_edit', ['id' => $membershipShiftExemption->getId()]);
             }
 
             $em->remove($membershipShiftExemption);
@@ -223,8 +233,9 @@ class AdminMembershipShiftExemptionController extends AbstractController
     private function getDeleteForm(MembershipShiftExemption $membershipShiftExemption): FormInterface
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('admin_membershipshiftexemption_delete', array('id' => $membershipShiftExemption->getId())))
+            ->setAction($this->generateUrl('admin_membershipshiftexemption_delete', ['id' => $membershipShiftExemption->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 }

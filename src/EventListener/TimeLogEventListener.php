@@ -15,6 +15,8 @@ use App\Event\ShiftInvalidatedEvent;
 use Doctrine\ORM\EntityManager;
 use Monolog\Logger;
 use Symfony\Component\DependencyInjection\Container;
+use Doctrine\ORM\ORMException;
+use Doctrine\ORM\OptimisticLockException;
 
 /**
  * if the coop uses the card_reader (use_card_reader_to_validate_shifts = true)
@@ -24,7 +26,7 @@ use Symfony\Component\DependencyInjection\Container;
  * - more details:
  *  - booking a shift does not create a time log
  *  - the time log is created only when the shift is validated (with the card_reader) (with date = validation date)
- *  - when a shift is invalidated, we create an inverse time log (instead of deleting the existing time log)
+ *  - when a shift is invalidated, we create an inverse time log (instead of deleting the existing time log).
  *
  * if the coop doesn't use the card_reader (use_card_reader_to_validate_shifts = false)
  * - general rules:
@@ -63,13 +65,12 @@ class TimeLogEventListener
     }
 
     /**
-     * @param ShiftBookedEvent $event
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function onShiftBooked(ShiftBookedEvent $event)
     {
-        $this->logger->info("Time Log Listener: onShiftBooked");
+        $this->logger->info('Time Log Listener: onShiftBooked');
 
         $shift = $event->getShift();
 
@@ -82,13 +83,12 @@ class TimeLogEventListener
     }
 
     /**
-     * @param ShiftValidatedEvent $event
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     public function onShiftValidated(ShiftValidatedEvent $event)
     {
-        $this->logger->info("Time Log Listener: onShiftValidated");
+        $this->logger->info('Time Log Listener: onShiftValidated');
 
         $shift = $event->getShift();
 
@@ -106,7 +106,7 @@ class TimeLogEventListener
                 $this->em->refresh($shift);  // added to prevent from returning cached (old) data
                 $member = $shift->getShifter()->getMembership();
 
-                $now_plus_one_second = (clone $now)->modify("+1 second");
+                $now_plus_one_second = (clone $now)->modify('+1 second');
                 $member_counter_time = $member->getShiftTimeCount($now_plus_one_second);  // $now_plus_one_second? to be sure we take the above log into account
                 $member_counter_extra_time = $member_counter_time - ($this->due_duration_by_cycle + $this->max_time_at_end_of_shift);
 
@@ -116,27 +116,26 @@ class TimeLogEventListener
                     $this->em->persist($log);
                     // then increment the savingTimeCount
                     // we don't pass de $shift info because the extra time may not correspond to the shift time
-                    $log = $this->container->get('time_log_service')->initSavingTimeLog($member, $member_counter_extra_time, $now_plus_one_second);  # $shift
+                    $log = $this->container->get('time_log_service')->initSavingTimeLog($member, $member_counter_extra_time, $now_plus_one_second);  // $shift
                     $this->em->persist($log);
                     $this->em->flush();
                 }
             }
-        } else {
-            // do nothing! shouldn't happen (only onShiftBooked should be called)
-            // shiftTime log already created in onShiftBooked
-
-            // what about saving account mode?
-            // see onMemberCycleEnd (createCycleBeginningLog)
         }
+        // do nothing! shouldn't happen (only onShiftBooked should be called)
+        // shiftTime log already created in onShiftBooked
+
+        // what about saving account mode?
+        // see onMemberCycleEnd (createCycleBeginningLog)
+
     }
 
     /**
-     * @param ShiftInvalidatedEvent $event
-     * @throws \Doctrine\ORM\ORMException
+     * @throws ORMException
      */
     public function onShiftInvalidated(ShiftInvalidatedEvent $event)
     {
-        $this->logger->info("Time Log Listener: onShiftInvalidated");
+        $this->logger->info('Time Log Listener: onShiftInvalidated');
 
         $shift = $event->getShift();
         $member = $event->getBeneficiary()->getMembership();
@@ -146,23 +145,22 @@ class TimeLogEventListener
             // check that a TimeLog::TYPE_SHIFT_VALIDATED already exists
             // if true, create an inverse timelog
             $shiftValidatedTimeLog = $shift->getTimeLogs()->filter(function (TimeLog $log) use ($member) {
-                return (($log->getType() == TimeLog::TYPE_SHIFT_VALIDATED) && ($log->getMembership() == $member));
+                return ($log->getType() == TimeLog::TYPE_SHIFT_VALIDATED) && ($log->getMembership() == $member);
             });
             if ($shiftValidatedTimeLog->count() > 0) {
                 $this->createShiftInvalidatedTimeLog($shift, $member);
             }
-        } else {
-            // do nothing! shouldn't happen (only onShiftFreed should be called)
         }
+        // do nothing! shouldn't happen (only onShiftFreed should be called)
+
     }
 
     /**
-     * @param ShiftFreedEvent $event
-     * @throws \Doctrine\ORM\ORMException
+     * @throws ORMException
      */
     public function onShiftFreed(ShiftFreedEvent $event)
     {
-        $this->logger->info("Time Log Listener: onShiftFreed");
+        $this->logger->info('Time Log Listener: onShiftFreed');
 
         $shift = $event->getShift();
         $member = $event->getMember();
@@ -203,12 +201,11 @@ class TimeLogEventListener
     }
 
     /**
-     * @param ShiftDeletedEvent $event
-     * @throws \Doctrine\ORM\ORMException
+     * @throws ORMException
      */
     public function onShiftDeleted(ShiftDeletedEvent $event)
     {
-        $this->logger->info("Time Log Listener: onShiftDeleted");
+        $this->logger->info('Time Log Listener: onShiftDeleted');
 
         $shift = $event->getShift();
         $member = $event->getMember();
@@ -219,27 +216,26 @@ class TimeLogEventListener
     }
 
     /**
-     * @param MemberCycleEndEvent $event
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws ORMException
+     * @throws OptimisticLockException
      * @throws \Exception
      */
     public function onMemberCycleEnd(MemberCycleEndEvent $event)
     {
-        $this->logger->info("Time Log Listener: onMemberCycleEnd");
+        $this->logger->info('Time Log Listener: onMemberCycleEnd');
 
         $member = $event->getMembership();
         $date = $event->getDate();
 
         $registrationEnd = clone $member->getLastRegistration()->getDate();
-        $registrationEnd->modify('+'.$this->registration_duration);
-        $registrationEnd->modify('+'.$this->cycle_duration);
+        $registrationEnd->modify('+' . $this->registration_duration);
+        $registrationEnd->modify('+' . $this->cycle_duration);
 
         if ($date > $registrationEnd) {
             $this->createRegistrationExpiredLog($member);
-        } else if ($member->getFrozen()) {
+        } elseif ($member->getFrozen()) {
             $this->createFrozenLog($member);
-        } else if ($member->isCurrentlyExemptedFromShifts($date)) {
+        } elseif ($member->isCurrentlyExemptedFromShifts($date)) {
             $this->createExemptedLog($member);
         } else {
             $this->createCycleBeginningLog($member, $date);
@@ -262,11 +258,12 @@ class TimeLogEventListener
     }
 
     /**
-     * @param Shift $shift
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @param null|mixed $description
+     *
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
-    private function createShiftValidatedTimeLog(Shift $shift, \DateTime $date = null, $description = null)
+    private function createShiftValidatedTimeLog(Shift $shift, ?\DateTime $date = null, $description = null)
     {
         $log = $this->container->get('time_log_service')->initShiftValidatedTimeLog($shift, $date, $description);
         $this->em->persist($log);
@@ -274,11 +271,12 @@ class TimeLogEventListener
     }
 
     /**
-     * @param Shift $shift
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @param null|mixed $description
+     *
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
-    private function createShiftInvalidatedTimeLog(Shift $shift, Membership $member, \DateTime $date = null, $description = null)
+    private function createShiftInvalidatedTimeLog(Shift $shift, Membership $member, ?\DateTime $date = null, $description = null)
     {
         $log = $this->container->get('time_log_service')->initShiftInvalidatedTimeLog($shift, $member, $date, $description);
         $this->em->persist($log);
@@ -286,9 +284,7 @@ class TimeLogEventListener
     }
 
     /**
-     * @param Shift $shift
-     * @param Membership $member
-     * @throws \Doctrine\ORM\ORMException
+     * @throws ORMException
      */
     private function deleteShiftLogs(Shift $shift, Membership $member)
     {
@@ -302,10 +298,8 @@ class TimeLogEventListener
     }
 
     /**
-     * @param Membership $member
-     * @param \DateTime $date
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     private function createCycleBeginningLog(Membership $member, \DateTime $date)
     {
@@ -316,7 +310,7 @@ class TimeLogEventListener
 
         $this->em->refresh($member);  // added to prevent from returning cached (old) data
 
-        $date_plus_one_second = (clone $date)->modify("+1 second");
+        $date_plus_one_second = (clone $date)->modify('+1 second');
         $member_counter_time = $member->getShiftTimeCount($date_plus_one_second);  // $date_plus_one_second? to be sure we take the above log into account
         $member_counter_extra_time = $member_counter_time - $this->max_time_at_end_of_shift;  // not $this->due_duration_by_cycle? already substracted in the above log
 
@@ -330,20 +324,20 @@ class TimeLogEventListener
                 $log = $this->container->get('time_log_service')->initSavingTimeLog($member, 1 * $member_counter_extra_time, $date_plus_one_second);
                 $this->em->persist($log);
             }
-        // member has a negative shiftTimeCount...
+            // member has a negative shiftTimeCount...
         } elseif ($member_counter_time < 0) {
             // we can *maybe* use the member's savingTime to bring his shiftTime back to 0
             if ($this->use_time_log_saving) {
                 $member_saving_time = $member->getSavingTimeCount($date_plus_one_second);  // $date_plus_one_second? to be sure we take the above log into account
                 if ($member_saving_time > 0) {
-                    $date_minus_one_day = (clone $date)->modify("-1 days");
+                    $date_minus_one_day = (clone $date)->modify('-1 days');
                     // count missed shifts in the previous cycle
                     $previous_cycle_missed_shifts_count = $this->container->get('membership_service')->getCycleShiftMissedCount($member, $date_minus_one_day);
                     // count freed shifts within the min_time_in_advance in the previous cycle
                     $previous_cycle_freed_shifts_less_than_min_time_in_advance_count = $this->container->get('membership_service')->getCycleShiftFreedCount($member, $date_minus_one_day, $this->time_log_saving_shift_free_min_time_in_advance_days);
                     // we can use the member's savings only if:
                     // - the member has no missed shifts in the previous cycle
-                    // - the member has no freed shifts within the min_time_in_advance 
+                    // - the member has no freed shifts within the min_time_in_advance
                     if ($previous_cycle_missed_shifts_count == 0 && $previous_cycle_freed_shifts_less_than_min_time_in_advance_count == 0) {
                         $missing_due_time = -1 * $member_counter_time;
                         $withdraw_from_saving = min($member_saving_time, $missing_due_time);
@@ -356,12 +350,12 @@ class TimeLogEventListener
                     } else {
                         // not allowed to use member's saving
                         // give explanation
-                        $description = "(compteur épargne (" . $member_saving_time . " minutes) non utilisé car ";
+                        $description = '(compteur épargne (' . $member_saving_time . ' minutes) non utilisé car ';
                         if ($previous_cycle_missed_shifts_count) {
-                            $description = $description . $previous_cycle_missed_shifts_count . " créneau" . (($previous_cycle_missed_shifts_count > 1) ? 'x' : '') . " raté" . (($previous_cycle_missed_shifts_count > 1) ? 's' : '');
+                            $description = $description . $previous_cycle_missed_shifts_count . ' créneau' . (($previous_cycle_missed_shifts_count > 1) ? 'x' : '') . ' raté' . (($previous_cycle_missed_shifts_count > 1) ? 's' : '');
                         }
                         if ($previous_cycle_freed_shifts_less_than_min_time_in_advance_count) {
-                            $description = $description . (($previous_cycle_missed_shifts_count > 0) ? ' & ' : '') . $previous_cycle_freed_shifts_less_than_min_time_in_advance_count . " créneau" . (($previous_cycle_freed_shifts_less_than_min_time_in_advance_count > 1) ? 'x' : '') . " annulé" . (($previous_cycle_freed_shifts_less_than_min_time_in_advance_count > 1) ? 's' : '') . " sous les " . $this->time_log_saving_shift_free_min_time_in_advance_days . " jours)";
+                            $description = $description . (($previous_cycle_missed_shifts_count > 0) ? ' & ' : '') . $previous_cycle_freed_shifts_less_than_min_time_in_advance_count . ' créneau' . (($previous_cycle_freed_shifts_less_than_min_time_in_advance_count > 1) ? 'x' : '') . ' annulé' . (($previous_cycle_freed_shifts_less_than_min_time_in_advance_count > 1) ? 's' : '') . ' sous les ' . $this->time_log_saving_shift_free_min_time_in_advance_days . ' jours)';
                         }
                         $log = $this->container->get('time_log_service')->initCycleEndSavingTimeLog($member, 0, $date_plus_one_second, $description);
                         $this->em->persist($log);
@@ -374,9 +368,8 @@ class TimeLogEventListener
     }
 
     /**
-     * @param Membership $member
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     private function createFrozenLog(Membership $member)
     {
@@ -389,9 +382,8 @@ class TimeLogEventListener
     }
 
     /**
-     * @param Membership $member
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     private function createExemptedLog(Membership $member)
     {
@@ -404,9 +396,8 @@ class TimeLogEventListener
     }
 
     /**
-     * @param Membership $member
-     * @throws \Doctrine\ORM\ORMException
-     * @throws \Doctrine\ORM\OptimisticLockException
+     * @throws ORMException
+     * @throws OptimisticLockException
      */
     private function createRegistrationExpiredLog(Membership $member)
     {

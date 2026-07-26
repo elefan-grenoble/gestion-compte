@@ -2,7 +2,6 @@
 
 namespace App\Controller;
 
-
 use App\Entity\Client;
 use App\Entity\Service;
 use App\Entity\Task;
@@ -11,8 +10,7 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
-use Symfony\Component\Validator\Constraints\DateTime;
-
+use Symfony\Component\Form\FormInterface;
 
 /**
  * Task controller.
@@ -21,24 +19,25 @@ use Symfony\Component\Validator\Constraints\DateTime;
  */
 class ClientController extends AbstractController
 {
-
     /**
      * Lists all clients.
      *
      * @Route("/", name="client_list", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function listAction()
     {
         $clients = $this->getDoctrine()->getManager()->getRepository(Client::class)->findAll();
 
-        return $this->render('admin/client/list.html.twig',array('clients'=>$clients));
+        return $this->render('admin/client/list.html.twig', ['clients' => $clients]);
     }
 
     /**
-     * Add new Client //todo put this auto in service création
+     * Add new Client //todo put this auto in service création.
      *
      * @Route("/new", name="client_new", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
@@ -53,24 +52,25 @@ class ClientController extends AbstractController
 
             $clientManager = $this->container->get('fos_oauth_server.client_manager.default');
             $client = $clientManager->createClient();
-            $client->setRedirectUris(explode(',',$urls));
+            $client->setRedirectUris(explode(',', $urls));
             $client->setAllowedGrantTypes($form->get('grant_types')->getData());
             $client->setService($service);
             $clientManager->updateClient($client);
 
             $this->addFlash('success', 'Le client a bien été créé !');
+
             return $this->redirectToRoute('client_list');
 
-//            return $this->redirect($this->generateUrl('fos_oauth_server_authorize', array(
-//                'client_id' => $client->getPublicId(),
-//                'redirect_uri' => $url,
-//                'response_type' => 'code'
-//            )));
+            //            return $this->redirect($this->generateUrl('fos_oauth_server_authorize', array(
+            //                'client_id' => $client->getPublicId(),
+            //                'redirect_uri' => $url,
+            //                'response_type' => 'code'
+            //            )));
         }
 
-        return $this->render('admin/client/new.html.twig', array(
-            'form' => $form->createView()
-        ));
+        return $this->render('admin/client/new.html.twig', [
+            'form' => $form->createView(),
+        ]);
 
     }
 
@@ -78,6 +78,7 @@ class ClientController extends AbstractController
      * edit client.
      *
      * @Route("/{id}/edit", name="client_edit", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function editAction(Request $request, Client $client)
@@ -93,7 +94,7 @@ class ClientController extends AbstractController
 
         if ($form->isSubmitted() && $form->isValid()) {
             $urls = $form->get('urls')->getData();
-            $client->setRedirectUris(explode(',',$urls));
+            $client->setRedirectUris(explode(',', $urls));
             $service = $form->get('service')->getData();
             $client->setService($service);
             $grant_types = $form->get('grant_types')->getData();
@@ -103,20 +104,22 @@ class ClientController extends AbstractController
             $em->flush();
 
             $this->addFlash('success', 'Le client a bien été édité !');
+
             return $this->redirectToRoute('client_list');
 
-        } elseif ($form->isSubmitted()) {
+        }
+        if ($form->isSubmitted()) {
             foreach ($form->getErrors(true) as $key => $error) {
-                $this->addFlash('error', 'Erreur ' . ($key + 1) . " : " . $error->getMessage());
+                $this->addFlash('error', 'Erreur ' . ($key + 1) . ' : ' . $error->getMessage());
             }
         }
 
         $delete_form = $this->getDeleteForm($client);
 
-        return $this->render('admin/client/edit.html.twig', array(
+        return $this->render('admin/client/edit.html.twig', [
             'form' => $form->createView(),
-            'delete_form' => $delete_form->createView()
-        ));
+            'delete_form' => $delete_form->createView(),
+        ]);
 
     }
 
@@ -124,6 +127,7 @@ class ClientController extends AbstractController
      * delete client.
      *
      * @Route("/{id}", name="client_delete", methods={"DELETE"})
+     *
      * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function deleteAction(Request $request, Client $client)
@@ -144,14 +148,14 @@ class ClientController extends AbstractController
     }
 
     /**
-     * @param Client $client
-     * @return \Symfony\Component\Form\FormInterface
+     * @return FormInterface
      */
     protected function getDeleteForm(Client $client)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('client_delete', array('id' => $client->getId())))
+            ->setAction($this->generateUrl('client_delete', ['id' => $client->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 }
