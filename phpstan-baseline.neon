@@ -2329,12 +2329,6 @@ parameters:
 			path: src/Controller/ShiftController.php
 
 		-
-			message: '#^Method App\\Controller\\ShiftController\:\:createShiftContactForm\(\) has parameter \$coShifters with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Controller/ShiftController.php
-
-		-
 			message: '#^Method App\\Controller\\ShiftController\:\:createShiftContactForm\(\) should return Symfony\\Component\\Form\\Form but returns Symfony\\Component\\Form\\FormInterface\<mixed\>\.$#'
 			identifier: return.type
 			count: 1
@@ -2659,12 +2653,6 @@ parameters:
 			path: src/Controller/TimeLogController.php
 
 		-
-			message: '#^Method App\\Controller\\TimeLogController\:\:timelogDeleteAction\(\) has parameter \$timelog_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Controller/TimeLogController.php
-
-		-
 			message: '#^Property App\\Controller\\TimeLogController\:\:\$forbid_own_timelog_new_admin has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -2673,12 +2661,6 @@ parameters:
 		-
 			message: '#^If condition is always true\.$#'
 			identifier: if.alwaysTrue
-			count: 1
-			path: src/Controller/UserController.php
-
-		-
-			message: '#^Method App\\Controller\\UserController\:\:addRoleAction\(\) has parameter \$role with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: src/Controller/UserController.php
 
@@ -2745,12 +2727,6 @@ parameters:
 		-
 			message: '#^Method App\\Controller\\UserController\:\:removeClientUserAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Controller/UserController.php
-
-		-
-			message: '#^Method App\\Controller\\UserController\:\:removeRoleAction\(\) has parameter \$role with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: src/Controller/UserController.php
 
@@ -9313,12 +9289,6 @@ parameters:
 			path: src/Service/PeriodService.php
 
 		-
-			message: '#^Method App\\Service\\Picture\\BasePathPicture\:\:getPicturePath\(\) has parameter \$entity with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/Picture/BasePathPicture.php
-
-		-
 			message: '#^Property App\\Service\\Picture\\BasePathPicture\:\:\$imagineCacheManager has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -9577,12 +9547,6 @@ parameters:
 			path: src/Service/ShiftService.php
 
 		-
-			message: '#^Method App\\Service\\ShiftService\:\:canBookDuration\(\) has parameter \$duration with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/ShiftService.php
-
-		-
 			message: '#^Method App\\Service\\ShiftService\:\:canFreeShift\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -9591,12 +9555,6 @@ parameters:
 		-
 			message: '#^Method App\\Service\\ShiftService\:\:filterBucketsByDayAndJobByFilling\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Service/ShiftService.php
-
-		-
-			message: '#^Method App\\Service\\ShiftService\:\:generateShiftBuckets\(\) has parameter \$shifts with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: src/Service/ShiftService.php
 
@@ -9675,18 +9633,6 @@ parameters:
 		-
 			message: '#^Method App\\Service\\ShiftService\:\:isShiftBookable\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Service/ShiftService.php
-
-		-
-			message: '#^Method App\\Service\\ShiftService\:\:isShiftEmpty\(\) has parameter \$shift with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/ShiftService.php
-
-		-
-			message: '#^Method App\\Service\\ShiftService\:\:removeEmptyShift\(\) has parameter \$buckets with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: src/Service/ShiftService.php
 
