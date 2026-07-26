@@ -181,8 +181,6 @@ test-coverage: ## Tests avec rapport de couverture HTML
 # ------------------------------------------------------------------
 
 lint: warmup phpstan cs-fixer-check ## Analyse PHPStan
-	phpstan
-	cs-fixer-check
 
 warmup:
 	$(EXEC) php bin/console cache:warmup --env=dev
