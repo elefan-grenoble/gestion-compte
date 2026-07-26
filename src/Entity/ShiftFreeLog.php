@@ -2,14 +2,15 @@
 
 namespace App\Entity;
 
-use App\Repository\ShiftFreeLogRepository;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * ShiftFreeLog
+ * ShiftFreeLog.
  *
  * @ORM\Table(name="shiftfreelog")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\ShiftFreeLogRepository")
  */
 class ShiftFreeLog
@@ -18,13 +19,16 @@ class ShiftFreeLog
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
      * @ORM\ManyToOne(targetEntity="Shift", inversedBy="freeLogs")
+     *
      * @ORM\JoinColumn(referencedColumnName="id", onDelete="SET NULL")
      */
     private $shift;
@@ -38,6 +42,7 @@ class ShiftFreeLog
 
     /**
      * @ORM\ManyToOne(targetEntity="Beneficiary", cascade={"remove"})
+     *
      * @ORM\JoinColumn(referencedColumnName="id", onDelete="CASCADE")
      */
     private $beneficiary;
@@ -72,6 +77,7 @@ class ShiftFreeLog
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(referencedColumnName="id")
      */
     private $createdBy;
@@ -127,17 +133,13 @@ class ShiftFreeLog
         return $this;
     }
 
-    /**
-     * @return bool
-     */
-    public function isFixe(): ?bool {
+    public function isFixe(): ?bool
+    {
         return $this->fixe;
     }
 
-    /**
-     * @param bool $fixe
-     */
-    public function setFixe(?bool $fixe): void {
+    public function setFixe(?bool $fixe): void
+    {
         $this->fixe = $fixe;
     }
 

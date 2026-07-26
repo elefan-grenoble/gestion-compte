@@ -6,25 +6,21 @@ use App\Entity\Beneficiary;
 use App\Entity\Membership;
 use App\Entity\User;
 use App\Tests\Functional\FunctionalTestCase;
-use Exception;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\BufferedOutput;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class AdminControllerTest extends FunctionalTestCase
 {
-    public function csvDelimiterProvider(): array
-    {
-        return [
-            'comma-separated' => [__DIR__ . '/../Mocks/mocked_users.csv', ','],
-            'semicolon-separated' => [__DIR__ . '/../Mocks/mocked_users_semicolon.csv', ';'],
-        ];
-    }
-
     /**
      * @dataProvider csvDelimiterProvider
      *
-     * @throws Exception
+     * @throws \Exception
      */
     public function testCsvImportForEmptyBase(string $csvPath, string $delimiter)
     {
@@ -37,7 +33,7 @@ class AdminControllerTest extends FunctionalTestCase
             'command' => 'app:import:users',
             '--delimiter' => $delimiter,
             'file' => $csvPath,
-            '--default_mapping' => true
+            '--default_mapping' => true,
         ]);
 
         $output = new BufferedOutput();
@@ -64,7 +60,7 @@ class AdminControllerTest extends FunctionalTestCase
     /**
      * @dataProvider csvDelimiterProvider
      *
-     * @throws Exception
+     * @throws \Exception
      */
     public function testCsvImportForCommissionFilledBase(string $csvPath, string $delimiter)
     {
@@ -79,7 +75,7 @@ class AdminControllerTest extends FunctionalTestCase
             'command' => 'app:import:users',
             '--delimiter' => $delimiter,
             'file' => $csvPath,
-            '--default_mapping' => true
+            '--default_mapping' => true,
         ]);
 
         $application->run($input);
@@ -96,5 +92,13 @@ class AdminControllerTest extends FunctionalTestCase
         }
 
         $this->assertEquals(67, $count);
+    }
+
+    public function csvDelimiterProvider(): array
+    {
+        return [
+            'comma-separated' => [__DIR__ . '/../Mocks/mocked_users.csv', ','],
+            'semicolon-separated' => [__DIR__ . '/../Mocks/mocked_users_semicolon.csv', ';'],
+        ];
     }
 }

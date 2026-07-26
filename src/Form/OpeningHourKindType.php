@@ -11,50 +11,42 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class OpeningHourKindType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('name', TextType::class, array(
+            ->add('name', TextType::class, [
                 'label' => 'Nom',
-                'required' => true
-            ))
-            ->add('start_date', DateType::class, array(
+                'required' => true,
+            ])
+            ->add('start_date', DateType::class, [
                 'label' => 'Date de début (optionnel)',
                 'required' => false,
                 'html5' => false,
                 'widget' => 'single_text',
-                'attr' => array('class' => 'datepicker')
-            ))
-            ->add('end_date', DateType::class, array(
+                'attr' => ['class' => 'datepicker'],
+            ])
+            ->add('end_date', DateType::class, [
                 'label' => 'Date de fin (optionnel)',
                 'required' => false,
                 'html5' => false,
                 'widget' => 'single_text',
-                'attr' => array('class' => 'datepicker')
-            ))
-            ->add('enabled', CheckboxType::class, array(
+                'attr' => ['class' => 'datepicker'],
+            ])
+            ->add('enabled', CheckboxType::class, [
                 'label' => 'Actif',
                 'required' => false,
-                'attr' => array('class' => 'filled-in')
-            ));
+                'attr' => ['class' => 'filled-in'],
+            ])
+        ;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
-            'data_class' => 'App\Entity\OpeningHourKind'
-        ));
+        $resolver->setDefaults([
+            'data_class' => 'App\Entity\OpeningHourKind',
+        ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlockPrefix()
     {
         return 'App_OpeningHourKind';

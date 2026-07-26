@@ -13,44 +13,38 @@ use App\Repository\JobRepository;
 
 class PeriodType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('day_of_week', ChoiceType::class, array('label' => 'Jour de la semaine', 'choices' => Period::DAYS_OF_WEEK_LIST_WITH_INT))
-            ->add('start', TextType::class, array('label' => 'Heure de début', 'attr' => array('class' => 'timepicker')))
-            ->add('end', TextType::class, array('label' => 'Heure de fin', 'attr' => array('class' => 'timepicker')))
-            ->add('job', EntityType::class, array(
+            ->add('day_of_week', ChoiceType::class, ['label' => 'Jour de la semaine', 'choices' => Period::DAYS_OF_WEEK_LIST_WITH_INT])
+            ->add('start', TextType::class, ['label' => 'Heure de début', 'attr' => ['class' => 'timepicker']])
+            ->add('end', TextType::class, ['label' => 'Heure de fin', 'attr' => ['class' => 'timepicker']])
+            ->add('job', EntityType::class, [
                 'label' => 'Poste',
                 'class' => 'App:Job',
-                'choice_label'=> 'name',
+                'choice_label' => 'name',
                 'multiple' => false,
                 'required' => true,
-                'query_builder' => function(JobRepository $repository) {
+                'query_builder' => function (JobRepository $repository) {
                     $qb = $repository->createQueryBuilder('j');
+
                     return $qb
                         ->where($qb->expr()->eq('j.enabled', '?1'))
                         ->setParameter('1', '1')
-                        ->orderBy('j.name', 'ASC');
-                }
-            ));
+                        ->orderBy('j.name', 'ASC')
+                    ;
+                },
+            ])
+        ;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
-            'data_class' => Period::class
-        ));
+        $resolver->setDefaults([
+            'data_class' => Period::class,
+        ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlockPrefix()
     {
         return 'App_period';

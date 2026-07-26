@@ -9,7 +9,6 @@ use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\CheckboxType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
-use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\Extension\Core\Type\TextType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\Form\FormEvent;
@@ -26,9 +25,6 @@ class TaskType extends AbstractType
         $this->tokenStorage = $tokenStorage;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         // grab the user, do a quick sanity check that one exists
@@ -43,64 +39,65 @@ class TaskType extends AbstractType
             $form = $event->getForm();
             $taskData = $event->getData();
 
-            if ($user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN')){
-                $form->add('commissions',EntityType::class, array(
+            if ($user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN')) {
+                $form->add('commissions', EntityType::class, [
                     'class' => 'App:Commission',
                     'choice_label'     => 'name',
                     'multiple'     => true,
                     'required' => true,
-                    'label'=>'Commission(s)'
-                ));
-            }else{
-                $form->add('commissions',EntityType::class, array(
+                    'label' => 'Commission(s)',
+                ]);
+            } else {
+                $form->add('commissions', EntityType::class, [
                     'class' => 'App:Commission',
                     'choices' => $user->getBeneficiary()->getCommissions(),
                     'choice_label'     => 'name',
                     'multiple'     => true,
                     'required' => true,
-                    'label'=>'Commission(s) / College(s)'
-                ));
+                    'label' => 'Commission(s) / College(s)',
+                ]);
             }
 
-            $form->add('title',TextType::class,array('label'=>'titre'))
-                ->add('due_date',TextType::class,array('required' => true,'attr'=>array('class'=>'datepicker'),'label'=>'Echéance'))
-                ->add('priority',ChoiceType::class,array(
+            $form->add('title', TextType::class, ['label' => 'titre'])
+                ->add('due_date', TextType::class, ['required' => true, 'attr' => ['class' => 'datepicker'], 'label' => 'Echéance'])
+                ->add('priority', ChoiceType::class, [
                     'label' => 'priorité',
-                    'choices' => array(
-                        "Non definie" => 0,
-                        Task::PRIORITY_ANNEXE_VALUE." ANNEXE" => Task::PRIORITY_ANNEXE_VALUE,
-                        Task::PRIORITY_NORMAL_VALUE." NORMAL" => Task::PRIORITY_NORMAL_VALUE,
-                        Task::PRIORITY_IMPORTANT_VALUE." IMPORTANT" => Task::PRIORITY_IMPORTANT_VALUE,
-                        Task::PRIORITY_URGENT_VALUE." URGENT" => Task::PRIORITY_URGENT_VALUE,
-                    )
-                ));
+                    'choices' => [
+                        'Non definie' => 0,
+                        Task::PRIORITY_ANNEXE_VALUE . ' ANNEXE' => Task::PRIORITY_ANNEXE_VALUE,
+                        Task::PRIORITY_NORMAL_VALUE . ' NORMAL' => Task::PRIORITY_NORMAL_VALUE,
+                        Task::PRIORITY_IMPORTANT_VALUE . ' IMPORTANT' => Task::PRIORITY_IMPORTANT_VALUE,
+                        Task::PRIORITY_URGENT_VALUE . ' URGENT' => Task::PRIORITY_URGENT_VALUE,
+                    ],
+                ])
+            ;
 
-            if ($taskData && $taskData->getId()){
-                $form->add('created_at', TextType::class,array(
+            if ($taskData && $taskData->getId()) {
+                $form->add('created_at', TextType::class, [
                     'required' => true,
                     'label' => 'Début',
-                    'attr' => array('class' => 'datepicker')
-                ));
-                $form->add('closed', CheckboxType::class,array(
+                    'attr' => ['class' => 'datepicker'],
+                ]);
+                $form->add('closed', CheckboxType::class, [
                     'required' => false,
                     'label' => 'Terminée',
-                    'attr' => array('class' => 'filled-in')
-                ));
-                $form->add('status', TextType::class, array('required' => false, 'label' => 'Status'));
-                if ($taskData->getCommissions()->count() > 0){
-                    $collection = array();
-                    foreach ($taskData->getCommissions() as $commission){
-                        $collection = array_merge($commission->getBeneficiaries()->toArray(),$collection);
+                    'attr' => ['class' => 'filled-in'],
+                ]);
+                $form->add('status', TextType::class, ['required' => false, 'label' => 'Status']);
+                if ($taskData->getCommissions()->count() > 0) {
+                    $collection = [];
+                    foreach ($taskData->getCommissions() as $commission) {
+                        $collection = array_merge($commission->getBeneficiaries()->toArray(), $collection);
                     }
                     $beneficiaries = new ArrayCollection($collection);
-                    $form->add('owners',EntityType::class, array(
+                    $form->add('owners', EntityType::class, [
                         'class' => Beneficiary::class,
                         'label' => 'Personne(s) ressource(s)',
                         'choice_label'     => 'display_name',
                         'choices' => $beneficiaries,
                         'multiple'     => true,
-                        'required' => false
-                    ));
+                        'required' => false,
+                    ]);
                 }
             }
 
@@ -108,24 +105,16 @@ class TaskType extends AbstractType
 
 
     }
-    
-    /**
-     * {@inheritdoc}
-     */
+
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
-            'data_class' => Task::class
-        ));
+        $resolver->setDefaults([
+            'data_class' => Task::class,
+        ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlockPrefix()
     {
         return 'App_task';
     }
-
-
 }

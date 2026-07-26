@@ -3,8 +3,6 @@
 namespace App\Form;
 
 use App\Entity\User;
-use App\EventListener\BeneficiaryInitializationSubscriber;
-use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -35,8 +33,8 @@ class UserType extends AbstractType
 
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
-            'data_class' => User::class
-        ));
+        $resolver->setDefaults([
+            'data_class' => User::class,
+        ]);
     }
 }

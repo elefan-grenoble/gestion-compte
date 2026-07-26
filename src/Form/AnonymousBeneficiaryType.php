@@ -26,9 +26,6 @@ class AnonymousBeneficiaryType extends AbstractType
         $this->tokenStorage = $tokenStorage;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         // grab the user, do a quick sanity check that one exists
@@ -40,41 +37,42 @@ class AnonymousBeneficiaryType extends AbstractType
         }
 
         $builder
-            ->add('email', EmailType::class, array(
-                'label' => 'Email du nouveau membre'
-            ))
-            ->add('join_to', AutocompleteBeneficiaryType::class, array(
+            ->add('email', EmailType::class, [
+                'label' => 'Email du nouveau membre',
+            ])
+            ->add('join_to', AutocompleteBeneficiaryType::class, [
                 'label' => 'Email ou nom du compte parent',
-                'required' => false
-            ))
-            ->add('beneficiaries_emails',CollectionType::class, array(
+                'required' => false,
+            ])
+            ->add('beneficiaries_emails', CollectionType::class, [
                 'label' => false, // 'Email bénéficiaire',
                 'required' => false,
                 'entry_type' => EmailType::class,
-                'entry_options' => array(
+                'entry_options' => [
                     'label' => 'Email bénéficiaire',
-                    'attr' => array('placehoder'=>'email@domain.fr'),
+                    'attr' => ['placehoder' => 'email@domain.fr'],
                     'required' => false,
-                    'constraints' => [new UniqueEmail()]
-                ),
-                'allow_add'=>true
-            ))
-            ->add('amount', TextType::class, array(
+                    'constraints' => [new UniqueEmail()],
+                ],
+                'allow_add' => true,
+            ])
+            ->add('amount', TextType::class, [
                 'label' => 'Montant',
-                'attr'=> array('placeholder' => '15'),
-                'required' => false
-            ))
-            ->add('mode', ChoiceType::class, array(  // todo, make it dynamic
+                'attr' => ['placeholder' => '15'],
+                'required' => false,
+            ])
+            ->add('mode', ChoiceType::class, [  // todo, make it dynamic
                 'label' => 'Mode de réglement',
                 'placeholder' => '',
                 'required' => false,
-                'choices' => array(
+                'choices' => [
                     'Espèce' => Registration::TYPE_CASH,
                     'Chèque' => Registration::TYPE_CHECK,
                     $this->local_currency_name => Registration::TYPE_LOCAL,
                     'Helloasso' => Registration::TYPE_HELLOASSO,
-                )
-            ));
+                ],
+            ])
+        ;
 
         $builder->get('beneficiaries_emails')->addModelTransformer(new CallbackTransformer(
             function ($beneficiariesAsString) {
@@ -85,18 +83,14 @@ class AnonymousBeneficiaryType extends AbstractType
                 // transform the array back to a string
                 return implode(', ', $beneficiariesAsArray);
             }
-        ))
-        ;
+        ));
 
     }
-    
-    /**
-     * {@inheritdoc}
-     */
+
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
-            'data_class' => AnonymousBeneficiary::class
-        ));
+        $resolver->setDefaults([
+            'data_class' => AnonymousBeneficiary::class,
+        ]);
     }
 }

@@ -17,9 +17,6 @@ class BeneficiaryWithoutUserType extends BeneficiaryType
         parent::__construct($use_fly_and_fixed, $fly_and_fixed_entity_flying, $tokenStorage, $validator, $beneficiaryInitializationSubscriber);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         parent::buildForm($builder, $options);

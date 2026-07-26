@@ -4,18 +4,15 @@ namespace App\DataFixtures\ORM;
 
 use App\DataFixtures\FixturesConstants;
 use App\Entity\Commission;
-use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
-use Doctrine\Common\DataFixtures\DependentFixtureInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
-use Exception;
 
 class CommissionFixtures extends Fixture implements FixtureGroupInterface, OrderedFixtureInterface
 {
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     public function load(ObjectManager $manager)
     {
@@ -28,7 +25,7 @@ class CommissionFixtures extends Fixture implements FixtureGroupInterface, Order
         $ownersCount = 0;
         $beneficiariesCount = 0;
 
-        for ($i = 0; $i < $commissionsCount; $i++) {
+        for ($i = 0; $i < $commissionsCount; ++$i) {
             $commission = new Commission();
             $commission->setName($commissions[$i]);
             $commission->setDescription($descriptions[$i]);
@@ -36,7 +33,7 @@ class CommissionFixtures extends Fixture implements FixtureGroupInterface, Order
             $commission->setNextMeetingDesc($nextMeetingDescriptions[$i]);
 
             // a meeting between now and 2 months later
-            $date = new DateTime('+' . rand(0, 60) . ' days');
+            $date = new \DateTime('+' . rand(0, 60) . ' days');
             $commission->setNextMeetingDate($date);
 
             // if beneficiaries have been set ( in order for group commission to function )
@@ -47,13 +44,13 @@ class CommissionFixtures extends Fixture implements FixtureGroupInterface, Order
 
                 // define owner
                 if ($i == 0) {
-                    $ownerId = $roleGoesToId["OWNER_OF_FIRST_COMMISSION"];
-                } else if ($i == 1) {
-                    $ownerId = $roleGoesToId["OWNER_OF_SECOND_COMMISSION"];
-                } else if ($i == 2) {
-                    $ownerId = $roleGoesToId["OWNER_OF_THIRD_COMMISSION"];
-                } else if ($i == 3) {
-                    $ownerId = $roleGoesToId["OWNER_OF_FOURTH_COMMISSION"];
+                    $ownerId = $roleGoesToId['OWNER_OF_FIRST_COMMISSION'];
+                } elseif ($i == 1) {
+                    $ownerId = $roleGoesToId['OWNER_OF_SECOND_COMMISSION'];
+                } elseif ($i == 2) {
+                    $ownerId = $roleGoesToId['OWNER_OF_THIRD_COMMISSION'];
+                } elseif ($i == 3) {
+                    $ownerId = $roleGoesToId['OWNER_OF_FOURTH_COMMISSION'];
                 } else {
                     $ownerId = $i + 1;
                 }
@@ -68,7 +65,7 @@ class CommissionFixtures extends Fixture implements FixtureGroupInterface, Order
 
                 // add beneficiaries for each commission
                 if ($i == 0) {
-                    foreach ((array)$roleGoesToId["IN_FIRST_COMMISSION"] as $j) {
+                    foreach ((array) $roleGoesToId['IN_FIRST_COMMISSION'] as $j) {
                         $beneficiary = $this->getReference('beneficiary_' . $j);
                         $commission->addBeneficiary($beneficiary);
                         $beneficiary->addCommission($commission);
@@ -77,7 +74,7 @@ class CommissionFixtures extends Fixture implements FixtureGroupInterface, Order
                 }
 
                 if ($i == 1) {
-                    foreach ((array)$roleGoesToId["IN_SECOND_COMMISSION"] as $j) {
+                    foreach ((array) $roleGoesToId['IN_SECOND_COMMISSION'] as $j) {
                         $beneficiary = $this->getReference('beneficiary_' . $j);
                         $commission->addBeneficiary($beneficiary);
                         $beneficiary->addCommission($commission);
@@ -85,7 +82,7 @@ class CommissionFixtures extends Fixture implements FixtureGroupInterface, Order
                     }
                 }
                 if ($i == 2) {
-                    foreach ((array)$roleGoesToId["IN_THIRD_COMMISSION"] as $j) {
+                    foreach ((array) $roleGoesToId['IN_THIRD_COMMISSION'] as $j) {
                         $beneficiary = $this->getReference('beneficiary_' . $j);
                         $commission->addBeneficiary($beneficiary);
                         $beneficiary->addCommission($commission);
@@ -94,7 +91,7 @@ class CommissionFixtures extends Fixture implements FixtureGroupInterface, Order
                 }
 
                 if ($i == 3) {
-                    foreach ((array)$roleGoesToId["IN_FOURTH_COMMISSION"] as $j) {
+                    foreach ((array) $roleGoesToId['IN_FOURTH_COMMISSION'] as $j) {
                         $beneficiary = $this->getReference('beneficiary_' . $j);
                         $commission->addBeneficiary($beneficiary);
                         $beneficiary->addCommission($commission);
@@ -111,9 +108,8 @@ class CommissionFixtures extends Fixture implements FixtureGroupInterface, Order
 
         $manager->flush();
 
-        echo $commissionsCount . " commissions with ". $ownersCount ." owners and " . $beneficiariesCount . " beneficiaries each created \n";
+        echo $commissionsCount . ' commissions with ' . $ownersCount . ' owners and ' . $beneficiariesCount . " beneficiaries each created \n";
     }
-
 
     public static function getGroups(): array
     {
@@ -124,6 +120,4 @@ class CommissionFixtures extends Fixture implements FixtureGroupInterface, Order
     {
         return 8;
     }
-
-
 }

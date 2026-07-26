@@ -42,7 +42,8 @@ class UpdateHelloAssoPaymentsCommand extends Command
     {
         $this
             ->setDescription('Update missing payments by browsing HelloAsso API')
-            ->addOption('delay', '', InputOption::VALUE_REQUIRED, "Delay (example: '1 month')");
+            ->addOption('delay', '', InputOption::VALUE_REQUIRED, "Delay (example: '1 month')")
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -50,7 +51,7 @@ class UpdateHelloAssoPaymentsCommand extends Command
         $formSlug = $this->params->get('helloasso_campaign_slug');
         $from = Carbon::now()->sub($input->getOption('delay'));
 
-        $output->writeln('Searching from '.$from->format('Y-m-d'));
+        $output->writeln('Searching from ' . $from->format('Y-m-d'));
 
         $this->processPage($formSlug, $from, 1);
 
@@ -59,7 +60,7 @@ class UpdateHelloAssoPaymentsCommand extends Command
 
     private function processPage(string $formSlug, \DateTimeInterface $from, int $page)
     {
-        $this->logger->info('Fetching page '.$page);
+        $this->logger->info('Fetching page ' . $page);
         $results = $this->helloassoClient->getFormPayments(
             'Membership',
             $formSlug,

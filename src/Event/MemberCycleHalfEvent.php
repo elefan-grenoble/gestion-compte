@@ -3,11 +3,10 @@
 namespace App\Event;
 
 use App\Entity\Membership;
-use Symfony\Component\EventDispatcher\Event;
 
 class MemberCycleHalfEvent extends \Symfony\Contracts\EventDispatcher\Event
 {
-    const NAME = 'member.cycle.half';
+    public const NAME = 'member.cycle.half';
 
     private $membership;
     private $date;
@@ -43,5 +42,4 @@ class MemberCycleHalfEvent extends \Symfony\Contracts\EventDispatcher\Event
     {
         return $this->currentCycleShifts;
     }
-
 }

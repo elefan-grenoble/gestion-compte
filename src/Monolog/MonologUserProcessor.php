@@ -3,7 +3,6 @@
 namespace App\Monolog;
 
 use App\Entity\User;
-use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorage;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
 
 class MonologUserProcessor
@@ -27,7 +26,7 @@ class MonologUserProcessor
                 $text .= ' (' . $beneficiary->getDisplayNameWithMemberNumber() . ')';
             }
             $record['extra']['user'] = $text;
-        } else if ($current_user) {
+        } elseif ($current_user) {
             $record['extra']['user'] = $current_user;
         }
 

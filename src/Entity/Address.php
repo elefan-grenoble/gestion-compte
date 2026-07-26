@@ -6,9 +6,10 @@ use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 
 /**
- * Address
+ * Address.
  *
  * @ORM\Table(name="address")
+ *
  * @ORM\Entity(repositoryClass="App\Repository\AddressRepository")
  */
 class Address
@@ -17,7 +18,9 @@ class Address
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -26,6 +29,7 @@ class Address
      * @var string
      *
      * @ORM\Column(name="street1", type="string", length=255)
+     *
      * @Assert\NotBlank(message="L'adresse est requise")
      */
     private $street1;
@@ -41,9 +45,12 @@ class Address
      * @var string
      *
      * @ORM\Column(name="zipcode", type="string", length=255)
+     *
      * @Assert\NotNull(message="Le code postal est requis")
+     *
      * @Assert\Regex(pattern="/^[0-9]+$/", message="Le code postal doit comporter uniquement des chiffres")
-     * @Assert\Length(min="4", max="10", exactMessage="Le code postal doit comporter entre 4 et 10 chiffres")
+     *
+     *  * @Assert\Length(min="4", max="10", exactMessage="Le code postal doit comporter entre 4 et 10 chiffres")
      */
     private $zipcode;
 
@@ -51,18 +58,20 @@ class Address
      * @var string
      *
      * @ORM\Column(name="city", type="string", length=255)
+     *
      * @Assert\NotBlank(message="La ville est requise")
      */
     private $city;
 
     /**
      * One Address has Beneficiary.
+     *
      * @ORM\OneToOne(targetEntity="Beneficiary", mappedBy="address")
      */
     private $beneficiary;
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -72,7 +81,7 @@ class Address
     }
 
     /**
-     * Set street2
+     * Set street2.
      *
      * @param string $street2
      *
@@ -86,7 +95,7 @@ class Address
     }
 
     /**
-     * Get street2
+     * Get street2.
      *
      * @return string
      */
@@ -96,7 +105,7 @@ class Address
     }
 
     /**
-     * Set zipcode
+     * Set zipcode.
      *
      * @param string $zipcode
      *
@@ -110,7 +119,7 @@ class Address
     }
 
     /**
-     * Get zipcode
+     * Get zipcode.
      *
      * @return string
      */
@@ -120,7 +129,7 @@ class Address
     }
 
     /**
-     * Set city
+     * Set city.
      *
      * @param string $city
      *
@@ -134,7 +143,7 @@ class Address
     }
 
     /**
-     * Get city
+     * Get city.
      *
      * @return string
      */
@@ -144,7 +153,7 @@ class Address
     }
 
     /**
-     * Set street1
+     * Set street1.
      *
      * @param string $street1
      *
@@ -158,7 +167,7 @@ class Address
     }
 
     /**
-     * Get street1
+     * Get street1.
      *
      * @return string
      */

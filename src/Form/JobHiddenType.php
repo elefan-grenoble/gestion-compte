@@ -2,20 +2,17 @@
 
 namespace App\Form;
 
-use App\Entity\Job;
 use App\Form\DataTransformer\JobToNumberTransformer;
 use Symfony\Component\Form\Extension\Core\Type\HiddenType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
-use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 
 /**
- * Entity hidden custom type class definition
+ * Entity hidden custom type class definition.
  */
 class JobHiddenType extends AbstractType
 {
-
     private $transformer;
 
     public function __construct(JobToNumberTransformer $transformer)

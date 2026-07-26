@@ -1,9 +1,10 @@
 <?php
+
 // src/App/Command/AmbassadorShiftTimeLogCommand.php
+
 namespace App\Command;
 
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\Query\Expr\Join;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -12,9 +13,9 @@ use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
 use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Address;
 use Symfony\Component\Mime\Email;
-use Symfony\Component\Templating\EngineInterface;
 use App\Entity\DynamicContent;
 use App\Entity\Membership;
+use Twig\Environment;
 
 class AmbassadorShiftTimeLogCommand extends Command
 {
@@ -26,10 +27,9 @@ class AmbassadorShiftTimeLogCommand extends Command
     public function __construct(
         EntityManagerInterface $em,
         ContainerBagInterface $params,
-        \Twig\Environment $twig,
+        Environment $twig,
         MailerInterface $mailer
-    )
-    {
+    ) {
         $this->em = $em;
         $this->params = $params;
         $this->twig = $twig;
@@ -41,11 +41,12 @@ class AmbassadorShiftTimeLogCommand extends Command
     protected function configure()
     {
         $this
-          ->setName('app:shift:send_late_shifters')
-          ->setDescription('Send shifters which are too late')
-          ->setHelp('This command allows you to send alerts for shifters that are too late')
+            ->setName('app:shift:send_late_shifters')
+            ->setDescription('Send shifters which are too late')
+            ->setHelp('This command allows you to send alerts for shifters that are too late')
             ->addOption('emails', null, InputOption::VALUE_OPTIONAL, 'Email recipients (comma separated)')
-            ->addOption('emailTemplate', null, InputOption::VALUE_OPTIONAL, 'Template used in email alerts', 'SHIFT_LATE_ALERT_EMAIL');
+            ->addOption('emailTemplate', null, InputOption::VALUE_OPTIONAL, 'Template used in email alerts', 'SHIFT_LATE_ALERT_EMAIL')
+        ;
     }
 
     protected function execute(InputInterface $input, OutputInterface $output): int
@@ -57,7 +58,8 @@ class AmbassadorShiftTimeLogCommand extends Command
         $time_after_which_members_are_late_with_shifts = $this->params->get('time_after_which_members_are_late_with_shifts');
 
         $alerts = $this->em->getRepository(Membership::class)
-                     ->findLateShifters($time_after_which_members_are_late_with_shifts);
+            ->findLateShifters($time_after_which_members_are_late_with_shifts)
+        ;
         $nbAlerts = count($alerts);
         if ($nbAlerts > 0) {
             $output->writeln('<fg=cyan;>Found ' . $nbAlerts . ' alerts to send</>');
@@ -69,8 +71,8 @@ class AmbassadorShiftTimeLogCommand extends Command
         return 0;
     }
 
-
-    private function sendAlertsByEmail(InputInterface $input, OutputInterface $output, $alerts, $template) {
+    private function sendAlertsByEmail(InputInterface $input, OutputInterface $output, $alerts, $template)
+    {
         $recipients = $input->getOption('emails') ? explode(',', $input->getOption('emails')) : null;
         if ($recipients) {
             $subject = '[ALERTE RETARDS] Membres en retard de créneaux';
@@ -91,9 +93,10 @@ class AmbassadorShiftTimeLogCommand extends Command
                 ->html(
                     $this->twig->render(
                         $template,
-                        array('membership_late_alerts' => $alerts)
+                        ['membership_late_alerts' => $alerts]
                     )
-                );
+                )
+            ;
             $this->mailer->send($email);
             $output->writeln('<fg=cyan;>Email(s) sent</>');
         }

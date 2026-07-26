@@ -16,7 +16,7 @@ class HelloassoPaymentHandler
     /** @var EntityManagerInterface */
     private $entityManager;
 
-    /** @var ObjectRepository<HelloassoPayment>  */
+    /** @var ObjectRepository<HelloassoPayment> */
     private $helloassoPaymentRepository;
 
     /** @var EventDispatcherInterface */
@@ -44,6 +44,7 @@ class HelloassoPaymentHandler
             $existingPayement = $this->helloassoPaymentRepository->findOneBy(['paymentId' => $payment->id]);
             if ($existingPayement instanceof HelloassoPayment) {
                 $this->logger->info(sprintf('Payment #%d is already in database', $payment->id));
+
                 continue;
             }
 

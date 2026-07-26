@@ -15,7 +15,6 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-
 /**
  * Beneficiary controller.
  *
@@ -27,13 +26,13 @@ class BeneficiaryController extends AbstractController
 
     /**
      * Returns a user current representation.
-     * @return UserInterface
      */
     public function getCurrentAppUser(): UserInterface
     {
-        if (!$this->_current_app_user){
+        if (!$this->_current_app_user) {
             $this->_current_app_user = $this->get('security.token_storage')->getToken()->getUser();
         }
+
         return $this->_current_app_user;
     }
 
@@ -41,8 +40,7 @@ class BeneficiaryController extends AbstractController
      * Displays a form to edit an existing user entity.
      *
      * @Route("/{id}/edit", name="beneficiary_edit", methods={"GET", "POST"})
-     * @param Request $request
-     * @param Beneficiary $beneficiary
+     *
      * @return RedirectResponse|Response
      */
     public function editBeneficiaryAction(Request $request, Beneficiary $beneficiary)
@@ -58,21 +56,20 @@ class BeneficiaryController extends AbstractController
             $em->flush();
 
             $this->addFlash('success', 'Mise à jour effectuée');
+
             return $this->redirectToShow($member);
         }
 
-        return $this->render('beneficiary/edit_beneficiary.html.twig', array(
+        return $this->render('beneficiary/edit_beneficiary.html.twig', [
             'beneficiary' => $beneficiary,
             'edit_form' => $editForm->createView(),
-        ));
+        ]);
     }
 
     /**
-     * Set as main beneficiary
+     * Set as main beneficiary.
      *
      * @Route("/{id}/set_main", name="beneficiary_set_main", methods={"GET"})
-     * @param Beneficiary $beneficiary
-     * @return RedirectResponse
      */
     public function setAsMainBeneficiaryAction(Beneficiary $beneficiary): RedirectResponse
     {
@@ -86,6 +83,7 @@ class BeneficiaryController extends AbstractController
         $em->flush();
 
         $this->addFlash('success', 'Le changement de bénéficiaire principal a été effectué');
+
         return $this->redirectToShow($member);
     }
 
@@ -93,9 +91,6 @@ class BeneficiaryController extends AbstractController
      * Detaches a beneficiary entity.
      *
      * @Route("/{id}/detach", name="beneficiary_detach", methods={"POST"})
-     * @param Request $request
-     * @param Beneficiary $beneficiary
-     * @return RedirectResponse
      */
     public function detachBeneficiaryAction(Request $request, Beneficiary $beneficiary): RedirectResponse
     {
@@ -105,13 +100,15 @@ class BeneficiaryController extends AbstractController
 
         if ($beneficiary->isMain()) {
             $this->addFlash('error', 'Un bénéficiaire principal ne peut pas être détaché');
+
             return $this->redirectToShow($member);
         }
 
         $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('beneficiary_detach', array('id' => $beneficiary->getId())))
+            ->setAction($this->generateUrl('beneficiary_detach', ['id' => $beneficiary->getId()]))
             ->setMethod('POST')
-            ->getForm();
+            ->getForm()
+        ;
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -122,7 +119,7 @@ class BeneficiaryController extends AbstractController
             $em->persist($member);
 
             // check if there is a existing membership with this main beneficiary (artefact ?)
-            $existing_member = $em->getRepository(Membership::class)->findOneBy(array('mainBeneficiary' => $beneficiary));
+            $existing_member = $em->getRepository(Membership::class)->findOneBy(['mainBeneficiary' => $beneficiary]);
             if ($existing_member) {
                 $new_member = $existing_member;
                 $new_member->setMainBeneficiary($beneficiary);
@@ -132,8 +129,9 @@ class BeneficiaryController extends AbstractController
                 // init member id
                 $m = $em->getRepository(Membership::class)->findBy([], ['member_number' => 'DESC'], 1)[0];
                 $mm = 1;
-                if ($m instanceof Membership)
+                if ($m instanceof Membership) {
                     $mm = $m->getMemberNumber() + 1;
+                }
                 $new_member->setMemberNumber($mm);
                 // set main beneficiary
                 $new_member->setMainBeneficiary($beneficiary);
@@ -149,6 +147,7 @@ class BeneficiaryController extends AbstractController
             $em->flush();
 
             $this->addFlash('success', 'Le bénéficiaire a été détaché ! Il a maintenant son propre compte.');
+
             return $this->redirectToShow($new_member);
         }
 
@@ -159,9 +158,6 @@ class BeneficiaryController extends AbstractController
      * Deletes a beneficiary entity.
      *
      * @Route("/{id}", name="beneficiary_delete", methods={"DELETE"})
-     * @param Request $request
-     * @param Beneficiary $beneficiary
-     * @return RedirectResponse
      */
     public function deleteBeneficiaryAction(Request $request, Beneficiary $beneficiary): RedirectResponse
     {
@@ -170,9 +166,10 @@ class BeneficiaryController extends AbstractController
         $this->denyAccessUnlessGranted('edit', $member);
 
         $form = $this->createFormBuilder()
-            ->setAction($this->generateUrl('beneficiary_delete', array('id' => $beneficiary->getId())))
+            ->setAction($this->generateUrl('beneficiary_delete', ['id' => $beneficiary->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
         $form->handleRequest($request);
 
         if ($form->isSubmitted() && $form->isValid()) {
@@ -187,7 +184,7 @@ class BeneficiaryController extends AbstractController
     // TODO: check if this function is ever used ?!
     private function getErrorMessages(Form $form): array
     {
-        $errors = array();
+        $errors = [];
 
         foreach ($form->getErrors() as $key => $error) {
             if ($form->isRoot()) {
@@ -209,8 +206,6 @@ class BeneficiaryController extends AbstractController
 
     /**
      * @Route("/find_member_number", name="find_member_number")
-     * @param Request $request
-     * @return Response
      */
     public function findMemberNumberAction(Request $request): Response
     {
@@ -219,18 +214,20 @@ class BeneficiaryController extends AbstractController
 
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $form = $this->createFormBuilder()
-                ->add('firstname', TextType::class, array('label' => 'Le prénom', 'attr' => array(
+                ->add('firstname', TextType::class, ['label' => 'Le prénom', 'attr' => [
                     'placeholder' => 'babar',
-                )))
-                ->add('find', SubmitType::class, array('label' => 'Trouver le numéro'))
-                ->getForm();
+                ]])
+                ->add('find', SubmitType::class, ['label' => 'Trouver le numéro'])
+                ->getForm()
+            ;
         } else {
             $form = $this->createFormBuilder()
-                ->add('firstname', TextType::class, array('label' => 'Mon prénom', 'attr' => array(
+                ->add('firstname', TextType::class, ['label' => 'Mon prénom', 'attr' => [
                     'placeholder' => 'babar',
-                )))
-                ->add('find', SubmitType::class, array('label' => 'Trouver mon numéro'))
-                ->getForm();
+                ]])
+                ->add('find', SubmitType::class, ['label' => 'Trouver mon numéro'])
+                ->getForm()
+            ;
         }
 
         $form->handleRequest($request);
@@ -238,38 +235,36 @@ class BeneficiaryController extends AbstractController
             $firstname = $form->get('firstname')->getData();
             $beneficiaries = $em->getRepository(Beneficiary::class)->findActiveFromFirstname($firstname);
 
-            return $this->render('beneficiary/find_member_number.html.twig', array(
+            return $this->render('beneficiary/find_member_number.html.twig', [
                 'form' => null,
                 'beneficiaries' => $beneficiaries,
                 'return_path' => 'confirm',
                 'routeParam' => 'id',
-                'params' => array()
-            ));
+                'params' => [],
+            ]);
         }
 
-        return $this->render('beneficiary/find_member_number.html.twig', array(
+        return $this->render('beneficiary/find_member_number.html.twig', [
             'form' => $form->createView(),
-            'beneficiaries' => ''
-        ));
+            'beneficiaries' => '',
+        ]);
     }
 
     /**
      * @Route("/{id}/confirm", name="confirm", methods={"POST"})
-     * @param Beneficiary $beneficiary
-     * @param Request $request
-     * @return Response
      */
     public function confirmAction(Beneficiary $beneficiary, Request $request): Response
     {
-        return $this->render('beneficiary/confirm.html.twig', array('beneficiary' => $beneficiary));
+        return $this->render('beneficiary/confirm.html.twig', ['beneficiary' => $beneficiary]);
     }
 
-    private function redirectToShow(Membership $member):RedirectResponse
+    private function redirectToShow(Membership $member): RedirectResponse
     {
         $user = $member->getMainBeneficiary()->getUser(); // FIXME
-        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN'))
-            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber()));
-        else
-            return $this->redirectToRoute('member_show', array('member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($this->get('request_stack')->getCurrentRequest()->getSession()->get('token_key') . $this->getCurrentAppUser()->getUsername())));
+        if ($this->get('security.authorization_checker')->isGranted('ROLE_ADMIN')) {
+            return $this->redirectToRoute('member_show', ['member_number' => $member->getMemberNumber()]);
+        }
+
+        return $this->redirectToRoute('member_show', ['member_number' => $member->getMemberNumber(), 'token' => $user->getTmpToken($this->get('request_stack')->getCurrentRequest()->getSession()->get('token_key') . $this->getCurrentAppUser()->getUsername())]);
     }
 }

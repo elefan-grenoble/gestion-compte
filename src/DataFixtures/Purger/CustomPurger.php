@@ -9,7 +9,7 @@ use Doctrine\ORM\EntityManagerInterface;
 class CustomPurger extends ORMPurger
 {
     private $entityManager;
-    private $excludedTables = ["migration_versions", "dynamic_content"];
+    private $excludedTables = ['migration_versions', 'dynamic_content'];
 
     public function __construct(EntityManagerInterface $entityManager, array $excluded = [])
     {
@@ -21,11 +21,12 @@ class CustomPurger extends ORMPurger
      * Purges the MySQL database with temporarily disabled foreign key checks.
      *
      * {@inheritDoc}
+     *
      * @throws Exception
      */
     public function purge(): void
     {
-        echo "\n Purging database expect tables: " . implode(", ", $this->excludedTables) . "\n";
+        echo "\n Purging database expect tables: " . implode(', ', $this->excludedTables) . "\n";
 
         $conn = $this->entityManager->getConnection();
         $sm = $conn->getSchemaManager();
@@ -38,5 +39,4 @@ class CustomPurger extends ORMPurger
         }
         $conn->executeQuery('SET FOREIGN_KEY_CHECKS = 1;');
     }
-
 }

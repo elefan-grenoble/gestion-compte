@@ -5,18 +5,15 @@ namespace App\DataFixtures\ORM;
 use App\DataFixtures\FixturesConstants;
 use App\Entity\Event;
 use App\Entity\EventKind;
-use DateTime;
 use Doctrine\Bundle\FixturesBundle\Fixture;
 use Doctrine\Bundle\FixturesBundle\FixtureGroupInterface;
 use Doctrine\Common\DataFixtures\OrderedFixtureInterface;
 use Doctrine\Persistence\ObjectManager;
-use Exception;
 
 class EventFixtures extends Fixture implements OrderedFixtureInterface, FixtureGroupInterface
 {
-
     /**
-     * @throws Exception
+     * @throws \Exception
      */
     public function load(ObjectManager $manager)
     {
@@ -28,39 +25,39 @@ class EventFixtures extends Fixture implements OrderedFixtureInterface, FixtureG
         $eventKindsCount = FixturesConstants::EVENT_KINDS_COUNT;
         $eventKindNames = FixturesConstants::EVENT_KIND_NAMES;
 
-        for ($i = 0; $i < $eventKindsCount; $i++) {
+        for ($i = 0; $i < $eventKindsCount; ++$i) {
 
             $eventKind = new EventKind();
 
             $eventKind->setName($eventKindNames[$i]);
 
-            $this->addReference('event_kind_' . ($i+1), $eventKind);
+            $this->addReference('event_kind_' . ($i + 1), $eventKind);
 
             $manager->persist($eventKind);
         }
 
         echo $eventKindsCount . " event kinds created\n";
 
-        for ($i = 0; $i < $eventCounts; $i++) {
+        for ($i = 0; $i < $eventCounts; ++$i) {
 
             $event = new Event();
-            $event->setDate(new DateTime('+' . rand(1, 30) . ' days'));
+            $event->setDate(new \DateTime('+' . rand(1, 30) . ' days'));
             $event->setTitle($eventTitles[$i]);
             $event->setDescription($eventDescriptions[$i]);
 
-            $event->setDisplayedHome((bool)rand(0, 1));
+            $event->setDisplayedHome((bool) rand(0, 1));
 
             $event->setCreatedBy($this->getReference('admin_' . rand(1, 5)));
 
-            $event->setNeedProxy((bool)rand(0, 1));
-            $event->setAnonymousProxy((bool)rand(0, 1));
+            $event->setNeedProxy((bool) rand(0, 1));
+            $event->setAnonymousProxy((bool) rand(0, 1));
 
             $kind = $this->getReference('event_kind_' . rand(1, $eventKindsCount));
             $event->setKind($kind);
 
             $event->setLocation($eventLocations[$i]);
 
-            $this->setReference('event_' . ($i+1), $event);
+            $this->setReference('event_' . ($i + 1), $event);
 
             $manager->persist($event);
 
@@ -80,5 +77,4 @@ class EventFixtures extends Fixture implements OrderedFixtureInterface, FixtureG
     {
         return 9;
     }
-
 }

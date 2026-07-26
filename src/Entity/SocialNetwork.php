@@ -5,10 +5,12 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * SocialNetwork
+ * SocialNetwork.
  *
  * @ORM\Table(name="social_network")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\SocialNetworkRepository")
  */
 class SocialNetwork
@@ -17,14 +19,16 @@ class SocialNetwork
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
      * @var string
-     * 
+     *
      * @ORM\Column(name="name", type="string", length=255, unique=true)
      */
     private $name;
@@ -38,21 +42,21 @@ class SocialNetwork
 
     /**
      * @var string
-     * 
+     *
      * @ORM\Column(name="url", type="string", length=255, nullable=true)
      */
     private $url;
 
     /**
      * @var bool
-     * 
+     *
      * @ORM\Column(name="displayed_footer", type="boolean", options={"default" : 0}, nullable=false)
      */
     private $displayedFooter;
 
     /**
      * @var \DateTime
-     * 
+     *
      * @ORM\Column(name="created_at", type="datetime")
      */
     private $createdAt;
@@ -68,7 +72,7 @@ class SocialNetwork
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -78,7 +82,7 @@ class SocialNetwork
     }
 
     /**
-     * Set name
+     * Set name.
      *
      * @param string $name
      *
@@ -92,7 +96,7 @@ class SocialNetwork
     }
 
     /**
-     * Get name
+     * Get name.
      *
      * @return string
      */
@@ -102,7 +106,7 @@ class SocialNetwork
     }
 
     /**
-     * Set description
+     * Set description.
      *
      * @param string $description
      *
@@ -116,7 +120,7 @@ class SocialNetwork
     }
 
     /**
-     * Get description
+     * Get description.
      *
      * @return string
      */
@@ -126,7 +130,7 @@ class SocialNetwork
     }
 
     /**
-     * Set url
+     * Set url.
      *
      * @param string $url
      *
@@ -140,7 +144,7 @@ class SocialNetwork
     }
 
     /**
-     * Get url
+     * Get url.
      *
      * @return string
      */
@@ -150,9 +154,9 @@ class SocialNetwork
     }
 
     /**
-     * Set displayedFooter
+     * Set displayedFooter.
      *
-     * @param bool|null $displayedFooter
+     * @param null|bool $displayedFooter
      *
      * @return SocialNetwork
      */
@@ -164,7 +168,7 @@ class SocialNetwork
     }
 
     /**
-     * Get displayedFooter
+     * Get displayedFooter.
      *
      * @return bool
      */
@@ -174,7 +178,7 @@ class SocialNetwork
     }
 
     /**
-     * Set createdAt
+     * Set createdAt.
      *
      * @param \DateTime $date
      *
@@ -188,7 +192,7 @@ class SocialNetwork
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */

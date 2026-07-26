@@ -4,30 +4,36 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 /**
- * Period
+ * Period.
  *
  * @ORM\Table(name="period")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\PeriodRepository")
  */
 class Period
 {
-    const DAYS_OF_WEEK = ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"];
-    const DAYS_OF_WEEK_LIST_WITH_INT = ["Lundi" => 0, "Mardi" => 1, "Mercredi" => 2, "Jeudi" => 3, "Vendredi" => 4, "Samedi" => 5, "Dimanche" => 6];
-    const WEEK_A = "A";
-    const WEEK_B = "B";
-    const WEEK_C = "C";
-    const WEEK_D = "D";
-    const WEEK_CYCLE = [Period::WEEK_A, Period::WEEK_B, Period::WEEK_C, Period::WEEK_D];
-    const WEEK_CYCLE_CHOICE_LIST = ["Semaine A" => Period::WEEK_A, "Semaine B" => Period::WEEK_B, "Semaine C" => Period::WEEK_C, "Semaine D" => Period::WEEK_D];
+    public const DAYS_OF_WEEK = ['Lundi', 'Mardi', 'Mercredi', 'Jeudi', 'Vendredi', 'Samedi', 'Dimanche'];
+    public const DAYS_OF_WEEK_LIST_WITH_INT = ['Lundi' => 0, 'Mardi' => 1, 'Mercredi' => 2, 'Jeudi' => 3, 'Vendredi' => 4, 'Samedi' => 5, 'Dimanche' => 6];
+    public const WEEK_A = 'A';
+    public const WEEK_B = 'B';
+    public const WEEK_C = 'C';
+    public const WEEK_D = 'D';
+    public const WEEK_CYCLE = [Period::WEEK_A, Period::WEEK_B, Period::WEEK_C, Period::WEEK_D];
+    public const WEEK_CYCLE_CHOICE_LIST = ['Semaine A' => Period::WEEK_A, 'Semaine B' => Period::WEEK_B, 'Semaine C' => Period::WEEK_C, 'Semaine D' => Period::WEEK_D];
 
     /**
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -55,13 +61,16 @@ class Period
 
     /**
      * One Period has One Job.
+     *
      * @ORM\ManyToOne(targetEntity="Job", inversedBy="periods", fetch="EAGER")
+     *
      * @ORM\JoinColumn(name="job_id", referencedColumnName="id", nullable=false)
      */
     private $job;
 
     /**
      * One Period has Many Positions.
+     *
      * @ORM\OneToMany(targetEntity="PeriodPosition", mappedBy="period", cascade={"persist", "remove"}), orphanRemoval=true)
      */
     private $positions;
@@ -75,6 +84,7 @@ class Period
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
      */
     private $createdBy;
@@ -88,24 +98,25 @@ class Period
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="updated_by_id", referencedColumnName="id")
      */
     private $updatedBy;
 
     /**
-     * Constructor
+     * Constructor.
      */
     public function __construct()
     {
-        $this->positions = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->positions = new ArrayCollection();
     }
 
     /**
-     * Example: "Epicerie/Livraison - Lundi - 9h30 à 12h30"
+     * Example: "Epicerie/Livraison - Lundi - 9h30 à 12h30".
      */
     public function __toString()
     {
-        return $this->getJob() . ' - ' . ucfirst($this->getDayOfWeekString()) . ' - ' . $this->getStart()->format('G\\hi') . ' à ' . $this->getEnd()->format('G\\hi');
+        return $this->getJob() . ' - ' . ucfirst($this->getDayOfWeekString()) . ' - ' . $this->getStart()->format('G\hi') . ' à ' . $this->getEnd()->format('G\hi');
     }
 
     /**
@@ -120,6 +131,7 @@ class Period
 
     /**
      * @ORM\PrePersist
+     *
      * @ORM\PreUpdate
      */
     public function setUpdatedAtValue()
@@ -128,7 +140,7 @@ class Period
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -138,9 +150,9 @@ class Period
     }
 
     /**
-     * Set dayOfWeek
+     * Set dayOfWeek.
      *
-     * @param integer $dayOfWeek
+     * @param int $dayOfWeek
      *
      * @return Period
      */
@@ -152,7 +164,7 @@ class Period
     }
 
     /**
-     * Get dayOfWeek
+     * Get dayOfWeek.
      *
      * @return int
      */
@@ -162,17 +174,17 @@ class Period
     }
 
     /**
-     * Get dayOfWeekString
+     * Get dayOfWeekString.
      *
      * @return int
      */
     public function getDayOfWeekString()
     {
-        return strftime("%A", strtotime("Monday + {$this->dayOfWeek} days"));
+        return strftime('%A', strtotime("Monday + {$this->dayOfWeek} days"));
     }
 
     /**
-     * Set start
+     * Set start.
      *
      * @param \DateTime $start
      *
@@ -186,7 +198,7 @@ class Period
     }
 
     /**
-     * Get start
+     * Get start.
      *
      * @return \DateTime
      */
@@ -196,7 +208,7 @@ class Period
     }
 
     /**
-     * Set end
+     * Set end.
      *
      * @param \DateTime $end
      *
@@ -210,7 +222,7 @@ class Period
     }
 
     /**
-     * Get end
+     * Get end.
      *
      * @return \DateTime
      */
@@ -228,13 +240,11 @@ class Period
     }
 
     /**
-     * Set job
-     *
-     * @param \App\Entity\Job $job
+     * Set job.
      *
      * @return Period
      */
-    public function setJob(\App\Entity\Job $job = null)
+    public function setJob(?Job $job = null)
     {
         $this->job = $job;
 
@@ -242,9 +252,9 @@ class Period
     }
 
     /**
-     * Get job
+     * Get job.
      *
-     * @return \App\Entity\Job
+     * @return Job
      */
     public function getJob()
     {
@@ -252,13 +262,11 @@ class Period
     }
 
     /**
-     * Add periodPosition
-     *
-     * @param \App\Entity\PeriodPosition $position
+     * Add periodPosition.
      *
      * @return Period
      */
-    public function addPosition(\App\Entity\PeriodPosition $position)
+    public function addPosition(PeriodPosition $position)
     {
         $position->setPeriod($this);
         $this->positions[] = $position;
@@ -267,19 +275,17 @@ class Period
     }
 
     /**
-     * Remove periodPosition
-     *
-     * @param \App\Entity\PeriodPosition $position
+     * Remove periodPosition.
      */
-    public function removePosition(\App\Entity\PeriodPosition $position)
+    public function removePosition(PeriodPosition $position)
     {
         $this->positions->removeElement($position);
     }
 
     /**
-     * Get periodPositions
+     * Get periodPositions.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getPositions()
     {
@@ -287,7 +293,7 @@ class Period
     }
 
     /**
-     * Set createdAt
+     * Set createdAt.
      *
      * @param \DateTime $date
      *
@@ -301,7 +307,7 @@ class Period
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */
@@ -311,9 +317,9 @@ class Period
     }
 
     /**
-     * Get createdBy
+     * Get createdBy.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getCreatedBy()
     {
@@ -321,13 +327,11 @@ class Period
     }
 
     /**
-     * Set createdBy
-     *
-     * @param \App\Entity\User $user
+     * Set createdBy.
      *
      * @return Period
      */
-    public function setCreatedBy(\App\Entity\User $user = null)
+    public function setCreatedBy(?User $user = null)
     {
         $this->createdBy = $user;
 
@@ -335,7 +339,7 @@ class Period
     }
 
     /**
-     * Get updatedAt
+     * Get updatedAt.
      *
      * @return \DateTime
      */
@@ -345,9 +349,9 @@ class Period
     }
 
     /**
-     * Get updatedBy
+     * Get updatedBy.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getUpdatedBy()
     {
@@ -355,13 +359,11 @@ class Period
     }
 
     /**
-     * Set updatedBy
-     *
-     * @param \App\Entity\User $user
+     * Set updatedBy.
      *
      * @return Period
      */
-    public function setUpdatedBy(\App\Entity\User $user = null)
+    public function setUpdatedBy(?User $user = null)
     {
         $this->updatedBy = $user;
 
@@ -369,26 +371,29 @@ class Period
     }
 
     /**
-     * Get all the positions
+     * Get all the positions.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @param null|mixed $booked
+     * @param null|mixed $weekCycle
+     *
+     * @return Collection
      */
     public function getPositionsWithFilter($booked = null, $weekCycle = null)
     {
         $positions = $this->getPositions();
 
         if ($booked === true) {
-            $positions = $positions->filter(function (\App\Entity\PeriodPosition $position) {
+            $positions = $positions->filter(function (PeriodPosition $position) {
                 return $position->getShifter();
             });
         } elseif ($booked === false) {
-            $positions = $positions->filter(function (\App\Entity\PeriodPosition $position) {
+            $positions = $positions->filter(function (PeriodPosition $position) {
                 return !$position->getShifter();
             });
         }
 
         if ($weekCycle) {
-            $positions = $positions->filter(function (\App\Entity\PeriodPosition $position) use ($weekCycle) {
+            $positions = $positions->filter(function (PeriodPosition $position) use ($weekCycle) {
                 return $position->getWeekCycle() == $weekCycle;
             });
         }
@@ -397,58 +402,57 @@ class Period
     }
 
     /**
-     * Get all the positions per week cycle
-     *
-     * @return array
+     * Get all the positions per week cycle.
      */
     public function getPositionsPerWeekCycle(): array
     {
-        $positionsPerWeekCycle = array();
+        $positionsPerWeekCycle = [];
         foreach ($this->positions as $position) {
             if (!array_key_exists($position->getWeekCycle(), $positionsPerWeekCycle)) {
-                $positionsPerWeekCycle[$position->getWeekCycle()] = array();
+                $positionsPerWeekCycle[$position->getWeekCycle()] = [];
             }
             $positionsPerWeekCycle[$position->getWeekCycle()][] = $position;
         }
         ksort($positionsPerWeekCycle);
+
         return $positionsPerWeekCycle;
     }
 
-        /**
-     * Get periodPositions grouped per week cycle
+    /**
+     * Get periodPositions grouped per week cycle.
      *
-     * @param String|null $weekCycle a string of the week to keep or null if no filter
-     * @return array
+     * @param null|string $weekCycle a string of the week to keep or null if no filter
      */
-    public function getGroupedPositionsPerWeekCycle(?String $weekCycle=null): array
+    public function getGroupedPositionsPerWeekCycle(?string $weekCycle = null): array
     {
-        $aggregatePerFormation = array();
+        $aggregatePerFormation = [];
         foreach ($this->positions as $position) {
             if (!array_key_exists($position->getWeekCycle(), $aggregatePerFormation)) {
-                $aggregatePerFormation[$position->getWeekCycle()] = array();
+                $aggregatePerFormation[$position->getWeekCycle()] = [];
             }
             if ($position->getFormation()) {
                 $formation = $position->getFormation()->getName();
             } else {
-                $formation = "Membre";
+                $formation = 'Membre';
             }
             if (array_key_exists($formation, $aggregatePerFormation[$position->getWeekCycle()])) {
-                $aggregatePerFormation[$position->getWeekCycle()][$formation] += 1;
+                ++$aggregatePerFormation[$position->getWeekCycle()][$formation];
             } else {
                 $aggregatePerFormation[$position->getWeekCycle()][$formation] = 1;
             }
         }
         ksort($aggregatePerFormation);
-        $aggregatePerWeekCycle = array();
+        $aggregatePerWeekCycle = [];
 
         foreach ($aggregatePerFormation as $week => $position) {
-            if($weekCycle && $week==$weekCycle or !$weekCycle){
-                //week_filter not null and in the filter list or week_filter null
+            if ($weekCycle && $week == $weekCycle or !$weekCycle) {
+                // week_filter not null and in the filter list or week_filter null
                 $key = $week;
                 foreach ($aggregatePerWeekCycle as $w => $p) {
                     if ($p == $position) {
-                        $key = $w.", ".$week;
+                        $key = $w . ', ' . $week;
                         unset($aggregatePerWeekCycle[$w]);
+
                         break;
                     }
                 }
@@ -457,17 +461,17 @@ class Period
         }
 
         ksort($aggregatePerWeekCycle);
+
         return $aggregatePerWeekCycle;
     }
 
     /**
      * Return true if 0 periods have been assigned to a shifter (a.k.a. beneficiary)
-     * Note: useful only if the use_fly_and_fixed is activated
+     * Note: useful only if the use_fly_and_fixed is activated.
      *
-     * @param String|null $weekCycle a string of the week to keep or null if no filter
-     * @return bool
+     * @param null|string $weekCycle a string of the week to keep or null if no filter
      */
-    public function isEmpty(?String $weekCycle=null): bool
+    public function isEmpty(?string $weekCycle = null): bool
     {
         $bookedPositions = $this->getPositionsWithFilter(true, $weekCycle);
 
@@ -476,12 +480,11 @@ class Period
 
     /**
      * Return true if all the periods have been assigned to a shifter (a.k.a. beneficiary)
-     * Note: useful only if the use_fly_and_fixed is activated
+     * Note: useful only if the use_fly_and_fixed is activated.
      *
-     * @param String|null $weekCycle a string of the week to keep or null if no filter
-     * @return bool
+     * @param null|string $weekCycle a string of the week to keep or null if no filter
      */
-    public function isFull(?String $weekCycle=null): bool
+    public function isFull(?string $weekCycle = null): bool
     {
         $emptyPositions = $this->getPositionsWithFilter(false, $weekCycle);
 
@@ -490,12 +493,11 @@ class Period
 
     /**
      * Return true if neither 0 nor all the periods have been assigned to a shifter (a.k.a. beneficiary)
-     * Note: useful only if the use_fly_and_fixed is activated
+     * Note: useful only if the use_fly_and_fixed is activated.
      *
-     * @param String|null $weekCycle a string of the week to keep or null if no filter
-     * @return bool
+     * @param null|string $weekCycle a string of the week to keep or null if no filter
      */
-    public function isPartial(?String $weekCycle=null): bool
+    public function isPartial(?string $weekCycle = null): bool
     {
         $bookedPositions = $this->getPositionsWithFilter(true, $weekCycle);
         $emptyPositions = $this->getPositionsWithFilter(false, $weekCycle);
@@ -503,13 +505,14 @@ class Period
         return (count($bookedPositions) > 0) && (count($emptyPositions) > 0);
     }
 
-    public function hasShifter(Beneficiary $beneficiary = null)
+    public function hasShifter(?Beneficiary $beneficiary = null)
     {
         if (!$beneficiary) {
             return true;
         }
-        return $this->getPositions()->filter(function (\App\Entity\PeriodPosition $position) use ($beneficiary) {
-            return ($position->getShifter() === $beneficiary);
+
+        return $this->getPositions()->filter(function (PeriodPosition $position) use ($beneficiary) {
+            return $position->getShifter() === $beneficiary;
         });
     }
 }

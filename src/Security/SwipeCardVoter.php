@@ -1,21 +1,22 @@
 <?php
+
 // src/App/Security/SwipeCardVoter.php
+
 namespace App\Security;
 
 use App\Entity\SwipeCard;
 use App\Entity\Task;
 use App\Entity\User;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class SwipeCardVoter extends Voter
 {
-    const PAIR = 'pair';
-    const DISABLE = 'disable';
-    const ENABLE = 'enable';
-    const DELETE = 'delete';
+    public const PAIR = 'pair';
+    public const DISABLE = 'disable';
+    public const ENABLE = 'enable';
+    public const DELETE = 'delete';
 
     private $decisionManager;
 
@@ -27,7 +28,7 @@ class SwipeCardVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::PAIR,self::DISABLE,self::ENABLE,self::DELETE,))) {
+        if (!in_array($attribute, [self::PAIR, self::DISABLE, self::ENABLE, self::DELETE])) {
             return false;
         }
 
@@ -49,7 +50,7 @@ class SwipeCardVoter extends Voter
         }
 
         // ROLE_SUPER_ADMIN can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
+        if ($this->decisionManager->decide($token, ['ROLE_SUPER_ADMIN'])) {
             return true;
         }
 
@@ -65,21 +66,28 @@ class SwipeCardVoter extends Voter
                 if ($this->decisionManager->decide($token, $allowedRoles)) {
                     return true;
                 }
+
                 return false;
+
             case self::DISABLE:
                 if ($this->decisionManager->decide($token, $allowedRoles)) {
                     return true;
                 }
+
                 return $this->own($swipeCard, $user);
+
             case self::ENABLE:
                 if ($this->decisionManager->decide($token, $allowedRoles)) {
                     return true;
                 }
+
                 return $this->own($swipeCard, $user);
+
             case self::PAIR:
                 if ($this->decisionManager->decide($token, $allowedRoles)) {
                     return true;
                 }
+
                 return $this->canPair($swipeCard, $user);
         }
 
@@ -91,6 +99,7 @@ class SwipeCardVoter extends Voter
         if ($swipeCard->getBeneficiary()->getUser() === $user) {
             return true;
         }
+
         return false;
     }
 
@@ -102,7 +111,7 @@ class SwipeCardVoter extends Voter
         if ($user->getBeneficiary()->getEnabledSwipeCards()->count() === 0) {
             return true;
         }
+
         return false;
     }
-
 }

@@ -17,9 +17,6 @@ class BasePathPicture
     }
 
     /**
-     * @param $entity
-     * @param string $fileField
-     * @param string $filter
      * @return string
      */
     public function getPicturePath($entity, string $fileField, string $filter)

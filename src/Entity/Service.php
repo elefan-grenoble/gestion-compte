@@ -5,13 +5,18 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
+use Doctrine\Common\Collections\Collection;
+use Symfony\Component\HttpFoundation\File\UploadedFile;
 
 /**
- * Service
+ * Service.
  *
  * @ORM\Table(name="service")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\ServiceRepository")
+ *
  * @Vich\Uploadable
  */
 class Service
@@ -20,7 +25,9 @@ class Service
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -29,6 +36,7 @@ class Service
      * @var string
      *
      * @Assert\NotBlank()
+     *
      * @ORM\Column(name="name", type="string", length=255)
      */
     private $name;
@@ -37,6 +45,7 @@ class Service
      * @var string
      *
      * @Assert\NotBlank()
+     *
      * @ORM\Column(name="description", type="string", length=255)
      */
     private $description;
@@ -45,6 +54,7 @@ class Service
      * @var string
      *
      * @Assert\NotBlank()
+     *
      * @ORM\Column(name="icon", type="string", length=255)
      */
     private $icon;
@@ -53,12 +63,13 @@ class Service
      * @var string
      *
      * @Assert\NotBlank()
+     *
      * @ORM\Column(name="slug", type="string", length=255)
      */
     private $slug;
 
     /**
-     * @var boolean
+     * @var bool
      *
      * @ORM\Column(name="public", type="boolean", unique=false, options={"default" : 0},nullable=true)
      */
@@ -90,7 +101,7 @@ class Service
     /**
      * @ORM\Column(type="integer",nullable=true)
      *
-     * @var integer
+     * @var int
      */
     private $logoSize;
 
@@ -107,11 +118,9 @@ class Service
     private $updatedAt;
 
     /**
-     * Constructor
+     * Constructor.
      */
-    public function __construct()
-    {
-    }
+    public function __construct() {}
 
     /**
      * @ORM\PrePersist
@@ -122,7 +131,7 @@ class Service
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -138,7 +147,7 @@ class Service
      * must be able to accept an instance of 'File' as the bundle will inject one here
      * during Doctrine hydration.
      *
-     * @param \Symfony\Component\HttpFoundation\File\UploadedFile $image
+     * @param UploadedFile $image
      */
     public function setLogoFile($image = null)
     {
@@ -157,7 +166,7 @@ class Service
     }
 
     /**
-     * Set name
+     * Set name.
      *
      * @param string $name
      *
@@ -171,7 +180,7 @@ class Service
     }
 
     /**
-     * Get name
+     * Get name.
      *
      * @return string
      */
@@ -181,7 +190,7 @@ class Service
     }
 
     /**
-     * Set description
+     * Set description.
      *
      * @param string $description
      *
@@ -195,7 +204,7 @@ class Service
     }
 
     /**
-     * Get description
+     * Get description.
      *
      * @return string
      */
@@ -205,7 +214,7 @@ class Service
     }
 
     /**
-     * Set url
+     * Set url.
      *
      * @param string $url
      *
@@ -219,7 +228,7 @@ class Service
     }
 
     /**
-     * Get url
+     * Get url.
      *
      * @return string
      */
@@ -229,13 +238,11 @@ class Service
     }
 
     /**
-     * Add client
-     *
-     * @param \App\Entity\Client $client
+     * Add client.
      *
      * @return Service
      */
-    public function addClient(\App\Entity\Client $client)
+    public function addClient(Client $client)
     {
         $this->clients[] = $client;
 
@@ -243,19 +250,17 @@ class Service
     }
 
     /**
-     * Remove client
-     *
-     * @param \App\Entity\Client $client
+     * Remove client.
      */
-    public function removeClient(\App\Entity\Client $client)
+    public function removeClient(Client $client)
     {
         $this->clients->removeElement($client);
     }
 
     /**
-     * Get clients
+     * Get clients.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getClients()
     {
@@ -263,7 +268,7 @@ class Service
     }
 
     /**
-     * Set logo
+     * Set logo.
      *
      * @param string $logo
      *
@@ -277,7 +282,7 @@ class Service
     }
 
     /**
-     * Get logo
+     * Get logo.
      *
      * @return string
      */
@@ -287,9 +292,9 @@ class Service
     }
 
     /**
-     * Set logoSize
+     * Set logoSize.
      *
-     * @param integer $logoSize
+     * @param int $logoSize
      *
      * @return Service
      */
@@ -301,9 +306,9 @@ class Service
     }
 
     /**
-     * Get logoSize
+     * Get logoSize.
      *
-     * @return integer
+     * @return int
      */
     public function getLogoSize()
     {
@@ -311,7 +316,7 @@ class Service
     }
 
     /**
-     * Set updatedAt
+     * Set updatedAt.
      *
      * @param \DateTime $updatedAt
      *
@@ -325,7 +330,7 @@ class Service
     }
 
     /**
-     * Get updatedAt
+     * Get updatedAt.
      *
      * @return \DateTime
      */
@@ -337,7 +342,7 @@ class Service
     /**
      * Set public.
      *
-     * @param bool|null $public
+     * @param null|bool $public
      *
      * @return Service
      */
@@ -351,7 +356,7 @@ class Service
     /**
      * Get public.
      *
-     * @return bool|null
+     * @return null|bool
      */
     public function getPublic()
     {

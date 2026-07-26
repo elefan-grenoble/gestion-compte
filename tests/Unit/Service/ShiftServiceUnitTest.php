@@ -10,33 +10,40 @@ use App\Entity\User;
 use App\Service\BeneficiaryService;
 use App\Service\MembershipService;
 use App\Service\ShiftService;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\TestCase;
+use PHPUnit\Framework\MockObject\MockObject;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class ShiftServiceUnitTest extends TestCase
 {
-    /** @var EntityManagerInterface|\PHPUnit\Framework\MockObject\MockObject */
+    /** @var EntityManagerInterface|MockObject */
     private $em;
 
-    /** @var BeneficiaryService|\PHPUnit\Framework\MockObject\MockObject */
+    /** @var BeneficiaryService|MockObject */
     private $beneficiaryService;
 
-    /** @var MembershipService|\PHPUnit\Framework\MockObject\MockObject */
+    /** @var MembershipService|MockObject */
     private $membershipService;
 
     protected function setUp(): void
     {
         $this->em = $this->getMockBuilder(EntityManagerInterface::class)
             ->disableOriginalConstructor()
-            ->getMock();
+            ->getMock()
+        ;
         $this->beneficiaryService = $this->getMockBuilder(BeneficiaryService::class)
             ->disableOriginalConstructor()
-            ->getMock();
+            ->getMock()
+        ;
         $this->membershipService = $this->getMockBuilder(MembershipService::class)
             ->disableOriginalConstructor()
-            ->getMock();
+            ->getMock()
+        ;
     }
 
     private function createService(array $params = []): ShiftService
@@ -109,7 +116,8 @@ class ShiftServiceUnitTest extends TestCase
         $member = $beneficiary->getMembership();
 
         $this->membershipService->method('getEndOfCycle')
-            ->willReturn(new \DateTime('+27 days'));
+            ->willReturn(new \DateTime('+27 days'))
+        ;
 
         // No shifts booked → full time log count is 0
         $remaining = $service->remainingToBook($member);
@@ -127,7 +135,8 @@ class ShiftServiceUnitTest extends TestCase
         $membership->setFlying(false);
 
         $this->membershipService->method('getEndOfCycle')
-            ->willReturn(new \DateTime('+27 days'));
+            ->willReturn(new \DateTime('+27 days'))
+        ;
 
         // Membership has shift time count → remaining = due - shiftTimeCount
         // Since Membership's getShiftTimeCount relies on timeLogs, and we have none,
@@ -208,10 +217,11 @@ class ShiftServiceUnitTest extends TestCase
             ->setConstructorArgs([
                 $this->em, $this->beneficiaryService, $this->membershipService,
                 180, 90, false, false, '3 days', 30,
-                false, false, false, 3, false
+                false, false, false, 3, false,
             ])
             ->onlyMethods(['canBookOnCycle'])
-            ->getMock();
+            ->getMock()
+        ;
 
         $beneficiary = $this->createBeneficiaryWithMembership();
 
@@ -220,7 +230,8 @@ class ShiftServiceUnitTest extends TestCase
             ->willReturnMap([
                 [$beneficiary, 0, true],
                 [$beneficiary, 1, false],
-            ]);
+            ])
+        ;
 
         $this->assertTrue($service->canBookSomething($beneficiary));
     }
@@ -250,11 +261,13 @@ class ShiftServiceUnitTest extends TestCase
 
         // MembershipService returns end of cycle
         $this->membershipService->method('getEndOfCycle')
-            ->willReturn(new \DateTime('+27 days'));
+            ->willReturn(new \DateTime('+27 days'))
+        ;
 
         // Beneficiary already has 180 min of shifts this cycle
         $this->beneficiaryService->method('getCycleShiftDurationSum')
-            ->willReturn(180);
+            ->willReturn(180)
+        ;
 
         // Membership already has 180 min in time logs → already at due
         // But Membership's getShiftTimeCount returns 0 (no timeLogs in our test entity)
