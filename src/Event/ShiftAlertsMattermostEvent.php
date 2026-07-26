@@ -2,7 +2,9 @@
 
 namespace App\Event;
 
-class ShiftAlertsMattermostEvent extends \Symfony\Contracts\EventDispatcher\Event
+use Symfony\Contracts\EventDispatcher\Event;
+
+class ShiftAlertsMattermostEvent extends Event
 {
     public const NAME = 'shift.alerts.mattermost';
 

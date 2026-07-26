@@ -227,6 +227,7 @@ WHERE date >= :from ' . (($to) ? 'AND date <= :to' : '') . ';');
         return $this->createFormBuilder()
             ->setAction($this->generateUrl('registration_remove', ['id' => $registration_id]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 }

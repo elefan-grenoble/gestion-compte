@@ -5,8 +5,9 @@ namespace App\Event;
 use App\Entity\Membership;
 use App\Entity\Beneficiary;
 use App\Entity\Shift;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class ShiftDeletedEvent extends \Symfony\Contracts\EventDispatcher\Event
+class ShiftDeletedEvent extends Event
 {
     public const NAME = 'shift.deleted';
 

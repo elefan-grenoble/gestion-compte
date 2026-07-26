@@ -57,7 +57,7 @@ class MembershipService
      */
     public function getRemainder(Membership $membership)
     {
-        return date_diff(new \Datetime('now'), $this->getExpire($membership));
+        return date_diff(new \DateTime('now'), $this->getExpire($membership));
     }
 
     /**
@@ -68,7 +68,7 @@ class MembershipService
     public function canRegister(Membership $membership)
     {
         $expire = $this->getExpire($membership);
-        $date = new \Datetime('+28 days');
+        $date = new \DateTime('+28 days');
         $date->setTime(0, 0);
 
         return $expire < $date;
@@ -77,22 +77,22 @@ class MembershipService
     /**
      * @param Membership $membership
      */
-    public function getExpire($membership): ?\Datetime
+    public function getExpire($membership): ?\DateTime
     {
         if ($this->registration_every_civil_year) {
             if ($membership->getLastRegistration()) {
                 $expire = $membership->getLastRegistration()->getDate();
             } else {
-                $expire = new \Datetime('-1 year');
+                $expire = new \DateTime('-1 year');
             }
-            $expire = new \Datetime('last day of December ' . $expire->format('Y'));
+            $expire = new \DateTime('last day of December ' . $expire->format('Y'));
         } else {
             if ($membership->getLastRegistration()) {
                 $expire = clone $membership->getLastRegistration()->getDate();
                 $expire = $expire->add(\DateInterval::createFromDateString($this->registration_duration));
                 $expire->modify('-1 day');
             } else {
-                $expire = new \Datetime('-1 day');
+                $expire = new \DateTime('-1 day');
             }
         }
         $expire->setTime(23, 59, 59);
@@ -108,7 +108,7 @@ class MembershipService
     public function isUptodate(Membership $member)
     {
         $expire = $this->getExpire($member);
-        $today = new \Datetime('now');
+        $today = new \DateTime('now');
         $today->setTime(0, 0);
 
         return $expire > $today;
@@ -124,7 +124,7 @@ class MembershipService
     public function getStartOfCycle(Membership $member, $cycleOffset = 0)
     {
         // init
-        $now = new \Datetime('now');
+        $now = new \DateTime('now');
         $date = clone $now;
         if ($this->cycle_type == 'abcd') {
             // Set date to last monday

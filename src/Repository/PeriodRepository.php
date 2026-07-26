@@ -57,6 +57,7 @@ class PeriodRepository extends EntityRepository
 
         return $qb
             ->getQuery()
-            ->getResult();
+            ->getResult()
+        ;
     }
 }

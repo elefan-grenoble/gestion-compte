@@ -5,8 +5,9 @@ namespace App\Event;
 use App\Entity\Beneficiary;
 use App\Entity\Membership;
 use App\Entity\Shift;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class ShiftFreedEvent extends \Symfony\Contracts\EventDispatcher\Event
+class ShiftFreedEvent extends Event
 {
     public const NAME = 'shift.freed';
 

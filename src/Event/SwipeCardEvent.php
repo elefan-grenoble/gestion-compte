@@ -3,8 +3,9 @@
 namespace App\Event;
 
 use App\Entity\SwipeCard;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class SwipeCardEvent extends \Symfony\Contracts\EventDispatcher\Event
+class SwipeCardEvent extends Event
 {
     public const SWIPE_CARD_SCANNED = 'swipe_card.scanned';
 

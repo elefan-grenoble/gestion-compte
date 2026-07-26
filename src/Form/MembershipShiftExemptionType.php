@@ -28,7 +28,7 @@ class MembershipShiftExemptionType extends AbstractType
                         'label' => 'Membre',
                     ]);
                 }
-                $now = new \Datetime();
+                $now = new \DateTime();
                 // checks if the MembershipShiftExamption object is "new" or start date in future
                 if (!$membershipShiftExemption || null === $membershipShiftExemption->getId() || ($membershipShiftExemption && $membershipShiftExemption->getStart() > $now)) {
                     $form->add('start', DateType::class, ['html5' => false, 'widget' => 'single_text', 'label' => 'Début (premier jour du cycle)', 'attr' => ['class' => 'datepicker'],

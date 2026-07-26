@@ -3,8 +3,9 @@
 namespace App\Event;
 
 use App\Entity\AnonymousBeneficiary;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class AnonymousBeneficiaryCreatedEvent extends \Symfony\Contracts\EventDispatcher\Event
+class AnonymousBeneficiaryCreatedEvent extends Event
 {
     public const NAME = 'anonymous_beneficiary.created';
 

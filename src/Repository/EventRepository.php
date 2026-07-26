@@ -149,10 +149,12 @@ class EventRepository extends EntityRepository
     public function findAllDisplayedHome()
     {
         $qb = $this->createQueryBuilder('e')
-            ->where('e.displayedHome = 1');
+            ->where('e.displayedHome = 1')
+        ;
 
         return $qb
             ->getQuery()
-            ->getResult();
+            ->getResult()
+        ;
     }
 }

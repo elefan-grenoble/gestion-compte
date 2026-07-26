@@ -29,7 +29,7 @@ class SwipeCard
     {
         $return = str_pad('', strlen($string), ' ', STR_PAD_LEFT);
         $key = $this->getKey(strlen($string));
-        for ($pos = 0; $pos < strlen($string); ++$pos ) {
+        for ($pos = 0; $pos < strlen($string); ++$pos) {
             $return[$pos] = chr((ord($string[$pos]) + ord($key[$pos])) % 256);
         }
 
@@ -41,7 +41,7 @@ class SwipeCard
         $string = base64_decode($string);
         $return = str_pad('', strlen($string), ' ', STR_PAD_LEFT);
         $key = $this->getKey(strlen($string));
-        for ($pos = 0; $pos < strlen($string); ++$pos ) {
+        for ($pos = 0; $pos < strlen($string); ++$pos) {
             $return[$pos] = chr((ord($string[$pos]) - ord($key[$pos])) % 256);
         }
 

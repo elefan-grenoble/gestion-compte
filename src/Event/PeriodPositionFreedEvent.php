@@ -5,8 +5,9 @@ namespace App\Event;
 use App\Entity\Beneficiary;
 use App\Entity\Membership;
 use App\Entity\PeriodPosition;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class PeriodPositionFreedEvent extends \Symfony\Contracts\EventDispatcher\Event
+class PeriodPositionFreedEvent extends Event
 {
     public const NAME = 'period_position.freed';
 

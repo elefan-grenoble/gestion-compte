@@ -54,6 +54,7 @@ class ProcessUpdateRepository extends EntityRepository
 
         return $qb
             ->getQuery()
-            ->getSingleScalarResult();
+            ->getSingleScalarResult()
+        ;
     }
 }

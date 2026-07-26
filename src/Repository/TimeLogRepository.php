@@ -46,6 +46,7 @@ class TimeLogRepository extends EntityRepository
 
         return $qb
             ->getQuery()
-            ->getResult();
+            ->getResult()
+        ;
     }
 }

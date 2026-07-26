@@ -3,8 +3,9 @@
 namespace App\Event;
 
 use App\Entity\Code;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class CodeNewEvent extends \Symfony\Contracts\EventDispatcher\Event
+class CodeNewEvent extends Event
 {
     public const NAME = 'code.new';
 

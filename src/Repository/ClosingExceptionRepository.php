@@ -96,6 +96,7 @@ class ClosingExceptionRepository extends EntityRepository
 
         return $qb
             ->getQuery()
-            ->getResult();
+            ->getResult()
+        ;
     }
 }

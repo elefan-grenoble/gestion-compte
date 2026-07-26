@@ -97,10 +97,12 @@ class OpeningHourRepository extends EntityRepository
         $qb
             ->addOrderBy('ohk.id', 'ASC')
             ->addOrderBy('oh.dayOfWeek', 'ASC')
-            ->addOrderBy('oh.start', 'ASC');
+            ->addOrderBy('oh.start', 'ASC')
+        ;
 
         return $qb
             ->getQuery()
-            ->getResult();
+            ->getResult()
+        ;
     }
 }

@@ -146,10 +146,12 @@ class MembershipRepository extends EntityRepository
             ->andWhere('m.withdrawn = 0')
             ->andWhere('m.frozen = 0')
             ->andWhere('m IN (SELECT IDENTITY(t.membership) FROM App\Entity\TimeLog t WHERE t.type != 20 GROUP BY t.membership HAVING SUM(t.time) < :compteurlt * 60)')
-            ->setParameter('compteurlt', $time_after_which_members_are_late_with_shifts);
+            ->setParameter('compteurlt', $time_after_which_members_are_late_with_shifts)
+        ;
 
         return $qb
             ->getQuery()
-            ->getResult();
+            ->getResult()
+        ;
     }
 }

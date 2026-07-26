@@ -194,7 +194,8 @@ class ShiftServiceTest extends TestCase
     }
 
     /**
-     * @param $emptyShift boolean
+     * @param       $emptyShift boolean
+     * @param mixed $beginner
      *
      * @return mixed
      */
@@ -212,7 +213,7 @@ class ShiftServiceTest extends TestCase
             ->getMock()
         ;
         $shift->method('getStart')
-            ->willReturn(new \Datetime())
+            ->willReturn(new \DateTime())
         ;
         $shift->expects($this->any())
             ->method('getIsPast')
@@ -318,21 +319,21 @@ class ShiftServiceTest extends TestCase
 
     public function testHasPreviousValidShiftsWithShift()
     {
-        $date = new \Datetime();
+        $date = new \DateTime();
         $date->sub(new \DateInterval('P10D'));
         $this->assertTrue($this->doTestHasPreviousValidShifts($date));
     }
 
     public function testHasPreviousValidShiftsWithShiftInTheFuture()
     {
-        $date = new \Datetime();
+        $date = new \DateTime();
         $date->add(new \DateInterval('P10D'));
         $this->assertFalse($this->doTestHasPreviousValidShifts($date));
     }
 
     public function testHasPreviousValidShiftsWithDismissedShift()
     {
-        $date = new \Datetime();
+        $date = new \DateTime();
         $date->add(new \DateInterval('P10D'));
         $this->assertFalse($this->doTestHasPreviousValidShifts($date));
     }
@@ -362,7 +363,8 @@ class ShiftServiceTest extends TestCase
             ->getMockBuilder(ShiftService::class)
             ->onlyMethods([])
             ->disableOriginalConstructor()
-            ->getMock();
+            ->getMock()
+        ;
 
         return $shiftService->hasPreviousValidShifts($beneficiary);
     }

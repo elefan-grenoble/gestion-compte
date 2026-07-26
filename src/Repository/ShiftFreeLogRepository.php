@@ -94,6 +94,7 @@ class ShiftFreeLogRepository extends EntityRepository
         }
 
         return (int) $qb->getQuery()
-            ->getSingleScalarResult();
+            ->getSingleScalarResult()
+        ;
     }
 }

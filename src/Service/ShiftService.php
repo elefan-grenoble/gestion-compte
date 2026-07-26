@@ -149,7 +149,8 @@ class ShiftService
     /**
      * Check if a beneficiary can book a specific duration on the given cycle.
      *
-     * @param int $cycle
+     * @param int   $cycle
+     * @param mixed $duration
      *
      * @return bool
      */
@@ -368,6 +369,8 @@ class ShiftService
     /**
      * Check if the bucket of the given shift doesn't contain any shifters.
      *
+     * @param mixed $shift
+     *
      * @return bool
      */
     public function isShiftEmpty($shift)
@@ -516,6 +519,8 @@ class ShiftService
     }
 
     /**
+     * @param mixed $shifts
+     *
      * @return array
      */
     public function generateShiftBuckets($shifts)
@@ -558,6 +563,8 @@ class ShiftService
 
     /**
      * Remove all empty shifts from an array of shift buckets.
+     *
+     * @param mixed $buckets
      *
      * @return array
      */

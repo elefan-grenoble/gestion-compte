@@ -110,6 +110,7 @@ class BeneficiaryRepository extends EntityRepository
 
         return $qb
             ->getQuery()
-            ->getResult();
+            ->getResult()
+        ;
     }
 }

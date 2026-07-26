@@ -425,7 +425,7 @@ class SearchUserFormHelper
         if (in_array($type, ['noregistration', 'lateregistration', 'shifttimelog', 'fixe_without_periodposition'])) {
             $qb = $qb->leftJoin('m.registrations', 'lr', Join::WITH, 'lr.date > r.date')->addSelect('lr')
                 ->where('lr.id IS NULL') // registration is the last one registered
-                ->addSelect('(SELECT SUM(ti.time) FROM App\\Entity\\TimeLog ti WHERE ti.type != 20 AND ti.membership = m.id) AS HIDDEN time')
+                ->addSelect('(SELECT SUM(ti.time) FROM App\Entity\TimeLog ti WHERE ti.type != 20 AND ti.membership = m.id) AS HIDDEN time')
                 ->leftJoin('m.timeLogs', 'tl')->addSelect('tl')
                 ->leftJoin('m.notes', 'n')->addSelect('n')
             ;
@@ -823,7 +823,8 @@ class SearchUserFormHelper
 
             if (count($subQuery)) {
                 $qb = $qb->andWhere('m.id NOT IN (:subQueryformations)')
-                    ->setParameter('subQueryformations', $subQuery);
+                    ->setParameter('subQueryformations', $subQuery)
+                ;
             }
         }
 
