@@ -10,34 +10,24 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
 
 class ProcessUpdateType extends AbstractType
 {
-    /**
-     * {@inheritdoc}
-     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('title', TextType::class, array('label' => 'Titre', 'required' => true))
-            ->add('link', TextType::class, array('label' => 'Lien vers la procédure complète', 'required' => false))
-            ->add('description', MarkdownEditorType::class, array('label' => 'Description', 'required' => true));
+            ->add('title', TextType::class, ['label' => 'Titre', 'required' => true])
+            ->add('link', TextType::class, ['label' => 'Lien vers la procédure complète', 'required' => false])
+            ->add('description', MarkdownEditorType::class, ['label' => 'Description', 'required' => true])
+        ;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
-            'data_class' => ProcessUpdate::class
-        ));
+        $resolver->setDefaults([
+            'data_class' => ProcessUpdate::class,
+        ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlockPrefix()
     {
         return 'App_process_update';
     }
-
-
 }

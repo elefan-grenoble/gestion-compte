@@ -3,11 +3,11 @@
 namespace App\Event;
 
 use App\Entity\Code;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class CodeNewEvent extends \Symfony\Contracts\EventDispatcher\Event
+class CodeNewEvent extends Event
 {
-    const NAME = 'code.new';
+    public const NAME = 'code.new';
 
     private $code;
     private $old_codes;
@@ -33,5 +33,4 @@ class CodeNewEvent extends \Symfony\Contracts\EventDispatcher\Event
     {
         return $this->old_codes;
     }
-
 }

@@ -10,13 +10,18 @@ use App\Entity\ShiftBucket;
 use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class ShiftBucketTest extends TestCase
 {
     private function createShift(
-        \DateTime $start = null,
-        \DateTime $end = null,
-        Beneficiary $shifter = null,
-        Formation $formation = null
+        ?\DateTime $start = null,
+        ?\DateTime $end = null,
+        ?Beneficiary $shifter = null,
+        ?Formation $formation = null
     ): Shift {
         $shift = new Shift();
         $shift->setStart($start ?? new \DateTime('2024-06-15 09:00'));

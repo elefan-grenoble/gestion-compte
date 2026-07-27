@@ -3,6 +3,8 @@
 namespace App\Tests\Functional\Controller;
 
 use App\Tests\Functional\FunctionalTestCase;
+use App\Entity\Beneficiary;
+use App\Entity\Shift;
 
 /**
  * Smoke tests for routes with database fixtures loaded.
@@ -10,6 +12,10 @@ use App\Tests\Functional\FunctionalTestCase;
  * These tests verify that main pages respond with the expected HTTP status code.
  * The 'period' fixture group is loaded once per class and includes all entities
  * (users, admins, jobs, shifts, events, opening hours, dynamic content, etc.).
+ *
+ * @internal
+ *
+ * @coversNothing
  */
 class SmokeTest extends FunctionalTestCase
 {
@@ -296,8 +302,8 @@ class SmokeTest extends FunctionalTestCase
         $client = static::createClient();
 
         $em = $client->getContainer()->get('doctrine')->getManager();
-        $shift = $em->getRepository(\App\Entity\Shift::class)->findOneBy([]);
-        $beneficiary = $em->getRepository(\App\Entity\Beneficiary::class)->findOneBy([]);
+        $shift = $em->getRepository(Shift::class)->findOneBy([]);
+        $beneficiary = $em->getRepository(Beneficiary::class)->findOneBy([]);
 
         $this->assertNotNull($shift, 'Fixtures should contain at least one Shift.');
         $this->assertNotNull($beneficiary, 'Fixtures should contain at least one Beneficiary.');

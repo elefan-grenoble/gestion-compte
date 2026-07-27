@@ -57,8 +57,15 @@ compose.yaml
 /build/
 /.web-server-pid
 /updateLocalDbFromProd.sh
+
+# Claude audit
 claude.local.md
 TODO-audit.md
 rector-dead-code.php
 phpstan-dead-code.neon
 .claude/
+
+###> php-cs-fixer/shim ###
+/.php-cs-fixer.php
+/.php-cs-fixer.cache
+###< php-cs-fixer/shim ###

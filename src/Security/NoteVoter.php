@@ -1,20 +1,21 @@
 <?php
+
 // src/App/Security/NoteVoter.php
+
 namespace App\Security;
 
 use App\Entity\Note;
 use App\Entity\User;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Authentication\Token\TokenInterface;
 use Symfony\Component\Security\Core\Authorization\AccessDecisionManagerInterface;
 use Symfony\Component\Security\Core\Authorization\Voter\Voter;
 
 class NoteVoter extends Voter
 {
-    const VIEW = 'view';
-    const CREATE = 'create';
-    const EDIT = 'edit';
-    const DELETE = 'delete';
+    public const VIEW = 'view';
+    public const CREATE = 'create';
+    public const EDIT = 'edit';
+    public const DELETE = 'delete';
 
     private $decisionManager;
 
@@ -26,7 +27,7 @@ class NoteVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, array(self::CREATE, self::EDIT,self::VIEW,self::DELETE))) {
+        if (!in_array($attribute, [self::CREATE, self::EDIT, self::VIEW, self::DELETE])) {
             return false;
         }
 
@@ -48,7 +49,7 @@ class NoteVoter extends Voter
         }
 
         // ROLE_SUPER_ADMIN can do anything! The power!
-        if ($this->decisionManager->decide($token, array('ROLE_SUPER_ADMIN'))) {
+        if ($this->decisionManager->decide($token, ['ROLE_SUPER_ADMIN'])) {
             return true;
         }
 
@@ -59,10 +60,13 @@ class NoteVoter extends Voter
         switch ($attribute) {
             case self::VIEW:
                 return true;
+
             case self::CREATE:
                 return $this->canAdd($note, $token);
+
             case self::EDIT:
                 return $this->canEdit($note, $token);
+
             case self::DELETE:
                 return $this->canDelete($note, $token);
         }
@@ -82,9 +86,10 @@ class NoteVoter extends Voter
         if ($note->getSubject() === $user) {
             return true;
         }
-        if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+        if ($this->decisionManager->decide($token, ['ROLE_ADMIN'])) {
             return true;
         }
+
         return false;
     }
 
@@ -95,12 +100,13 @@ class NoteVoter extends Voter
         if ($note->getAuthor() === $user) {
             return true;
         }
-        if (!$note->getSubject()) { //postit can be edited by anyone
+        if (!$note->getSubject()) { // postit can be edited by anyone
             return true;
         }
-        if ($this->decisionManager->decide($token, array('ROLE_ADMIN'))) {
+        if ($this->decisionManager->decide($token, ['ROLE_ADMIN'])) {
             return true;
         }
+
         return false;
     }
 
@@ -117,6 +123,7 @@ class NoteVoter extends Voter
         if ($this->decisionManager->decide($token, ['ROLE_USER_MANAGER'])) {
             return true;
         }
+
         return false;
     }
 }

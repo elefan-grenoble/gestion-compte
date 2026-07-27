@@ -8,20 +8,22 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\Request;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
+use Symfony\Component\Form\FormInterface;
 
 /**
  * Formation controller.
  *
  * @Route("admin/formations")
+ *
  * @Security("is_granted('ROLE_ADMIN')")
  */
 class FormationController extends AbstractController
 {
-
     /**
-     * Formations list
+     * Formations list.
      *
      * @Route("/", name="formation_list", methods={"GET"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function indexAction(Request $request)
@@ -30,13 +32,14 @@ class FormationController extends AbstractController
 
         $formations = $em->getRepository(Formation::class)->findAll();
 
-        return $this->render('admin/formation/list.html.twig',array('formations'=>$formations));
+        return $this->render('admin/formation/list.html.twig', ['formations' => $formations]);
     }
 
     /**
-     * Formation new
+     * Formation new.
      *
      * @Route("/new", name="formation_new", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function newAction(Request $request)
@@ -56,19 +59,21 @@ class FormationController extends AbstractController
             $em->flush();
 
             $this->addFlash('success', 'La nouvelle formation a bien été créée !');
+
             return $this->redirectToRoute('formation_list');
         }
 
-        return $this->render('admin/formation/new.html.twig', array(
+        return $this->render('admin/formation/new.html.twig', [
             'formation' => $formation,
             'form' => $form->createView(),
-        ));
+        ]);
     }
 
     /**
-     * Formation edit
+     * Formation edit.
      *
      * @Route("/{id}/edit", name="formation_edit", methods={"GET","POST"})
+     *
      * @Security("is_granted('ROLE_ADMIN')")
      */
     public function editAction(Request $request, Formation $formation)
@@ -83,20 +88,22 @@ class FormationController extends AbstractController
             $em->flush();
 
             $this->addFlash('success', 'La formation a bien été éditée !');
+
             return $this->redirectToRoute('formation_list');
         }
 
-        return $this->render('admin/formation/edit.html.twig', array(
+        return $this->render('admin/formation/edit.html.twig', [
             'formation' => $formation,
             'form' => $form->createView(),
             'delete_form' => $this->getDeleteForm($formation)->createView(),
-        ));
+        ]);
     }
 
     /**
-     * Formation delete
+     * Formation delete.
      *
      * @Route("/{id}", name="formation_delete", methods={"DELETE"})
+     *
      * @Security("is_granted('ROLE_SUPER_ADMIN')")
      */
     public function deleteAction(Request $request, Formation $formation)
@@ -117,14 +124,14 @@ class FormationController extends AbstractController
     }
 
     /**
-     * @param Formation $formation
-     * @return \Symfony\Component\Form\FormInterface
+     * @return FormInterface
      */
     protected function getDeleteForm(Formation $formation)
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('formation_delete', array('id' => $formation->getId())))
+            ->setAction($this->generateUrl('formation_delete', ['id' => $formation->getId()]))
             ->setMethod('DELETE')
-            ->getForm();
+            ->getForm()
+        ;
     }
 }

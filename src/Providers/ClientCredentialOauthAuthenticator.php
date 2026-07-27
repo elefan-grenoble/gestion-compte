@@ -22,7 +22,7 @@ class ClientCredentialOauthAuthenticator implements OauthAuthenticatorInterface
             'clientSecret' => $clientSecret,
             'urlAccessToken' => $authUrl,
             'urlAuthorize' => '',
-            'urlResourceOwnerDetails' => ''
+            'urlResourceOwnerDetails' => '',
         ]);
 
         return $provider->getAccessToken('client_credentials');

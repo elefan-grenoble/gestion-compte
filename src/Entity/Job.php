@@ -4,12 +4,16 @@ namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 /**
- * Job
+ * Job.
  *
  * @ORM\Table(name="job")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\JobRepository")
  */
 class Job
@@ -18,7 +22,9 @@ class Job
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -27,6 +33,7 @@ class Job
      * @var string
      *
      * @Assert\NotBlank()
+     *
      * @ORM\Column(name="name", type="string", length=191, unique=true)
      */
     private $name;
@@ -35,27 +42,28 @@ class Job
      * @var string
      *
      * @Assert\NotBlank()
+     *
      * @ORM\Column(name="color", type="string", length=255, unique=false)
      */
     private $color;
 
     /**
      * @var string
-     * 
+     *
      * @ORM\Column(name="description", type="text", nullable=true)
      */
     private $description;
 
     /**
      * @var string
-     * 
+     *
      * @ORM\Column(name="url", type="string", length=255, nullable=true)
      */
     private $url;
 
     /**
      * @var int
-     * 
+     *
      * @ORM\Column(name="min_shifter_alert", type="integer", options={"default" : 2})
      */
     private $min_shifter_alert;
@@ -86,16 +94,17 @@ class Job
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
      */
     private $createdBy;
 
     /**
-     * Constructor
+     * Constructor.
      */
     public function __construct()
     {
-        $this->shifts = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->shifts = new ArrayCollection();
     }
 
     /**
@@ -117,7 +126,7 @@ class Job
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -127,7 +136,7 @@ class Job
     }
 
     /**
-     * Set name
+     * Set name.
      *
      * @param string $name
      *
@@ -141,7 +150,7 @@ class Job
     }
 
     /**
-     * Get name
+     * Get name.
      *
      * @return string
      */
@@ -151,7 +160,7 @@ class Job
     }
 
     /**
-     * Set color
+     * Set color.
      *
      * @param string $color
      *
@@ -165,7 +174,7 @@ class Job
     }
 
     /**
-     * Get color
+     * Get color.
      *
      * @return string
      */
@@ -175,7 +184,7 @@ class Job
     }
 
     /**
-     * Get min_shifter_alert
+     * Get min_shifter_alert.
      *
      * @return int
      */
@@ -185,25 +194,21 @@ class Job
     }
 
     /**
-     * Set min_shifter_alert
-     * 
-     * @param int $min_shifter_alert
-     * @return Job
+     * Set min_shifter_alert.
      */
     public function setMinShifterAlert(int $min_shifter_alert): Job
     {
         $this->min_shifter_alert = $min_shifter_alert;
+
         return $this;
     }
 
     /**
-     * Add shift
-     *
-     * @param \App\Entity\Shift $shift
+     * Add shift.
      *
      * @return Job
      */
-    public function addShift(\App\Entity\Shift $shift)
+    public function addShift(Shift $shift)
     {
         $this->shifts[] = $shift;
 
@@ -211,21 +216,19 @@ class Job
     }
 
     /**
-     * Remove shift
+     * Remove shift.
      *
-     * @param \App\Entity\Shift $shift
-     *
-     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
+     * @return bool TRUE if this collection contained the specified element, FALSE otherwise
      */
-    public function removeShift(\App\Entity\Shift $shift)
+    public function removeShift(Shift $shift)
     {
         return $this->shifts->removeElement($shift);
     }
 
     /**
-     * Get shifts
+     * Get shifts.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getShifts()
     {
@@ -233,13 +236,11 @@ class Job
     }
 
     /**
-     * Add period
-     *
-     * @param \App\Entity\Period $period
+     * Add period.
      *
      * @return Job
      */
-    public function addPeriod(\App\Entity\Period $period)
+    public function addPeriod(Period $period)
     {
         $this->periods[] = $period;
 
@@ -247,21 +248,19 @@ class Job
     }
 
     /**
-     * Remove period
+     * Remove period.
      *
-     * @param \App\Entity\Period $period
-     *
-     * @return boolean TRUE if this collection contained the specified element, FALSE otherwise.
+     * @return bool TRUE if this collection contained the specified element, FALSE otherwise
      */
-    public function removePeriod(\App\Entity\Period $period)
+    public function removePeriod(Period $period)
     {
         return $this->periods->removeElement($period);
     }
 
     /**
-     * Get periods
+     * Get periods.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getPeriods()
     {
@@ -276,18 +275,13 @@ class Job
         return $this->enabled;
     }
 
-    /**
-     * @param bool $enabled
-     */
     public function setEnabled(bool $enabled)
     {
         $this->enabled = $enabled;
     }
 
     /**
-     * Get description
-     * 
-     * @return string
+     * Get description.
      */
     public function getDescription(): string
     {
@@ -295,19 +289,17 @@ class Job
     }
 
     /**
-     * Set description
-     * 
-     * @param string $description
-     * @return Job
+     * Set description.
      */
     public function setDescription(string $description): Job
     {
         $this->description = $description;
+
         return $this;
     }
 
     /**
-     * Set url
+     * Set url.
      *
      * @param string $url
      *
@@ -321,7 +313,7 @@ class Job
     }
 
     /**
-     * Get url
+     * Get url.
      *
      * @return string
      */
@@ -331,7 +323,7 @@ class Job
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */
@@ -341,13 +333,11 @@ class Job
     }
 
     /**
-     * Set createdBy
-     *
-     * @param \App\Entity\User $createBy
+     * Set createdBy.
      *
      * @return Job
      */
-    public function setCreatedBy(\App\Entity\User $user = null)
+    public function setCreatedBy(?User $user = null)
     {
         $this->createdBy = $user;
 
@@ -355,9 +345,9 @@ class Job
     }
 
     /**
-     * Get createdBy
+     * Get createdBy.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getCreatedBy()
     {

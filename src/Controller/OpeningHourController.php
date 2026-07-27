@@ -9,15 +9,15 @@ use Symfony\Component\HttpFoundation\Request;
 use App\Entity\OpeningHourKind;
 
 /**
- * OpeningHour controller
+ * OpeningHour controller.
  *
  * @Route("openinghours")
  */
 class OpeningHourController extends AbstractController
 {
     /**
-     * Opening hours widget display
-     * 
+     * Opening hours widget display.
+     *
      * @Route("/widget", name="openinghour_widget", methods={"GET"})
      */
     public function widgetAction(Request $request)

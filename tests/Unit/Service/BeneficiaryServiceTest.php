@@ -13,16 +13,22 @@ use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class BeneficiaryServiceTest extends TestCase
 {
-    /** @var ContainerInterface|\PHPUnit\Framework\MockObject\MockObject */
+    /** @var ContainerInterface|MockObject */
     private $container;
 
-    /** @var EntityManagerInterface|\PHPUnit\Framework\MockObject\MockObject */
+    /** @var EntityManagerInterface|MockObject */
     private $em;
 
-    /** @var MembershipService|\PHPUnit\Framework\MockObject\MockObject */
+    /** @var MembershipService|MockObject */
     private $membershipService;
 
     protected function setUp(): void
@@ -30,10 +36,12 @@ class BeneficiaryServiceTest extends TestCase
         $this->container = $this->createMock(ContainerInterface::class);
         $this->em = $this->getMockBuilder(EntityManagerInterface::class)
             ->disableOriginalConstructor()
-            ->getMock();
+            ->getMock()
+        ;
         $this->membershipService = $this->getMockBuilder(MembershipService::class)
             ->disableOriginalConstructor()
-            ->getMock();
+            ->getMock()
+        ;
     }
 
     private function createService(array $params = []): BeneficiaryService
@@ -53,7 +61,8 @@ class BeneficiaryServiceTest extends TestCase
         $this->container->method('getParameter')
             ->willReturnCallback(function ($key) use ($params) {
                 return $params[$key] ?? null;
-            });
+            })
+        ;
 
         return new BeneficiaryService($this->container, $this->em, $this->membershipService);
     }
@@ -95,7 +104,8 @@ class BeneficiaryServiceTest extends TestCase
         $this->membershipService->expects($this->once())
             ->method('hasWarningStatus')
             ->with($beneficiary->getMembership())
-            ->willReturn(true);
+            ->willReturn(true)
+        ;
 
         $this->assertTrue($service->hasWarningStatus($beneficiary));
     }
@@ -295,13 +305,16 @@ class BeneficiaryServiceTest extends TestCase
         $shiftRepo = $this->getMockBuilder(EntityRepository::class)
             ->disableOriginalConstructor()
             ->addMethods(['findShiftsForBeneficiary'])
-            ->getMock();
+            ->getMock()
+        ;
         $shiftRepo->method('findShiftsForBeneficiary')
-            ->willReturn(new ArrayCollection([$shift1, $shift2]));
+            ->willReturn(new ArrayCollection([$shift1, $shift2]))
+        ;
 
         $this->em->method('getRepository')
             ->with(Shift::class)
-            ->willReturn($shiftRepo);
+            ->willReturn($shiftRepo)
+        ;
 
         $sum = $service->getCycleShiftDurationSum($beneficiary, 0);
 
@@ -319,13 +332,16 @@ class BeneficiaryServiceTest extends TestCase
         $shiftRepo = $this->getMockBuilder(EntityRepository::class)
             ->disableOriginalConstructor()
             ->addMethods(['findShiftsForBeneficiary'])
-            ->getMock();
+            ->getMock()
+        ;
         $shiftRepo->method('findShiftsForBeneficiary')
-            ->willReturn(new ArrayCollection());
+            ->willReturn(new ArrayCollection())
+        ;
 
         $this->em->method('getRepository')
             ->with(Shift::class)
-            ->willReturn($shiftRepo);
+            ->willReturn($shiftRepo)
+        ;
 
         $sum = $service->getCycleShiftDurationSum($beneficiary, 0);
 

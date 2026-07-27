@@ -97,12 +97,6 @@ parameters:
 			path: src/Command/CsvCommand.php
 
 		-
-			message: '#^Method App\\Command\\CsvCommand\:\:checkDelimiter\(\) has parameter \$nbOfColumn with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Command/CsvCommand.php
-
-		-
 			message: '#^Method App\\Command\\CsvCommand\:\:getField\(\) has parameter \$data with no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -735,7 +729,7 @@ parameters:
 		-
 			message: '#^Left side of && is always true\.$#'
 			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
+			count: 2
 			path: src/Controller/AdminEventController.php
 
 		-
@@ -837,7 +831,7 @@ parameters:
 		-
 			message: '#^Right side of && is always true\.$#'
 			identifier: booleanAnd.rightAlwaysTrue
-			count: 1
+			count: 2
 			path: src/Controller/AdminEventController.php
 
 		-
@@ -1305,12 +1299,6 @@ parameters:
 		-
 			message: '#^Call to an undefined method App\\Repository\\JobRepository\<App\\Entity\\Job\>\:\:findByEnabled\(\)\.$#'
 			identifier: method.notFound
-			count: 1
-			path: src/Controller/BookingController.php
-
-		-
-			message: '#^Method App\\Controller\\BookingController\:\:adminFilterFormFactory\(\) has parameter \$em with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: src/Controller/BookingController.php
 
@@ -1783,12 +1771,6 @@ parameters:
 			path: src/Controller/HelloassoController.php
 
 		-
-			message: '#^Method App\\Controller\\HelloassoController\:\:confirmOrphan\(\) has parameter \$code with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Controller/HelloassoController.php
-
-		-
 			message: '#^Method App\\Controller\\HelloassoController\:\:createPaymentEditForm\(\) should return Symfony\\Component\\Form\\Form but returns Symfony\\Component\\Form\\FormInterface\<mixed\>\.$#'
 			identifier: return.type
 			count: 1
@@ -1831,12 +1813,6 @@ parameters:
 			path: src/Controller/HelloassoController.php
 
 		-
-			message: '#^Method App\\Controller\\HelloassoController\:\:orphanExitAndConfirm\(\) has parameter \$code with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Controller/HelloassoController.php
-
-		-
 			message: '#^Method App\\Controller\\HelloassoController\:\:removePaymentAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1845,12 +1821,6 @@ parameters:
 		-
 			message: '#^Method App\\Controller\\HelloassoController\:\:resolveOrphan\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Controller/HelloassoController.php
-
-		-
-			message: '#^Method App\\Controller\\HelloassoController\:\:resolveOrphan\(\) has parameter \$code with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: src/Controller/HelloassoController.php
 
@@ -2359,12 +2329,6 @@ parameters:
 			path: src/Controller/ShiftController.php
 
 		-
-			message: '#^Method App\\Controller\\ShiftController\:\:createShiftContactForm\(\) has parameter \$coShifters with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Controller/ShiftController.php
-
-		-
 			message: '#^Method App\\Controller\\ShiftController\:\:createShiftContactForm\(\) should return Symfony\\Component\\Form\\Form but returns Symfony\\Component\\Form\\FormInterface\<mixed\>\.$#'
 			identifier: return.type
 			count: 1
@@ -2689,12 +2653,6 @@ parameters:
 			path: src/Controller/TimeLogController.php
 
 		-
-			message: '#^Method App\\Controller\\TimeLogController\:\:timelogDeleteAction\(\) has parameter \$timelog_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Controller/TimeLogController.php
-
-		-
 			message: '#^Property App\\Controller\\TimeLogController\:\:\$forbid_own_timelog_new_admin has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -2703,12 +2661,6 @@ parameters:
 		-
 			message: '#^If condition is always true\.$#'
 			identifier: if.alwaysTrue
-			count: 1
-			path: src/Controller/UserController.php
-
-		-
-			message: '#^Method App\\Controller\\UserController\:\:addRoleAction\(\) has parameter \$role with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: src/Controller/UserController.php
 
@@ -2779,18 +2731,6 @@ parameters:
 			path: src/Controller/UserController.php
 
 		-
-			message: '#^Method App\\Controller\\UserController\:\:removeClientUserAction\(\) has parameter \$client_id with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Controller/UserController.php
-
-		-
-			message: '#^Method App\\Controller\\UserController\:\:removeRoleAction\(\) has parameter \$role with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Controller/UserController.php
-
-		-
 			message: '#^Method App\\Controller\\UserController\:\:selfRegistrationAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2805,6 +2745,12 @@ parameters:
 		-
 			message: '#^Property App\\Controller\\UserController\:\:\$_current_app_user has no type specified\.$#'
 			identifier: missingType.property
+			count: 1
+			path: src/Controller/UserController.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
 			count: 1
 			path: src/Controller/UserController.php
 
@@ -2995,12 +2941,6 @@ parameters:
 			path: src/DataFixtures/Purger/CustomPurger.php
 
 		-
-			message: '#^Method App\\DataFixtures\\Purger\\CustomPurgerFactory\:\:createForEntityManager\(\) has parameter \$excluded with no value type specified in iterable type array\.$#'
-			identifier: missingType.iterableValue
-			count: 1
-			path: src/DataFixtures/Purger/CustomPurgerFactory.php
-
-		-
 			message: '#^Method App\\Entity\\AbstractRegistration\:\:getEntityId\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -3085,12 +3025,6 @@ parameters:
 			path: src/Entity/AnonymousBeneficiary.php
 
 		-
-			message: '#^Method App\\Entity\\AnonymousBeneficiary\:\:validate\(\) has parameter \$payload with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Entity/AnonymousBeneficiary.php
-
-		-
 			message: '#^Negated boolean expression is always false\.$#'
 			identifier: booleanNot.alwaysFalse
 			count: 2
@@ -3117,12 +3051,6 @@ parameters:
 		-
 			message: '#^Method App\\Entity\\Beneficiary\:\:getCommissions\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
 			identifier: missingType.generics
-			count: 1
-			path: src/Entity/Beneficiary.php
-
-		-
-			message: '#^Method App\\Entity\\Beneficiary\:\:getEmail\(\) should return string but returns null\.$#'
-			identifier: return.type
 			count: 1
 			path: src/Entity/Beneficiary.php
 
@@ -3315,6 +3243,12 @@ parameters:
 		-
 			message: '#^Property App\\Entity\\Beneficiary\:\:\$user has no type specified\.$#'
 			identifier: missingType.property
+			count: 1
+			path: src/Entity/Beneficiary.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
 			count: 1
 			path: src/Entity/Beneficiary.php
 
@@ -3589,12 +3523,6 @@ parameters:
 			path: src/Entity/Event.php
 
 		-
-			message: '#^Method App\\Entity\\Event\:\:setEnd\(\) has parameter \$end with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Entity/Event.php
-
-		-
 			message: '#^Method App\\Entity\\Event\:\:setImgFile\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -3776,12 +3704,6 @@ parameters:
 
 		-
 			message: '#^Method App\\Entity\\HelloassoPayment\:\:fromPaymentObj\(\) has parameter \$paymentObject with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Entity/HelloassoPayment.php
-
-		-
-			message: '#^Method App\\Entity\\HelloassoPayment\:\:setCreatedAt\(\) has parameter \$date with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
 			path: src/Entity/HelloassoPayment.php
@@ -4375,18 +4297,6 @@ parameters:
 			path: src/Entity/Period.php
 
 		-
-			message: '#^Method App\\Entity\\Period\:\:getPositionsWithFilter\(\) has parameter \$booked with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Entity/Period.php
-
-		-
-			message: '#^Method App\\Entity\\Period\:\:getPositionsWithFilter\(\) has parameter \$weekCycle with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Entity/Period.php
-
-		-
 			message: '#^Method App\\Entity\\Period\:\:getPositionsWithFilter\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
 			identifier: missingType.generics
 			count: 1
@@ -4705,12 +4615,6 @@ parameters:
 			path: src/Entity/Registration.php
 
 		-
-			message: '#^Method App\\Entity\\Registration\:\:setCreatedAt\(\) has parameter \$date with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Entity/Registration.php
-
-		-
 			message: '#^Method App\\Entity\\Registration\:\:setCreatedAtValue\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4875,12 +4779,6 @@ parameters:
 		-
 			message: '#^Method App\\Entity\\Shift\:\:getTmpToken\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Entity/Shift.php
-
-		-
-			message: '#^Method App\\Entity\\Shift\:\:getTmpToken\(\) has parameter \$key with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: src/Entity/Shift.php
 
@@ -5065,26 +4963,8 @@ parameters:
 			path: src/Entity/ShiftBucket.php
 
 		-
-			message: '#^Method App\\Entity\\ShiftBucket\:\:createShiftFilterCallback\(\) has parameter \$withFormations with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Entity/ShiftBucket.php
-
-		-
 			message: '#^Method App\\Entity\\ShiftBucket\:\:filterByFormations\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Entity/ShiftBucket.php
-
-		-
-			message: '#^Method App\\Entity\\ShiftBucket\:\:filterByFormations\(\) has parameter \$formations with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Entity/ShiftBucket.php
-
-		-
-			message: '#^Method App\\Entity\\ShiftBucket\:\:filterByFormations\(\) has parameter \$shifts with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: src/Entity/ShiftBucket.php
 
@@ -5169,18 +5049,6 @@ parameters:
 		-
 			message: '#^Method App\\Entity\\ShiftBucket\:\:shiftIntersectFormations\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Entity/ShiftBucket.php
-
-		-
-			message: '#^Method App\\Entity\\ShiftBucket\:\:shiftIntersectFormations\(\) has parameter \$formations with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Entity/ShiftBucket.php
-
-		-
-			message: '#^Method App\\Entity\\ShiftBucket\:\:shiftIntersectFormations\(\) has parameter \$shifts with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: src/Entity/ShiftBucket.php
 
@@ -5305,12 +5173,6 @@ parameters:
 			path: src/Entity/SwipeCard.php
 
 		-
-			message: '#^Method App\\Entity\\SwipeCard\:\:setDisabledAt\(\) has parameter \$disabledAt with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Entity/SwipeCard.php
-
-		-
 			message: '#^Negated boolean expression is always false\.$#'
 			identifier: booleanNot.alwaysFalse
 			count: 1
@@ -5405,12 +5267,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: src/Entity/Task.php
-
-		-
-			message: '#^Method App\\Entity\\TimeLog\:\:setCreatedAt\(\) has parameter \$date with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Entity/TimeLog.php
 
 		-
 			message: '#^Method App\\Entity\\TimeLog\:\:setCreatedAtValue\(\) has no return type specified\.$#'
@@ -5533,12 +5389,6 @@ parameters:
 			path: src/Entity/User.php
 
 		-
-			message: '#^Method App\\Entity\\User\:\:getMembership\(\) should return App\\Entity\\Membership but returns null\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Entity/User.php
-
-		-
 			message: '#^Method App\\Entity\\User\:\:getRecordedRegistrations\(\) return type with generic interface Doctrine\\Common\\Collections\\Collection does not specify its types\: TKey, T$#'
 			identifier: missingType.generics
 			count: 1
@@ -5644,6 +5494,12 @@ parameters:
 			message: '#^Property App\\Entity\\User\:\:\$recordedRegistrations has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
+			path: src/Entity/User.php
+
+		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 5
 			path: src/Entity/User.php
 
 		-
@@ -6079,8 +5935,8 @@ parameters:
 			path: src/Event/SwipeCardEvent.php
 
 		-
-			message: '#^Method App\\EventListener\\AuthenticationSuccessHandler\:\:onAuthenticationSuccess\(\) should return Symfony\\Component\\HttpFoundation\\Response but empty return statement found\.$#'
-			identifier: return.empty
+			message: '#^Method App\\EventListener\\AuthenticationSuccessHandler\:\:onAuthenticationSuccess\(\) should return Symfony\\Component\\HttpFoundation\\Response but return statement is missing\.$#'
+			identifier: return.missing
 			count: 1
 			path: src/EventListener/AuthenticationSuccessHandler.php
 
@@ -6595,20 +6451,8 @@ parameters:
 			path: src/EventListener/TimeLogEventListener.php
 
 		-
-			message: '#^Method App\\EventListener\\TimeLogEventListener\:\:createShiftInvalidatedTimeLog\(\) has parameter \$description with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/EventListener/TimeLogEventListener.php
-
-		-
 			message: '#^Method App\\EventListener\\TimeLogEventListener\:\:createShiftValidatedTimeLog\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/EventListener/TimeLogEventListener.php
-
-		-
-			message: '#^Method App\\EventListener\\TimeLogEventListener\:\:createShiftValidatedTimeLog\(\) has parameter \$description with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: src/EventListener/TimeLogEventListener.php
 
@@ -7465,6 +7309,12 @@ parameters:
 			path: src/Form/ProxyType.php
 
 		-
+			message: '#^Unreachable statement \- code above always terminates\.$#'
+			identifier: deadCode.unreachable
+			count: 1
+			path: src/Form/ProxyType.php
+
+		-
 			message: '#^Class App\\Form\\RadioChoiceType extends generic class Symfony\\Component\\Form\\AbstractType but does not specify its types\: TData$#'
 			identifier: missingType.generics
 			count: 1
@@ -7843,18 +7693,6 @@ parameters:
 			path: src/Monolog/ToggleableHandler.php
 
 		-
-			message: '#^Method App\\Monolog\\ToggleableHandler\:\:__call\(\) has parameter \$args with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Monolog/ToggleableHandler.php
-
-		-
-			message: '#^Method App\\Monolog\\ToggleableHandler\:\:__call\(\) has parameter \$method with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Monolog/ToggleableHandler.php
-
-		-
 			message: '#^Method App\\Monolog\\ToggleableHandler\:\:__construct\(\) has parameter \$enabled with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -7963,20 +7801,8 @@ parameters:
 			path: src/Repository/BeneficiaryRepository.php
 
 		-
-			message: '#^Method App\\Repository\\BeneficiaryRepository\:\:findFromAutoComplete\(\) has parameter \$beneficiaries with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Repository/BeneficiaryRepository.php
-
-		-
 			message: '#^Method App\\Repository\\BeneficiaryRepository\:\:findOneFromAutoComplete\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Repository/BeneficiaryRepository.php
-
-		-
-			message: '#^Method App\\Repository\\BeneficiaryRepository\:\:findOneFromAutoComplete\(\) has parameter \$beneficiary with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: src/Repository/BeneficiaryRepository.php
 
@@ -8125,12 +7951,6 @@ parameters:
 			path: src/Repository/MembershipRepository.php
 
 		-
-			message: '#^Method App\\Repository\\MembershipRepository\:\:findAllActive\(\) has parameter \$prefetchBeneficiaries with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Repository/MembershipRepository.php
-
-		-
 			message: '#^Method App\\Repository\\MembershipRepository\:\:findLateShifters\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -8145,12 +7965,6 @@ parameters:
 		-
 			message: '#^Method App\\Repository\\MembershipRepository\:\:findOneFromAutoComplete\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Repository/MembershipRepository.php
-
-		-
-			message: '#^Method App\\Repository\\MembershipRepository\:\:findOneFromAutoComplete\(\) has parameter \$membership with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: src/Repository/MembershipRepository.php
 
@@ -8533,18 +8347,6 @@ parameters:
 			path: src/Repository/ShiftRepository.php
 
 		-
-			message: '#^Method App\\Repository\\ShiftRepository\:\:getMemberShiftMissedCount\(\) has parameter \$end_before with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Repository/ShiftRepository.php
-
-		-
-			message: '#^Method App\\Repository\\ShiftRepository\:\:getMemberShiftMissedCount\(\) has parameter \$start_after with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Repository/ShiftRepository.php
-
-		-
 			message: '#^Method App\\Repository\\ShiftRepository\:\:getYears\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -8739,13 +8541,7 @@ parameters:
 		-
 			message: '#^If condition is always true\.$#'
 			identifier: if.alwaysTrue
-			count: 5
-			path: src/Security/KeycloakAuthenticator.php
-
-		-
-			message: '#^Method App\\Security\\KeycloakAuthenticator\:\:createMembership\(\) has parameter \$member_number with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
+			count: 4
 			path: src/Security/KeycloakAuthenticator.php
 
 		-
@@ -9277,12 +9073,6 @@ parameters:
 			path: src/Service/MembershipService.php
 
 		-
-			message: '#^Method App\\Service\\MembershipService\:\:getEndOfCycle\(\) has parameter \$cycleOffset with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/MembershipService.php
-
-		-
 			message: '#^Method App\\Service\\MembershipService\:\:getPeriodPositionFreeLogs\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -9499,12 +9289,6 @@ parameters:
 			path: src/Service/PeriodService.php
 
 		-
-			message: '#^Method App\\Service\\Picture\\BasePathPicture\:\:getPicturePath\(\) has parameter \$entity with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/Picture/BasePathPicture.php
-
-		-
 			message: '#^Property App\\Service\\Picture\\BasePathPicture\:\:\$imagineCacheManager has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -9655,12 +9439,6 @@ parameters:
 			path: src/Service/SearchUserFormHelper.php
 
 		-
-			message: '#^Method App\\Service\\SearchUserFormHelper\:\:initSearchQuery\(\) has parameter \$type with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/SearchUserFormHelper.php
-
-		-
 			message: '#^Property App\\Service\\SearchUserFormHelper\:\:\$container has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -9769,18 +9547,6 @@ parameters:
 			path: src/Service/ShiftService.php
 
 		-
-			message: '#^Method App\\Service\\ShiftService\:\:canBookDuration\(\) has parameter \$duration with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/ShiftService.php
-
-		-
-			message: '#^Method App\\Service\\ShiftService\:\:canFreeShift\(\) has parameter \$from_admin with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/ShiftService.php
-
-		-
 			message: '#^Method App\\Service\\ShiftService\:\:canFreeShift\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -9793,18 +9559,6 @@ parameters:
 			path: src/Service/ShiftService.php
 
 		-
-			message: '#^Method App\\Service\\ShiftService\:\:filterBucketsByDayAndJobByFilling\(\) has parameter \$bucketsByDay with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/ShiftService.php
-
-		-
-			message: '#^Method App\\Service\\ShiftService\:\:generateShiftBuckets\(\) has parameter \$shifts with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/ShiftService.php
-
-		-
 			message: '#^Method App\\Service\\ShiftService\:\:generateShiftBuckets\(\) return type has no value type specified in iterable type array\.$#'
 			identifier: missingType.iterableValue
 			count: 1
@@ -9813,12 +9567,6 @@ parameters:
 		-
 			message: '#^Method App\\Service\\ShiftService\:\:generateShiftBucketsByDayAndJob\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Service/ShiftService.php
-
-		-
-			message: '#^Method App\\Service\\ShiftService\:\:generateShiftBucketsByDayAndJob\(\) has parameter \$shifts with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: src/Service/ShiftService.php
 
@@ -9885,18 +9633,6 @@ parameters:
 		-
 			message: '#^Method App\\Service\\ShiftService\:\:isShiftBookable\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Service/ShiftService.php
-
-		-
-			message: '#^Method App\\Service\\ShiftService\:\:isShiftEmpty\(\) has parameter \$shift with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/ShiftService.php
-
-		-
-			message: '#^Method App\\Service\\ShiftService\:\:removeEmptyShift\(\) has parameter \$buckets with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: src/Service/ShiftService.php
 
@@ -10009,60 +9745,6 @@ parameters:
 			path: src/Service/ShiftService.php
 
 		-
-			message: '#^Method App\\Service\\TimeLogService\:\:initCustomTimeLog\(\) has parameter \$description with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/TimeLogService.php
-
-		-
-			message: '#^Method App\\Service\\TimeLogService\:\:initCustomTimeLog\(\) has parameter \$time with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/TimeLogService.php
-
-		-
-			message: '#^Method App\\Service\\TimeLogService\:\:initCycleEndSavingTimeLog\(\) has parameter \$description with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/TimeLogService.php
-
-		-
-			message: '#^Method App\\Service\\TimeLogService\:\:initCycleEndSavingTimeLog\(\) has parameter \$time with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/TimeLogService.php
-
-		-
-			message: '#^Method App\\Service\\TimeLogService\:\:initSavingTimeLog\(\) has parameter \$shift with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/TimeLogService.php
-
-		-
-			message: '#^Method App\\Service\\TimeLogService\:\:initShiftFreedSavingTimeLog\(\) has parameter \$time with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/TimeLogService.php
-
-		-
-			message: '#^Method App\\Service\\TimeLogService\:\:initShiftInvalidatedTimeLog\(\) has parameter \$description with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/TimeLogService.php
-
-		-
-			message: '#^Method App\\Service\\TimeLogService\:\:initShiftValidatedTimeLog\(\) has parameter \$description with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/TimeLogService.php
-
-		-
-			message: '#^Method App\\Service\\TimeLogService\:\:initTimeLog\(\) has parameter \$description with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Service/TimeLogService.php
-
-		-
 			message: '#^Property App\\Service\\TimeLogService\:\:\$due_duration_by_cycle has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -10129,12 +9811,6 @@ parameters:
 			path: src/Twig/Extension/AppExtension.php
 
 		-
-			message: '#^Method App\\Twig\\Extension\\AppExtension\:\:date_fr_full_with_time\(\) has parameter \$date with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Twig/Extension/AppExtension.php
-
-		-
 			message: '#^Method App\\Twig\\Extension\\AppExtension\:\:date_fr_long\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -10155,12 +9831,6 @@ parameters:
 		-
 			message: '#^Method App\\Twig\\Extension\\AppExtension\:\:date_short\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Twig/Extension/AppExtension.php
-
-		-
-			message: '#^Method App\\Twig\\Extension\\AppExtension\:\:date_short\(\) has parameter \$date with no type specified\.$#'
-			identifier: missingType.parameter
 			count: 1
 			path: src/Twig/Extension/AppExtension.php
 

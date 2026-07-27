@@ -1,14 +1,11 @@
 <?php
 
-
 namespace App\DataFixtures;
-
-
 
 class FixtureTools
 {
-
-    public static function biased_random($min, $max, $bias) {
+    public static function biased_random($min, $max, $bias)
+    {
         // Calculate the probability for non-maximum values
         $prob_range = (1 - $bias) / ($max - $min);
 
@@ -32,5 +29,4 @@ class FixtureTools
         // Fallback (this shouldn't happen)
         return $max;
     }
-
 }

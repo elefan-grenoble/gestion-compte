@@ -3,7 +3,6 @@
 namespace App\Form\DataTransformer;
 
 use App\Entity\Membership;
-use App\Entity\User;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Form\DataTransformerInterface;
 use Symfony\Component\Form\Exception\TransformationFailedException;
@@ -18,11 +17,12 @@ class MembershipToStringTransformer implements DataTransformerInterface
     }
 
     /**
-    * Transforms an object (Membership) to a string.
-    *
-    * @param  Membership|null $membership
-    * @return string
-    */
+     * Transforms an object (Membership) to a string.
+     *
+     * @param null|Membership $membership
+     *
+     * @return string
+     */
     public function transform($membership)
     {
         if (null === $membership) {
@@ -35,8 +35,10 @@ class MembershipToStringTransformer implements DataTransformerInterface
     /**
      * Transforms a string to an object (Membership).
      *
-     * @param  string $autocomplete
+     * @param string $autocomplete
+     *
      * @return Membership
+     *
      * @throws TransformationFailedException if object (Membership) is not found
      */
     public function reverseTransform($autocomplete)
@@ -47,7 +49,8 @@ class MembershipToStringTransformer implements DataTransformerInterface
 
         $membership = $this->entityManager
             ->getRepository(Membership::class)
-            ->findOneFromAutoComplete($autocomplete);
+            ->findOneFromAutoComplete($autocomplete)
+        ;
 
         if ($membership === null) {
             throw new TransformationFailedException(sprintf(

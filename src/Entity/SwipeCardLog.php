@@ -5,9 +5,10 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 
 /**
- * SwipeCardLog
+ * SwipeCardLog.
  *
  * @ORM\Table(name="swipe_card_log")
+ *
  * @ORM\Entity
  */
 class SwipeCardLog
@@ -16,25 +17,30 @@ class SwipeCardLog
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
 
     /**
      * @ORM\ManyToOne(targetEntity="SwipeCard", inversedBy="logs")
+     *
      * @ORM\JoinColumn(name="swipe_card_id", referencedColumnName="id", nullable=true)
      */
     private $swipeCard;
 
     /**
      * @var int
+     *
      * @ORM\Column(name="counter", type="integer")
      */
     private $counter;
 
     /**
      * @var \DateTime
+     *
      * @ORM\Column(type="datetime", nullable=false)
      */
     private $date;
@@ -52,8 +58,6 @@ class SwipeCardLog
     /**
      * Set swipeCard.
      *
-     * @param SwipeCard|null $swipeCard
-     *
      * @return SwipeCardLog
      */
     public function setSwipeCard(?SwipeCard $swipeCard)
@@ -65,10 +69,8 @@ class SwipeCardLog
 
     /**
      * Get swipeCard.
-     *
-     * @return SwipeCard|null
      */
-    public function getSwipeCard() : ?SwipeCard
+    public function getSwipeCard(): ?SwipeCard
     {
         return $this->swipeCard;
     }
@@ -76,7 +78,7 @@ class SwipeCardLog
     /**
      * Set counter.
      *
-     * @param integer $counter
+     * @param int $counter
      *
      * @return SwipeCardLog
      */
@@ -90,7 +92,7 @@ class SwipeCardLog
     /**
      * Get counter.
      *
-     * @return integer $counter
+     * @return int $counter
      */
     public function getCounter()
     {
@@ -100,7 +102,7 @@ class SwipeCardLog
     /**
      * Set date.
      *
-     * @param \DateTime|null $date
+     * @param null|\DateTime $date
      *
      * @return SwipeCardLog
      */
@@ -114,7 +116,7 @@ class SwipeCardLog
     /**
      * Get date.
      *
-     * @return \DateTime|null
+     * @return null|\DateTime
      */
     public function getDate()
     {

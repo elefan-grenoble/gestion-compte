@@ -61,6 +61,7 @@
         "twig/twig": ">=3.0"
     },
     "require-dev": {
+        "php-cs-fixer/shim": "^3.94",
         "phpstan/phpstan": "^2.1.31",
         "phpstan/phpstan-doctrine": "^2.0",
         "phpstan/phpstan-symfony": "^2.0",

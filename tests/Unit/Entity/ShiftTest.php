@@ -11,9 +11,14 @@ use App\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class ShiftTest extends TestCase
 {
-    private function createShift(\DateTime $start = null, \DateTime $end = null): Shift
+    private function createShift(?\DateTime $start = null, ?\DateTime $end = null): Shift
     {
         $shift = new Shift();
         $shift->setStart($start ?? new \DateTime('2024-06-15 09:00'));

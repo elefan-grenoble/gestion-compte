@@ -5,9 +5,7 @@ namespace App\Form;
 use App\Entity\Beneficiary;
 use App\Entity\Membership;
 use App\Entity\Proxy;
-use App\Entity\Task;
 use App\Entity\User;
-use Doctrine\Common\Collections\ArrayCollection;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\FormBuilderInterface;
@@ -28,9 +26,6 @@ class ProxyType extends AbstractType
         $this->tokenStorage = $tokenStorage;
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         // grab the user, do a quick sanity check that one exists
@@ -46,58 +41,51 @@ class ProxyType extends AbstractType
             $form = $event->getForm();
             $userData = $event->getData();
 
-            if ($user->hasRole('ROLE_SUPER_ADMIN')){
-                $form->add('giver',EntityType::class,array(
+            if ($user->hasRole('ROLE_SUPER_ADMIN')) {
+                $form->add('giver', EntityType::class, [
                     'class' => Membership::class,
                     'choice_label' => function (Membership $membership) {
                         $mainBeneficiary = $membership->getMainBeneficiary();
                         if ($mainBeneficiary) {
                             return $mainBeneficiary;
-                        } else {
-                            return $membership->getMemberNumber();
                         }
+
+                        return $membership->getMemberNumber();
+
                     },
-                    'label'=>'Utilisateur donnant la procuration',
-                    'required' => false));
-                $form->add('owner',EntityType::class,array(
+                    'label' => 'Utilisateur donnant la procuration',
+                    'required' => false]);
+                $form->add('owner', EntityType::class, [
                     'class' => Beneficiary::class,
-                    'label'=>'beneficiaire acceptant la procuration',
-                    'required' => false
-                ));
-            }else{
-                if ($userData && $userData->getOwner()){
-                    $form->add('owner',EntityType::class,array(
+                    'label' => 'beneficiaire acceptant la procuration',
+                    'required' => false,
+                ]);
+            } else {
+                if ($userData && $userData->getOwner()) {
+                    $form->add('owner', EntityType::class, [
                         'class' => Beneficiary::class,
-                        'choices' => array($userData->getOwner()),
+                        'choices' => [$userData->getOwner()],
                         'choice_label' => 'public_display_name',
-                        'label'=>'beneficiaire acceptant la procuration'));
-                }else{
-                    $form->add('owner',EntityType::class,array(
+                        'label' => 'beneficiaire acceptant la procuration']);
+                } else {
+                    $form->add('owner', EntityType::class, [
                         'class' => Beneficiary::class,
                         'choices' => $user->getBeneficiary()->getMembership()->getBeneficiaries(),
-                        'label'=>'beneficiaire présent acceptant la procuration'));
+                        'label' => 'beneficiaire présent acceptant la procuration']);
                 }
             }
         });
     }
-    
-    /**
-     * {@inheritdoc}
-     */
+
     public function configureOptions(OptionsResolver $resolver)
     {
-        $resolver->setDefaults(array(
-            'data_class' => Proxy::class
-        ));
+        $resolver->setDefaults([
+            'data_class' => Proxy::class,
+        ]);
     }
 
-    /**
-     * {@inheritdoc}
-     */
     public function getBlockPrefix()
     {
         return 'App_proxy';
     }
-
-
 }

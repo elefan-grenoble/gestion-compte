@@ -5,12 +5,15 @@ namespace App\Entity;
 use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OrderBy;
 use Symfony\Component\Validator\Constraints as Assert;
+use Doctrine\Common\Collections\Collection;
 
 /**
- * OpeningHourKind
+ * OpeningHourKind.
  *
  * @ORM\Table(name="opening_hour_kind")
+ *
  * @ORM\HasLifecycleCallbacks()
+ *
  * @ORM\Entity(repositoryClass="App\Repository\OpeningHourKindRepository")
  */
 class OpeningHourKind
@@ -19,7 +22,9 @@ class OpeningHourKind
      * @var int
      *
      * @ORM\Column(name="id", type="integer")
+     *
      * @ORM\Id
+     *
      * @ORM\GeneratedValue(strategy="AUTO")
      */
     private $id;
@@ -28,6 +33,7 @@ class OpeningHourKind
      * @var string
      *
      * @Assert\NotBlank()
+     *
      * @ORM\Column(name="name", type="string", length=255)
      */
     private $name;
@@ -41,6 +47,7 @@ class OpeningHourKind
 
     /**
      * @Assert\Date
+     *
      * @Assert\GreaterThan(propertyPath="start_date")
      *
      * @ORM\Column(name="end_date", type="date", nullable=true)
@@ -56,6 +63,7 @@ class OpeningHourKind
 
     /**
      * @ORM\OneToMany(targetEntity="OpeningHour", mappedBy="kind", cascade={"persist"})
+     *
      * @OrderBy({"dayOfWeek" = "ASC", "start" = "ASC"})
      */
     private $openingHours;
@@ -69,19 +77,21 @@ class OpeningHourKind
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="created_by_id", referencedColumnName="id")
      */
     private $createdBy;
 
     /**
      * @var \DateTime
-     * 
+     *
      * @ORM\Column(type="datetime")
      */
     private $updatedAt;
 
     /**
      * @ORM\ManyToOne(targetEntity="User")
+     *
      * @ORM\JoinColumn(name="updated_by_id", referencedColumnName="id")
      */
     private $updatedBy;
@@ -106,6 +116,7 @@ class OpeningHourKind
 
     /**
      * @ORM\PrePersist
+     *
      * @ORM\PreUpdate
      */
     public function setUpdatedAtValue()
@@ -114,7 +125,7 @@ class OpeningHourKind
     }
 
     /**
-     * Get id
+     * Get id.
      *
      * @return int
      */
@@ -124,7 +135,7 @@ class OpeningHourKind
     }
 
     /**
-     * Set name
+     * Set name.
      *
      * @param string $name
      *
@@ -138,7 +149,7 @@ class OpeningHourKind
     }
 
     /**
-     * Get name
+     * Get name.
      *
      * @return string
      */
@@ -148,7 +159,7 @@ class OpeningHourKind
     }
 
     /**
-     * Set startDate
+     * Set startDate.
      *
      * @param \DateTime $date
      *
@@ -162,7 +173,7 @@ class OpeningHourKind
     }
 
     /**
-     * Get startDate
+     * Get startDate.
      *
      * @return \DateTime
      */
@@ -172,7 +183,7 @@ class OpeningHourKind
     }
 
     /**
-     * Set endDate
+     * Set endDate.
      *
      * @param \DateTime $date
      *
@@ -186,7 +197,7 @@ class OpeningHourKind
     }
 
     /**
-     * Get endDate
+     * Get endDate.
      *
      * @return \DateTime
      */
@@ -196,7 +207,7 @@ class OpeningHourKind
     }
 
     /**
-     * Get enabled
+     * Get enabled.
      *
      * @return bool
      */
@@ -206,9 +217,7 @@ class OpeningHourKind
     }
 
     /**
-     * Set enabled
-     *
-     * @param bool $enabled
+     * Set enabled.
      */
     public function setEnabled(bool $enabled)
     {
@@ -216,9 +225,9 @@ class OpeningHourKind
     }
 
     /**
-     * Get openingHours
+     * Get openingHours.
      *
-     * @return \Doctrine\Common\Collections\Collection
+     * @return Collection
      */
     public function getOpeningHours()
     {
@@ -226,7 +235,7 @@ class OpeningHourKind
     }
 
     /**
-     * Get createdAt
+     * Get createdAt.
      *
      * @return \DateTime
      */
@@ -236,13 +245,11 @@ class OpeningHourKind
     }
 
     /**
-     * Set createdBy
-     *
-     * @param \App\Entity\User $user
+     * Set createdBy.
      *
      * @return OpeningHourKind
      */
-    public function setCreatedBy(\App\Entity\User $user = null)
+    public function setCreatedBy(?User $user = null)
     {
         $this->createdBy = $user;
 
@@ -250,9 +257,9 @@ class OpeningHourKind
     }
 
     /**
-     * Get createdBy
+     * Get createdBy.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getCreatedBy()
     {
@@ -260,7 +267,7 @@ class OpeningHourKind
     }
 
     /**
-     * Get updatedAt
+     * Get updatedAt.
      *
      * @return \DateTime
      */
@@ -270,13 +277,11 @@ class OpeningHourKind
     }
 
     /**
-     * Set updatedBy
-     *
-     * @param \App\Entity\User $user
+     * Set updatedBy.
      *
      * @return OpeningHourKind
      */
-    public function setUpdatedBy(\App\Entity\User $user = null)
+    public function setUpdatedBy(?User $user = null)
     {
         $this->updatedBy = $user;
 
@@ -284,9 +289,9 @@ class OpeningHourKind
     }
 
     /**
-     * Get updatedBy
+     * Get updatedBy.
      *
-     * @return \App\Entity\User
+     * @return User
      */
     public function getUpdatedBy()
     {

@@ -3,11 +3,11 @@
 namespace App\Event;
 
 use App\Entity\Membership;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class MemberCreatedEvent extends \Symfony\Contracts\EventDispatcher\Event
+class MemberCreatedEvent extends Event
 {
-    const NAME = 'member.created';
+    public const NAME = 'member.created';
 
     private $membership;
 
@@ -23,5 +23,4 @@ class MemberCreatedEvent extends \Symfony\Contracts\EventDispatcher\Event
     {
         return $this->membership;
     }
-
 }

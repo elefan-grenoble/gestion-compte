@@ -3,11 +3,11 @@
 namespace App\Event;
 
 use App\Entity\AnonymousBeneficiary;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class AnonymousBeneficiaryRecallEvent extends \Symfony\Contracts\EventDispatcher\Event
+class AnonymousBeneficiaryRecallEvent extends Event
 {
-    const NAME = 'anonymous_beneficiary.recall';
+    public const NAME = 'anonymous_beneficiary.recall';
 
     private $anonymous_beneficiary;
 
@@ -23,5 +23,4 @@ class AnonymousBeneficiaryRecallEvent extends \Symfony\Contracts\EventDispatcher
     {
         return $this->anonymous_beneficiary;
     }
-
 }

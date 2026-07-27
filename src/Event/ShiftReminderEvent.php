@@ -3,11 +3,11 @@
 namespace App\Event;
 
 use App\Entity\Shift;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class ShiftReminderEvent extends \Symfony\Contracts\EventDispatcher\Event
+class ShiftReminderEvent extends Event
 {
-    const NAME = 'shift.reminder';
+    public const NAME = 'shift.reminder';
 
     private $shift;
 

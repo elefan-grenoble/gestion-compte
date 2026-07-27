@@ -19,11 +19,10 @@ use App\Entity\DynamicContent;
 use App\Entity\Event;
 use App\Entity\Shift;
 use App\Entity\SocialNetwork;
-
+use Symfony\Component\HttpFoundation\RedirectResponse;
 
 class DefaultController extends AbstractController
 {
-
     /**
      * @Route("/", name="homepage")
      */
@@ -36,7 +35,7 @@ class DefaultController extends AbstractController
         if ($securityContext->isGranted('IS_AUTHENTICATED_REMEMBERED')) {
             $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
-            if ($current_app_user->getBeneficiary() != null) { //member only
+            if ($current_app_user->getBeneficiary() != null) { // member only
 
                 /** @var Membership $membership */
                 $membership = $current_app_user->getBeneficiary()->getMembership();
@@ -45,44 +44,51 @@ class DefaultController extends AbstractController
                     $this->container->get('security.token_storage')->setToken(null);
                     $this->container->get('session')->invalidate();
                     $this->addFlash('error', 'Compte fermé !');
+
                     return $this->redirectToRoute('homepage');
                 }
 
                 $cycle_end = $membership_service->getEndOfCycle($membership);
                 $dayAfterEndOfCycle = clone $cycle_end;
                 $dayAfterEndOfCycle->modify('+1 day');
-                $profileUrlHtml = "<a style=\"text-decoration:underline;color:white;\" href=\"" . $this->get('router')->generate('fos_user_profile_show') . "\"><i class=\"material-icons tiny\">settings</i> ton profil</a>.";
+                $profileUrlHtml = '<a style="text-decoration:underline;color:white;" href="' . $this->get('router')->generate('fos_user_profile_show') . '"><i class="material-icons tiny">settings</i> ton profil</a>.';
                 if ($membership->getFrozenChange() && !$membership->getFrozen()) {
                     $now = new \DateTime('now');
-                    $this->addFlash('warning',
-                        'Comme demandé, ton compte sera gelé dans ' .
-                        date_diff($now, $cycle_end)->format('%a jours') .
-                        ', le <strong>' . $this->container->get('twig')->getExtension(AppExtension::class)->date_fr_long($dayAfterEndOfCycle) . '</strong>.' .
-                        "<br />Pour annuler, visite " . $profileUrlHtml);
+                    $this->addFlash(
+                        'warning',
+                        'Comme demandé, ton compte sera gelé dans '
+                        . date_diff($now, $cycle_end)->format('%a jours')
+                        . ', le <strong>' . $this->container->get('twig')->getExtension(AppExtension::class)->date_fr_long($dayAfterEndOfCycle) . '</strong>.'
+                        . '<br />Pour annuler, visite ' . $profileUrlHtml
+                    );
                 }
                 if ($membership->getFrozenChange() && $membership->getFrozen()) {
                     $now = new \DateTime('now');
-                    $this->addFlash('notice',
-                        'Comme demandé, ton compte sera dégelé dans ' .
-                        date_diff($now, $cycle_end)->format('%a jours') .
-                        ', le <strong>' . $this->container->get('twig')->getExtension(AppExtension::class)->date_fr_long($dayAfterEndOfCycle) . '</strong>.' .
-                        "<br />Pour annuler, visite " . $profileUrlHtml);
+                    $this->addFlash(
+                        'notice',
+                        'Comme demandé, ton compte sera dégelé dans '
+                        . date_diff($now, $cycle_end)->format('%a jours')
+                        . ', le <strong>' . $this->container->get('twig')->getExtension(AppExtension::class)->date_fr_long($dayAfterEndOfCycle) . '</strong>.'
+                        . '<br />Pour annuler, visite ' . $profileUrlHtml
+                    );
                 }
 
                 if ($membership_service->canRegister($membership)) {
                     if ($membership->getRegistrations()->count() <= 0) {
                         $this->addFlash('warning', 'Pour poursuivre entre ton adhésion en ligne !');
-                    }else{
+                    } else {
                         $remainder = $membership_service->getRemainder($membership);
-                        $remainingDays = intval($remainder->format("%R%a"));
-                        if ($remainingDays < 0)
+                        $remainingDays = intval($remainder->format('%R%a'));
+                        if ($remainingDays < 0) {
                             $this->addFlash('error', 'Oups, ton adhésion a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer !');
-                        else {
-                            $this->addFlash('warning',
-                                'Ton adhésion expire dans ' . $remainingDays . ' jours.<br>' .
-                                'Tu peux ré-adhérer en ligne par carte bancaire ou bien au bureau des membres par chèque, espèce ou ' .
-                                $this->getParameter('local_currency_name') .
-                                '.');
+                        } else {
+                            $this->addFlash(
+                                'warning',
+                                'Ton adhésion expire dans ' . $remainingDays . ' jours.<br>'
+                                . 'Tu peux ré-adhérer en ligne par carte bancaire ou bien au bureau des membres par chèque, espèce ou '
+                                . $this->getParameter('local_currency_name')
+                                . '.'
+                            );
                         }
                     }
                 } elseif ($membership->getRegistrations()->count() <= 0) {
@@ -90,7 +96,7 @@ class DefaultController extends AbstractController
                 }
             }
         } else {
-            $from = new \Datetime('today');
+            $from = new \DateTime('today');
             $to = new \DateTime();
             $to->modify('+7 days');
             $shifts = $em->getRepository(Shift::class)->findFrom($from, $to);
@@ -98,14 +104,14 @@ class DefaultController extends AbstractController
 
             return $this->render('default/index_anon.html.twig', [
                 'bucketsByDay' => $bucketsByDay,
-                'hours' => $this->getHours()
+                'hours' => $this->getHours(),
             ]);
         }
 
         $eventsFutureOrOngoing = $em->getRepository(Event::class)->findFutureOrOngoing();
         $eventsFutureOrOngoingDisplayedHome = $em->getRepository(Event::class)->findFutureOrOngoing(null, true);
-        $dynamicContentTop = $em->getRepository(DynamicContent::class)->findOneByCode("HOME_TOP")->getContent();
-        $dynamicContentBottom = $em->getRepository(DynamicContent::class)->findOneByCode("HOME_BOTTOM")->getContent();
+        $dynamicContentTop = $em->getRepository(DynamicContent::class)->findOneByCode('HOME_TOP')->getContent();
+        $dynamicContentBottom = $em->getRepository(DynamicContent::class)->findOneByCode('HOME_BOTTOM')->getContent();
 
         return $this->render('default/index.html.twig', [
             'eventsFutureOrOngoing' => $eventsFutureOrOngoing,
@@ -136,14 +142,16 @@ class DefaultController extends AbstractController
 
     /**
      * @Route("/schedule", name="schedule", methods={"GET","POST"})
+     *
      * @Security("is_granted('IS_AUTHENTICATED_REMEMBERED', user)")
-     * @return \Symfony\Component\HttpFoundation\RedirectResponse|\Symfony\Component\HttpFoundation\Response
+     *
+     * @return RedirectResponse|Response
      */
     public function scheduleAction(ShiftService $shift_service)
     {
         $em = $this->getDoctrine()->getManager();
 
-        $from = new \Datetime('today');
+        $from = new \DateTime('today');
         $to = new \DateTime();
         $to->modify('+7 days');
         $shifts = $em->getRepository(Shift::class)->findFrom($from, $to);
@@ -151,18 +159,19 @@ class DefaultController extends AbstractController
 
         return $this->render('booking/schedule.html.twig', [
             'bucketsByDay' => $bucketsByDay,
-            'hours' => $this->getHours()
+            'hours' => $this->getHours(),
         ]);
     }
 
-    private function getHours() {
-        $hours = array();
-        for ($i = 6; $i < 22; $i++) { //todo put this in conf
+    private function getHours()
+    {
+        $hours = [];
+        for ($i = 6; $i < 22; ++$i) { // todo put this in conf
             $hours[] = $i;
         }
+
         return $hours;
     }
-
 
     /**
      * @Route("/helloassoNotify", name="helloasso_notify", methods={"POST"})
@@ -190,6 +199,7 @@ class DefaultController extends AbstractController
         }
 
         $handler->savePayments([$payment]);
+
         return new Response('Successfully handled.', Response::HTTP_CREATED);
     }
 }

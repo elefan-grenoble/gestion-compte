@@ -3,11 +3,11 @@
 namespace App\Event;
 
 use App\Entity\Membership;
-use Symfony\Component\EventDispatcher\Event;
+use Symfony\Contracts\EventDispatcher\Event;
 
-class MemberCycleStartEvent extends \Symfony\Contracts\EventDispatcher\Event
+class MemberCycleStartEvent extends Event
 {
-    const NAME = 'member.cycle.start';
+    public const NAME = 'member.cycle.start';
 
     private $membership;
     private $date;
@@ -43,5 +43,4 @@ class MemberCycleStartEvent extends \Symfony\Contracts\EventDispatcher\Event
     {
         return $this->currentCycleShifts;
     }
-
 }

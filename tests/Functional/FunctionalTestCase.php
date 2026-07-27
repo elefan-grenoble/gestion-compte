@@ -2,18 +2,24 @@
 
 namespace App\Tests\Functional;
 
+use Symfony\Bundle\FrameworkBundle\Client;
+
 /**
  * Base class for functional tests that need database fixtures and login helpers.
  *
  * Extends DatabasePrimer (which handles DB purge and fixture loading)
  * and adds shared helper methods used across functional test classes.
+ *
+ * @internal
+ *
+ * @coversNothing
  */
 class FunctionalTestCase extends DatabasePrimer
 {
     /**
      * Helper to log in as a given user via the login form.
      *
-     * @return \Symfony\Bundle\FrameworkBundle\Client
+     * @return Client
      */
     protected function loginAs(string $username, string $password = 'password')
     {

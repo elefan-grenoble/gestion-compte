@@ -3,20 +3,24 @@
 namespace App\Tests\Unit\Service;
 
 use App\Entity\Membership;
-use App\Entity\MembershipShiftExemption;
 use App\Entity\Registration;
 use App\Service\MembershipService;
-use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class MembershipServiceTest extends TestCase
 {
-    /** @var ContainerInterface|\PHPUnit\Framework\MockObject\MockObject */
+    /** @var ContainerInterface|MockObject */
     private $container;
 
-    /** @var EntityManagerInterface|\PHPUnit\Framework\MockObject\MockObject */
+    /** @var EntityManagerInterface|MockObject */
     private $em;
 
     protected function setUp(): void
@@ -24,7 +28,8 @@ class MembershipServiceTest extends TestCase
         $this->container = $this->createMock(ContainerInterface::class);
         $this->em = $this->getMockBuilder(EntityManagerInterface::class)
             ->disableOriginalConstructor()
-            ->getMock();
+            ->getMock()
+        ;
     }
 
     /**
@@ -44,7 +49,8 @@ class MembershipServiceTest extends TestCase
         $this->container->method('getParameter')
             ->willReturnCallback(function ($key) use ($params) {
                 return $params[$key] ?? null;
-            });
+            })
+        ;
 
         return new MembershipService($this->container, $this->em);
     }
@@ -52,7 +58,7 @@ class MembershipServiceTest extends TestCase
     /**
      * Create a Membership with an optional last registration date.
      */
-    private function createMembershipWithRegistration(\DateTime $registrationDate = null): Membership
+    private function createMembershipWithRegistration(?\DateTime $registrationDate = null): Membership
     {
         $membership = new Membership();
         $membership->setWithdrawn(false);
@@ -91,7 +97,7 @@ class MembershipServiceTest extends TestCase
         $expire = $service->getExpire($membership);
 
         // Without registration → expire = last day of December of (now - 1 year)
-        $expectedYear = (int)(new \DateTime('-1 year'))->format('Y');
+        $expectedYear = (int) (new \DateTime('-1 year'))->format('Y');
         $this->assertEquals($expectedYear . '-12-31', $expire->format('Y-m-d'));
     }
 

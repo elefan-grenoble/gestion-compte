@@ -13,6 +13,11 @@ use App\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use PHPUnit\Framework\TestCase;
 
+/**
+ * @internal
+ *
+ * @coversNothing
+ */
 class MembershipTest extends TestCase
 {
     private function createMembership(): Membership
