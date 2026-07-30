@@ -66,6 +66,7 @@ security:
     - { path: ^/sw/in/, role: IS_AUTHENTICATED_ANONYMOUSLY }
     - { path: ^/sw/.+/(qr|br)\.png$, role: IS_AUTHENTICATED_ANONYMOUSLY }
     - { path: ^/card_reader, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/cardReader$, role: IS_AUTHENTICATED_ANONYMOUSLY }
     - { path: ^/codes/close_all$, role: IS_AUTHENTICATED_ANONYMOUSLY }
     - { path: ^/member/new$, role: IS_AUTHENTICATED_ANONYMOUSLY }
     - { path: ^/member/add_beneficiary$, role: IS_AUTHENTICATED_ANONYMOUSLY }

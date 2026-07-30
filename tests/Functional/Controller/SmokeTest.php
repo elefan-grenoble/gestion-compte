@@ -425,10 +425,32 @@ class SmokeTest extends FunctionalTestCase
             // Vigenère magic-link route (no token supplied here): must reach
             // the controller, which then mutes/redirects on invalid input.
             'codes close_all' => ['/codes/close_all'],
-            // Badge-scan route (bogus code): must reach the controller,
-            // which handles an unknown code gracefully.
-            'swipe_in' => ['/sw/in/bogus-code'],
         ];
+    }
+
+    /**
+     * Badge-scan route: must reach the controller (not be gated by the
+     * firewall) even for an unknown code, which swipeInAction handles
+     * gracefully by redirecting to homepage. The code must decode cleanly
+     * through vigenereDecode() — an arbitrary string like "bogus-code" isn't
+     * valid base64 and causes an unrelated 500 deeper in the lookup, which
+     * would defeat the purpose of this test.
+     */
+    public function testSwipeInIsNotBlockedByFirewall(): void
+    {
+        $client = static::createClient();
+        $client->request('GET', '/sw/in/' . urlencode($this->encodeInviteCode('unknown-badge-code')));
+
+        $response = $client->getResponse();
+        $this->assertTrue(
+            $response->isRedirection(),
+            sprintf('swipe_in with an unknown code should redirect (to homepage), got %d.', $response->getStatusCode())
+        );
+        $this->assertStringNotContainsString(
+            '/login',
+            $response->headers->get('Location'),
+            'swipe_in must not be gated by the terminal access_control rule.'
+        );
     }
 
     /**
