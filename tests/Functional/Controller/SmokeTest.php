@@ -3,8 +3,10 @@
 namespace App\Tests\Functional\Controller;
 
 use App\Tests\Functional\FunctionalTestCase;
+use App\Entity\AnonymousBeneficiary;
 use App\Entity\Beneficiary;
 use App\Entity\Shift;
+use App\Helper\SwipeCard;
 
 /**
  * Smoke tests for routes with database fixtures loaded.
@@ -442,6 +444,102 @@ class SmokeTest extends FunctionalTestCase
         $this->assertNotNull($shift, 'Fixtures should contain at least one Shift.');
 
         $client->request('GET', sprintf('/booking/bucket/%d/show', $shift->getId()));
+
+        $this->assertSame(200, $client->getResponse()->getStatusCode());
+    }
+
+    /**
+     * Encodes a value the same way App\Helper\SwipeCard does, using the
+     * SWIPE_CARD_SECRET declared in .env.test. Instantiated directly rather
+     * than fetched from the container, since App\Helper\SwipeCard is not a
+     * public service.
+     */
+    private function encodeInviteCode(string $value): string
+    {
+        $swipeCard = new SwipeCard('SwipeSecretToEncryptNumberInUrl');
+
+        return $swipeCard->vigenereEncode($value);
+    }
+
+    /**
+     * The anonymous membership-registration entry point: member_new skips
+     * its own denyAccessUnlessGranted('create', ...) call entirely when a
+     * valid invite `code` resolves to an AnonymousBeneficiary — this is the
+     * highest-risk route for the terminal access_control rule to break,
+     * since it has no @Security annotation and self-gates purely on this
+     * business logic.
+     */
+    public function testMemberNewWithValidInviteCodeIsPubliclyReachable(): void
+    {
+        $client = static::createClient();
+
+        $email = 'invite-' . uniqid() . '@example.test';
+        $em = $client->getContainer()->get('doctrine')->getManager();
+        $anonymousBeneficiary = new AnonymousBeneficiary();
+        $anonymousBeneficiary->setEmail($email);
+        $em->persist($anonymousBeneficiary);
+        $em->flush();
+
+        $code = $this->encodeInviteCode($email);
+        $client->request('GET', '/member/new?code=' . urlencode($code));
+
+        $this->assertSame(
+            200,
+            $client->getResponse()->getStatusCode(),
+            'member_new with a valid invite code must render the registration form anonymously.'
+        );
+    }
+
+    /**
+     * Same as above for member_add_beneficiary (adding a beneficiary to an
+     * existing membership via invite code) — the code path either renders
+     * the form (200) or redirects to homepage on a business-rule violation
+     * (BeneficiaryCanHost), never to /login.
+     */
+    public function testMemberAddBeneficiaryWithValidInviteCodeIsNotBlockedByFirewall(): void
+    {
+        $client = static::createClient();
+
+        $em = $client->getContainer()->get('doctrine')->getManager();
+        $hostBeneficiary = $em->getRepository(Beneficiary::class)->findOneBy([]);
+        $this->assertNotNull($hostBeneficiary, 'Fixtures should contain at least one Beneficiary.');
+
+        $email = 'invite-' . uniqid() . '@example.test';
+        $anonymousBeneficiary = new AnonymousBeneficiary();
+        $anonymousBeneficiary->setEmail($email);
+        $anonymousBeneficiary->setJoinTo($hostBeneficiary);
+        $em->persist($anonymousBeneficiary);
+        $em->flush();
+
+        $code = $this->encodeInviteCode($email);
+        $client->request('GET', '/member/add_beneficiary?code=' . urlencode($code));
+
+        $response = $client->getResponse();
+        $isFormRendered = 200 === $response->getStatusCode();
+        $isNonLoginRedirect = $response->isRedirection() && false === strpos((string) $response->headers->get('Location'), '/login');
+
+        $this->assertTrue(
+            $isFormRendered || $isNonLoginRedirect,
+            sprintf('member_add_beneficiary with a valid invite code must not be gated by the firewall, got %d.', $response->getStatusCode())
+        );
+    }
+
+    /**
+     * set_email (the #1245 temp-email activation flow) always renders
+     * beneficiary/confirm.html.twig regardless of branch taken — it must
+     * never redirect to /login.
+     */
+    public function testSetEmailIsPubliclyReachable(): void
+    {
+        $client = static::createClient();
+
+        $em = $client->getContainer()->get('doctrine')->getManager();
+        $beneficiary = $em->getRepository(Beneficiary::class)->findOneBy([]);
+        $this->assertNotNull($beneficiary, 'Fixtures should contain at least one Beneficiary.');
+
+        $client->request('POST', sprintf('/member/%d/set_email', $beneficiary->getId()), [
+            'email' => 'new-email-' . uniqid() . '@example.test',
+        ]);
 
         $this->assertSame(200, $client->getResponse()->getStatusCode());
     }
