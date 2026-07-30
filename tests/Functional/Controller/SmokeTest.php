@@ -56,6 +56,7 @@ class SmokeTest extends FunctionalTestCase
             'about' => ['/about'],
             'homepage (anonymous)' => ['/'],
             'member find_me' => ['/member/find_me'],
+            'beneficiary find_member_number' => ['/beneficiary/find_member_number'],
         ];
     }
 
@@ -174,6 +175,7 @@ class SmokeTest extends FunctionalTestCase
             'profile' => ['/profile/'],
             'schedule' => ['/schedule'],
             'event index' => ['/events/'],
+            'tasks list' => ['/tasks/'],
         ];
     }
 
@@ -354,5 +356,93 @@ class SmokeTest extends FunctionalTestCase
             $client->getResponse()->getStatusCode(),
             sprintf('Admin URL "%s" should be forbidden for regular user.', $url)
         );
+    }
+
+    // -------------------------------------------------------
+    // Default-deny terminal rule (#1246): previously-unannotated
+    // controllers are now covered by the catch-all access_control rule.
+    // -------------------------------------------------------
+
+    /**
+     * BeneficiaryController has no @Security annotations at all — it relied
+     * solely on an inline denyAccessUnlessGranted() voter call. The terminal
+     * rule adds a second layer that must not change the observable behavior
+     * for a legitimate, already-covered anonymous request.
+     */
+    public function testBeneficiaryEditRequiresAuthentication(): void
+    {
+        $client = static::createClient();
+
+        $em = $client->getContainer()->get('doctrine')->getManager();
+        $beneficiary = $em->getRepository(Beneficiary::class)->findOneBy([]);
+        $this->assertNotNull($beneficiary, 'Fixtures should contain at least one Beneficiary.');
+
+        $client->request('GET', sprintf('/beneficiary/%d/edit', $beneficiary->getId()));
+
+        $response = $client->getResponse();
+        $this->assertTrue(
+            $response->isRedirection(),
+            sprintf('Anonymous beneficiary edit should redirect, got %d.', $response->getStatusCode())
+        );
+        $this->assertStringContainsString('/login', $response->headers->get('Location'));
+    }
+
+    // -------------------------------------------------------
+    // Default-deny terminal rule (#1246): anonymous flows that must stay
+    // reachable (magic-link / invite-code / bootstrap / badge-scan routes).
+    // A redirect to /login here would mean the security.yaml whitelist
+    // regex is missing or wrong.
+    // -------------------------------------------------------
+
+    /**
+     * @dataProvider anonymousFlowUrlProvider
+     */
+    public function testAnonymousFlowUrlIsNotBlockedByFirewall(string $url): void
+    {
+        $client = static::createClient();
+        $client->request('GET', $url);
+
+        $response = $client->getResponse();
+        $this->assertTrue(
+            $response->isRedirection(),
+            sprintf('URL "%s" should redirect (to homepage), got %d.', $url, $response->getStatusCode())
+        );
+        $this->assertStringNotContainsString(
+            '/login',
+            $response->headers->get('Location'),
+            sprintf('URL "%s" must not be gated by the terminal access_control rule.', $url)
+        );
+    }
+
+    public function anonymousFlowUrlProvider(): array
+    {
+        return [
+            // Bootstrap route: must stay reachable even once a super-admin
+            // already exists, since the controller itself no-ops in that case.
+            'user install_admin' => ['/user/install_admin'],
+            // Vigenère magic-link route (no token supplied here): must reach
+            // the controller, which then mutes/redirects on invalid input.
+            'codes close_all' => ['/codes/close_all'],
+            // Badge-scan route (bogus code): must reach the controller,
+            // which handles an unknown code gracefully.
+            'swipe_in' => ['/sw/in/bogus-code'],
+        ];
+    }
+
+    /**
+     * bucket_show renders anonymously with display_names conditioned on
+     * authentication (SEC.1-12) — must stay reachable without a session.
+     */
+    public function testBucketShowIsPubliclyReachable(): void
+    {
+        $client = static::createClient();
+
+        $em = $client->getContainer()->get('doctrine')->getManager();
+        $shift = $em->getRepository(Shift::class)->findOneBy([]);
+        $this->assertNotNull($shift, 'Fixtures should contain at least one Shift.');
+
+        $client->request('GET', sprintf('/booking/bucket/%d/show', $shift->getId()));
+
+        $this->assertSame(200, $client->getResponse()->getStatusCode());
     }
 }
