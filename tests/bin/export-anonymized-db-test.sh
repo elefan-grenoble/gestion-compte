@@ -92,6 +92,41 @@ expect_exit "refuses an unreadable --input" 1 \
 expect_output_contains "refuses a DATABASE_URL with no database name" "database name" \
     env DATABASE_URL='mysql://u:p@127.0.0.1:3306' "${SCRIPT_UNDER_TEST}" --output "${WORK_DIR}/out.sql"
 
+# --- client detection -------------------------------------------------
+# MariaDB 11+ ships only mariadb/mariadb-dump, older installs only
+# mysql/mysqldump, and the rename did not happen in lockstep. Each binary
+# therefore has to be resolved on its own.
+
+# Emptying PATH would not work: the script needs sed to parse the URL
+# before it ever looks for a client, so it would fail for the wrong
+# reason. Run it only where there is genuinely nothing to find.
+if command -v mariadb >/dev/null 2>&1 || command -v mysql >/dev/null 2>&1; then
+    printf '  \033[0;33mskip\033[0m %s\n' "reports a missing client by name (a client is installed here)"
+else
+    expect_output_contains "reports a missing client by name" "looked for: mariadb, mysql" \
+        env DATABASE_URL='mysql://u:p@127.0.0.1:3306/db' \
+            "${SCRIPT_UNDER_TEST}" --output "${WORK_DIR}/out.sql"
+fi
+
+# A install where the client was renamed but the dump tool was not must
+# fall back rather than give up: resolving the pair as a block used to
+# fail here.
+STUB_DIR="${WORK_DIR}/stubs"
+mkdir -p "${STUB_DIR}"
+for stub in mariadb mysqldump; do
+    printf '#!/bin/sh\nexit 1\n' > "${STUB_DIR}/${stub}"
+    chmod +x "${STUB_DIR}/${stub}"
+done
+
+detection_output="$(env PATH="${STUB_DIR}:${PATH}" DATABASE_URL='mysql://u:p@127.0.0.1:3306/db' \
+    "${SCRIPT_UNDER_TEST}" --output "${WORK_DIR}/out.sql" 2>&1)"
+
+if [[ "${detection_output}" == *"no dump tool found"* ]]; then
+    fail "pairs mariadb with mysqldump when mariadb-dump is absent"
+else
+    pass "pairs mariadb with mysqldump when mariadb-dump is absent"
+fi
+
 # The property that matters most: a refused run must not leave anything
 # behind that could be mistaken for a finished export.
 if [[ -e "${WORK_DIR}/out.sql" ]]; then

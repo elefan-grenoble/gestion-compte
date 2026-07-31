@@ -112,30 +112,45 @@ DB_HOST="${DB_HOST:-127.0.0.1}"
 DB_PORT="${DB_PORT:-3306}"
 
 # --- client detection -----------------------------------------------
-# MariaDB renamed its clients; accept either family.
+# MariaDB renamed its clients and, from 11.x on, dropped the mysql* names
+# altogether; older installs only have those. Each binary is resolved on
+# its own rather than as a pair, because the versions that renamed them
+# did not do so in lockstep.
 
-if command -v mariadb >/dev/null 2>&1; then
-    MYSQL_BIN="mariadb"
-    DUMP_BIN="mariadb-dump"
-elif command -v mysql >/dev/null 2>&1; then
-    MYSQL_BIN="mysql"
-    DUMP_BIN="mysqldump"
-else
-    die "neither 'mariadb' nor 'mysql' found on PATH"
-fi
-command -v "${DUMP_BIN}" >/dev/null 2>&1 || die "'${DUMP_BIN}' not found on PATH"
+pick_binary() {
+    local candidate
+    for candidate in "$@"; do
+        if command -v "${candidate}" >/dev/null 2>&1; then
+            printf '%s' "${candidate}"
+            return 0
+        fi
+    done
+    return 1
+}
+
+MYSQL_BIN="$(pick_binary mariadb mysql)" \
+    || die "no client found on PATH (looked for: mariadb, mysql)"
+DUMP_BIN="$(pick_binary mariadb-dump mysqldump)" \
+    || die "no dump tool found on PATH (looked for: mariadb-dump, mysqldump)"
 
 # Credentials go to the clients through a private option file: passing
 # them as arguments would expose them in the process list to every other
 # user on the machine.
 CREDENTIALS_FILE="$(mktemp)"
 chmod 600 "${CREDENTIALS_FILE}"
+
+# Quoted, with backslashes and quotes escaped: option files treat an
+# unquoted '#' as the start of a comment, which would truncate the value
+# and fail authentication for a reason nothing in the output would
+# explain.
+escaped_password="$(printf '%s' "${DB_PASS}" | sed -e 's/\\/\\\\/g' -e 's/"/\\"/g')"
+
 cat > "${CREDENTIALS_FILE}" <<CNF
 [client]
 host=${DB_HOST}
 port=${DB_PORT}
 user=${DB_USER}
-password=${DB_PASS}
+password="${escaped_password}"
 CNF
 
 STAMP="$(date +%Y%m%d%H%M%S)$$"
@@ -196,8 +211,10 @@ for allowed in ${ALLOWED+"${ALLOWED[@]}"}; do VERIFY_ARGS+=(--allow "${allowed}"
 
 log "Verifying the artifact"
 if ! php "${PROJECT_DIR}/bin/console" app:anonymize:verify "${STAGED_DUMP}" ${VERIFY_ARGS+"${VERIFY_ARGS[@]}"}; then
-    # Overwritten rather than merely unlinked: the point of this branch is
-    # that the contents were judged unsafe to exist as a file.
+    # The header is zeroed before unlinking so that a recovered fragment
+    # is not a usable dump. This is tidiness, not secure erasure — on a
+    # journalling or copy-on-write filesystem the original blocks may well
+    # survive, so treat a failed export as data that existed on disk.
     dd if=/dev/zero of="${STAGED_DUMP}" bs=1M count=1 conv=notrunc 2>/dev/null || true
     rm -f -- "${STAGED_DUMP}"
     die "verification failed — no dump was written to '${OUTPUT}'"

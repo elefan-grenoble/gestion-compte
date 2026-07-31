@@ -148,6 +148,22 @@ branchée par erreur sur un vrai SMTP ne peut donc atteindre personne.
   champ de texte libre laissé en `keep` n'est pas détectable
   automatiquement — d'où les `--canary` quand vous connaissez des valeurs
   réelles.
-- `mysql`/`mariadb` et `mysqldump`/`mariadb-dump` doivent être dans le
-  `PATH` de la machine qui lance l'export.
-- Le moteur est spécifique à MySQL/MariaDB.
+- Le moteur est spécifique à MySQL/MariaDB (il n'est pas portable vers
+  PostgreSQL). Il est validé sur MariaDB : les tests fonctionnels
+  tournent sur MariaDB en local comme en CI.
+- Un client et un outil de dump doivent être dans le `PATH` de la
+  machine qui lance l'export. Le script résout `mariadb` puis `mysql`, et
+  `mariadb-dump` puis `mysqldump`, **indépendamment l'un de l'autre** :
+  MariaDB 11+ ne fournit plus les noms `mysql*`, les versions plus
+  anciennes ne fournissent que ceux-là, et le renommage ne s'est pas
+  fait d'un bloc.
+- Le scan lit le dump ligne par ligne, or `mysqldump` regroupe par défaut
+  les `INSERT` d'une table sur une seule ligne : sur une très grosse
+  table, cette ligne est chargée entière en mémoire. Si l'export sature,
+  produire le dump avec `--skip-extended-insert` (fichier plus gros et
+  restauration plus lente, mais lecture à mémoire constante).
+- Un mot de passe de connexion contenant des guillemets ou des
+  antislashs est correctement échappé, mais celui de `--password` est
+  transmis en argument de commande : il est donc visible dans la liste
+  des processus le temps de l'export. N'y mettez pas un secret réel —
+  c'est un mot de passe de démonstration, pas un identifiant.
