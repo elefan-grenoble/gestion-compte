@@ -54,12 +54,17 @@ Une extension existe aussi pour vscode : https://marketplace.visualstudio.com/it
 ## Tests
 
 ```shell
-// créer la base de donnée de test + initialiser avec le schema
+// créer la base de donnée de test + construire le schéma
 docker exec -i php php bin/console --env=test doctrine:database:create
-docker exec -i php php bin/console --env=test doctrine:schema:create
+docker exec -i php php bin/console --env=test doctrine:migrations:migrate --no-interaction
 // lancer les tests
 docker exec -i php php ./vendor/bin/phpunit
 ```
+
+Le schéma se construit en rejouant les migrations, jamais avec
+`doctrine:schema:create` : ce dernier le déduit des mappings d'entités et ne
+produit pas le même résultat que la CI et la production. `make db-reset`
+fait la même chose, précédé d'un drop de la base existante.
 
 ## Logs
 

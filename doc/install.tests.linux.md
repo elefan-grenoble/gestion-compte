@@ -90,7 +90,7 @@ make test-e2e-oidc        # Tests OIDC (nécessite Keycloak)
 
 ```bash
 make help          # Liste toutes les cibles disponibles
-make db-reset      # Recrée le schéma (sans fixtures)
+make db-reset      # Recrée le schéma en rejouant les migrations (sans fixtures)
 make db-migrate    # Exécute les migrations Doctrine
 make db-fixtures   # Reset DB + fixtures
 make cache-clear   # Vide le cache Symfony (env test)

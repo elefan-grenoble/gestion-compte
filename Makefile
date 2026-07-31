@@ -132,10 +132,16 @@ encore-stubs: ## Crée des stubs Webpack Encore (évite les 500 en test)
 # Base de données
 # ------------------------------------------------------------------
 
-db-reset: vendor ## Drop + recreate le schéma de test
+# Le schéma est reconstruit en rejouant les migrations, comme le font la CI
+# et la production, et non avec doctrine:schema:create qui le déduit des
+# mappings d'entités. Les deux ne produisent pas le même schéma : par
+# exemple view_abstract_registration est une vue SQL côté migrations, mais
+# une table ordinaire côté schema:create. Ne pas revenir en arrière : un
+# schéma local divergent laisse passer des bugs de migration jusqu'en CI.
+db-reset: vendor ## Drop + recreate le schéma de test (en rejouant les migrations)
 	$(EXEC) php bin/console --env=test doctrine:database:drop --force --if-exists
 	$(EXEC) php bin/console --env=test doctrine:database:create
-	$(EXEC) php bin/console --env=test doctrine:schema:create
+	@$(MAKE) --no-print-directory db-migrate
 
 db-migrate: ## Exécute les migrations Doctrine (env test)
 	$(EXEC) php bin/console --env=test doctrine:migrations:migrate --no-interaction
