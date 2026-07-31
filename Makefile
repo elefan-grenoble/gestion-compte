@@ -45,6 +45,7 @@ endif
         test-e2e test-e2e-main test-e2e-shift test-e2e-membership test-e2e-oidc \
         npm-install encore-build encore-stubs \
         db-reset db-migrate db-fixtures db-fixtures-load \
+        db-export-anon db-verify-anon test-anon \
         env-ci env-ci-oidc serve \
         up down clean cache-clear
 
@@ -219,6 +220,35 @@ test-e2e-membership: ## Cypress — tests adhésion
 
 test-e2e-oidc: ## Cypress — tests OIDC / Keycloak
 	$(CYPRESS_CMD) --spec 'cypress/e2e/keycloak/**/*'
+
+# ------------------------------------------------------------------
+# Export anonymisé de la base
+# ------------------------------------------------------------------
+#
+# L'export refuse de livrer un fichier tant qu'il n'a pas franchi trois
+# contrôles bloquants : couverture du schéma par le manifeste, scan du
+# dump produit, et restauration de ce dump. Voir doc/anonymized-export.md
+#
+# DATABASE_URL doit pointer sur la base source ; elle est uniquement lue.
+
+ANON_OUTPUT ?= var/export/anonymized-$(shell date +%Y%m%d-%H%M%S).sql
+ANON_INPUT  ?=
+ANON_DUMP   ?=
+
+db-export-anon: ## Produit un dump anonymisé et vérifié (ANON_OUTPUT=, ANON_INPUT=)
+	@mkdir -p $(dir $(ANON_OUTPUT))
+	./bin/export-anonymized-db.sh \
+		--output $(ANON_OUTPUT) \
+		$(if $(ANON_INPUT),--input $(ANON_INPUT),)
+
+db-verify-anon: ## Vérifie un dump SQL déjà existant (ANON_DUMP=chemin.sql)
+	@test -n "$(ANON_DUMP)" || { echo "Usage: make db-verify-anon ANON_DUMP=chemin.sql"; exit 1; }
+	$(EXEC) php bin/console app:anonymize:verify $(ANON_DUMP)
+
+test-anon: ## Tests du dispositif d'anonymisation (unitaires + fonctionnels + script)
+	$(EXEC) php vendor/bin/phpunit tests/Unit/Anonymization
+	$(EXEC) php vendor/bin/phpunit tests/Functional/Anonymization
+	./tests/bin/export-anonymized-db-test.sh
 
 # ------------------------------------------------------------------
 # Helpers CI

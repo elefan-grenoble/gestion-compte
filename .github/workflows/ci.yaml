@@ -108,6 +108,11 @@ jobs:
       - name: Run unit and integration tests
         run: make test-unit
 
+      # Preconditions of the anonymized export script. No database needed:
+      # every case is refused before a connection is opened.
+      - name: Run export script tests
+        run: ./tests/bin/export-anonymized-db-test.sh
+
   # ================================================================
   # 3. PHPStan
   # ================================================================
@@ -184,6 +189,14 @@ jobs:
 
       - name: Run migrations
         run: make db-migrate
+
+      # The anonymization tests build a throwaway database of their own
+      # rather than rewriting the one the rest of the suite uses, which
+      # needs a grant the per-database CI user does not get by default.
+      - name: Allow scratch databases for the anonymization tests
+        run: |
+          mysql -h 127.0.0.1 -P 3306 -uroot -psecret \
+            -e "GRANT ALL PRIVILEGES ON *.* TO 'user'@'%'; FLUSH PRIVILEGES;"
 
       - name: Run functional tests
         run: make test-func

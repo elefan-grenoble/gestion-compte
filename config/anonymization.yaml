@@ -1,0 +1,549 @@
+# ------------------------------------------------------------------
+# Anonymization manifest
+#
+# Single source of truth for `bin/console app:anonymize` and for the
+# anonymized database export (`make db-export-anon`).
+#
+# EVERY table and EVERY column of the live schema must be classified
+# here. tests/Functional/Anonymization/SchemaCoverageTest.php compares
+# this file against information_schema and fails the build when the
+# database contains something this file does not mention. That drift
+# check is what makes the export safe over time: adding a column in a
+# migration turns CI red until somebody decides whether the new column
+# carries personal data.
+#
+# Never add a wildcard or a default rule. The whole guarantee rests on
+# every column having been looked at by a human at least once.
+#
+# Table strategies
+#   truncate  all rows are deleted; columns need no classification
+#             because no data survives (new columns are harmless)
+#   anonymize rows are kept; every column must carry a rule
+#   view      a SQL view; its content is derived from base tables, so
+#             anonymizing those is enough and writing to it is invalid
+#
+# Column rules — see src/Anonymization/RuleRegistry.php
+#   keep                left untouched
+#   empty / null        emptied
+#   firstname lastname phone street city zipcode
+#                       deterministic fake, drawn from a pool
+#   username username_canonical email email_canonical
+#                       derived from the same fake identity
+#   word                short generic label ("commission 12")
+#   text                paragraph drawn from a neutral pool
+#   password            one fixed, publicly known bcrypt hash
+#   token               fresh random opaque value
+#   sequence            replaced by the row's own id
+#   redact              fixed marker string
+#
+# Determinism: fake values are seeded from the row's `seed` column
+# (default `id`). Two tables seeded on the same user id therefore draw
+# the same identity, which is what keeps fos_user and beneficiary
+# consistent without a join.
+#
+# Audience: internal development and testing. Business identifiers that
+# a developer needs in order to reproduce a bug (member_number, dates,
+# amounts) are deliberately kept. Widening the audience means revisiting
+# every `keep` below, not just adding rules.
+# ------------------------------------------------------------------
+
+tables:
+
+  # ---- Credentials and tokens -------------------------------------
+  # Dropped wholesale: none of it is reconstructible and all of it is
+  # directly exploitable.
+
+  access_token:
+    strategy: truncate
+    reason: Live OAuth bearer tokens.
+
+  refresh_token:
+    strategy: truncate
+    reason: Live OAuth refresh tokens.
+
+  auth_code:
+    strategy: truncate
+    reason: Live OAuth authorization codes.
+
+  client:
+    strategy: truncate
+    reason: OAuth client secrets. Cascades to the three token tables.
+
+  users_clients:
+    strategy: truncate
+    reason: Join table on `client`, which is truncated.
+
+  note:
+    strategy: truncate
+    reason: >-
+      Free-text staff annotations about members. Impossible to
+      anonymize meaningfully; the content is the sensitive part.
+
+  anonymous_beneficiary:
+    strategy: truncate
+    reason: >-
+      Pending invitations, holding e-mail addresses of people who are
+      not even members yet.
+
+  # ---- Identities --------------------------------------------------
+
+  fos_user:
+    strategy: anonymize
+    columns:
+      id: keep
+      username: username
+      username_canonical: username_canonical
+      email: email
+      email_canonical: email_canonical
+      enabled: keep
+      salt: 'null'
+      password: password
+      last_login: keep
+      confirmation_token: 'null'
+      password_requested_at: 'null'
+      roles: keep
+
+  beneficiary:
+    strategy: anonymize
+    seed: user_id
+    columns:
+      id: keep
+      address_id: keep
+      user_id: keep
+      membership_id: keep
+      commission_id: keep
+      lastname: lastname
+      firstname: firstname
+      phone: phone
+      flying: keep
+      openid: 'null'
+      openid_member_number: 'null'
+      created_at: keep
+
+  address:
+    strategy: anonymize
+    columns:
+      id: keep
+      street1: street
+      street2: empty
+      zipcode: zipcode
+      city: city
+
+  membership:
+    strategy: anonymize
+    columns:
+      id: keep
+      withdrawn_by_id: keep
+      main_beneficiary_id: keep
+      member_number: keep          # business identifier, kept for internal use
+      withdrawn: keep
+      withdrawn_date: keep
+      frozen: keep
+      frozen_change: keep
+      flying: keep
+      first_shift_date: keep
+      created_at: keep
+
+  # ---- Physical access ---------------------------------------------
+
+  swipe_card:
+    strategy: anonymize
+    columns:
+      id: keep
+      beneficiary_id: keep
+      disabled_at: keep
+      number: sequence             # printed badge number
+      enable: keep
+      code: token                  # badge secret, opens the shop
+      created_at: keep
+
+  swipe_card_log:
+    strategy: anonymize
+    columns:
+      id: keep
+      swipe_card_id: keep
+      counter: keep
+      date: keep
+
+  code:
+    strategy: anonymize
+    columns:
+      id: keep
+      registrar_id: keep
+      value: token                 # door access code
+      closed: keep
+      created_at: keep
+
+  # ---- Payments ----------------------------------------------------
+
+  helloasso_payment:
+    strategy: anonymize
+    seed_query: >-
+      SELECT hp.id AS id, b.user_id AS seed
+      FROM helloasso_payment hp
+      JOIN registration r ON r.id = hp.registration_id
+      JOIN membership m ON m.id = r.membership_id
+      JOIN beneficiary b ON b.id = m.main_beneficiary_id
+    columns:
+      id: keep
+      registration_id: keep
+      payment_id: keep
+      campaign_id: keep
+      date: keep
+      amount: keep
+      email: email
+      payer_first_name: firstname
+      payer_last_name: lastname
+      status: keep
+      created_at: keep
+
+  registration:
+    strategy: anonymize
+    columns:
+      id: keep
+      membership_id: keep
+      registrar_id: keep
+      date: keep
+      amount: keep
+      mode: keep
+      created_at: keep
+
+  # ---- Free text written by humans ---------------------------------
+  # These are the columns where members' names leak in practice, even
+  # though nothing in the schema says so.
+
+  time_log:
+    strategy: anonymize
+    columns:
+      id: keep
+      created_by_id: keep
+      membership_id: keep
+      shift_id: keep
+      created_at: keep
+      time: keep
+      type: keep
+      description: text
+      request_route: keep
+
+  membership_shift_exemption:
+    strategy: anonymize
+    columns:
+      id: keep
+      shift_exemption_id: keep
+      membership_id: keep
+      created_by_id: keep
+      description: text
+      start: keep
+      end: keep
+      created_at: keep
+
+  shiftfreelog:
+    strategy: anonymize
+    columns:
+      id: keep
+      shift_id: keep
+      beneficiary_id: keep
+      created_by_id: keep
+      shift_string: redact         # denormalized label, embeds names
+      fixe: keep
+      reason: text
+      request_route: keep
+      created_at: keep
+
+  period_position_free_log:
+    strategy: anonymize
+    columns:
+      id: keep
+      period_position_id: keep
+      beneficiary_id: keep
+      created_by_id: keep
+      period_position_string: redact   # denormalized label, embeds names
+      booked_time: keep
+      request_route: keep
+      created_at: keep
+
+  closing_exception:
+    strategy: anonymize
+    columns:
+      id: keep
+      created_by_id: keep
+      date: keep
+      reason: text
+      created_at: keep
+
+  process_update:
+    strategy: anonymize
+    columns:
+      id: keep
+      author_id: keep
+      date: keep
+      title: word
+      description: text
+      link: keep
+
+  task:
+    strategy: anonymize
+    columns:
+      id: keep
+      registrar_id: keep
+      title: word
+      due_date: keep
+      closed: keep
+      priority: keep
+      status: keep
+      created_at: keep
+
+  commission:
+    strategy: anonymize
+    columns:
+      id: keep
+      name: word
+      description: text
+      email: email
+      next_meeting_desc: text
+      next_meeting_date: keep
+      created_at: keep
+
+  event:
+    strategy: anonymize
+    columns:
+      id: keep
+      event_kind_id: keep
+      created_by_id: keep
+      updated_by_id: keep
+      title: word
+      description: text
+      location: city               # small events are hosted at members' homes
+      date: keep
+      end: keep
+      img: keep
+      img_size: keep
+      max_date_of_last_registration: keep
+      need_proxy: keep
+      anonymous_proxy: keep
+      displayed_home: keep
+      created_at: keep
+      updated_at: keep
+
+  # ---- Organisational content --------------------------------------
+  # Catalogs and public-facing copy. No personal data, and developers
+  # need the real values for the app to look and behave normally.
+
+  dynamic_content:
+    strategy: anonymize
+    columns:
+      id: keep
+      created_by_id: keep
+      updated_by_id: keep
+      code: keep                   # functional key looked up by the app
+      type: keep
+      name: keep
+      description: keep
+      content: keep                # already published on the public site
+      created_at: keep
+      updated_at: keep
+
+  email_template:
+    strategy: anonymize
+    columns:
+      id: keep
+      created_by_id: keep
+      updated_by_id: keep
+      name: keep
+      description: keep
+      content: keep
+      created_at: keep
+      updated_at: keep
+
+  formation:
+    strategy: anonymize
+    columns:
+      id: keep
+      created_by_id: keep
+      name: keep
+      roles: keep
+      description: keep
+      url: keep
+      created_at: keep
+
+  job:
+    strategy: anonymize
+    columns:
+      id: keep
+      created_by_id: keep
+      name: keep
+      color: keep
+      description: keep
+      url: keep
+      min_shifter_alert: keep
+      enabled: keep
+      created_at: keep
+
+  service:
+    strategy: anonymize
+    columns:
+      id: keep
+      name: keep
+      description: keep
+      icon: keep
+      slug: keep
+      public: keep
+      url: keep
+      logo: keep
+      logo_size: keep
+      updated_at: keep
+
+  social_network:
+    strategy: anonymize
+    columns:
+      id: keep
+      name: keep
+      description: keep
+      url: keep
+      displayed_footer: keep
+      created_at: keep
+
+  event_kind:
+    strategy: anonymize
+    columns:
+      id: keep
+      name: keep
+      created_at: keep
+
+  shift_exemption:
+    strategy: anonymize
+    columns:
+      id: keep
+      name: keep
+      created_at: keep
+
+  opening_hour_kind:
+    strategy: anonymize
+    columns:
+      id: keep
+      created_by_id: keep
+      updated_by_id: keep
+      name: keep
+      start_date: keep
+      end_date: keep
+      enabled: keep
+      created_at: keep
+      updated_at: keep
+
+  opening_hour:
+    strategy: anonymize
+    columns:
+      id: keep
+      opening_hour_kind_id: keep
+      day_of_week: keep
+      start: keep
+      end: keep
+      closed: keep
+      created_at: keep
+
+  # ---- Planning ----------------------------------------------------
+  # Structure and foreign keys only; the identities they point at are
+  # anonymized at the source.
+
+  shift:
+    strategy: anonymize
+    columns:
+      id: keep
+      shifter_id: keep
+      booker_id: keep
+      last_shifter_id: keep
+      formation_id: keep
+      job_id: keep
+      position_id: keep
+      created_by_id: keep
+      start: keep
+      end: keep
+      booked_time: keep
+      was_carried_out: keep
+      locked: keep
+      fixe: keep
+      created_at: keep
+
+  period:
+    strategy: anonymize
+    columns:
+      id: keep
+      job_id: keep
+      created_by_id: keep
+      updated_by_id: keep
+      day_of_week: keep
+      start: keep
+      end: keep
+      created_at: keep
+      updated_at: keep
+
+  period_position:
+    strategy: anonymize
+    columns:
+      id: keep
+      formation_id: keep
+      period_id: keep
+      shifter_id: keep
+      booker_id: keep
+      created_by_id: keep
+      updated_by_id: keep
+      week_cycle: keep
+      booked_time: keep
+      created_at: keep
+      updated_at: keep
+
+  proxy:
+    strategy: anonymize
+    columns:
+      id: keep
+      event_id: keep
+      owner: keep                  # int FK to beneficiary, not a name
+      giver: keep                  # int FK to beneficiary, not a name
+      created_at: keep
+
+  beneficiaries_commissions:
+    strategy: anonymize
+    columns:
+      beneficiary_id: keep
+      commission_id: keep
+
+  beneficiaries_formations:
+    strategy: anonymize
+    columns:
+      beneficiary_id: keep
+      formation_id: keep
+
+  tasks_beneficiaries:
+    strategy: anonymize
+    columns:
+      task_id: keep
+      beneficiary_id: keep
+
+  tasks_commissions:
+    strategy: anonymize
+    columns:
+      task_id: keep
+      commission_id: keep
+
+  # ---- Derived / infrastructure ------------------------------------
+
+  view_abstract_registration:
+    strategy: view
+    reason: >-
+      SQL view (src/Migrations/Version20191218002203_add_start_date_to_registration.php).
+      Its `beneficiary` column is CONCAT(firstname, lastname) read from
+      the `beneficiary` table, so it follows automatically once that
+      table is anonymized. Writing to it is not valid.
+      Note: a schema built with doctrine:schema:create instead of the
+      migrations materializes this as a real table holding real names —
+      SchemaCoverageTest asserts it really is a view.
+
+  doctrine_migration_versions:
+    strategy: anonymize
+    # Present only when the schema was built by running the migrations.
+    # A schema built with doctrine:schema:create does not have it.
+    optional: true
+    columns:
+      version: keep
+      executed_at: keep
+      execution_time: keep
