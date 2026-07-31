@@ -538,10 +538,13 @@ tables:
       migrations materializes this as a real table holding real names —
       SchemaCoverageTest asserts it really is a view.
 
-  doctrine_migration_versions:
+  migration_versions:
     strategy: anonymize
     # Present only when the schema was built by running the migrations.
     # A schema built with doctrine:schema:create does not have it.
+    # Named `migration_versions`, not the bundle default
+    # `doctrine_migration_versions`: config/packages/doctrine_migrations.yaml
+    # renames it on this project.
     optional: true
     columns:
       version: keep
