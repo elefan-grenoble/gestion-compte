@@ -42,7 +42,7 @@ class SchemaCoverageTest extends KernelTestCase
         $this->assertSame([], $problems, sprintf(
             "The database holds things %s does not classify.\n"
             . "Every column has to be given a rule before an export can be trusted — `keep` is a valid answer, silence is not.\n"
-            . "This is the same check app:anonymize refuses to run without.",
+            . 'This is the same check app:anonymize refuses to run without.',
             basename(Manifest::defaultPath())
         ));
     }

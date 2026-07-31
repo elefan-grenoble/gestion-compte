@@ -45,7 +45,7 @@ final class RuleRegistry
      * user for the same password — more work, and it would defeat the
      * "all accounts share one password" check the verifier relies on.
      *
-     * @var string|null
+     * @var null|string
      */
     private $passwordHash;
 
@@ -141,7 +141,7 @@ final class RuleRegistry
      * @param int $seed identity seed — equal seeds yield equal identities
      * @param int $id   the row's own id, used where the column must stay unique
      *
-     * @return string|null null means SQL NULL
+     * @return null|string null means SQL NULL
      */
     public function value(string $rule, int $seed, int $id): ?string
     {
@@ -173,10 +173,10 @@ final class RuleRegistry
             case 'zipcode':
                 return $this->pick($this->cities, $seed)[0];
 
-            // Written straight to the canonical columns rather than left to
-            // the FOSUserBundle Doctrine listener: the export must not
-            // depend on an ORM side effect that a future refactor could
-            // silently drop.
+                // Written straight to the canonical columns rather than left to
+                // the FOSUserBundle Doctrine listener: the export must not
+                // depend on an ORM side effect that a future refactor could
+                // silently drop.
             case 'username':
             case 'username_canonical':
                 return $this->username($seed, $id);

@@ -9,6 +9,7 @@ use App\Anonymization\RuleRegistry;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\DriverManager;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
+use App\Entity\User;
 
 /**
  * Exercises the anonymizer end to end against known personal data.
@@ -180,7 +181,7 @@ class AnonymizationLeakTest extends KernelTestCase
 
         $this->assertNotFalse($row);
         $this->assertStringStartsWith(
-            \App\Entity\User::makeUsername($row['firstname'], $row['lastname']),
+            User::makeUsername($row['firstname'], $row['lastname']),
             $row['username']
         );
     }

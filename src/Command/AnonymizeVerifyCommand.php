@@ -36,16 +36,17 @@ class AnonymizeVerifyCommand extends Command
         $this
             ->setName('app:anonymize:verify')
             ->setDescription('Check that a SQL dump carries no personal data')
-            ->setHelp(<<<'HELP'
-Streams a SQL dump and reports anything that looks like personal data:
-real e-mail addresses, French phone numbers, any literal passed with
---canary, and any password hash that does not verify against the
-anonymized password (--password, default Password123).
+            ->setHelp(
+                <<<'HELP'
+                    Streams a SQL dump and reports anything that looks like personal data:
+                    real e-mail addresses, French phone numbers, any literal passed with
+                    --canary, and any password hash that does not verify against the
+                    anonymized password (--password, default Password123).
 
-Exit code 0 means clean, 1 means findings, 2 means the file could not be
-read. Intended to gate an export: refuse to publish anything that does
-not exit 0.
-HELP
+                    Exit code 0 means clean, 1 means findings, 2 means the file could not be
+                    read. Intended to gate an export: refuse to publish anything that does
+                    not exit 0.
+                    HELP
             )
             ->addArgument('dump', InputArgument::REQUIRED, 'Path to the SQL dump to inspect')
             ->addOption('canary', 'c', InputOption::VALUE_IS_ARRAY | InputOption::VALUE_REQUIRED, 'A literal known to be real data; fails if found')

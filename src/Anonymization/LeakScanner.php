@@ -29,14 +29,14 @@ final class LeakScanner
     /** @var string[] */
     private $allowed;
 
-    /** @var string|null */
+    /** @var null|string */
     private $expectedPassword;
 
     /**
      * @param string[]    $canaries         known-real values that must not survive
      * @param string[]    $allowed          literals exempt from the pattern rules,
      *                                      for content deliberately left intact
-     * @param string|null $expectedPassword the password every account is
+     * @param null|string $expectedPassword the password every account is
      *                                      supposed to end up with; null
      *                                      disables the hash check
      */

@@ -35,11 +35,11 @@ final class Anonymizer
     }
 
     /**
-     * @param callable|null $progress fn(string $message): void
+     * @param null|callable $progress fn(string $message): void
      *
      * @return array<string, int> table name => rows affected
      */
-    public function run(bool $dryRun = false, callable $progress = null): array
+    public function run(bool $dryRun = false, ?callable $progress = null): array
     {
         $report = [];
         $notify = static function (string $message) use ($progress): void {
@@ -97,6 +97,7 @@ final class Anonymizer
 
         $affected = 0;
         $this->connection->beginTransaction();
+
         try {
             foreach ($rows as $row) {
                 $id = (int) $row['id'];

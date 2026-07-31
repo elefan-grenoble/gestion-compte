@@ -40,14 +40,15 @@ class AnonymizeDataCommand extends Command
         $this
             ->setName('app:anonymize')
             ->setDescription('Anonymize the connected database in place')
-            ->setHelp(<<<'HELP'
-Rewrites every column classified in config/anonymization.yaml, so the
-database can be shared with developers.
+            ->setHelp(
+                <<<'HELP'
+                    Rewrites every column classified in config/anonymization.yaml, so the
+                    database can be shared with developers.
 
-THIS REWRITES THE DATABASE IT IS CONNECTED TO. It is meant to run against
-a scratch copy, not against production. `make db-export-anon` wires that
-up for you.
-HELP
+                    THIS REWRITES THE DATABASE IT IS CONNECTED TO. It is meant to run against
+                    a scratch copy, not against production. `make db-export-anon` wires that
+                    up for you.
+                    HELP
             )
             ->addOption('dry-run', null, InputOption::VALUE_NONE, 'Report what would be rewritten, change nothing')
             ->addOption('force', 'f', InputOption::VALUE_NONE, 'Skip the confirmation prompt (required when not interactive)')
