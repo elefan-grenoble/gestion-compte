@@ -56,5 +56,31 @@ security:
     - { path: ^/register, role: IS_AUTHENTICATED_ANONYMOUSLY }
     - { path: ^/resetting, role: IS_AUTHENTICATED_ANONYMOUSLY }
     - { path: ^/admin/, role: ROLE_ADMIN_PANEL }
-    - { path: ^/api, role: IS_AUTHENTICATED_FULLY }
     - { path: ^/api/oauth/, role: ROLE_OAUTH_LOGIN }
+    - { path: ^/api, role: IS_AUTHENTICATED_FULLY }
+    # --- Public routes (anonymous access required by design) ---
+    - { path: ^/$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/about$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/helloassoNotify$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/oauth/(login|logout|callback)$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/sw/in/, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/sw/.+/(qr|br)\.png$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/card_reader, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/cardReader$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/codes/close_all$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/member/new$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/member/add_beneficiary$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/member/find_me$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/member/[^/]+/set_email$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/user/install_admin$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/beneficiary/find_member_number$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/beneficiary/[^/]+/confirm$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/booking/bucket/[^/]+/show$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/booking/day/, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/widget/$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/openinghours/widget$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/events/widget$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/shift/widget$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    - { path: ^/closingexceptions/widget$, role: IS_AUTHENTICATED_ANONYMOUSLY }
+    # --- Default-deny terminal rule (SEC.1-1 / C-SEC-2) ---
+    - { path: ^/, role: IS_AUTHENTICATED_REMEMBERED }
