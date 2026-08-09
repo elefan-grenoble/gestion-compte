@@ -25,6 +25,9 @@ set -euo pipefail
 readonly SCRIPT_NAME="${0##*/}"
 readonly PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
+# shellcheck source=bin/lib/dump-sanitize.sh
+source "${PROJECT_DIR}/bin/lib/dump-sanitize.sh"
+
 usage() {
     cat <<USAGE
 Usage: ${SCRIPT_NAME} --output <file> [--input <dump.sql>] [options]
@@ -200,10 +203,15 @@ DATABASE_URL="${SCRATCH_URL}" php "${PROJECT_DIR}/bin/console" app:anonymize \
 
 # --- 2. dump, then verify before anything is delivered ---------------
 
+# Piped through dump_sanitize so the artifact does not carry the scratch
+# database's generated name — that database is dropped when this script
+# exits, so a view still qualified with it would be unrestorable for
+# everyone, starting with gate 3 below.
 log "Dumping the anonymized copy"
 "${DUMP_BIN}" --defaults-extra-file="${CREDENTIALS_FILE}" \
     --single-transaction --quick --routines --events \
-    "${SCRATCH_DB}" > "${STAGED_DUMP}"
+    "${SCRATCH_DB}" \
+    | dump_sanitize "${SCRATCH_DB}" > "${STAGED_DUMP}"
 
 VERIFY_ARGS=(--password "${PASSWORD}")
 for canary in ${CANARIES+"${CANARIES[@]}"}; do VERIFY_ARGS+=(--canary "${canary}"); done

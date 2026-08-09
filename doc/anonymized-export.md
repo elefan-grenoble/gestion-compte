@@ -66,6 +66,27 @@ fichier.
 Un artefact corrompu est ainsi détecté ici plutôt que par son
 destinataire. Désactivable avec `--no-restore-check`.
 
+### Vues et DEFINER
+
+Le dump est réécrit avant livraison (`bin/lib/dump-sanitize.sh`), pour
+deux raisons qui tiennent toutes les deux au fait qu'un dump est produit
+depuis une base jetable au nom généré, détruite en fin d'exécution.
+
+Une vue dont le `DEFINER` désigne un compte absent du serveur — le cas
+de toute vue restaurée depuis la production — est stockée avec ses
+références de tables développées en `` `base`.`table`.`colonne` `` dans
+le `SELECT` et les `ON`, alors que le `FROM` garde le nom nu. Avec
+`--single-transaction`, cette forme arrive telle quelle dans le dump :
+la vue lit alors une colonne d'une base qui n'est pas celle du `FROM`,
+et la restauration échoue sur `Unknown column`. La réécriture retire ce
+préfixe de base.
+
+Elle retire aussi la clause `DEFINER` elle-même : le compte qu'elle
+nomme n'existe pas chez le destinataire, qui obtiendrait sinon
+`The user specified as a definer does not exist` en interrogeant la vue.
+Sans cette clause, la vue s'exécute avec les droits de qui l'a
+restaurée.
+
 ## Le manifeste
 
 `config/anonymization.yaml` est la source de vérité. **Toute** table et

@@ -201,6 +201,15 @@ jobs:
       - name: Run functional tests
         run: make test-func
 
+      # Round trip of the dump sanitiser. Needs a database, so it cannot
+      # live with the precondition tests in fast-tests, and needs root:
+      # its fixture sets a DEFINER other than its own, which is the
+      # condition the defect depends on.
+      - name: Run dump sanitiser tests
+        env:
+          DATABASE_URL: 'mysql://root:secret@127.0.0.1:3306/symfony'
+        run: ./tests/bin/dump-sanitize-test.sh
+
   # ================================================================
   # 5. Cypress E2E tests
   # ================================================================
