@@ -39,6 +39,47 @@ Et l'inverse, pour du contenu volontairement conservé :
 ./bin/export-anonymized-db.sh --output out.sql --allow 'contact@elefan.org'
 ```
 
+## Privilèges nécessaires
+
+Un compte root (ou tout compte `ALL PRIVILEGES ON *.*`) — le cas d'un
+dev local classique — n'a rien à configurer.
+
+Pour un compte restreint, quatre choses sont nécessaires, découvertes en
+lançant l'export contre une vraie base et en accordant exactement ce que
+chaque échec réclamait :
+
+```sql
+-- lire la base source (jamais d'écriture dessus)
+GRANT SELECT, SHOW VIEW, TRIGGER, EVENT ON `<db>`.* TO '<user>'@'<host>';
+
+-- créer/écrire/détruire les bases jetables que l'export génère
+-- (nom motif `<db>_anon_<horodatage>` / `<db>_verify_<horodatage>`)
+GRANT ALL PRIVILEGES ON `<db>_anon_%`.*   TO '<user>'@'<host>';
+GRANT ALL PRIVILEGES ON `<db>_verify_%`.* TO '<user>'@'<host>';
+
+-- restaurer une vue/trigger/routine dont le DEFINER désigne un compte
+-- absent du serveur — le cas de tout ce qui vient de la production
+GRANT SET USER ON *.* TO '<user>'@'<host>';  -- SUPER sur un serveur plus ancien
+
+FLUSH PRIVILEGES;
+```
+
+`SELECT`/`SHOW VIEW`/`TRIGGER`/`EVENT` restent scopés à `<db>` : le
+compte ne peut ni écrire ni détruire quoi que ce soit sur la base
+source, quelle que soit la suite de l'export. `SET USER` (ou `SUPER`)
+est global — MariaDB ne permet pas de le scoper par base — mais ne sert
+qu'à recréer des objets qu'on ne possède pas soi-même dans les bases
+jetables, jamais sur la source.
+
+Le script vérifie ces privilèges **avant** de créer quoi que ce soit
+(`SHOW GRANTS FOR CURRENT_USER()`, lecture de métadonnées, aucune requête
+sur les données) et refuse avec la liste précise de ce qui manque plutôt
+que d'échouer plus loin avec une erreur SQL peu explicite. C'est un
+contrôle statique — il ne voit pas un privilège accordé via un rôle
+(MariaDB 10.5+), auquel cas `--skip-privilege-check` le désactive ; les
+étapes de l'export continuent alors à attraper un compte réellement
+sous-privilégié, juste plus tard et avec une erreur moins précise.
+
 ## Les trois contrôles
 
 Ils sont **bloquants**. Aucun n'a d'option pour passer outre : la

@@ -250,6 +250,7 @@ test-anon: ## Tests du dispositif d'anonymisation (unitaires + fonctionnels + sc
 	$(EXEC) php vendor/bin/phpunit tests/Functional/Anonymization
 	./tests/bin/export-anonymized-db-test.sh
 	./tests/bin/dump-sanitize-test.sh
+	./tests/bin/check-privileges-test.sh
 	./tests/bin/export-anonymized-db-view-restore-test.sh
 
 # ------------------------------------------------------------------

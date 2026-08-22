@@ -27,6 +27,8 @@ readonly PROJECT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # shellcheck source=bin/lib/dump-sanitize.sh
 source "${PROJECT_DIR}/bin/lib/dump-sanitize.sh"
+# shellcheck source=bin/lib/check-privileges.sh
+source "${PROJECT_DIR}/bin/lib/check-privileges.sh"
 
 usage() {
     cat <<USAGE
@@ -46,13 +48,19 @@ Usage: ${SCRIPT_NAME} --output <file> [--input <dump.sql>] [options]
                       Repeatable.
   --keep-scratch      do not drop the scratch databases (debugging)
   --no-restore-check  skip gate 3
+  --skip-privilege-check
+                      skip the upfront check of what DATABASE_URL's
+                      account can do (see doc/anonymized-export.md);
+                      needed when the account holds its privileges
+                      through a role, which the check cannot see
   -h, --help          this text
 
 Requires DATABASE_URL in the environment, pointing at the source database:
 
   export DATABASE_URL='mysql://user:pass@host:3306/dbname'
 
-The source database is only ever read from.
+The source database is only ever read from. See
+doc/anonymized-export.md for the privileges that account needs.
 USAGE
 }
 
@@ -72,20 +80,22 @@ INPUT=""
 PASSWORD="Password123"
 KEEP_SCRATCH=0
 RESTORE_CHECK=1
+SKIP_PRIVILEGE_CHECK=0
 CANARIES=()
 ALLOWED=()
 
 while [[ $# -gt 0 ]]; do
     case "$1" in
-        --output)           OUTPUT="${2:-}"; shift 2 ;;
-        --input)            INPUT="${2:-}"; shift 2 ;;
-        --password)         PASSWORD="${2:-}"; shift 2 ;;
-        --canary)           CANARIES+=("${2:-}"); shift 2 ;;
-        --allow)            ALLOWED+=("${2:-}"); shift 2 ;;
-        --keep-scratch)     KEEP_SCRATCH=1; shift ;;
-        --no-restore-check) RESTORE_CHECK=0; shift ;;
-        -h|--help)          usage; exit 0 ;;
-        *)                  usage >&2; die "unknown argument '$1'" ;;
+        --output)               OUTPUT="${2:-}"; shift 2 ;;
+        --input)                INPUT="${2:-}"; shift 2 ;;
+        --password)             PASSWORD="${2:-}"; shift 2 ;;
+        --canary)               CANARIES+=("${2:-}"); shift 2 ;;
+        --allow)                ALLOWED+=("${2:-}"); shift 2 ;;
+        --keep-scratch)         KEEP_SCRATCH=1; shift ;;
+        --no-restore-check)     RESTORE_CHECK=0; shift ;;
+        --skip-privilege-check) SKIP_PRIVILEGE_CHECK=1; shift ;;
+        -h|--help)              usage; exit 0 ;;
+        *)                      usage >&2; die "unknown argument '$1'" ;;
     esac
 done
 
@@ -177,6 +187,27 @@ cleanup() {
     exit "${status}"
 }
 trap cleanup EXIT INT TERM
+
+# --- privilege check --------------------------------------------------
+# Before anything is created: an under-privileged account should fail
+# with a list of what it is missing, not partway through with whichever
+# SQL error the missing privilege happens to produce first. Runs after
+# the trap above is armed, so a refusal here still cleans up the
+# credentials file. See bin/lib/check-privileges.sh for what is checked
+# and why, and doc/anonymized-export.md for the GRANT statements this
+# expects.
+
+if [[ ${SKIP_PRIVILEGE_CHECK} -eq 0 ]]; then
+    grants="$(mysql_run --skip-column-names --batch -e 'SHOW GRANTS FOR CURRENT_USER()' 2>&1)" \
+        || die "could not read privileges for the DATABASE_URL account: ${grants}"
+
+    missing="$(check_export_privileges "${DB_NAME}" <<< "${grants}")" || true
+    if [[ -n "${missing}" ]]; then
+        printf 'the DATABASE_URL account is missing:\n%s\n' "${missing}" >&2
+        printf 'see doc/anonymized-export.md, or pass --skip-privilege-check\n' >&2
+        exit 1
+    fi
+fi
 
 # --- 0. load the source into a scratch database ----------------------
 
