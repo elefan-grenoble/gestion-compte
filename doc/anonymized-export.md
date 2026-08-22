@@ -49,6 +49,9 @@ lançant l'export contre une vraie base et en accordant exactement ce que
 chaque échec réclamait :
 
 ```sql
+-- créer le compte dédié
+CREATE USER '<user>'@'<host>' IDENTIFIED BY '<password>';
+
 -- lire la base source (jamais d'écriture dessus)
 GRANT SELECT, SHOW VIEW, TRIGGER, EVENT ON `<db>`.* TO '<user>'@'<host>';
 

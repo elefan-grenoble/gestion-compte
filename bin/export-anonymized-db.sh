@@ -204,7 +204,21 @@ if [[ ${SKIP_PRIVILEGE_CHECK} -eq 0 ]]; then
     missing="$(check_export_privileges "${DB_NAME}" <<< "${grants}")" || true
     if [[ -n "${missing}" ]]; then
         printf 'the DATABASE_URL account is missing:\n%s\n' "${missing}" >&2
-        printf 'see doc/anonymized-export.md, or pass --skip-privilege-check\n' >&2
+        # Unquoted heredoc: ${DB_NAME} expands, backticks are escaped so
+        # they reach the terminal literally instead of running as a
+        # command substitution.
+        cat >&2 <<EXAMPLE
+
+no dedicated account yet? create one, e.g.:
+
+  CREATE USER 'anon_reader'@'%' IDENTIFIED BY '<password>';
+  GRANT SELECT, SHOW VIEW, TRIGGER, EVENT ON \`${DB_NAME}\`.* TO 'anon_reader'@'%';
+  GRANT ALL PRIVILEGES ON \`${DB_NAME}_anon_%\`.*   TO 'anon_reader'@'%';
+  GRANT ALL PRIVILEGES ON \`${DB_NAME}_verify_%\`.* TO 'anon_reader'@'%';
+  GRANT SET USER ON *.* TO 'anon_reader'@'%';
+
+see doc/anonymized-export.md, or pass --skip-privilege-check
+EXAMPLE
         exit 1
     fi
 fi
