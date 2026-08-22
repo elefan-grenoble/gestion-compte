@@ -206,6 +206,23 @@ Les adresses e-mail sont réécrites sur `@example.invalid`, un domaine que
 la RFC 6761 garantit non résolvable — une instance de développement
 branchée par erreur sur un vrai SMTP ne peut donc atteindre personne.
 
+### Le compte `admin`
+
+L'export contient **toujours** un compte `admin` (identifiant `admin`,
+e-mail `admin@example.invalid`, mot de passe partagé ci-dessus) avec le
+rôle `ROLE_SUPER_ADMIN`.
+
+Sans ça, développer sur un dump frais veut dire aller chercher lequel
+des identifiants anonymisés (`nmignerot_2`, `lbidar_5`...) porte ce rôle
+— ils changent d'un export à l'autre, puisque `username` est réécrit
+comme n'importe quelle colonne (voir `RuleRegistry::username()`).
+`AdminAccountGuarantee` repointe plutôt, après l'anonymisation, le
+compte `ROLE_SUPER_ADMIN` d'id le plus bas vers cette identité fixe —
+déterministe, sans jamais inventer de compte que le manifeste n'aurait
+pas classé. Si la base source ne contient **aucun** compte
+`ROLE_SUPER_ADMIN`, l'export refuse plutôt que de livrer un dump sans
+la garantie promise.
+
 ## Limites connues
 
 - Le scan par motifs reconnaît les adresses e-mail, les hachages bcrypt

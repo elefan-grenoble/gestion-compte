@@ -2,6 +2,7 @@
 
 namespace App\Command;
 
+use App\Anonymization\AdminAccountGuarantee;
 use App\Anonymization\Anonymizer;
 use App\Anonymization\Manifest;
 use App\Anonymization\RuleRegistry;
@@ -104,6 +105,20 @@ class AnonymizeDataCommand extends Command
 
         if (!$dryRun) {
             $io->note(sprintf('Every account now shares the password "%s".', $rules->password()));
+
+            try {
+                (new AdminAccountGuarantee($this->connection))->apply(RuleRegistry::EMAIL_DOMAIN);
+            } catch (\RuntimeException $e) {
+                $io->error($e->getMessage());
+
+                return 1;
+            }
+
+            $io->note(sprintf(
+                'Login "%s" (%s) always exists in the export, with ROLE_SUPER_ADMIN.',
+                AdminAccountGuarantee::USERNAME,
+                $rules->password()
+            ));
         }
 
         return 0;
