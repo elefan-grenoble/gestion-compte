@@ -187,10 +187,18 @@ if [[ -n "${INPUT}" ]]; then
     log "Restoring ${INPUT} into the scratch database"
     mysql_run "${SCRATCH_DB}" < "${INPUT}"
 else
+    # Piped through dump_sanitize for the same reason as the final dump
+    # below (see its comment): a view whose DEFINER names an account
+    # absent from this server — the case for any view restored from
+    # production — is dumped with its table references qualified by
+    # `${DB_NAME}`. Restored bare into a scratch database of a different
+    # name, that qualification points at a database that does not exist
+    # there, and the restore fails with "Unknown column". Every source
+    # with such a view was born unrestorable until this pass ran.
     log "Dumping ${DB_NAME} into the scratch database (source is only read)"
     "${DUMP_BIN}" --defaults-extra-file="${CREDENTIALS_FILE}" \
         --single-transaction --quick --routines --events \
-        "${DB_NAME}" | mysql_run "${SCRATCH_DB}"
+        "${DB_NAME}" | dump_sanitize "${DB_NAME}" | mysql_run "${SCRATCH_DB}"
 fi
 
 SCRATCH_URL="mysql://${DB_USER}:${DB_PASS}@${DB_HOST}:${DB_PORT}/${SCRATCH_DB}"
