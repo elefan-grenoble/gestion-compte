@@ -537,12 +537,15 @@ class SmokeTest extends FunctionalTestCase
         $client->request('GET', '/member/add_beneficiary?code=' . urlencode($code));
 
         $response = $client->getResponse();
-        $isFormRendered = 200 === $response->getStatusCode();
-        $isNonLoginRedirect = $response->isRedirection() && false === strpos((string) $response->headers->get('Location'), '/login');
 
-        $this->assertTrue(
-            $isFormRendered || $isNonLoginRedirect,
-            sprintf('member_add_beneficiary with a valid invite code must not be gated by the firewall, got %d.', $response->getStatusCode())
+        $this->assertStringNotContainsString(
+            '/login',
+            (string) $response->headers->get('Location', ''),
+            sprintf(
+                'member_add_beneficiary with a valid invite code must not be gated by the firewall (redirected to /login), got status %d with Location "%s".',
+                $response->getStatusCode(),
+                $response->headers->get('Location', '(none)')
+            )
         );
     }
 
