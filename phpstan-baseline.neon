@@ -1669,12 +1669,6 @@ parameters:
 			path: src/Controller/EventController.php
 
 		-
-			message: '#^Cannot call method getOwner\(\) on list\<object\>\.$#'
-			identifier: method.nonObject
-			count: 1
-			path: src/Controller/EventController.php
-
-		-
 			message: '#^Left side of && is always true\.$#'
 			identifier: booleanAnd.leftAlwaysTrue
 			count: 1
