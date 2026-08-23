@@ -253,7 +253,7 @@ class EmailingEventListener
                 )
             ;
         } catch (\Exception $e) {
-            exit($e->getMessage());
+            throw $e;
         }
 
         $this->mailer->send($email);
