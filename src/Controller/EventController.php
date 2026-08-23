@@ -441,7 +441,7 @@ class EventController extends AbstractController
             $max_event_proxy_per_member = $this->getParameter('max_event_proxy_per_member');
             $myproxy = $em->getRepository(Proxy::class)->findBy(['event' => $event, 'owner' => $form->getData()->getOwner()]);
             if (count($myproxy) >= $max_event_proxy_per_member) {
-                $this->addFlash('error', $myproxy->getOwner()->getFirstname() . ' accepte déjà ' . $max_event_proxy_per_member . ' procuration.');
+                $this->addFlash('error', $form->getData()->getOwner()->getFirstname() . ' accepte déjà ' . $max_event_proxy_per_member . ' procuration.');
 
                 return $this->redirectToRoute('event_proxy_take', ['id' => $event->getId()]);
             }
