@@ -17,6 +17,7 @@ require('materialize-css/')
 require('./barcode.js');
 require('./datepicker.js');
 global.Cookies = require('./js.cookie.js');
+require('canvas-gauges');
 
 require("../less/card.less");
 require("../less/custom.less");
