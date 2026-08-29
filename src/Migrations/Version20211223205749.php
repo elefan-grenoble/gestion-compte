@@ -22,19 +22,121 @@ final class Version20211223205749 extends AbstractMigration
         // this up() migration is auto-generated, please modify it to your needs
         $this->abortIf($this->connection->getDatabasePlatform()->getName() !== 'mysql', 'Migration can only be executed safely on \'mysql\'.');
 
-        $this->addSql('DROP TABLE period_position_period');
-        $this->addSql('DELETE FROM period_position');
-        $this->addSql('ALTER TABLE period DROP week_cycle');
         $this->addSql('ALTER TABLE period_position ADD period_id INT DEFAULT NULL, ADD shifter_id INT DEFAULT NULL, ADD booker_id INT DEFAULT NULL, ADD week_cycle VARCHAR(1) NOT NULL, ADD booked_time DATETIME DEFAULT NULL, DROP nb_of_shifter');
+        $this->addSql('ALTER TABLE shift ADD position_id INT DEFAULT NULL');
+        $this->addSql('ALTER TABLE period DROP week_cycle');
+        $this->addSql('DROP TABLE period_position_period');
+
+        // Migrate PeriodPosition data. We plan a delete (not a truncate: period_position_free_log
+        // FKs onto this table with ON DELETE SET NULL, and MySQL refuses to truncate a table that
+        // is referenced by a foreign key), then we retrieve data to plan new inserts (addSql
+        // statements are executed after the return statement)
+        $this->addSql('DELETE FROM period_position');
+        $this->addSql('ALTER TABLE period_position AUTO_INCREMENT=1');
+
+        // period_position.created_at/updated_at (added by later migrations, not yet present
+        // when this fix was first written) are NOT NULL with no default, so the backfill
+        // insert below has to set them explicitly.
+        $insertPositions = 'INSERT INTO period_position (period_id, formation_id, week_cycle, created_at, updated_at) VALUES ';
+        $shouldInsertPositions = false;
+
+        $selectPeriods = <<<'EOT'
+                SELECT per.id, per.job_id, per.day_of_week, per.start, per.end, per.week_cycle
+                FROM period per
+            EOT;
+        $periods = $this->connection->fetchAllAssociative($selectPeriods);
+
+        foreach ($periods as $per) {
+            $weeks = explode(',', $per['week_cycle']);
+            foreach ($weeks as $numWeek) {
+                $charWeek = chr(65 + (int) $numWeek); // 1 -> A, 2 -> B, 3 -> C, 4 -> D
+                $selectPositions = <<<EOT
+                        SELECT pos.id, pos.formation_id, pos.nb_of_shifter
+                        FROM period_position pos
+                        JOIN period_position_period ppp ON pos.id = ppp.period_position_id
+                        WHERE ppp.period_id = {$per['id']}
+                    EOT;
+                $positions = $this->connection->fetchAllAssociative($selectPositions);
+
+                foreach ($positions as $pos) {
+                    for ($i = 0; $i < $pos['nb_of_shifter']; ++$i) {
+                        $shouldInsertPositions = true; // at least one position needs to be added
+                        $formationId = $pos['formation_id'] ?: 'NULL';
+                        $insertPositions .= "({$per['id']}, {$formationId}, '{$charWeek}', NOW(), NOW()), ";
+                    }
+                }
+            }
+        }
+        if ($shouldInsertPositions) {
+            $insertPositions = rtrim($insertPositions, ' ,') . ';';
+            $this->addSql($insertPositions);
+        }
+
+        // Foreign keys and Indexes
         $this->addSql('ALTER TABLE period_position ADD CONSTRAINT FK_2367D496EC8B7ADE FOREIGN KEY (period_id) REFERENCES period (id) ON DELETE CASCADE');
         $this->addSql('ALTER TABLE period_position ADD CONSTRAINT FK_2367D496A7DA74C1 FOREIGN KEY (shifter_id) REFERENCES beneficiary (id)');
         $this->addSql('ALTER TABLE period_position ADD CONSTRAINT FK_2367D4968B7E4006 FOREIGN KEY (booker_id) REFERENCES beneficiary (id)');
+
         $this->addSql('CREATE INDEX IDX_2367D496EC8B7ADE ON period_position (period_id)');
         $this->addSql('CREATE INDEX IDX_2367D496A7DA74C1 ON period_position (shifter_id)');
         $this->addSql('CREATE INDEX IDX_2367D4968B7E4006 ON period_position (booker_id)');
-        $this->addSql('ALTER TABLE shift ADD position_id INT DEFAULT NULL');
+
         $this->addSql('ALTER TABLE shift ADD CONSTRAINT FK_A50B3B45DD842E46 FOREIGN KEY (position_id) REFERENCES period_position (id) ON DELETE SET NULL');
         $this->addSql('CREATE INDEX IDX_A50B3B45DD842E46 ON shift (position_id)');
+    }
+
+    public function postUp(Schema $schema): void
+    {
+        // Match Shifts with new PeriodPositions
+        $selectShifts = <<<'EOT'
+                SELECT s.id, s.formation_id, s.job_id, s.start, s.end
+                FROM shift s
+            EOT;
+        $shifts = $this->connection->fetchAllAssociative($selectShifts);
+        $usedPositionIds = [];
+        foreach ($shifts as $shift) {
+            // The original hotfix omitted the AND on these first two conditions, which made
+            // the query below a SQL syntax error as soon as there was more than one WHERE
+            // clause fragment (i.e. always, since formation/week_cycle always follow) —
+            // fixed here while forward-porting.
+            //
+            // It also compared `per.start`/`per.end` (TIME columns) against the shift's full
+            // DATETIME string as-is. MariaDB accepts that in a SELECT expression (silently
+            // extracting the time part) but not as a WHERE filter, where it never matches —
+            // so this never actually relinked a single shift. Extracting the time-of-day in
+            // PHP first fixes that.
+            $perStart = $shift['start'] ? date('H:i:s', strtotime($shift['start'])) : null;
+            $perEnd = $shift['end'] ? date('H:i:s', strtotime($shift['end'])) : null;
+            $perStartTest = $perStart ? "per.start = \"{$perStart}\"" : 'per.start IS NULL';
+            $perEndTest = $perEnd ? "AND per.end = \"{$perEnd}\"" : 'AND per.end IS NULL';
+            $perJobIdTest = $shift['job_id'] ? "AND per.job_id = \"{$shift['job_id']}\"" : 'AND per.job_id IS NULL';
+            $formationIdTest = $shift['formation_id'] ? "AND pos.formation_id = {$shift['formation_id']}" : 'AND pos.formation_id IS NULL';
+            $weekCycleIndex = (date_create($shift['start'])->format('W') - 1) % 4; // 0 = (1-1)%4 (first week) through 51 (based on ShiftGenerateCommand)
+            $weekCycleChar = chr(65 + $weekCycleIndex);
+            $weekCycleTest = "AND pos.week_cycle = \"{$weekCycleChar}\"";
+            $usedPositionIdsStr = implode(',', $usedPositionIds);
+            $usedPositionIdsTest = $usedPositionIdsStr ? "AND pos.id NOT IN ({$usedPositionIdsStr})" : '';
+            $selectMatchingPositions = <<<EOT
+                    SELECT pos.id
+                    FROM period_position pos
+                    LEFT JOIN period per ON per.id = pos.period_id
+                    WHERE
+                        {$perStartTest}
+                        {$perEndTest}
+                        {$perJobIdTest}
+                        {$formationIdTest}
+                        {$weekCycleTest}
+                        {$usedPositionIdsTest}
+                EOT;
+
+            if ($matchingPosition = $this->connection->fetchAssociative($selectMatchingPositions)) {
+                $update = "UPDATE shift SET position_id = {$matchingPosition['id']} WHERE id = {$shift['id']}";
+                $this->connection->executeStatement($update);
+                $usedPositionIds[] = $matchingPosition['id'];
+
+                $this->write($update);
+            }
+        }
     }
 
     public function down(Schema $schema): void
