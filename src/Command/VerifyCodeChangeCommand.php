@@ -100,7 +100,7 @@ class VerifyCodeChangeCommand extends Command
                     $code_change_done_url = $this->router->generate(
                         'code_change_done',
                         [
-                            'token' => $this->swipeCard->vigenereEncode($last->getRegistrar()->getUsername() . ',code:' . $last->getId()),
+                            'token' => $this->swipeCard->vigenereEncode($last->getRegistrar()->getUsername() . ',code:' . $last->getId() . ',ts:' . time()),
                         ],
                         UrlGeneratorInterface::ABSOLUTE_URL
                     );
