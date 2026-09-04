@@ -49,30 +49,6 @@ parameters:
 			path: src/Command/AmbassadorShiftTimeLogCommand.php
 
 		-
-			message: '#^Method App\\Command\\AnonymizeDataCommand\:\:configure\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Command/AnonymizeDataCommand.php
-
-		-
-			message: '#^Method App\\Command\\AnonymizeDataCommand\:\:randomValue\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Command/AnonymizeDataCommand.php
-
-		-
-			message: '#^Method App\\Command\\AnonymizeDataCommand\:\:randomValue\(\) has parameter \$array with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Command/AnonymizeDataCommand.php
-
-		-
-			message: '#^Property App\\Command\\AnonymizeDataCommand\:\:\$em has no type specified\.$#'
-			identifier: missingType.property
-			count: 1
-			path: src/Command/AnonymizeDataCommand.php
-
-		-
 			message: '#^Method App\\Command\\CloseMembershipCommand\:\:configure\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
