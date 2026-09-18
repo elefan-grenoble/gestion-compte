@@ -12,17 +12,17 @@ use Psr\Http\Client\ClientExceptionInterface;
 class IgloohomeClient
 {
     private OauthAuthenticatorInterface $authenticator;
-    private string $igloohomeClientId;
-    private string $igloohomeClientSecret;
-    private string $igloohomeApiAuthUrl;
-    private string $igloohomeApiDevice;
+    private ?string $igloohomeClientId;
+    private ?string $igloohomeClientSecret;
+    private ?string $igloohomeApiAuthUrl;
+    private ?string $igloohomeApiDevice;
 
     public function __construct(
         OauthAuthenticatorInterface $authenticator,
-        string $igloohomeClientId,
-        string $igloohomeClientSecret,
-        string $igloohomeApiAuthUrl,
-        string $igloohomeApiDevice
+        ?string $igloohomeClientId,
+        ?string $igloohomeClientSecret,
+        ?string $igloohomeApiAuthUrl,
+        ?string $igloohomeApiDevice
     ) {
         $this->igloohomeApiDevice = $igloohomeApiDevice;
         $this->igloohomeApiAuthUrl = $igloohomeApiAuthUrl;

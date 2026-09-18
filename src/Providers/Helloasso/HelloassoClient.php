@@ -11,19 +11,19 @@ use Psr\Http\Client\ClientExceptionInterface;
 class HelloassoClient
 {
     private OauthAuthenticatorInterface $authenticator;
-    private string $helloAssoClientId;
-    private string $helloAssoClientSecret;
-    private string $helloAssoApiAuthUrl;
-    private string $helloAssoApiBaseUrl;
-    private string $helloAssoOrganizationSlug;
+    private ?string $helloAssoClientId;
+    private ?string $helloAssoClientSecret;
+    private ?string $helloAssoApiAuthUrl;
+    private ?string $helloAssoApiBaseUrl;
+    private ?string $helloAssoOrganizationSlug;
 
     public function __construct(
         OauthAuthenticatorInterface $authenticator,
-        string $helloAssoClientId,
-        string $helloAssoClientSecret,
-        string $helloAssoApiAuthUrl,
-        string $helloAssoApiBaseUrl,
-        string $helloAssoOrganizationSlug
+        ?string $helloAssoClientId,
+        ?string $helloAssoClientSecret,
+        ?string $helloAssoApiAuthUrl,
+        ?string $helloAssoApiBaseUrl,
+        ?string $helloAssoOrganizationSlug
     ) {
         $this->helloAssoOrganizationSlug = $helloAssoOrganizationSlug;
         $this->helloAssoApiBaseUrl = $helloAssoApiBaseUrl;
