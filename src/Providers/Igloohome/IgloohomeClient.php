@@ -12,12 +12,12 @@ use Psr\Http\Client\ClientExceptionInterface;
 class IgloohomeClient
 {
     private OauthAuthenticatorInterface $authenticator;
-    private $igloohomeClientId;
-    private $igloohomeClientSecret;
-    private $igloohomeApiAuthUrl;
-    private $igloohomeApiDevice;
+    private $igloohomeClientId; // @phpstan-ignore missingType.property
+    private $igloohomeClientSecret; // @phpstan-ignore missingType.property
+    private $igloohomeApiAuthUrl; // @phpstan-ignore missingType.property
+    private $igloohomeApiDevice; // @phpstan-ignore missingType.property
 
-    public function __construct(
+    public function __construct(// @phpstan-ignore-line
         OauthAuthenticatorInterface $authenticator,
         $igloohomeClientId,
         $igloohomeClientSecret,

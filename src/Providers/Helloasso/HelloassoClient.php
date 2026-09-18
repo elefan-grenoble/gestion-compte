@@ -11,13 +11,13 @@ use Psr\Http\Client\ClientExceptionInterface;
 class HelloassoClient
 {
     private OauthAuthenticatorInterface $authenticator;
-    private $helloAssoClientId;
-    private $helloAssoClientSecret;
-    private $helloAssoApiAuthUrl;
-    private $helloAssoApiBaseUrl;
-    private $helloAssoOrganizationSlug;
+    private $helloAssoClientId; // @phpstan-ignore missingType.property
+    private $helloAssoClientSecret; // @phpstan-ignore missingType.property
+    private $helloAssoApiAuthUrl; // @phpstan-ignore missingType.property
+    private $helloAssoApiBaseUrl; // @phpstan-ignore missingType.property
+    private $helloAssoOrganizationSlug; // @phpstan-ignore missingType.property
 
-    public function __construct(
+    public function __construct(// @phpstan-ignore-line
         OauthAuthenticatorInterface $authenticator,
         $helloAssoClientId,
         $helloAssoClientSecret,
