@@ -36,7 +36,7 @@ jobs:
             echo "No containers to remove."
           fi
 
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Setup PHP
         uses: shivammathur/setup-php@verbose
@@ -46,12 +46,10 @@ jobs:
           extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, json
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.11.0'
+        uses: actions/setup-node@v7
 
       - name: Cache composer dependencies
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             ~/.composer/cache
@@ -69,13 +67,13 @@ jobs:
         run: make encore-build
 
       - name: Upload vendor/
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: vendor-dir
           path: vendor/
 
       - name: Upload public/build/
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: build-dir
           path: public/build/
@@ -87,10 +85,10 @@ jobs:
     needs: setup
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Download vendor/
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: vendor-dir
           path: vendor/
@@ -120,10 +118,10 @@ jobs:
     needs: setup
     runs-on: ubuntu-22.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Download vendor/
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: vendor-dir
           path: vendor/
@@ -163,16 +161,16 @@ jobs:
           --health-timeout=5s
           --health-retries=5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Download vendor/
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: vendor-dir
           path: vendor/
 
       - name: Download public/build/
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: build-dir
           path: public/build/
@@ -232,16 +230,16 @@ jobs:
           --health-timeout=5s
           --health-retries=5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Download vendor/
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: vendor-dir
           path: vendor/
 
       - name: Download public/build/
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: build-dir
           path: public/build/
@@ -257,9 +255,7 @@ jobs:
           extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, json
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.11.0'
+        uses: actions/setup-node@v7
 
       - name: Install Symfony CLI
         run: |
@@ -279,7 +275,7 @@ jobs:
         run: make db-fixtures-load
 
       - name: Cache Cypress binary
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/Cypress
           key: ${{ runner.os }}-cypress-${{ hashFiles('**/package-lock.json') }}
@@ -302,7 +298,7 @@ jobs:
 
       - name: Upload Cypress screenshots on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cypress-screenshots
           path: cypress/screenshots/
@@ -330,16 +326,16 @@ jobs:
           --health-timeout=5s
           --health-retries=5
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Download vendor/
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: vendor-dir
           path: vendor/
 
       - name: Download public/build/
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v8
         with:
           name: build-dir
           path: public/build/
@@ -355,9 +351,7 @@ jobs:
           extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, json
 
       - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.11.0'
+        uses: actions/setup-node@v7
 
       - name: Install Symfony CLI
         run: |
@@ -377,7 +371,7 @@ jobs:
         run: make db-fixtures-load
 
       - name: Cache Cypress binary
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: ~/.cache/Cypress
           key: ${{ runner.os }}-cypress-${{ hashFiles('**/package-lock.json') }}
@@ -417,7 +411,7 @@ jobs:
 
       - name: Upload Cypress screenshots on failure
         if: failure()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: cypress-oidc-screenshots
           path: cypress/screenshots/
