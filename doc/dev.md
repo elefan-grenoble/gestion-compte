@@ -3,7 +3,7 @@
 ## Contribuer
 
 * Les *Issues* servent à documenter, discuter et suivre les bugs ou idées d'améliorations
-* La branche principale est `master`
+* La branche principale est `main`
 * Ouvrir une *Pull Request* (PR) pour tout changement de code :
     * en essayant de les garder petites (quite à faire 2 ou 3 PR pour une grosse fonctionnalité)
     * en préférant le Français (l'application est actuellement seulement disponible dans cette langue)
