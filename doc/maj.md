@@ -26,7 +26,7 @@ git checkout vX.Y.Z
 
 ### vous n'avez pas installé avec git (ex via ftp)
 
-1. Téléchargez la dernière version de l'application via https://github.com/elefan-grenoble (releases, ou master)
+1. Téléchargez la dernière version de l'application via https://github.com/elefan-grenoble (releases, ou main)
 2. Déplacez l'intégralité du code téléchargé sur votre serveur afin d'écraser les anciens fichiers
 3. Connectez-vous en ligne de commande sur votre serveur et déplacez vous dans le dossier
 

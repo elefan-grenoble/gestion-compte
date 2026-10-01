@@ -17,7 +17,7 @@ require_once dirname(__DIR__, 3) . '/src/Migrations/Version20211223205749.php';
 /**
  * Regression test for the migration that used to wipe `period_position`
  * instead of migrating its data (fixed in v1.31.3, forward-ported to
- * master here).
+ * main here).
  *
  * The test database is built by replaying every migration in order
  * (see SchemaBuiltFromMigrationsTest), so by the time this test runs

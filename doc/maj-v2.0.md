@@ -14,7 +14,7 @@ Auparavant, vos paramètres se trouvaient dans un fichier `parameters.yml`.
 À partir de la version 2.0 (Symfony 4), ce fichier s'appelle `.env` et se présente légèrement différemment.
 
 Process :
-1. copiez le fichier [`.env.dist`](https://github.com/elefan-grenoble/gestion-compte/blob/master/.env.dist) et renommez-le `.env`
+1. copiez le fichier [`.env.dist`](https://github.com/elefan-grenoble/gestion-compte/blob/main/.env.dist) et renommez-le `.env`
 2. pour chacune des variables ce nouveau fichier `.env` :
   - consultez votre fichier `parameters.yml` et trouvez cette variable (même nom, en minuscules)
   - reportez la valeur de l'ancienne variable, si la nouvelle n'a pas encore la bonne valeur
