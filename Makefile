@@ -9,8 +9,10 @@
 # Usage :
 #   make setup-test    Bootstrap complet (Docker + DB + fixtures)
 #   make test          Tous les tests PHPUnit
-#   make test-unit     Tests unitaires + intégration
-#   make test-func     Tests fonctionnels
+#   make test-unit     Tests unitaires (sans DB)
+#   make test-integration  Tests d'intégration (Kernel + DB)
+#   make test-func     Tests fonctionnels (HTTP + DB)
+#   make test-coverage Tous les tests + couverture (var/coverage/)
 #   make lint          Analyse statique PHPStan
 #   make test-e2e      Tests Cypress E2E (hors OIDC)
 #   make clean         Arrête les conteneurs et supprime les volumes
@@ -41,7 +43,7 @@ else
 endif
 
 .PHONY: help check-docker check-hosts setup-test \
-        test test-unit test-func test-coverage lint \
+        test test-unit test-integration test-func test-coverage lint \
         test-e2e test-e2e-main test-e2e-shift test-e2e-membership test-e2e-oidc \
         npm-install encore-build encore-stubs \
         db-reset db-migrate db-fixtures db-fixtures-load \
@@ -161,8 +163,9 @@ setup-test: check-hosts vendor encore-stubs db-fixtures cache-clear ## Bootstrap
 	@echo ""
 	@echo "✅ Environnement de test prêt."
 	@echo "  make test          Tous les tests"
-	@echo "  make test-unit     Unit + intégration"
-	@echo "  make test-func     Fonctionnels"
+	@echo "  make test-unit     Unitaires (sans DB)"
+	@echo "  make test-integration  Intégration (DB)"
+	@echo "  make test-func     Fonctionnels (DB)"
 	@echo "  make lint          Outils de linting"
 	@echo "  make test-e2e      Cypress E2E"
 
@@ -173,13 +176,20 @@ setup-test: check-hosts vendor encore-stubs db-fixtures cache-clear ## Bootstrap
 test: ## Tous les tests PHPUnit
 	$(EXEC) composer test
 
-test-unit: ## Tests unitaires + intégration (sans DB)
+# Chaque test qui démarre le Kernel tourne dans une transaction annulée à sa
+# fin (tests/PHPUnit/DatabaseIsolationExtension.php) : l'ordre des tests ne
+# change rien à l'état de la base qu'ils voient.
+
+test-unit: ## Tests unitaires (TestCase pur, sans DB)
 	$(EXEC) composer test-unit
 
-test-func: ## Tests fonctionnels (avec DB)
+test-integration: ## Tests d'intégration (KernelTestCase + DB : repositories, DQL)
+	$(EXEC) composer test-integration
+
+test-func: ## Tests fonctionnels (HTTP + DB, fixtures par classe)
 	$(EXEC) composer test-functional
 
-test-coverage: ## Tests avec rapport de couverture HTML
+test-coverage: ## Tous les tests + couverture (HTML, Clover, texte) dans var/coverage/
 	$(EXEC) composer test-coverage
 
 # ------------------------------------------------------------------

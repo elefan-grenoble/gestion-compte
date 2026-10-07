@@ -79,11 +79,18 @@ jobs:
           path: public/build/
 
   # ================================================================
-  # 2. Unit + integration tests (no DB)
+  # 2. Unit tests (no DB)
+  #
+  # PHPUnit runs on 7.4 (README requirement, dev Docker image) and on
+  # 8.1 (production image); both are blocking.
   # ================================================================
   fast-tests:
     needs: setup
     runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: ['7.4', '8.1']
     steps:
       - uses: actions/checkout@v7
 
@@ -96,14 +103,15 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@verbose
         with:
-          php-version: '7.4'
+          php-version: ${{ matrix.php-versions }}
           tools: composer:2.2
+          coverage: none
           extensions: mbstring, xml, ctype, iconv, intl, dom, filter, gd, json
 
       - name: Set up environment
         run: make env-ci
 
-      - name: Run unit and integration tests
+      - name: Run unit tests
         run: make test-unit
 
       # Preconditions of the anonymized export script. No database needed:
@@ -140,11 +148,21 @@ jobs:
         run: make lint
 
   # ================================================================
-  # 4. Functional tests (with DB)
+  # 4. Integration + functional tests (with DB)
+  #
+  # Same PHP matrix as fast-tests. The 8.1 leg also measures coverage
+  # (every suite, unit included) and publishes it; no threshold yet.
   # ================================================================
   symfony-tests:
     needs: setup
     runs-on: ubuntu-22.04
+    strategy:
+      fail-fast: false
+      matrix:
+        php-versions: ['7.4', '8.1']
+        include:
+          - php-versions: '8.1'
+            coverage: true
     services:
       mariadb:
         image: mariadb:10.4
@@ -178,8 +196,9 @@ jobs:
       - name: Setup PHP
         uses: shivammathur/setup-php@verbose
         with:
-          php-version: '7.4'
+          php-version: ${{ matrix.php-versions }}
           tools: composer:2.2
+          coverage: ${{ matrix.coverage && 'pcov' || 'none' }}
           extensions: mbstring, xml, ctype, iconv, intl, pdo_mysql, dom, filter, gd, json
 
       - name: Set up environment
@@ -196,8 +215,32 @@ jobs:
           mysql -h 127.0.0.1 -P 3306 -uroot -psecret \
             -e "GRANT ALL PRIVILEGES ON \`symfony\_anon\_test\_%\`.* TO 'user'@'%'; FLUSH PRIVILEGES;"
 
+      - name: Run integration tests
+        if: ${{ !matrix.coverage }}
+        run: make test-integration
+
       - name: Run functional tests
+        if: ${{ !matrix.coverage }}
         run: make test-func
+
+      - name: Run all PHPUnit suites with coverage
+        if: ${{ matrix.coverage }}
+        run: make test-coverage
+
+      - name: Publish coverage summary
+        if: ${{ matrix.coverage }}
+        run: php tests/tools/coverage-summary.php var/coverage/clover.xml >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Upload coverage report
+        if: ${{ matrix.coverage }}
+        uses: actions/upload-artifact@v7
+        with:
+          name: coverage-report
+          path: |
+            var/coverage/clover.xml
+            var/coverage/coverage.txt
+            var/coverage/html/
+          retention-days: 14
 
       # Round trip of the dump sanitiser. Needs a database, so it cannot
       # live with the precondition tests in fast-tests, and needs root:

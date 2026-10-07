@@ -33,4 +33,10 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 # Installation des extensions nécessaires
 RUN docker-php-ext-install -j$(nproc) pdo_mysql pcntl gd
 
+# Pilote de couverture pour `make test-coverage`, désactivé par défaut
+# (composer test-coverage le réactive avec -d pcov.enabled=1)
+RUN pecl install pcov \
+    && docker-php-ext-enable pcov \
+    && echo 'pcov.enabled=0' > /usr/local/etc/php/conf.d/zz-pcov.ini
+
 WORKDIR /var/www/app/

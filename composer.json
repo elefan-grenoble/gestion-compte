@@ -82,9 +82,14 @@
             "@auto-scripts"
         ],
         "test": "php vendor/bin/phpunit",
-        "test-unit": "php vendor/bin/phpunit --testsuite unit,integration",
+        "test-unit": "php vendor/bin/phpunit --testsuite unit",
+        "test-integration": "php vendor/bin/phpunit --testsuite integration",
         "test-functional": "php vendor/bin/phpunit --testsuite functional",
-        "test-coverage": "php -d xdebug.mode=coverage vendor/bin/phpunit --coverage-html var/coverage"
+        "test-coverage": [
+            "@putenv XDEBUG_MODE=coverage",
+            "php -d pcov.enabled=1 vendor/bin/phpunit --coverage-html var/coverage/html --coverage-clover var/coverage/clover.xml --coverage-text=var/coverage/coverage.txt",
+            "php tests/tools/coverage-summary.php var/coverage/clover.xml"
+        ]
     },
     "config": {
         "preferred-install": {
