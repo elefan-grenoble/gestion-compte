@@ -41,8 +41,6 @@ require_once dirname(__DIR__, 3) . '/src/Migrations/Version20211223205749.php';
  * forward is what puts the schema back.
  *
  * @internal
- *
- * @coversNothing
  */
 class Version20211223205749Test extends DatabasePrimer implements SkipDatabaseRollback
 {

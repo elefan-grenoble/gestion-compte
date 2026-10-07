@@ -8,8 +8,6 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- *
- * @coversNothing
  */
 class LeakScannerTest extends TestCase
 {

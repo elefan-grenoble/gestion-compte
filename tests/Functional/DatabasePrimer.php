@@ -25,8 +25,6 @@ use Symfony\Component\Console\Output\BufferedOutput;
  * test writes is rolled back when it ends.
  *
  * @internal
- *
- * @coversNothing
  */
 class DatabasePrimer extends WebTestCase
 {

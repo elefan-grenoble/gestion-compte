@@ -15,8 +15,6 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  * other DB-backed test is suspect.
  *
  * @internal
- *
- * @coversNothing
  */
 class DatabaseIsolationTest extends KernelTestCase
 {

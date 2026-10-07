@@ -14,8 +14,6 @@ use Symfony\Component\Console\Output\BufferedOutput;
  * User CSV import on an empty database (the purge of setUpBeforeClass()).
  *
  * @internal
- *
- * @coversNothing
  */
 class AdminControllerTest extends FunctionalTestCase
 {

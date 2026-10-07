@@ -20,8 +20,6 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  * from a leak.
  *
  * @internal
- *
- * @coversNothing
  */
 class SchemaCoverageTest extends KernelTestCase
 {

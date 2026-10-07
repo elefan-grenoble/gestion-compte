@@ -14,8 +14,6 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- *
- * @coversNothing
  */
 class BeneficiaryTest extends TestCase
 {

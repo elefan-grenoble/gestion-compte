@@ -8,8 +8,6 @@ use App\Tests\Functional\FunctionalTestCase;
  * Functional tests for MembershipController.
  *
  * @internal
- *
- * @coversNothing
  */
 class MembershipControllerTest extends FunctionalTestCase
 {

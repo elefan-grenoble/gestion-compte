@@ -16,8 +16,6 @@ use App\Helper\SwipeCard;
  * (users, admins, jobs, shifts, events, opening hours, dynamic content, etc.).
  *
  * @internal
- *
- * @coversNothing
  */
 class SmokeTest extends FunctionalTestCase
 {

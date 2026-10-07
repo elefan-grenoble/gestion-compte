@@ -15,8 +15,6 @@ use Symfony\Component\Console\Output\BufferedOutput;
  * database, and fixtures can only be loaded once per class, before its tests.
  *
  * @internal
- *
- * @coversNothing
  */
 class AdminControllerCommissionImportTest extends FunctionalTestCase
 {

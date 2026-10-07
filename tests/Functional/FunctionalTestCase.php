@@ -15,8 +15,6 @@ use Symfony\Component\Security\Core\Authentication\Token\UsernamePasswordToken;
  * and adds shared helper methods used across functional test classes.
  *
  * @internal
- *
- * @coversNothing
  */
 class FunctionalTestCase extends DatabasePrimer
 {

@@ -15,8 +15,6 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- *
- * @coversNothing
  */
 class MembershipTest extends TestCase
 {

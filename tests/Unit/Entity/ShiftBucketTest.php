@@ -12,8 +12,6 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- *
- * @coversNothing
  */
 class ShiftBucketTest extends TestCase
 {

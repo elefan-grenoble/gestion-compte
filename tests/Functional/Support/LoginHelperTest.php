@@ -12,8 +12,6 @@ use App\Tests\Support\Builder\UserBuilder;
  * the functional tests rely on instead of the login form.
  *
  * @internal
- *
- * @coversNothing
  */
 class LoginHelperTest extends FunctionalTestCase
 {

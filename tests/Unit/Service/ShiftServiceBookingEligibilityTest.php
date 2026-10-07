@@ -25,8 +25,6 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * misleading assertions they carry are reviewed.
  *
  * @internal
- *
- * @coversNothing
  */
 class ShiftServiceBookingEligibilityTest extends TestCase
 {
