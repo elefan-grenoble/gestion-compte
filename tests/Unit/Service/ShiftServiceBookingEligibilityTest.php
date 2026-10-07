@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Tests\Integration\Service;
+namespace App\Tests\Unit\Service;
 
 use App\Entity\Beneficiary;
 use App\Entity\Membership;
@@ -16,11 +16,19 @@ use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
+ * ShiftService rules deciding whether a beneficiary may book a shift
+ * (isShiftBookable, isBeginner, hasPreviousValidShifts, shiftTimeByCycle).
+ *
+ * A pure TestCase on mocks: it used to sit in tests/Integration although it
+ * boots no kernel and opens no connection. It overlaps ShiftServiceUnitTest
+ * on isBeginner and shiftTimeByCycle; the two are kept apart until the
+ * misleading assertions they carry are reviewed.
+ *
  * @internal
  *
  * @coversNothing
  */
-class ShiftServiceTest extends TestCase
+class ShiftServiceBookingEligibilityTest extends TestCase
 {
     /**
      * @var ShiftService
