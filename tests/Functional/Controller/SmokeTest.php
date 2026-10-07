@@ -21,14 +21,10 @@ use App\Helper\SwipeCard;
  */
 class SmokeTest extends FunctionalTestCase
 {
-    private static bool $fixturesLoaded = false;
-
-    public function setUp(): void
+    public static function setUpBeforeClass(): void
     {
-        if (!self::$fixturesLoaded) {
-            $this->loadFixturesWithGroups(['period']);
-            self::$fixturesLoaded = true;
-        }
+        parent::setUpBeforeClass();
+        static::loadFixtures(['period']);
     }
 
     // -------------------------------------------------------
