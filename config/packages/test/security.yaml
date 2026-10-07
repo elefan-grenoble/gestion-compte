@@ -1,0 +1,8 @@
+security:
+  encoders:
+    # bcrypt at its lowest cost in tests: at the default cost (13) hashing one
+    # password takes about half a second, paid for every user a fixture or a
+    # test persists. The hashes stay real bcrypt hashes, checked the same way.
+    FOS\UserBundle\Model\UserInterface:
+      algorithm: bcrypt
+      cost: 4
