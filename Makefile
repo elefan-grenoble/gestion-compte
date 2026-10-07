@@ -115,8 +115,11 @@ clean: ## Arrête les conteneurs et supprime volumes + fichiers générés
 # Dépendances & assets
 # ------------------------------------------------------------------
 
-vendor: $(_DOCKER_DEP)
+# Prérequis composer.json/composer.lock : en CI, le vendor/ restauré du cache
+# peut dater d'un autre lock, et sans eux make le jugerait à jour.
+vendor: composer.json composer.lock $(_DOCKER_DEP)
 	$(EXEC) composer install --no-interaction --prefer-dist
+	@touch vendor
 
 npm-install: ## Installe les paquets NPM
 	npm ci
