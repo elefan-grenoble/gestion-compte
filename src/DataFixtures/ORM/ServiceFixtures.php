@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures\ORM;
 
+use App\DataFixtures\FixtureTools;
 use App\DataFixtures\FixturesConstants;
 use App\Entity\Service;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -13,6 +14,7 @@ class ServiceFixtures extends Fixture implements FixtureGroupInterface, OrderedF
 {
     public function load(ObjectManager $manager)
     {
+        FixtureTools::seedRandomGenerator(static::class);
 
         $serviceCounts = FixturesConstants::CLIENTS_COUNT;
         $serviceIcons = FixturesConstants::SERVICE_ICONS;

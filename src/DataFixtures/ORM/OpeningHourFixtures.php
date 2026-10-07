@@ -18,6 +18,7 @@ class OpeningHourFixtures extends Fixture implements FixtureGroupInterface, Orde
      */
     public function load(ObjectManager $manager)
     {
+        FixtureTools::seedRandomGenerator(static::class);
 
         $openingHourKindsNames = FixturesConstants::OPENING_HOUR_KINDS_NAMES;
         $openingHourKindsStartDates = FixturesConstants::OPENING_HOUR_KINDS_START_DATES;

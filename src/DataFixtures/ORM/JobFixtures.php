@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures\ORM;
 
+use App\DataFixtures\FixtureTools;
 use App\DataFixtures\FixturesConstants;
 use App\Entity\Job;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -13,6 +14,7 @@ class JobFixtures extends Fixture implements FixtureGroupInterface, OrderedFixtu
 {
     public function load(ObjectManager $manager)
     {
+        FixtureTools::seedRandomGenerator(static::class);
         $jobTitles = FixturesConstants::JOB_TITLES;
         $jobColors = FixturesConstants::JOB_COLORS;
         $jobDescriptions = FixturesConstants::JOB_DESCRIPTIONS;

@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures\ORM;
 
+use App\DataFixtures\FixtureTools;
 use App\DataFixtures\FixturesConstants;
 use App\Entity\Event;
 use App\Entity\EventKind;
@@ -17,6 +18,7 @@ class EventFixtures extends Fixture implements OrderedFixtureInterface, FixtureG
      */
     public function load(ObjectManager $manager)
     {
+        FixtureTools::seedRandomGenerator(static::class);
 
         $eventTitles = FixturesConstants::EVENT_TITLES;
         $eventCounts = FixturesConstants::EVENTS_COUNT;

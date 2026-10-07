@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures\ORM;
 
+use App\DataFixtures\FixtureTools;
 use App\DataFixtures\FixturesConstants;
 use App\Entity\Address;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -13,6 +14,7 @@ class AddressFixtures extends Fixture implements FixtureGroupInterface, OrderedF
 {
     public function load(ObjectManager $manager)
     {
+        FixtureTools::seedRandomGenerator(static::class);
 
         $addresses = FixturesConstants::ADDRESSES;
         $addresses_count = FixturesConstants::ADMINS_COUNT + FixturesConstants::USERS_COUNT + FixturesConstants::SUPER_ADMINS_COUNT;

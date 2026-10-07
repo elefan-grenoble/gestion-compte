@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures\ORM;
 
+use App\DataFixtures\FixtureTools;
 use App\DataFixtures\FixturesConstants;
 use App\Entity\Beneficiary;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -13,6 +14,7 @@ class BeneficiaryFixtures extends Fixture implements OrderedFixtureInterface, Fi
 {
     public function load(ObjectManager $manager)
     {
+        FixtureTools::seedRandomGenerator(static::class);
 
         $firstnames = FixturesConstants::FIRSTNAMES;
         $lastnames = FixturesConstants::LASTNAMES;
