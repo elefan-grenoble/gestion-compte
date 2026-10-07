@@ -26,6 +26,9 @@ use Symfony\Component\Form\FormInterface;
  */
 class CodeController extends AbstractController
 {
+    // durée de validité du lien de confirmation "code_change_done" envoyé par email
+    private const CODE_CHANGE_TOKEN_TTL = 30 * 24 * 60 * 60; // 30 jours
+
     private LoggerInterface $logger;
 
     public function __construct(LoggerInterface $logger)
@@ -251,7 +254,18 @@ class CodeController extends AbstractController
             $this->logger->info('CODE : confirm code change (logged in)', ['username' => $current_app_user->getUsername()]);
         } else {
             $token = $request->get('token');
-            $username = explode(',', $swipeCardHelper->vigenereDecode($token))[0];
+            $parts = explode(',', $swipeCardHelper->vigenereDecode($token));
+            $username = $parts[0];
+            $timestamp = null;
+            foreach ($parts as $part) {
+                if (str_starts_with($part, 'ts:')) {
+                    $timestamp = (int) substr($part, 3);
+                }
+            }
+            if (null === $timestamp || (time() - $timestamp) > self::CODE_CHANGE_TOKEN_TTL) {
+                // token absent, malformé, ou trop vieux : rejoué au-delà de sa durée de vie
+                return $this->redirectToRoute('homepage');
+            }
             $current_app_user = $em->getRepository(User::class)->findOneBy(['username' => $username]);
             if ($current_app_user) {
                 $previousToken = $this->get('security.token_storage')->getToken();

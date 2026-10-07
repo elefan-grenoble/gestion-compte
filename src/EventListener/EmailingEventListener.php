@@ -253,7 +253,7 @@ class EmailingEventListener
                 )
             ;
         } catch (\Exception $e) {
-            exit($e->getMessage());
+            throw $e;
         }
 
         $this->mailer->send($email);
@@ -669,7 +669,7 @@ class EmailingEventListener
         $emailTo = $code->getRegistrar()->getEmail();
 
         $router = $this->container->get('router');
-        $code_change_done_url = $router->generate('code_change_done', ['token' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($code->getRegistrar()->getUsername() . ',code:' . $code->getId())], UrlGeneratorInterface::ABSOLUTE_URL);
+        $code_change_done_url = $router->generate('code_change_done', ['token' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($code->getRegistrar()->getUsername() . ',code:' . $code->getId() . ',ts:' . time())], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $email = (new Email())
             ->subject($emailObject)
