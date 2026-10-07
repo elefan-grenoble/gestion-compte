@@ -552,6 +552,9 @@ class SmokeTest extends FunctionalTestCase
      * set_email (the #1245 temp-email activation flow) always renders
      * beneficiary/confirm.html.twig regardless of branch taken — it must
      * never redirect to /login.
+     *
+     * This public access is the C-SEC-1 hole (Security\SetEmailSecurityTest):
+     * the fix will replace this test.
      */
     public function testSetEmailIsPubliclyReachable(): void
     {
