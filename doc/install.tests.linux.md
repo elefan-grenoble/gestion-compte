@@ -55,16 +55,70 @@ Cela :
 - crée des stubs Webpack Encore (`public/build/`),
 - recrée le schéma de test et charge les fixtures.
 
+L'image PHP embarque `pcov` (désactivé par défaut) pour `make test-coverage`.
+Si ton image date d'avant cet ajout, reconstruis-la : `docker compose build php`.
+
 ## 3) Lancer les tests
 
 ### PHPUnit
 
 ```bash
-make test-unit     # Tests unitaires + intégration (sans DB)
-make test-func     # Tests fonctionnels (avec DB)
-make test          # Tous les tests PHPUnit
-make test-coverage # Avec rapport de couverture HTML
+make test-unit        # Tests unitaires (sans DB)
+make test-integration # Tests d'intégration (Kernel + DB)
+make test-func        # Tests fonctionnels (HTTP + DB)
+make test             # Tous les tests PHPUnit
+make test-coverage    # Tous les tests + couverture dans var/coverage/
 ```
+
+`make test-coverage` produit `var/coverage/html/index.html`, `var/coverage/clover.xml`,
+`var/coverage/coverage.txt`, et affiche la couverture par namespace.
+
+### Écrire un test PHPUnit
+
+| Suite         | Dossier              | Classe de base                    | Base de données |
+|---------------|----------------------|-----------------------------------|-----------------|
+| `unit`        | `tests/Unit`         | `TestCase`                        | aucune (mocks)  |
+| `integration` | `tests/Integration`  | `KernelTestCase`                  | réelle          |
+| `functional`  | `tests/Functional`   | `FunctionalTestCase` (WebTestCase)| réelle + fixtures |
+
+**Isolation.** Chaque test qui démarre le Kernel tourne dans une transaction annulée
+à sa fin (`tests/PHPUnit/DatabaseIsolationExtension.php`, sur
+`dama/doctrine-test-bundle`) : ce qu'un test écrit n'est jamais vu par le suivant,
+quel que soit l'ordre d'exécution. Conséquences :
+
+- les fixtures se chargent une fois par classe, dans `setUpBeforeClass()`, jamais
+  dans un test (le purger fait des `TRUNCATE`, qui valident la transaction) :
+
+  ```php
+  public static function setUpBeforeClass(): void
+  {
+      parent::setUpBeforeClass();         // purge la base
+      static::loadFixtures(['period']);    // groupes de fixtures, tous si null
+  }
+  ```
+
+- un test qui doit exécuter du DDL (`ALTER`, `CREATE`, `TRUNCATE`...) sur la connexion
+  par défaut implémente `App\Tests\PHPUnit\SkipDatabaseRollback` et nettoie derrière lui.
+
+**Fixtures déterministes.** `.env.test` fixe `FIXTURES_SEED` : les tirages `rand()` des
+fixtures sont identiques d'un chargement à l'autre (PHPUnit comme Cypress). Les dates
+restent relatives au jour du chargement. Sans la variable (env `dev`), les fixtures
+restent aléatoires.
+
+**Helpers** (`tests/Support`) :
+
+- builders `UserBuilder`, `BeneficiaryBuilder`, `MembershipBuilder`, `ShiftBuilder`,
+  avec des valeurs par défaut valides et uniques :
+
+  ```php
+  $membership = MembershipBuilder::aMembership()->frozen()->build();
+  $shift = ShiftBuilder::aShift()->bookedBy($membership->getMainBeneficiary())->build();
+  ```
+
+- `PersistsEntities::persist(...)` enregistre des entités dans la transaction du test ;
+- `FunctionalTestCase::createAuthenticatedClient($userOrUsername)` renvoie un client
+  déjà connecté, sans passer par le formulaire (`loginAs()` reste disponible pour
+  tester le formulaire lui-même).
 
 ### PHPStan
 
@@ -104,9 +158,15 @@ Le workflow `.github/workflows/ci.yaml` utilise les mêmes targets `make`.
 La variable `CI=true` (positionnée automatiquement par GitHub Actions) fait que
 le Makefile exécute les commandes PHP directement au lieu de passer par Docker.
 
-| Target Makefile    | Job CI correspondant |
-|--------------------|----------------------|
-| `make test-unit`   | `fast-tests`         |
-| `make lint`        | `phpstan`            |
-| `make test-func`   | `symfony-tests`      |
-| `make test-e2e-*`  | `cypress-tests`      |
+| Target Makefile                     | Job CI correspondant               |
+|-------------------------------------|------------------------------------|
+| `make test-unit`                    | `fast-tests` (PHP 7.4 et 8.1)      |
+| `make lint`                         | `phpstan`                          |
+| `make test-integration`, `test-func`| `symfony-tests` (PHP 7.4)          |
+| `make test-coverage`                | `symfony-tests` (PHP 8.1)          |
+| `make test-e2e-*`                   | `cypress-tests`                    |
+
+Les jobs PHPUnit tournent en PHP 7.4 et 8.1 (image de production), tous bloquants.
+Le job `symfony-tests` en 8.1 publie la couverture : résumé par namespace dans le
+récapitulatif du job, rapports complets dans l'artefact `coverage-report`.
+Aucun seuil n'est imposé pour l'instant.
