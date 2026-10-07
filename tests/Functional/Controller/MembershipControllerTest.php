@@ -62,14 +62,17 @@ class MembershipControllerTest extends FunctionalTestCase
         $form = $crawler->selectButton('Activer mon compte')->form([
             'form[member_number]' => 99999,
         ]);
-        $client->submit($form);
+        $crawler = $client->submit($form);
 
-        // Should redirect back (flash message) or re-render with warning
+        // The form is rendered again with a warning flash
         $this->assertSame(
             200,
             $client->getResponse()->getStatusCode(),
             'POST /member/find_me with non-existent member should return 200.'
         );
+        $warning = $crawler->filterXPath("//div[contains(concat(' ', normalize-space(@class), ' '), ' card-panel ') and contains(concat(' ', normalize-space(@class), ' '), ' warning ')]");
+        $this->assertCount(1, $warning, 'A warning flash should be displayed.');
+        $this->assertStringContainsString('aucun membre trouvé avec ce numéro d\'adhérent', $warning->text());
     }
 
     /**

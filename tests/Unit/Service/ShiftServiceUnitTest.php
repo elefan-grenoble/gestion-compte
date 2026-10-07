@@ -6,10 +6,12 @@ use App\Entity\Beneficiary;
 use App\Entity\Membership;
 use App\Entity\Registration;
 use App\Entity\Shift;
+use App\Entity\TimeLog;
 use App\Entity\User;
 use App\Service\BeneficiaryService;
 use App\Service\MembershipService;
 use App\Service\ShiftService;
+use App\Tests\Support\Builder\ShiftBuilder;
 use Doctrine\ORM\EntityManagerInterface;
 use PHPUnit\Framework\TestCase;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -46,6 +48,27 @@ class ShiftServiceUnitTest extends TestCase
 
     private function createService(array $params = []): ShiftService
     {
+        return new ShiftService(...$this->constructorArguments($params));
+    }
+
+    /**
+     * A ShiftService whose given methods are stubbed, the others being real.
+     *
+     * @param string[] $methods
+     *
+     * @return MockObject|ShiftService
+     */
+    private function createServiceWithStubbedMethods(array $methods, array $params = [])
+    {
+        return $this->getMockBuilder(ShiftService::class)
+            ->setConstructorArgs($this->constructorArguments($params))
+            ->onlyMethods($methods)
+            ->getMock()
+        ;
+    }
+
+    private function constructorArguments(array $params): array
+    {
         $defaults = [
             'due_duration_by_cycle' => 180,
             'min_shift_duration' => 90,
@@ -61,7 +84,7 @@ class ShiftServiceUnitTest extends TestCase
         ];
         $params = array_merge($defaults, $params);
 
-        return new ShiftService(
+        return [
             $this->em,
             $this->beneficiaryService,
             $this->membershipService,
@@ -75,8 +98,8 @@ class ShiftServiceUnitTest extends TestCase
             $params['fly_and_fixed_allow_fixed_shift_free'],
             $params['use_time_log_saving'],
             $params['time_log_saving_shift_free_min_time_in_advance_days'],
-            $params['time_log_saving_shift_free_allow_only_if_enough_saving']
-        );
+            $params['time_log_saving_shift_free_allow_only_if_enough_saving'],
+        ];
     }
 
     private function createBeneficiaryWithMembership(): Beneficiary
@@ -103,6 +126,20 @@ class ShiftServiceUnitTest extends TestCase
         return $beneficiary;
     }
 
+    /**
+     * Credits the membership with a time log created now (TimeLog stamps its
+     * creation date on persist only, so the stamp is triggered by hand).
+     */
+    private function addTimeLog(Membership $membership, int $minutes, int $type = TimeLog::TYPE_SHIFT_VALIDATED): void
+    {
+        $timeLog = new TimeLog();
+        $timeLog->setTime($minutes);
+        $timeLog->setType($type);
+        $timeLog->setMembership($membership);
+        $timeLog->setCreatedAtValue();
+        $membership->addTimeLog($timeLog);
+    }
+
     // -------------------------------------------------------
     // remainingToBook()
     // -------------------------------------------------------
@@ -125,22 +162,56 @@ class ShiftServiceUnitTest extends TestCase
     public function testRemainingToBookPartiallyBooked(): void
     {
         $service = $this->createService(['due_duration_by_cycle' => 180]);
-
-        $membership = new Membership();
-        $membership->setMemberNumber(1);
-        $membership->setWithdrawn(false);
-        $membership->setFrozen(false);
-        $membership->setFlying(false);
+        $member = $this->createBeneficiaryWithMembership()->getMembership();
+        $this->addTimeLog($member, 60);
 
         $this->membershipService->method('getEndOfCycle')
             ->willReturn(new \DateTime('+27 days'))
         ;
 
-        // Membership has shift time count → remaining = due - shiftTimeCount
-        // Since Membership's getShiftTimeCount relies on timeLogs, and we have none,
-        // the result will be 180 - 0 = 180
-        $remaining = $service->remainingToBook($membership);
-        $this->assertEquals(180, $remaining);
+        $this->assertSame(120, $service->remainingToBook($member));
+    }
+
+    public function testRemainingToBookFullyBooked(): void
+    {
+        $service = $this->createService(['due_duration_by_cycle' => 180]);
+        $member = $this->createBeneficiaryWithMembership()->getMembership();
+        $this->addTimeLog($member, 90);
+        $this->addTimeLog($member, 90);
+
+        $this->membershipService->method('getEndOfCycle')
+            ->willReturn(new \DateTime('+27 days'))
+        ;
+
+        $this->assertSame(0, $service->remainingToBook($member));
+    }
+
+    public function testRemainingToBookIgnoresSavingLogs(): void
+    {
+        $service = $this->createService(['due_duration_by_cycle' => 180]);
+        $member = $this->createBeneficiaryWithMembership()->getMembership();
+        $this->addTimeLog($member, 60);
+        $this->addTimeLog($member, 120, TimeLog::TYPE_SAVING);
+
+        $this->membershipService->method('getEndOfCycle')
+            ->willReturn(new \DateTime('+27 days'))
+        ;
+
+        $this->assertSame(120, $service->remainingToBook($member));
+    }
+
+    public function testRemainingToBookIgnoresLogsCreatedAfterTheEndOfTheCycle(): void
+    {
+        $service = $this->createService(['due_duration_by_cycle' => 180]);
+        $member = $this->createBeneficiaryWithMembership()->getMembership();
+        $this->addTimeLog($member, 60);
+
+        // The cycle ended yesterday, the log was created now
+        $this->membershipService->method('getEndOfCycle')
+            ->willReturn(new \DateTime('-1 day'))
+        ;
+
+        $this->assertSame(180, $service->remainingToBook($member));
     }
 
     // -------------------------------------------------------
@@ -211,15 +282,7 @@ class ShiftServiceUnitTest extends TestCase
     public function testCanBookSomethingDelegatesToCanBookOnCycle(): void
     {
         // Extra shifts disabled, beneficiary has capacity on cycle 0
-        $service = $this->getMockBuilder(ShiftService::class)
-            ->setConstructorArgs([
-                $this->em, $this->beneficiaryService, $this->membershipService,
-                180, 90, false, false, '3 days', 30,
-                false, false, false, 3, false,
-            ])
-            ->onlyMethods(['canBookOnCycle'])
-            ->getMock()
-        ;
+        $service = $this->createServiceWithStubbedMethods(['canBookOnCycle']);
 
         $beneficiary = $this->createBeneficiaryWithMembership();
 
@@ -256,27 +319,130 @@ class ShiftServiceUnitTest extends TestCase
             'allowExtraShifts' => false,
         ]);
         $beneficiary = $this->createBeneficiaryWithMembership();
+        $this->addTimeLog($beneficiary->getMembership(), 180);
 
-        // MembershipService returns end of cycle
         $this->membershipService->method('getEndOfCycle')
             ->willReturn(new \DateTime('+27 days'))
         ;
-
-        // Beneficiary already has 180 min of shifts this cycle
         $this->beneficiaryService->method('getCycleShiftDurationSum')
             ->willReturn(180)
         ;
 
-        // Membership already has 180 min in time logs → already at due
-        // But Membership's getShiftTimeCount returns 0 (no timeLogs in our test entity)
-        // So the check `$membership_counter >= $this->due_duration_by_cycle` will be false
-        // and we'll enter the catch-up logic
+        // The membership counter and the beneficiary have both reached the due time
+        $this->assertFalse($service->canBookDuration($beneficiary, 90, 0));
+    }
 
-        // Test with mocked ShiftService to control canBookDuration directly
-        $result = $service->canBookDuration($beneficiary, 90, 0);
+    public function testCanBookDurationWhenPartiallyBooked(): void
+    {
+        $service = $this->createService(['due_duration_by_cycle' => 180]);
+        $beneficiary = $this->createBeneficiaryWithMembership();
+        $this->addTimeLog($beneficiary->getMembership(), 90);
 
-        // 90 + 0 (shiftTimeCount) <= 1 * 180 → true (has catchup capacity)
-        $this->assertTrue($result);
+        $this->membershipService->method('getEndOfCycle')
+            ->willReturn(new \DateTime('+27 days'))
+        ;
+        $this->beneficiaryService->method('getCycleShiftDurationSum')
+            ->willReturn(90)
+        ;
+
+        // 90 left: a 90 minutes shift fits, a 120 minutes one does not
+        $this->assertTrue($service->canBookDuration($beneficiary, 90, 0));
+        $this->assertFalse($service->canBookDuration($beneficiary, 120, 0));
+    }
+
+    public function testCanBookDurationToCatchUpWhenTheMembershipIsBehind(): void
+    {
+        $service = $this->createService(['due_duration_by_cycle' => 180]);
+        $beneficiary = $this->createBeneficiaryWithMembership();
+        $this->addTimeLog($beneficiary->getMembership(), 60);
+
+        $this->membershipService->method('getEndOfCycle')
+            ->willReturn(new \DateTime('+27 days'))
+        ;
+        // This beneficiary booked nothing, but the membership is 120 minutes short
+        $this->beneficiaryService->method('getCycleShiftDurationSum')
+            ->willReturn(0)
+        ;
+
+        $this->assertTrue($service->canBookDuration($beneficiary, 120, 0));
+    }
+
+    public function testCanBookDurationOnTheNextCycleCountsTwoDueDurations(): void
+    {
+        $service = $this->createService(['due_duration_by_cycle' => 180]);
+        $beneficiary = $this->createBeneficiaryWithMembership();
+        $this->addTimeLog($beneficiary->getMembership(), 180);
+
+        $this->membershipService->method('getEndOfCycle')
+            ->willReturn(new \DateTime('+27 days'))
+        ;
+        $this->beneficiaryService->method('getCycleShiftDurationSum')
+            ->willReturn(100)
+        ;
+
+        // Cycle 1 allows up to 2 x 180 minutes: the membership counter (180) leaves
+        // room for 180 more, but 270 fits neither the counter nor the beneficiary's 100
+        $this->assertTrue($service->canBookDuration($beneficiary, 180, 1));
+        $this->assertFalse($service->canBookDuration($beneficiary, 270, 1));
+    }
+
+    // -------------------------------------------------------
+    // canBookOnCycle()
+    // -------------------------------------------------------
+
+    public function testCanBookOnCyclePossibleWithNoFlying(): void
+    {
+        $service = $this->createService();
+        $beneficiary = $this->createBeneficiaryWithMembership();
+
+        $this->membershipService->method('getEndOfCycle')
+            ->willReturn(new \DateTime('+27 days'))
+        ;
+        $this->beneficiaryService->method('getCycleShiftDurationSum')
+            ->willReturn(0)
+        ;
+
+        $this->assertTrue($service->canBookOnCycle($beneficiary, 0));
+    }
+
+    // -------------------------------------------------------
+    // isShiftBookable()
+    // -------------------------------------------------------
+
+    /**
+     * An empty shift is not bookable by a beginner: someone who knows the job
+     * has to open the bucket first.
+     */
+    public function testIsShiftBookableWithEmptyShiftAndBeginner(): void
+    {
+        $this->assertFalse($this->isShiftBookable(true, true));
+    }
+
+    public function testIsShiftBookableWithEmptyShiftAndNotABeginner(): void
+    {
+        $this->assertTrue($this->isShiftBookable(false, true));
+    }
+
+    /**
+     * A beginner can join a shift that already has a shifter.
+     */
+    public function testIsShiftBookableWithNotEmptyShiftAndBeginner(): void
+    {
+        $this->assertTrue($this->isShiftBookable(true, false));
+    }
+
+    private function isShiftBookable(bool $beginner, bool $emptyShift): bool
+    {
+        $service = $this->createServiceWithStubbedMethods(['isShiftEmpty', 'canBookDuration', 'isBeginner']);
+        $service->method('isShiftEmpty')->willReturn($emptyShift);
+        $service->method('canBookDuration')->willReturn(true);
+        $service->method('isBeginner')->willReturn($beginner);
+
+        $shift = $this->createMock(Shift::class);
+        $shift->method('getStart')->willReturn(new \DateTime());
+        $shift->method('getIsPast')->willReturn(false);
+
+        return $service->isShiftBookable($shift, $this->createBeneficiaryWithMembership());
     }
 
     // -------------------------------------------------------
@@ -494,13 +660,79 @@ class ShiftServiceUnitTest extends TestCase
         $service = $this->createService(['newUserStartAsBeginner' => true]);
         $beneficiary = $this->createBeneficiaryWithMembership();
 
-        // Add a past shift
-        $shift = new Shift();
-        $shift->setStart(new \DateTime('-10 days'));
-        $shift->setEnd(new \DateTime('-10 days +3 hours'));
-        $beneficiary->addShift($shift);
+        // Add a past shift that was carried out
+        ShiftBuilder::aShift()
+            ->startingAt(new \DateTime('-10 days'))
+            ->bookedBy($beneficiary)
+            ->carriedOut()
+            ->build()
+        ;
 
         $this->assertFalse($service->isBeginner($beneficiary));
+    }
+
+    // -------------------------------------------------------
+    // hasPreviousValidShifts()
+    // -------------------------------------------------------
+
+    public function testHasPreviousValidShiftsWithPastCarriedOutShift(): void
+    {
+        $beneficiary = $this->createBeneficiaryWithMembership();
+        ShiftBuilder::aShift()
+            ->startingAt(new \DateTime('-10 days'))
+            ->bookedBy($beneficiary)
+            ->carriedOut()
+            ->build()
+        ;
+
+        $this->assertTrue($this->createService()->hasPreviousValidShifts($beneficiary));
+    }
+
+    public function testHasPreviousValidShiftsWithShiftInTheFuture(): void
+    {
+        $beneficiary = $this->createBeneficiaryWithMembership();
+        ShiftBuilder::aShift()
+            ->startingAt(new \DateTime('+10 days'))
+            ->bookedBy($beneficiary)
+            ->build()
+        ;
+
+        $this->assertFalse($this->createService()->hasPreviousValidShifts($beneficiary));
+    }
+
+    public function testHasPreviousValidShiftsWithoutShift(): void
+    {
+        $beneficiary = $this->createBeneficiaryWithMembership();
+
+        $this->assertFalse($this->createService()->hasPreviousValidShifts($beneficiary));
+    }
+
+    /**
+     * A shift that took place without being carried out (the shifter did not
+     * show up) is no proof of experience, so it should not end the beginner
+     * status. hasPreviousValidShifts() currently only compares start dates and
+     * counts it: the target behaviour is asserted, the test stays incomplete
+     * until the service is fixed (it turns green on its own, then drop the
+     * marker).
+     */
+    public function testHasPreviousValidShiftsWithPastShiftNotCarriedOut(): void
+    {
+        $beneficiary = $this->createBeneficiaryWithMembership();
+        ShiftBuilder::aShift()
+            ->startingAt(new \DateTime('-10 days'))
+            ->bookedBy($beneficiary)
+            ->carriedOut(false)
+            ->build()
+        ;
+
+        if ($this->createService()->hasPreviousValidShifts($beneficiary)) {
+            $this->markTestIncomplete(
+                'TC.4.2 open: ShiftService::hasPreviousValidShifts() counts a past shift that was not carried out '
+                . '(wasCarriedOut=false). Product decision needed before changing it.'
+            );
+        }
+
+        $this->assertFalse($this->createService()->hasPreviousValidShifts($beneficiary));
     }
 
     // -------------------------------------------------------

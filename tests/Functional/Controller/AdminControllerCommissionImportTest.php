@@ -2,6 +2,7 @@
 
 namespace App\Tests\Functional\Controller;
 
+use App\DataFixtures\FixturesConstants;
 use App\Entity\Beneficiary;
 use App\Tests\Functional\FunctionalTestCase;
 use Symfony\Bundle\FrameworkBundle\Console\Application;
@@ -43,7 +44,10 @@ class AdminControllerCommissionImportTest extends FunctionalTestCase
             '--default_mapping' => true,
         ]);
 
-        $application->run($input, new BufferedOutput());
+        $output = new BufferedOutput();
+        $application->run($input, $output);
+
+        $this->assertStringContainsString('Dealing with 50 lines', $output->fetch());
 
         // Fetch data from the test database and assert
         $em = $client->getContainer()->get('doctrine')->getManager();
@@ -56,6 +60,33 @@ class AdminControllerCommissionImportTest extends FunctionalTestCase
             $count += $beneficiary->getCommissions()->count();
         }
 
-        $this->assertEquals(67, $count);
+        $this->assertSame(self::countCommissionReferences($csvPath, $delimiter), $count);
+    }
+
+    /**
+     * Number of commission ids listed in the "Commission (liste id)" column of
+     * the CSV (67 in the mocks). Every id of the mocks (1 to 10) exists in the
+     * "commission" fixtures (FixturesConstants::COMMISSIONS_COUNT) and none of
+     * those fixtures attaches a beneficiary to a commission, so each id of the
+     * CSV must give exactly one beneficiary <-> commission link after import.
+     */
+    private static function countCommissionReferences(string $csvPath, string $delimiter): int
+    {
+        $handle = fopen($csvPath, 'r');
+        $header = fgetcsv($handle, 0, $delimiter);
+        $column = array_search('Commission (liste id)', $header, true);
+        self::assertNotFalse($column, 'The CSV mock has no commission column.');
+
+        $count = 0;
+        while (false !== ($row = fgetcsv($handle, 0, $delimiter))) {
+            $ids = array_filter(array_map('trim', explode(',', $row[$column])), 'strlen');
+            foreach ($ids as $id) {
+                self::assertLessThanOrEqual(FixturesConstants::COMMISSIONS_COUNT, (int) $id, 'The CSV references a commission the fixtures do not create.');
+            }
+            $count += count($ids);
+        }
+        fclose($handle);
+
+        return $count;
     }
 }
