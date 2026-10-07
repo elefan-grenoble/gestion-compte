@@ -135,8 +135,13 @@ class SmokeTest extends FunctionalTestCase
 
         // Failed login redirects back to login
         $this->assertTrue($client->getResponse()->isRedirect());
-        $client->followRedirect();
+        $crawler = $client->followRedirect();
         $this->assertSame(200, $client->getResponse()->getStatusCode());
+
+        // ... which tells the user the credentials were refused
+        $error = $crawler->filterXPath("//div[contains(concat(' ', normalize-space(@class), ' '), ' card-panel ') and contains(concat(' ', normalize-space(@class), ' '), ' error ')]");
+        $this->assertCount(1, $error, 'The login page should display an error.');
+        $this->assertMatchesRegularExpression('/^(Identifiants invalides|Invalid credentials)\.$/', trim($error->text()));
     }
 
     // -------------------------------------------------------

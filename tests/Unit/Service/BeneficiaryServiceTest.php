@@ -6,11 +6,11 @@ use App\Entity\Beneficiary;
 use App\Entity\Membership;
 use App\Entity\Registration;
 use App\Entity\Shift;
+use App\Repository\ShiftRepository;
 use App\Service\BeneficiaryService;
 use App\Service\MembershipService;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\ORM\EntityManagerInterface;
-use Doctrine\ORM\EntityRepository;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use PHPUnit\Framework\MockObject\MockObject;
@@ -300,9 +300,9 @@ class BeneficiaryServiceTest extends TestCase
         $shift2 = $this->createMock(Shift::class);
         $shift2->method('getDuration')->willReturn(180);
 
-        $shiftRepo = $this->getMockBuilder(EntityRepository::class)
+        $shiftRepo = $this->getMockBuilder(ShiftRepository::class)
             ->disableOriginalConstructor()
-            ->addMethods(['findShiftsForBeneficiary'])
+            ->onlyMethods(['findShiftsForBeneficiary'])
             ->getMock()
         ;
         $shiftRepo->method('findShiftsForBeneficiary')
@@ -327,9 +327,9 @@ class BeneficiaryServiceTest extends TestCase
         $this->membershipService->method('getStartOfCycle')->willReturn(new \DateTime('2025-01-06'));
         $this->membershipService->method('getEndOfCycle')->willReturn(new \DateTime('2025-02-02'));
 
-        $shiftRepo = $this->getMockBuilder(EntityRepository::class)
+        $shiftRepo = $this->getMockBuilder(ShiftRepository::class)
             ->disableOriginalConstructor()
-            ->addMethods(['findShiftsForBeneficiary'])
+            ->onlyMethods(['findShiftsForBeneficiary'])
             ->getMock()
         ;
         $shiftRepo->method('findShiftsForBeneficiary')
