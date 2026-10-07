@@ -120,6 +120,30 @@ restent aléatoires.
   déjà connecté, sans passer par le formulaire (`loginAs()` reste disponible pour
   tester le formulaire lui-même).
 
+**Mots de passe.** En env `test`, bcrypt tourne au coût 4
+(`config/packages/test/security.yaml`) : au coût par défaut, chaque utilisateur
+persisté coûte ~0,5 s.
+
+**Tests de sécurité** (`tests/Functional/Security`, helpers dans `tests/Support/Security`) :
+
+- `AnonymousRouteAccessTest` parcourt toutes les routes : chacune doit renvoyer un
+  anonyme vers `/login`, sauf celles de sa liste `PUBLIC_ROUTES`, qui doit refléter
+  exactement les règles publiques d'`access_control`. Ajouter une route publique, c'est
+  l'ajouter à cette liste avec sa justification ;
+- `RoleMatrix::cases()` + le trait `ChecksRoleAccess` : matrice route × rôle × résultat
+  attendu (403 sous le rôle minimal, accès au-dessus) à partir de la hiérarchie de
+  `security.yaml` ;
+- `KnownOpenVulnerability::assertSecureOrKnownOpen()` : un test de faille encore ouverte
+  affirme le comportement sûr ; tant que la faille est là il est marqué *incomplete*
+  (la CI reste verte), et une fois corrigée il **échoue** pour qu'on retire l'enveloppe
+  et qu'il devienne un test de non-régression :
+
+  ```php
+  $this->assertSecureOrKnownOpen('C-SEC-1', 'set_email anonyme', function () use ($user) {
+      $this->assertSame('ancien@example.test', $user->getEmail());
+  });
+  ```
+
 ### PHPStan
 
 ```bash
