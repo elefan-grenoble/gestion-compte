@@ -63,7 +63,7 @@ class BookingControllerTest extends FunctionalTestCase
         }
 
         $this->assertTrue($client->getResponse()->isRedirect('/'));
-        $this->assertStringContainsString("Oups, ton adhésion a expiré", static::flashes($client)['warning'][0] ?? '');
+        $this->assertStringContainsString('Oups, ton adhésion a expiré', static::flashes($client)['warning'][0] ?? '');
     }
 
     public function testAFrozenMemberCannotBook(): void

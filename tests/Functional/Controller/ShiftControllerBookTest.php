@@ -387,6 +387,7 @@ class ShiftControllerBookTest extends FunctionalTestCase
         $shift = static::aBookableShift();
 
         static::logIn($client, $me->getUser());
+
         try {
             $client->request('POST', '/shift/' . $shift->getId() . '/book', ['beneficiaryId' => $me->getId()]);
         } catch (\Throwable $e) {

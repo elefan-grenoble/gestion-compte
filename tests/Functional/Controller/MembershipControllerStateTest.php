@@ -32,22 +32,6 @@ class MembershipControllerStateTest extends FunctionalTestCase
     }
 
     /**
-     * @return array<string, array{string, string, int|string}>
-     */
-    public function roleCases(): array
-    {
-        return RoleMatrix::cases([
-            'member_freeze' => 'ROLE_USER_MANAGER',
-            'member_unfreeze' => 'ROLE_USER_MANAGER',
-            'member_freeze_change' => 'ROLE_USER_MANAGER',
-            'member_flying' => 'ROLE_USER_MANAGER',
-            'member_withdrawn' => 'ROLE_USER_MANAGER',
-            'member_new_registration' => 'ROLE_USER_MANAGER',
-            'member_delete' => 'ROLE_SUPER_ADMIN',
-        ]);
-    }
-
-    /**
      * Acting on somebody else's membership.
      *
      * @dataProvider roleCases
@@ -62,6 +46,22 @@ class MembershipControllerStateTest extends FunctionalTestCase
             : ['id' => $target->getId()];
 
         $this->assertRouteAccessForRole($route, $role, $expected, $parameters);
+    }
+
+    /**
+     * @return array<string, array{string, string, int|string}>
+     */
+    public function roleCases(): array
+    {
+        return RoleMatrix::cases([
+            'member_freeze' => 'ROLE_USER_MANAGER',
+            'member_unfreeze' => 'ROLE_USER_MANAGER',
+            'member_freeze_change' => 'ROLE_USER_MANAGER',
+            'member_flying' => 'ROLE_USER_MANAGER',
+            'member_withdrawn' => 'ROLE_USER_MANAGER',
+            'member_new_registration' => 'ROLE_USER_MANAGER',
+            'member_delete' => 'ROLE_SUPER_ADMIN',
+        ]);
     }
 
     // --- freeze / unfreeze -------------------------------------------------
@@ -365,6 +365,7 @@ class MembershipControllerStateTest extends FunctionalTestCase
      * Posts an unnamed Symfony form ("form") with its CSRF token.
      *
      * @param array<string, int|string> $fields
+     * @param mixed                     $client
      */
     private function postForm($client, string $url, array $fields = [], string $method = 'POST'): void
     {

@@ -144,6 +144,26 @@ persisté coûte ~0,5 s.
   });
   ```
 
+**Tests de réservation et d'adhésion** (`tests/Functional/Controller/ShiftController*`,
+`BookingController*`, `MembershipController*`) : assertions sur l'état en base
+(`reloaded()` relit l'entité) et sur les messages flash (`flashes()`), pas seulement
+sur le code HTTP. Le trait `tests/Support/ShiftScenarios` fournit les scénarios :
+
+- `aBookableShift()` : un créneau libre dans un bucket déjà tenu par un autre membre
+  (un débutant ne peut pas ouvrir un bucket, `NEW_USERS_START_AS_BEGINNER`) ;
+- `csrfToken($client, $formName)` : jeton valide pour la session du client (se
+  connecter d'abord) ; les formulaires non nommés (`createFormBuilder()`) s'appellent
+  `form` ;
+- `withEnv([...], $callable)` : fait varier une variable d'environnement lue au boot
+  du noyau (`FORBID_OWN_SHIFT_*_ADMIN`…) ;
+- une entité construite en mémoire reste dans l'identity map du premier appel : appeler
+  `entityManager()->clear()` avant la requête si l'action parcourt ses collections ;
+- `ShiftRepository::functionsResultCache()->clear()` vide le cache de 5 s des cumuls de
+  créneaux, qui fausserait deux réservations enchaînées.
+
+Un bug de production découvert est écrit comme test du comportement cible, marqué
+*incomplete* avec une référence (`SHIFT-…`, `BOOKING-…`, `MEMBER-…`, `I-BUG-10`).
+
 ### PHPStan
 
 ```bash

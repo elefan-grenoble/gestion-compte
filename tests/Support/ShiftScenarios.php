@@ -38,7 +38,7 @@ trait ShiftScenarios
      */
     protected static function aBookableShift(?\DateTime $start = null, int $minutes = 180, ?Job $job = null): Shift
     {
-        $start = $start ?? new \DateTime('tomorrow 09:00');
+        $start ??= new \DateTime('tomorrow 09:00');
 
         $holder = static::aMembership()->getMainBeneficiary();
         $held = ShiftBuilder::aShift()->startingAt($start)->lasting($minutes)->bookedBy($holder);

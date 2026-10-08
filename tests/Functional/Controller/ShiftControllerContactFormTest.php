@@ -57,7 +57,9 @@ class ShiftControllerContactFormTest extends FunctionalTestCase
 
         $emails = $client->getProfile()->getCollector('mailer')->getEvents()->getMessages();
         $this->assertCount(1, $emails);
-        $this->assertSame([$coShifter->getEmail()], array_map(function ($a) { return $a->getAddress(); }, $emails[0]->getBcc()));
+        $this->assertSame([$coShifter->getEmail()], array_map(function ($a) {
+            return $a->getAddress();
+        }, $emails[0]->getBcc()));
         $this->assertSame($shifter->getEmail(), $emails[0]->getReplyTo()[0]->getAddress());
         $this->assertStringContainsString('I will be late', $emails[0]->getHtmlBody());
     }
@@ -122,7 +124,9 @@ class ShiftControllerContactFormTest extends FunctionalTestCase
         $name = 'shift_contact_form_' . $shift->getId();
         $client->request('POST', '/shift/' . $shift->getId() . '/contact_form', [$name => [
             'from' => $from->getId(),
-            'to' => array_map(function (Beneficiary $b) { return sprintf('#%d %s %s', static::reloaded($b)->getMemberNumber(), $b->getFirstname(), $b->getLastname()); }, $to),
+            'to' => array_map(function (Beneficiary $b) {
+                return sprintf('#%d %s %s', static::reloaded($b)->getMemberNumber(), $b->getFirstname(), $b->getLastname());
+            }, $to),
             'message' => $message,
             '_token' => static::csrfToken($client, $name),
         ]]);
