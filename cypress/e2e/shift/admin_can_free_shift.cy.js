@@ -2,9 +2,11 @@
 //
 // Self-contained: the shift is booked by the spec itself (same path as
 // member_can_book_shift), so that the target does not depend on which shifts
-// the fixtures happen to have booked. Liam is the main beneficiary of member 1.
+// the fixtures happen to have booked. The member number of Liam is read from
+// his home page rather than assumed.
 
-const MEMBER = 1
+// Shared by the two tests of the file (one browser, one module)
+let memberNumber = null
 
 function bookShiftAsLiam() {
     cy.login('Liam Smith', 'password')
@@ -39,21 +41,28 @@ describe('admin can free a shift booked by a member', function () {
     // session between tests, the database state is kept for the whole file.
     it('the member books a shift', function () {
         bookShiftAsLiam()
+
+        cy.visit('/')
+        cy.get('[data-cy=home_welcome_message]', { timeout: 10000 }).invoke('text').then((text) => {
+            const found = text.match(/#(\d+)/)
+            expect(found, 'member number on the home page').to.not.equal(null)
+            memberNumber = found[1]
+        })
     })
 
     it('the admin frees it and the member no longer holds it', function () {
         cy.login('admin', 'password')
         // Wait for the login to complete: visiting right away aborts it
         cy.get('[data-cy=settings_link]', { timeout: 10000 }).should('exist')
-        cy.visit(`/member/${MEMBER}/show`)
-        cy.url().should('include', `/member/${MEMBER}/show`)
+        cy.visit(`/member/${memberNumber}/show`)
+        cy.url().should('include', `/member/${memberNumber}/show`)
 
         // The shifts are in a collapsible section of the member page
         cy.get('body').should('contain', 'Cycle en cours')
         // Fail with the content of the section when it holds no shift card
         cy.get('#shifts').then(($section) => {
             if ($section.find('[id^="shift_"].card').length === 0) {
-                throw new Error('No shift card on /member/' + MEMBER + '/show. Shifts section: ' + $section.text().replace(/\s+/g, ' ').slice(0, 600))
+                throw new Error('No shift card on /member/' + memberNumber + '/show. Shifts section: ' + $section.text().replace(/\s+/g, ' ').slice(0, 600))
             }
         })
         cy.get('[id^="shift_"].card').its('length').then((before) => {
