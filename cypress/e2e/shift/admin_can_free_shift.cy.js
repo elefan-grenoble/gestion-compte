@@ -50,6 +50,12 @@ describe('admin can free a shift booked by a member', function () {
 
         // The shifts are in a collapsible section of the member page
         cy.get('body').should('contain', 'Cycle en cours')
+        // Fail with the content of the section when it holds no shift card
+        cy.get('#shifts').then(($section) => {
+            if ($section.find('[id^="shift_"].card').length === 0) {
+                throw new Error('No shift card on /member/' + MEMBER + '/show. Shifts section: ' + $section.text().replace(/\s+/g, ' ').slice(0, 600))
+            }
+        })
         cy.get('[id^="shift_"].card').its('length').then((before) => {
             cy.get('[id^="shift_"].card a.modal-trigger[title="Libérer"]').first().click()
             cy.get('.modal.open', { timeout: 10000 }).should('be.visible')
