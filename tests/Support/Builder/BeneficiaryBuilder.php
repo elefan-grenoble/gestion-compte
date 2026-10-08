@@ -2,6 +2,7 @@
 
 namespace App\Tests\Support\Builder;
 
+use App\Entity\Address;
 use App\Entity\Beneficiary;
 use App\Entity\User;
 
@@ -24,6 +25,8 @@ final class BeneficiaryBuilder
 
     /** @var User|UserBuilder */
     private $user;
+
+    private $withAddress = false;
 
     private function __construct()
     {
@@ -53,6 +56,17 @@ final class BeneficiaryBuilder
     /**
      * @param User|UserBuilder $user
      */
+    /**
+     * Gives the beneficiary a valid address, which the entity requires
+     * (@Assert\NotNull) as soon as a form validates it.
+     */
+    public function withAddress(bool $withAddress = true): self
+    {
+        $this->withAddress = $withAddress;
+
+        return $this;
+    }
+
     public function withUser($user): self
     {
         $this->user = $user;
@@ -70,6 +84,14 @@ final class BeneficiaryBuilder
         $beneficiary->setFlying($this->flying);
         $beneficiary->setUser($user);
         $user->setBeneficiary($beneficiary);
+
+        if ($this->withAddress) {
+            $address = new Address();
+            $address->setStreet1('1 rue du Test');
+            $address->setZipcode('38000');
+            $address->setCity('Grenoble');
+            $beneficiary->setAddress($address);
+        }
 
         return $beneficiary;
     }
