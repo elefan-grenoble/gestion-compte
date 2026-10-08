@@ -55,7 +55,8 @@ class RandomSortMembersCommandTest extends CommandTestCase
         $membership = MembershipBuilder::aMembership()
             ->withMainBeneficiary(BeneficiaryBuilder::aBeneficiary()->named('Ada', 'Lovelace'))
             ->registeredOn(new \DateTime('2026-01-10'))
-            ->build();
+            ->build()
+        ;
         $membership->getMainBeneficiary()->setPhone('0612345678');
         static::persist($membership);
 
