@@ -88,4 +88,53 @@ trait ShiftScenarios
     {
         $client->request('POST', $url, [], [], ['CONTENT_TYPE' => 'application/json'], json_encode($body));
     }
+
+    /**
+     * A valid CSRF token for the form of the given name, stored in the
+     * session of the client's next request.
+     *
+     * Log the client in first: the token lives in that session.
+     */
+    protected static function csrfToken(KernelBrowser $client, string $tokenId): string
+    {
+        $container = $client->getContainer();
+        $token = $container->get('security.csrf.token_manager')->getToken($tokenId)->getValue();
+        $container->get('session')->save();
+
+        return $token;
+    }
+
+    /**
+     * Runs the callable with environment variables set, as the application
+     * reads its configuration from them each time a kernel boots.
+     *
+     * @param array<string, string> $variables
+     *
+     * @return mixed what the callable returns
+     */
+    protected static function withEnv(array $variables, callable $callable)
+    {
+        $previous = [];
+        foreach ($variables as $name => $value) {
+            $previous[$name] = [$_ENV[$name] ?? null, $_SERVER[$name] ?? null];
+            $_ENV[$name] = $_SERVER[$name] = $value;
+        }
+
+        try {
+            return $callable();
+        } finally {
+            foreach ($previous as $name => [$env, $server]) {
+                if (null === $env) {
+                    unset($_ENV[$name]);
+                } else {
+                    $_ENV[$name] = $env;
+                }
+                if (null === $server) {
+                    unset($_SERVER[$name]);
+                } else {
+                    $_SERVER[$name] = $server;
+                }
+            }
+        }
+    }
 }
