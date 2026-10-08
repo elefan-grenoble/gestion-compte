@@ -29,6 +29,8 @@ function bookShiftAsLiam() {
     cy.get('#modal-bucket .checkedFormation').first().check({ force: true })
     cy.get('#modal-bucket #confirmButton').should('be.visible').click()
     cy.wait('@shiftBook', { timeout: 15000 }).its('response.statusCode').should('eq', 200)
+    cy.url({ timeout: 15000 }).should('not.include', '/booking')
+    cy.get('body', { timeout: 10000 }).should('contain', 'réservé')
 }
 
 describe('admin can free a shift booked by a member', function () {
@@ -39,7 +41,10 @@ describe('admin can free a shift booked by a member', function () {
         cy.clearCookies()
         cy.login('admin', 'password')
         cy.visit(`/member/${MEMBER}/show`)
+        cy.url().should('include', `/member/${MEMBER}/show`)
 
+        // The shifts are in a collapsible section of the member page
+        cy.get('body').should('contain', 'Cycle en cours')
         cy.get('[id^="shift_"].card').its('length').then((before) => {
             cy.get('[id^="shift_"].card a.modal-trigger[title="Libérer"]').first().click()
             cy.get('.modal.open', { timeout: 10000 }).should('be.visible')

@@ -214,7 +214,7 @@ diff-coverage: ## Couverture des lignes modifiées vs DIFF_COVER_COMPARE_BRANCH 
 	diff-cover var/coverage/clover.xml \
 		--compare-branch=$(DIFF_COVER_COMPARE_BRANCH) \
 		--fail-under=$(DIFF_COVER_THRESHOLD) \
-		--format markdown:var/coverage/diff-coverage.md || status=$$?; \
+		--markdown-report=var/coverage/diff-coverage.md || status=$$?; \
 	cat var/coverage/diff-coverage.md; \
 	exit $$status
 
