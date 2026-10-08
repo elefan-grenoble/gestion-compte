@@ -32,7 +32,7 @@ function bookShiftAsLiam() {
     cy.get('#modal-bucket #confirmButton').should('be.visible').click()
     cy.wait('@shiftBook', { timeout: 15000 }).its('response.statusCode').should('eq', 200)
     cy.url({ timeout: 15000 }).should('not.include', '/booking')
-    cy.get('body', { timeout: 10000 }).should('contain', 'réservé')
+    cy.get('body', { timeout: 10000 }).should('contain', 'Ce créneau a bien été réservé')
 }
 
 describe('admin can free a shift booked by a member', function () {
