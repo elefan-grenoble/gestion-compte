@@ -57,6 +57,22 @@ function openMemberShifts(number, attemptsLeft) {
     })
 }
 
+// Same 5 s cache as above, on the way out: reload until the list shrinks.
+function expectShiftCount(number, expected, attemptsLeft) {
+    cy.visit(`/member/${number}/show`)
+    cy.get('#shifts').then(($section) => {
+        const count = $section.find('[id^="shift_"].card').length
+        if (count === expected) {
+            return
+        }
+        if (attemptsLeft === 0) {
+            throw new Error(`Expected ${expected} shift card(s) on /member/${number}/show, found ${count}`)
+        }
+        cy.wait(1000) // eslint-disable-line cypress/no-unnecessary-waiting -- waits out the 5 s server-side cache
+        expectShiftCount(number, expected, attemptsLeft - 1)
+    })
+}
+
 describe('admin can free a shift booked by a member', function () {
 
     // Two tests rather than one with a logout in between: Cypress clears the
@@ -86,7 +102,7 @@ describe('admin can free a shift booked by a member', function () {
             cy.get('.modal.open').contains('button', 'Oui, libérer le créneau').click()
 
             cy.get('body').should('contain', 'Le créneau a bien été libéré')
-            cy.get('[id^="shift_"].card').should('have.length', before - 1)
+            expectShiftCount(memberNumber, before - 1, 10)
         })
     })
 })
