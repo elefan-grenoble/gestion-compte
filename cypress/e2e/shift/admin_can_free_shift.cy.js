@@ -40,6 +40,8 @@ describe('admin can free a shift booked by a member', function () {
 
         cy.clearCookies()
         cy.login('admin', 'password')
+        // Wait for the login to complete: visiting right away aborts it
+        cy.get('[data-cy=settings_link]', { timeout: 10000 }).should('exist')
         cy.visit(`/member/${MEMBER}/show`)
         cy.url().should('include', `/member/${MEMBER}/show`)
 
