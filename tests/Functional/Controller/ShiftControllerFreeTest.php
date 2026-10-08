@@ -4,13 +4,14 @@ namespace App\Tests\Functional\Controller;
 
 use App\Entity\Shift;
 use App\Entity\ShiftFreeLog;
-use App\Entity\TimeLog;
 use App\Tests\Functional\FunctionalTestCase;
 use App\Tests\Support\Builder\ShiftBuilder;
 use App\Tests\Support\Builder\UserBuilder;
 use App\Tests\Support\Builder\BeneficiaryBuilder;
 use App\Tests\Support\Builder\MembershipBuilder;
 use App\Tests\Support\ShiftScenarios;
+use App\Entity\Beneficiary;
+use App\Entity\User;
 
 /**
  * Freeing a shift: POST /shift/{id}/free (the shifter) and
@@ -314,7 +315,7 @@ class ShiftControllerFreeTest extends FunctionalTestCase
 
     // --- helpers ----------------------------------------------------------
 
-    private function aShiftBookedBy(\App\Entity\Beneficiary $shifter, \DateTime $start, bool $carriedOut = false): Shift
+    private function aShiftBookedBy(Beneficiary $shifter, \DateTime $start, bool $carriedOut = false): Shift
     {
         $shift = ShiftBuilder::aShift()->startingAt($start)->bookedBy($shifter)->carriedOut($carriedOut)->build();
         static::persist($shift->getJob(), $shift);
@@ -324,12 +325,12 @@ class ShiftControllerFreeTest extends FunctionalTestCase
         return $shift;
     }
 
-    private function aShiftManager(): \App\Entity\User
+    private function aShiftManager(): User
     {
         return $this->aMemberWithRoles('ROLE_SHIFT_MANAGER');
     }
 
-    private function aMemberWithRoles(string ...$roles): \App\Entity\User
+    private function aMemberWithRoles(string ...$roles): User
     {
         return static::persist(
             MembershipBuilder::aMembership()
