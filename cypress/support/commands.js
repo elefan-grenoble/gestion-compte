@@ -44,3 +44,42 @@ Cypress.Commands.add('loginKeycloak', (username, password) => {
         })
     })
 })
+
+// ---------------------------------------------------------------------------
+// Mails
+//
+// The Cypress job of the CI runs a mailcatcher and starts the application with
+// MAILER_DSN=smtp://127.0.0.1:1025; locally `make up` starts one. Its HTTP API
+// is read from CYPRESS_MAILCATCHER_URL (default http://localhost:1080). The
+// OIDC job has none: specs that read mails belong to the other jobs.
+// ---------------------------------------------------------------------------
+const mailcatcherUrl = () => Cypress.env('MAILCATCHER_URL') || 'http://localhost:1080'
+
+/** Empties the mailcatcher, to start a spec from a known mailbox. */
+Cypress.Commands.add('mailClear', () => {
+    cy.request('DELETE', `${mailcatcherUrl()}/messages`)
+})
+
+/**
+ * Yields the HTML body of the last mail sent to `recipient`; fails when none
+ * was received within 10 seconds (the application sends synchronously, the
+ * retry is only a safety net).
+ * @param {string} recipient
+ * @param {string} subjectPart text the subject must contain
+ */
+Cypress.Commands.add('mailLastTo', (recipient, subjectPart) => {
+    const lookup = (retries) => cy.request(`${mailcatcherUrl()}/messages`).then(({ body }) => {
+        const matching = body.filter((message) =>
+            message.recipients.some((r) => r.includes(recipient)) && message.subject.includes(subjectPart))
+        if (matching.length > 0) {
+            return cy.request(`${mailcatcherUrl()}/messages/${matching[matching.length - 1].id}.html`)
+                .its('body')
+        }
+        if (retries === 0) {
+            throw new Error(`No mail "${subjectPart}" received by ${recipient}`)
+        }
+        return cy.wait(500).then(() => lookup(retries - 1))
+    })
+
+    return lookup(20)
+})
