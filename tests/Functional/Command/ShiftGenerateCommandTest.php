@@ -8,7 +8,6 @@ use App\Entity\Job;
 use App\Entity\Period;
 use App\Entity\PeriodPosition;
 use App\Entity\Shift;
-use App\Entity\User;
 use App\Event\ShiftReservedEvent;
 use App\Tests\Support\Builder\MembershipBuilder;
 use App\Tests\Support\Builder\ShiftBuilder;
