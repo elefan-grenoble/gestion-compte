@@ -5,7 +5,7 @@
         xsi:noNamespaceSchemaLocation="https://schema.phpunit.de/9.3/phpunit.xsd"
         backupGlobals="false"
         colors="true"
-        bootstrap="config/bootstrap.php"
+        bootstrap="tests/bootstrap.php"
         convertWarningsToExceptions="false"
         convertDeprecationsToExceptions="false">
   <coverage>
@@ -24,7 +24,9 @@
   <php>
       <ini name="error_reporting" value="-1" />
       <server name="KERNEL_CLASS" value="App\Kernel"/>
-      <env name="SYMFONY_DEPRECATIONS_HELPER" value="disabled"/>
+      <!-- weak: deprecations are listed at the end of the run but never fail it.
+           Tighten (max[self]=0...) once the Symfony migration has been worked off. -->
+      <env name="SYMFONY_DEPRECATIONS_HELPER" value="weak"/>
       <!-- ###+ symfony/framework-bundle ### -->
       <env name="APP_ENV" value="test"/>
       <env name="APP_SECRET" value="3b4fa8b96ecb2d65bc474115bb8705bb"/>
