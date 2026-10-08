@@ -57,7 +57,9 @@ describe('admin can free a shift booked by a member', function () {
         cy.visit(`/member/${memberNumber}/show`)
         cy.url().should('include', `/member/${memberNumber}/show`)
 
-        // The shifts are in a collapsible section of the member page
+        // The shifts are in a collapsible section of the member page, closed by default
+        cy.get('#shifts > .collapsible-header').click()
+        cy.get('#shifts > .collapsible-body').should('be.visible')
         cy.get('body').should('contain', 'Cycle en cours')
         // Fail with the content of the section when it holds no shift card
         cy.get('#shifts').then(($section) => {
