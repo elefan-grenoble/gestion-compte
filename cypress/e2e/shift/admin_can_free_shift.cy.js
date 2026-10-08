@@ -35,10 +35,13 @@ function bookShiftAsLiam() {
 
 describe('admin can free a shift booked by a member', function () {
 
-    it('frees the shift and the member no longer holds it', function () {
+    // Two tests rather than one with a logout in between: Cypress clears the
+    // session between tests, the database state is kept for the whole file.
+    it('the member books a shift', function () {
         bookShiftAsLiam()
+    })
 
-        cy.clearCookies()
+    it('the admin frees it and the member no longer holds it', function () {
         cy.login('admin', 'password')
         // Wait for the login to complete: visiting right away aborts it
         cy.get('[data-cy=settings_link]', { timeout: 10000 }).should('exist')
