@@ -7,7 +7,6 @@ use App\Entity\Shift;
 use App\Tests\Functional\FunctionalTestCase;
 use App\Tests\Support\Builder\BeneficiaryBuilder;
 use App\Tests\Support\Builder\MembershipBuilder;
-use App\Tests\Support\Builder\ShiftBuilder;
 use App\Tests\Support\Builder\UserBuilder;
 use App\Tests\Support\ShiftScenarios;
 

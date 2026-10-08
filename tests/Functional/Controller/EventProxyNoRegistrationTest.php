@@ -25,6 +25,7 @@ class EventProxyNoRegistrationTest extends FunctionalTestCase
         $this->assertCount(0, $membership->getRegistrations(), 'Precondition: no registration.');
 
         $client = static::createAuthenticatedClient($membership->getMainBeneficiary()->getUser());
+
         try {
             $client->request('GET', sprintf('/events/%d/proxy/%s', $event->getId(), $route));
         } catch (\Error $e) {

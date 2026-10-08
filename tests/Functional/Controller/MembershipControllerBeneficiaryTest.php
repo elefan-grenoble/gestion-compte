@@ -42,7 +42,9 @@ class MembershipControllerBeneficiaryTest extends FunctionalTestCase
         $this->assertSame(['Beneficiaire ajouté'], static::flashes($client)['success'] ?? [], json_encode(static::flashes($client)));
         $reloaded = static::reloaded($membership);
         $this->assertCount(2, $reloaded->getBeneficiaries());
-        $added = $reloaded->getBeneficiaries()->filter(function (Beneficiary $b) { return 'Newcomer' === $b->getFirstname(); })->first();
+        $added = $reloaded->getBeneficiaries()->filter(function (Beneficiary $b) {
+            return 'Newcomer' === $b->getFirstname();
+        })->first();
         $this->assertSame($reloaded->getId(), $added->getMembership()->getId());
         $this->assertSame('newcomer@test.local', $added->getUser()->getEmail());
         $this->assertFalse($added->isMain());

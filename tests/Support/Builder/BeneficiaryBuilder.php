@@ -54,9 +54,6 @@ final class BeneficiaryBuilder
     }
 
     /**
-     * @param User|UserBuilder $user
-     */
-    /**
      * Gives the beneficiary a valid address, which the entity requires
      * (@Assert\NotNull) as soon as a form validates it.
      */

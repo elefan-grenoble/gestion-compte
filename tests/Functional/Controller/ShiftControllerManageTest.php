@@ -12,6 +12,7 @@ use App\Tests\Support\Builder\MembershipBuilder;
 use App\Tests\Support\Builder\ShiftBuilder;
 use App\Tests\Support\Builder\UserBuilder;
 use App\Tests\Support\ShiftScenarios;
+use App\Entity\Formation;
 
 /**
  * What a shift manager does to the shifts of the others: book for a member
@@ -43,7 +44,9 @@ class ShiftControllerManageTest extends FunctionalTestCase
         $this->postBookAdmin($client, $shift, $member->getMainBeneficiary());
 
         $this->assertTrue($client->getResponse()->isRedirect('/booking/admin'));
-        $this->assertCount(1, array_filter(static::flashes($client)['success'] ?? [], function ($m) { return 0 === strpos($m, 'Créneau réservé avec succès'); }));
+        $this->assertCount(1, array_filter(static::flashes($client)['success'] ?? [], function ($m) {
+            return 0 === strpos($m, 'Créneau réservé avec succès');
+        }));
         $shift = static::reloaded($shift);
         $this->assertSame($member->getMainBeneficiary()->getId(), $shift->getShifter()->getId());
         $this->assertSame($manager->getId(), $shift->getBooker()->getId(), 'The booker is the manager, not the member.');
@@ -71,7 +74,7 @@ class ShiftControllerManageTest extends FunctionalTestCase
         $client = static::createClient();
         $member = $this->aMemberWithAnAddress();
         $shift = static::aBookableShift();
-        $formation = new \App\Entity\Formation();
+        $formation = new Formation();
         $formation->setName('formation-' . uniqid());
         static::persist($formation);
         $shift->setFormation($formation);
