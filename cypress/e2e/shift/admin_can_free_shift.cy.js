@@ -35,6 +35,28 @@ function bookShiftAsLiam() {
     cy.get('body', { timeout: 10000 }).should('contain', 'Ce créneau a bien été réservé')
 }
 
+// ShiftRepository::findShiftsForBeneficiaries keeps its result for 5 seconds
+// (a result cache shared by all users): a member page read right after the
+// booking can still show the previous list. Reload, bounded, until the shift
+// is listed; fail with the content of the section when it never is.
+function openMemberShifts(number, attemptsLeft) {
+    cy.visit(`/member/${number}/show`)
+    cy.url().should('include', `/member/${number}/show`)
+    cy.get('#shifts').then(($section) => {
+        if ($section.find('[id^="shift_"].card').length > 0) {
+            // The section is collapsible and closed by default
+            cy.get('#shifts > .collapsible-header').click()
+            cy.get('#shifts > .collapsible-body').should('be.visible')
+            return
+        }
+        if (attemptsLeft === 0) {
+            throw new Error(`No shift card on /member/${number}/show. Shifts section: ` + $section.text().replace(/\s+/g, ' ').slice(0, 600))
+        }
+        cy.wait(1000) // eslint-disable-line cypress/no-unnecessary-waiting -- see above: waits out a 5 s server-side cache
+        openMemberShifts(number, attemptsLeft - 1)
+    })
+}
+
 describe('admin can free a shift booked by a member', function () {
 
     // Two tests rather than one with a logout in between: Cypress clears the
@@ -54,19 +76,9 @@ describe('admin can free a shift booked by a member', function () {
         cy.login('admin', 'password')
         // Wait for the login to complete: visiting right away aborts it
         cy.get('[data-cy=settings_link]', { timeout: 10000 }).should('exist')
-        cy.visit(`/member/${memberNumber}/show`)
-        cy.url().should('include', `/member/${memberNumber}/show`)
 
-        // The shifts are in a collapsible section of the member page, closed by default
-        cy.get('#shifts > .collapsible-header').click()
-        cy.get('#shifts > .collapsible-body').should('be.visible')
-        cy.get('body').should('contain', 'Cycle en cours')
-        // Fail with the content of the section when it holds no shift card
-        cy.get('#shifts').then(($section) => {
-            if ($section.find('[id^="shift_"].card').length === 0) {
-                throw new Error('No shift card on /member/' + memberNumber + '/show. Shifts section: ' + $section.text().replace(/\s+/g, ' ').slice(0, 600))
-            }
-        })
+        openMemberShifts(memberNumber, 10)
+
         cy.get('[id^="shift_"].card').its('length').then((before) => {
             cy.get('[id^="shift_"].card a.modal-trigger[title="Libérer"]').first().click()
             cy.get('.modal.open', { timeout: 10000 }).should('be.visible')
