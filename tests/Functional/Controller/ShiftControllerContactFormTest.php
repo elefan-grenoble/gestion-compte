@@ -86,8 +86,8 @@ class ShiftControllerContactFormTest extends FunctionalTestCase
     }
 
     /**
-     * The form reads the shifter of the shift to prefill itself; a shift
-     * nobody holds has none.
+     * A shift nobody holds has no contact form (SHIFT-CONTACT-FREE: reading
+     * its shifter to prefill the form crashed).
      */
     public function testTheFormOfAFreeShiftDoesNotCrash(): void
     {
@@ -96,14 +96,9 @@ class ShiftControllerContactFormTest extends FunctionalTestCase
         $shift = static::aBookableShift(new \DateTime('+2 days 09:00'));
         static::logIn($client, $member->getUser());
 
-        try {
-            $client->request('GET', '/shift/' . $shift->getId() . '/contact_form');
-        } catch (\Error $e) {
-            // The test client lets an \Error out instead of answering 500.
-            $this->markTestIncomplete('SHIFT-CONTACT-FREE open: the contact form of a shift without shifter crashes (' . $e->getMessage() . ').');
-        }
+        $client->request('GET', '/shift/' . $shift->getId() . '/contact_form');
 
-        $this->assertLessThan(500, $client->getResponse()->getStatusCode());
+        $this->assertSame(404, $client->getResponse()->getStatusCode());
     }
 
     private function aShiftWithACoShifter(): array

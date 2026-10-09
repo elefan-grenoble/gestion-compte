@@ -651,6 +651,10 @@ class ShiftController extends AbstractController
      */
     public function contactFormAction(Request $request, Shift $shift, MailerInterface $mailer)
     {
+        if (!$shift->getShifter()) {
+            throw $this->createNotFoundException("Ce créneau n'est pas réservé : il n'y a personne à contacter.");
+        }
+
         $em = $this->getDoctrine()->getManager();
 
         $coShifters = $em->getRepository(Beneficiary::class)->findCoShifters($shift);
