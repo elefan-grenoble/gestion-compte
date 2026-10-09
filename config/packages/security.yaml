@@ -15,6 +15,17 @@ security:
     fos_userbundle:
       id: fos_user.user_provider.username_email
   firewalls:
+    # The specific firewalls come before main (^/), which would catch their
+    # requests (I-SEC-14): the OAuth clients read /api with a bearer token
+    # only, never with the session cookie.
+    oauth_token:
+      pattern:    ^/oauth/v2/token
+      security:   false
+    api:
+      pattern:    ^/api
+      fos_oauth:  true
+      stateless:  true
+      anonymous:  false
     main:
       pattern: ^/
       fos_oauth:  true
@@ -33,9 +44,8 @@ security:
           #            - keycloak_authenticator
           - App\Security\KeycloakAuthenticator
 
-    oauth_token:
-      pattern:    ^/oauth/v2/token
-      security:   false
+    # Never reached: main catches /oauth/v2/auth first, and the authorization
+    # flow relies on the session of main (see I-SEC-14 in TODO-PRIORISEE.md).
     oauth_authorize:
       pattern:    ^/oauth/v2/auth
       form_login:
@@ -44,11 +54,6 @@ security:
         check_path: fos_user_security_check
         login_path: fos_user_security_login
       anonymous: true
-    api:
-      pattern:    ^/api
-      fos_oauth:  true
-      stateless:  true
-      anonymous:  false
   access_control:
     - { path: ^/oauth/v2/token, roles: [ IS_AUTHENTICATED_FULLY, IS_AUTHENTICATED_ANONYMOUSLY ] }
     - { path: ^/oauth/v2/auth, roles: [ IS_AUTHENTICATED_FULLY, IS_AUTHENTICATED_ANONYMOUSLY ] }

@@ -162,9 +162,10 @@ est désactivée à dessein (voir §5, `@coversNothing`). Les classes de test po
   requêtes du client de test, qui redémarre le noyau entre elles, ne partagent rien.
   L'ancien cache fichier de 5 s, partagé entre utilisateurs, faussait deux réservations
   enchaînées (SHIFT-QUOTA-CACHE, corrigé).
-- **Pare-feu** : `main` (`^/`) est déclaré avant `oauth_token`, `oauth_authorize` et `api`
-  qui sont donc inopérants (I-SEC-14). Les tests d'accès à `/api` s'appuient sur
-  `access_control`, pas sur le pare-feu.
+- **Pare-feu** : `oauth_token` et `api` sont déclarés avant `main` (`^/`) : `/api` est sans
+  état et n'accepte qu'un jeton Bearer (anonyme ou session → 401, voir `ApiFirewallTest`).
+  `oauth_authorize`, déclaré après `main`, reste inopérant : le flux d'autorisation SSO
+  s'appuie sur la session de `main` (I-SEC-14).
 - **Variables d'environnement** lues à la construction du conteneur : les poser *avant* le
   premier démarrage du noyau du test, avec `withEnv()` (`ShiftScenarios::withEnv([...], $callable)`
   pour les tests HTTP, `CommandTestCase::withEnv($nom, $valeur)` pour les commandes), qui
