@@ -139,12 +139,12 @@ class CommissionController extends AbstractController
      * Commission add a beneficiary.
      *
      * @Route("/{id}/add_beneficiary/", name="commission_add_beneficiary", methods={"POST"})
+     *
+     * @Security("is_granted('ROLE_USER')")
      */
     public function addBeneficiaryAction(Request $request, Commission $commission, EventDispatcherInterface $event_dispatcher)
     {
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-
-        if (! $current_app_user->hasRole('ROLE_SUPER_ADMIN') && ! $current_app_user->getBeneficiary()->getOwnedCommissions()->contains($commission)) {
+        if (!$this->canManageMembersOf($commission)) {
             throw $this->createAccessDeniedException();
         }
         $success = true;
@@ -186,19 +186,22 @@ class CommissionController extends AbstractController
      * Commission remove beneficiary.
      *
      * @Route("/{id}/remove_beneficiary/", name="commission_remove_beneficiary", methods={"POST"})
+     *
+     * @Security("is_granted('ROLE_USER')")
      */
     public function removeBeneficiaryAction(Request $request, Commission $commission, EventDispatcherInterface $event_dispatcher)
     {
-        $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
-
-        if (! $current_app_user->hasRole('ROLE_SUPER_ADMIN') && ! $current_app_user->getBeneficiary()->getOwnedCommissions()->contains($commission)) {
+        if (!$this->canManageMembersOf($commission)) {
             throw $this->createAccessDeniedException();
         }
 
         $em = $this->getDoctrine()->getManager();
-        $beneficiary = $em->getRepository(Beneficiary::class)->find($_POST['beneficiary']);
+        /** @var null|Beneficiary $beneficiary */
+        $beneficiary = $em->getRepository(Beneficiary::class)->find((int) $request->request->get('beneficiary'));
+        if (!$beneficiary) {
+            throw $this->createNotFoundException();
+        }
 
-        /** @var Beneficiary $beneficiary */
         if ($beneficiary->getId()) {
             $beneficiary->removeCommission($commission);
             $em->persist($beneficiary);
@@ -244,6 +247,19 @@ class CommissionController extends AbstractController
         }
 
         return $this->redirectToRoute('admin_commissions');
+    }
+
+    /**
+     * The super admin, or an owner of the commission, adds and removes its members.
+     */
+    private function canManageMembersOf(Commission $commission): bool
+    {
+        if ($this->isGranted('ROLE_SUPER_ADMIN')) {
+            return true;
+        }
+        $beneficiary = $this->getUser()->getBeneficiary();
+
+        return $beneficiary && $beneficiary->getOwnedCommissions()->contains($commission);
     }
 
     /**
