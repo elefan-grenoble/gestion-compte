@@ -287,24 +287,19 @@ class ShiftControllerFreeTest extends FunctionalTestCase
     }
 
     /**
-     * Freeing a shift nobody holds passes null to a typed argument of
-     * ShiftService::canFreeShift() instead of reaching the message
-     * "not currently booked".
+     * Freeing a shift nobody holds is refused with the message "not
+     * currently booked" (SHIFT-FREE-FREE: it used to pass null to a typed
+     * argument of ShiftService::canFreeShift()).
      */
     public function testFreeingAFreeShiftIsRefusedWithAMessage(): void
     {
         $client = static::createClient();
         $shift = static::aBookableShift(new \DateTime('+3 days 09:00'));
         static::logIn($client, $this->aShiftManager());
-        $token = static::csrfToken($client, 'shift_free_forms_' . $shift->getId());
 
-        try {
-            $client->request('POST', '/shift/' . $shift->getId() . '/free_admin', ['shift_free_forms_' . $shift->getId() => ['reason' => '', '_token' => $token]], [], ['HTTP_REFERER' => 'http://localhost/booking/admin']);
-        } catch (\Throwable $e) {
-            $this->markTestIncomplete('SHIFT-FREE-FREE open: freeing an unbooked shift crashes (' . get_class($e) . ': ' . $e->getMessage() . ').');
-        }
+        $this->postFreeAdmin($client, $shift);
 
-        $this->assertArrayHasKey('error', static::flashes($client));
+        $this->assertSame(["Impossible de libérer le créneau car il n'est actuellement pas réservé."], static::flashes($client)['error'] ?? []);
     }
 
     // --- helpers ----------------------------------------------------------
