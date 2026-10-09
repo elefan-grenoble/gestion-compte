@@ -199,12 +199,6 @@ parameters:
 			path: src/Controller/RegistrationsController.php
 
 		-
-			message: '#^Binary operation "\+\=" between ''Le créneau a bien…'' and ''Grâce au compteur…'' results in an error\.$#'
-			identifier: assignOp.invalid
-			count: 1
-			path: src/Controller/ShiftController.php
-
-		-
 			message: '#^Cannot call method getBeneficiary\(\) on string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface\.$#'
 			identifier: method.nonObject
 			count: 4
@@ -319,12 +313,6 @@ parameters:
 			path: src/Entity/User.php
 
 		-
-			message: '#^Constructor of class App\\Event\\ShiftBookedEvent has an unused parameter \$fromAdmin\.$#'
-			identifier: constructor.unusedParameter
-			count: 1
-			path: src/Event/ShiftBookedEvent.php
-
-		-
 			message: '#^PHPDoc tag @param for parameter \$event with type App\\Event\\PeriodPositionFreedEvent is incompatible with native type Symfony\\Component\\HttpKernel\\Event\\RequestEvent\.$#'
 			identifier: parameter.phpDocType
 			count: 1
@@ -385,12 +373,6 @@ parameters:
 			path: src/Security/UserVoter.php
 
 		-
-			message: '#^Binary operation "/" between non\-falsy\-string and 28 results in an error\.$#'
-			identifier: binaryOp.invalid
-			count: 1
-			path: src/Service/MembershipService.php
-
-		-
 			message: '#^PHPDoc tag @param for parameter \$start_after with type App\\Service\\Datetime is not subtype of native type DateTime\.$#'
 			identifier: parameter.phpDocType
 			count: 1
@@ -425,4 +407,3 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: src/Validator/Constraints/UniqueEmailValidator.php
-

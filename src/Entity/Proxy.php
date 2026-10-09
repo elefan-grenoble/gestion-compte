@@ -109,9 +109,9 @@ class Proxy
     }
 
     /**
-     * Get owner.
+     * Get owner: none while the proxy waits for someone to take it.
      *
-     * @return Beneficiary
+     * @return null|Beneficiary
      */
     public function getOwner()
     {
@@ -133,7 +133,7 @@ class Proxy
     /**
      * Get giver.
      *
-     * @return Membership
+     * @return null|Membership
      */
     public function getGiver()
     {

@@ -19,6 +19,8 @@ class MembershipService
     protected $registration_duration;
     protected $registration_every_civil_year;
     protected $cycle_type;
+
+    /** @var int */
     protected $cycle_days;
     protected $use_fly_and_fixed;
     protected $fly_and_fixed_entity_flying;
@@ -163,7 +165,7 @@ class MembershipService
                 $date = clone $firstShiftDate;
                 // Compute the number of elapsed cycles until today
                 $diff = $firstShiftDate->diff($now)->format('%r%a');
-                $currentCycleCount = floor($diff / $this->cycle_days);
+                $currentCycleCount = floor((int) $diff / $this->cycle_days);
                 $date->modify((($currentCycleCount > 0) ? '+' : '') . ($this->cycle_days * $currentCycleCount) . ' days');
             }
         }
