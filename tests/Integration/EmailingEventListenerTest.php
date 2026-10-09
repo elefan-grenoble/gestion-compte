@@ -155,8 +155,6 @@ class EmailingEventListenerTest extends KernelTestCase
      */
     public function testAnonymousBeneficiaryMailsSurviveAMissingDynamicContent(string $method, string $eventClass): void
     {
-        $this->markTestIncomplete('I-BUG-4 open: EmailingEventListener reads PRE_MEMBERSHIP_EMAIL with findOneByCode()->getContent() and no null guard (Error on null).');
-
         $this->setDynamicContent('PRE_MEMBERSHIP_EMAIL', null);
         $anonymous = $this->anAnonymousBeneficiary('newcomer@example.org');
 
@@ -335,8 +333,6 @@ class EmailingEventListenerTest extends KernelTestCase
      */
     public function testReminderSurvivesAMissingDynamicContent(): void
     {
-        $this->markTestIncomplete('I-BUG-4 open: EmailingEventListener reads SHIFT_REMINDER_EMAIL with findOneByCode()->getContent() and no null guard (Error on null).');
-
         $this->setDynamicContent('SHIFT_REMINDER_EMAIL', null);
         $shift = $this->aBookedShift('Cashier');
 
