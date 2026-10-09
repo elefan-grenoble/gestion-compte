@@ -123,14 +123,12 @@ class ShiftFreeLogServiceTest extends TestCase
     }
 
     /**
-     * I-BUG-9: outside an HTTP request (console command, cron) there is no
-     * current request, and the service dereferences it unguarded. The log
-     * should simply carry no route.
+     * Outside an HTTP request (console command, cron) there is no current
+     * request: the log carries no route (I-BUG-9: the service dereferenced
+     * the missing request).
      */
     public function testInitShiftFreeLogOutsideAnHttpRequest(): void
     {
-        $this->markTestIncomplete('I-BUG-9 open: ShiftFreeLogService::initShiftFreeLog() calls get() on a null request outside HTTP; the log should have a null request route.');
-
         $log = $this->service->initShiftFreeLog($this->aShift(), new Beneficiary());
 
         $this->assertNull($log->getRequestRoute());

@@ -42,7 +42,7 @@ class PeriodPositionFreeLogService
         if (is_object($current_user)) {
             $log->setCreatedBy($current_user);
         }
-        $log->setRequestRoute($request->get('_route'));
+        $log->setRequestRoute($request ? $request->get('_route') : null);
 
         return $log;
     }
