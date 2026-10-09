@@ -668,7 +668,7 @@ class TimeLogEventListenerTest extends KernelTestCase
      */
     public function testCycleEndSavesAPendingFreezeToTheDatabase(): void
     {
-        $this->markTestIncomplete('Open (not in TODO-PRIORISEE yet): TimeLogEventListener::onMemberCycleEnd() persists the frozen toggle without flushing, and CycleStartCommand never flushes.');
+        $this->markTestIncomplete('CYCLE-FREEZE-FLUSH open: TimeLogEventListener::onMemberCycleEnd() persists the frozen toggle without flushing, and CycleStartCommand never flushes.');
 
         $member = $this->aMember();
         $member->setFrozenChange(true);
