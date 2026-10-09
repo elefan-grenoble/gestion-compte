@@ -77,21 +77,11 @@ class UserController extends AbstractController
 
             return $this->redirectToRoute('homepage');
 
-        }   // main super user not created yet
-        $admin = new User();
-        $admin->setEmail($this->getParameter('emails.admin')['address']);
-        $admin->setPlainPassword($this->getParameter('super_admin.initial_password'));
-        $admin->setUsername($this->getParameter('super_admin.username'));
-        $admin->setEnabled(true);
-        $admin->addRole('ROLE_SUPER_ADMIN');
-        $em->persist($admin);
-        $em->flush();
-
-        $this->addFlash('success', 'user super admin created with success !');
+        }
+        // main super admin not created yet: created from the command line only (I-SEC-11)
+        $this->addFlash('error', 'Aucun super admin : le créer en ligne de commande avec bin/console app:user:install_super_admin.');
 
         return $this->redirectToRoute('homepage');
-
-
     }
 
     /**

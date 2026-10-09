@@ -24,9 +24,10 @@ class UserSecurityTest extends FunctionalTestCase
     use KnownOpenVulnerability;
 
     /**
-     * I-SEC-11 (SEC.2-5, SPEC.4): until a super admin exists, the first
-     * visitor of /user/install_admin creates it, with the initial password
-     * from the environment.
+     * The super admin of a fresh install is created from the command line
+     * (I-SEC-11, SEC.2-5, SPEC.4: until a super admin existed, the first
+     * visitor of /user/install_admin created it, with the initial password
+     * from the environment). See InstallSuperAdminCommandTest.
      */
     public function testAnonymousVisitorCannotCreateTheSuperAdminOfAFreshInstall(): void
     {
@@ -35,9 +36,8 @@ class UserSecurityTest extends FunctionalTestCase
 
         $client->request('GET', '/user/install_admin');
 
-        $this->assertSecureOrKnownOpen('I-SEC-11', 'the first anonymous visitor creates the super admin of a fresh install', function () {
-            $this->assertSame([], $this->superAdmins(), 'An anonymous request created a super admin.');
-        });
+        $this->assertSame([], $this->superAdmins(), 'An anonymous request created a super admin.');
+        $this->assertTrue($client->getResponse()->isRedirect('/'));
     }
 
     /**
