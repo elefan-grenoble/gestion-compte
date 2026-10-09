@@ -70,7 +70,8 @@ class EmailingEventListener
         $emailObject = 'Bienvenue à ' . $this->container->getParameter('project_name') . ', tu te présentes ?';
         $emailTo = $event->getAnonymousBeneficiary()->getEmail();
 
-        $dynamicContent = $this->em->getRepository(DynamicContent::class)->findOneByCode('PRE_MEMBERSHIP_EMAIL')->getContent();
+        $dynamicContent = $this->em->getRepository(DynamicContent::class)->findOneByCode('PRE_MEMBERSHIP_EMAIL');
+        $dynamicContent = $dynamicContent ? $dynamicContent->getContent() : ''; // the coop may have deleted it
 
         $router = $this->container->get('router');
         if (!$event->getAnonymousBeneficiary()->getJoinTo()) {
@@ -107,7 +108,8 @@ class EmailingEventListener
         $emailObject = 'Bienvenue à ' . $this->container->getParameter('project_name') . ', souhaites-tu te présenter ?';
         $emailTo = $event->getAnonymousBeneficiary()->getEmail();
 
-        $dynamicContent = $this->em->getRepository(DynamicContent::class)->findOneByCode('PRE_MEMBERSHIP_EMAIL')->getContent();
+        $dynamicContent = $this->em->getRepository(DynamicContent::class)->findOneByCode('PRE_MEMBERSHIP_EMAIL');
+        $dynamicContent = $dynamicContent ? $dynamicContent->getContent() : ''; // the coop may have deleted it
 
         $router = $this->container->get('router');
         if (!$event->getAnonymousBeneficiary()->getJoinTo()) {
@@ -405,7 +407,8 @@ class EmailingEventListener
         $router = $this->container->get('router');
         $home_url = $router->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $dynamicContent = $this->em->getRepository(DynamicContent::class)->findOneByCode('SHIFT_REMINDER_EMAIL')->getContent();
+        $dynamicContent = $this->em->getRepository(DynamicContent::class)->findOneByCode('SHIFT_REMINDER_EMAIL');
+        $dynamicContent = $dynamicContent ? $dynamicContent->getContent() : ''; // the coop may have deleted it
         $template = $this->container->get('twig')->createTemplate($dynamicContent);
         $dynamicContent = $this->container->get('twig')->render($template, ['beneficiary' => $beneficiary]);
 
