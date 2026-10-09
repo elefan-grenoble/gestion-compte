@@ -96,6 +96,18 @@ class HelloassoNotifySecurityTest extends FunctionalTestCase
     }
 
     /**
+     * An instance without HelloAsso credentials answers that the webhook is
+     * not configured (m-BUG-1: a TypeError on the null client id).
+     */
+    public function testAnInstanceWithoutHelloassoCredentialsSaysSo(): void
+    {
+        $_ENV['HELLOASSO_CLIENT_ID'] = $_SERVER['HELLOASSO_CLIENT_ID'] = '';
+        $_ENV['HELLOASSO_CLIENT_SECRET'] = $_SERVER['HELLOASSO_CLIENT_SECRET'] = '';
+
+        $this->assertSame(503, $this->notify(['eventType' => 'Payment', 'data' => ['id' => 1234, 'state' => 'Authorized']]));
+    }
+
+    /**
      * Posts the notification and returns the status code, or a description of
      * the PHP error the controller died of (the test client, unlike the front
      * controller, lets errors through).

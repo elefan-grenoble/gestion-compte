@@ -33,6 +33,14 @@ class HelloassoClient
         $this->authenticator = $authenticator;
     }
 
+    /**
+     * Whether the instance has the credentials to call the HelloAsso API.
+     */
+    public function isConfigured(): bool
+    {
+        return (bool) $this->helloAssoClientId && (bool) $this->helloAssoClientSecret && (bool) $this->helloAssoApiAuthUrl;
+    }
+
     private function getClient(): Client
     {
         return new Client([
