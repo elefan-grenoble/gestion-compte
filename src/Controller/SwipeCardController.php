@@ -2,12 +2,11 @@
 
 namespace App\Controller;
 
+use App\Helper\QrCodePng;
 use App\Entity\Beneficiary;
 use App\Helper\SwipeCard as SwipeCardHelper;
 use App\Entity\SwipeCard as SwipeCardEntity;
 use App\Security\SwipeCardVoter;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\ErrorCorrectionLevel;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\HeaderUtils;
@@ -290,26 +289,6 @@ class SwipeCardController extends AbstractController
         ]);
     }
 
-    private function _getQr($url)
-    {
-        $qrCode = new QrCode($url);
-
-        try {
-            $qrCode->setSize(200)
-                ->setMargin(0)
-                ->setErrorCorrectionLevel(ErrorCorrectionLevel::HIGH)
-                ->setForegroundColor(['r' => 0, 'g' => 0, 'b' => 0])
-                ->setBackgroundColor(['r' => 255, 'g' => 255, 'b' => 255])
-                ->setEncoding('UTF-8')
-            ;
-
-            // Return the QR code as a base64-encoded PNG image:
-            return 'data:image/png;base64,' . base64_encode($qrCode->writeString());
-        } catch (\Exception $exception) {
-            $this->logger->error($exception->getMessage());
-        }
-    }
-
     /**
      * Swipe Card QR Code.
      *
@@ -330,7 +309,7 @@ class SwipeCardController extends AbstractController
         }
 
         $url = $this->generateUrl('swipe_in', ['code' => $this->swipeCardHelper->vigenereEncode($card->getCode())], UrlGeneratorInterface::ABSOLUTE_URL);
-        $content = base64_decode($this->_getQr($url));
+        $content = QrCodePng::fromText($url);
         $response = new Response();
         $disposition = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_INLINE, 'qr.png');
         $response->headers->set('Content-Disposition', $disposition);
