@@ -59,7 +59,7 @@ Pour un usage en production, il est très fortement recommandé d'utiliser un vr
 
 Ajouter `127.0.0.1 membres.yourcoop.local` au fichier _/etc/hosts_.
 
-Visiter [http://membres.yourcoop.local/user/install_admin](http://membres.yourcoop.local/user/install_admin) pour créer l'utilisateur super admin (valeurs par défaut : admin:password)
+Créer l'utilisateur super admin en ligne de commande : `php bin/console app:user:install_super_admin` (identifiants : `SUPER_ADMIN_USERNAME` / `SUPER_ADMIN_INITIAL_PASSWORD`, à changer à la première connexion). La page `/user/install_admin` ne crée plus le super admin d'une instance neuve.
 
 ## En prod
 

@@ -83,7 +83,7 @@ class AnonymousRouteAccessTest extends FunctionalTestCase
 
         // Machine-to-machine and bootstrap.
         'helloasso_notify' => 'OPEN HOLE I-SEC-7: HelloAsso webhook, no authentication',
-        'user_install_admin' => 'OPEN HOLE I-SEC-11: creates the super admin when none exists',
+        'user_install_admin' => 'tells a fresh install to create its super admin from the command line (I-SEC-11)',
     ];
 
     /**
