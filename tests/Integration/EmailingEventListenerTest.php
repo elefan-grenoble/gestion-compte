@@ -547,11 +547,11 @@ class EmailingEventListenerTest extends KernelTestCase
      * onAnonymousBeneficiaryRecall() and onCodeNew() (and the helloasso
      * listener) fetch the helper with $this->container->get(SwipeCard::class),
      * but the service is private: the compiled container inlines it and get()
-     * throws ServiceNotFoundException. Not in TODO-PRIORISEE yet.
+     * throws ServiceNotFoundException. Tracked as MAIL-SWIPECARD-DI in TODO-PRIORISEE.md.
      */
     public function testSwipeCardHelperIsReachableFromTheContainer(): void
     {
-        $this->markTestIncomplete('Open (not in TODO-PRIORISEE yet): App\Helper\SwipeCard is private, EmailingEventListener::onAnonymousBeneficiaryRecall()/onCodeNew() get() it from the container and throw.');
+        $this->markTestIncomplete('MAIL-SWIPECARD-DI open: App\Helper\SwipeCard is private, EmailingEventListener::onAnonymousBeneficiaryRecall()/onCodeNew() get() it from the container and throw.');
 
         $this->assertTrue(static::$kernel->getContainer()->has(SwipeCard::class));
     }
