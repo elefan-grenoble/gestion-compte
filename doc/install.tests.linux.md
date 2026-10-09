@@ -3,6 +3,8 @@
 Ce guide permet de lancer les suites de tests sans PHP/Composer installés localement, via Docker.
 Toutes les commandes sont centralisées dans le `Makefile` à la racine du projet.
 
+Pour l'architecture de la suite, les helpers, les règles d'écriture et les pièges, voir le [guide de la suite de tests](tests.md).
+
 Le même Makefile est utilisé par la CI GitHub Actions (`.github/workflows/ci.yaml`).
 En local, les commandes PHP passent par Docker Compose ; en CI (`CI=true`), elles
 s'exécutent directement.
