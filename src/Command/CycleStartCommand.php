@@ -3,6 +3,7 @@
 namespace App\Command;
 
 use App\Event\MemberCycleEndEvent;
+use App\Service\MembershipService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
@@ -62,7 +63,7 @@ class CycleStartCommand extends Command
 
         $cycle_type = $this->params->get('cycle_type');
 
-        $members_with_cycle_starting_today = $this->em->getRepository(Membership::class)->findWithNewCycleStarting($date, $cycle_type);
+        $members_with_cycle_starting_today = $this->em->getRepository(Membership::class)->findWithNewCycleStarting($date, $cycle_type, $cycle_type === 'abcd' ? 28 : MembershipService::durationInDays($this->params->get('cycle_duration')));
         $count = 0;
         foreach ($members_with_cycle_starting_today as $member) {
             $this->event_dispatcher->dispatch(new MemberCycleEndEvent($member, $date), MemberCycleEndEvent::NAME);
