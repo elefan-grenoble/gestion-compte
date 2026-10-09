@@ -26,12 +26,16 @@ class HelloassoNotificationRequest
     public static function createFromRequest(Request $request): self
     {
         $requestData = json_decode($request->getContent(), true);
-        $eventType = $requestData['eventType'];
+        if (!is_array($requestData)) {
+            throw new \InvalidArgumentException('helloasso notification is not a JSON object');
+        }
+
+        $eventType = $requestData['eventType'] ?? null;
         if (!is_string($eventType)) {
             throw new \InvalidArgumentException('cannot find eventType in helloasso notification');
         }
 
-        $data = $requestData['data'];
+        $data = $requestData['data'] ?? null;
         if (!is_array($data)) {
             throw new \InvalidArgumentException('cannot find data in helloasso notification');
         }
@@ -41,6 +45,6 @@ class HelloassoNotificationRequest
 
     public function isPaymentValidated(): bool
     {
-        return $this->eventType === 'Payment' && $this->data['state'] === 'Authorized';
+        return $this->eventType === 'Payment' && ($this->data['state'] ?? null) === 'Authorized';
     }
 }
