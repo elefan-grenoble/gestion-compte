@@ -267,8 +267,9 @@ class ShiftControllerFreeTest extends FunctionalTestCase
     }
 
     /**
-     * Without a Referer header the action builds `new RedirectResponse(null)`,
-     * which throws; a privacy extension or a cross-origin post gets a 500.
+     * Without a Referer header (privacy extension, cross-origin post) the
+     * manager is sent to the admin booking page (SHIFT-NO-REFERER: the
+     * action used to build `new RedirectResponse(null)` and answer 500).
      */
     public function testFreeingWithoutARefererStillRedirects(): void
     {
@@ -280,10 +281,8 @@ class ShiftControllerFreeTest extends FunctionalTestCase
 
         $client->request('POST', '/shift/' . $shift->getId() . '/free_admin', ['shift_free_forms_' . $shift->getId() => ['reason' => '', '_token' => $token]]);
 
-        if (500 === $client->getResponse()->getStatusCode()) {
-            $this->markTestIncomplete('SHIFT-NO-REFERER open: free_admin answers 500 without a Referer header (RedirectResponse(null)); the shift is freed but the manager gets an error page.');
-        }
-        $this->assertTrue($client->getResponse()->isRedirection());
+        $this->assertTrue($client->getResponse()->isRedirect('/booking/admin'), (string) $client->getResponse()->headers->get('Location'));
+        $this->assertNull(static::reloaded($shift)->getShifter());
     }
 
     /**
