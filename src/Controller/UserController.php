@@ -173,7 +173,7 @@ class UserController extends AbstractController
     /**
      * remove role of user.
      *
-     * @Route("/{id}/removeRole/{role}", name="user_remove_role", methods={"GET","POST"})
+     * @Route("/{id}/removeRole/{role}", name="user_remove_role", methods={"POST"})
      *
      * @Security("is_granted('ROLE_ADMIN')")
      *
@@ -181,10 +181,16 @@ class UserController extends AbstractController
      *
      * @return RedirectResponse
      */
-    public function removeRoleAction(User $user, $role)
+    public function removeRoleAction(Request $request, User $user, $role)
     {
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->getCurrentAppUser();
+
+        if (!$this->isCsrfTokenValid('user_role_' . $user->getId() . '_' . $role, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide, merci de réessayer depuis la fiche du membre.');
+
+            return $this->redirectToShow($user);
+        }
 
         // cannot remove a nonexistant role
         if (!$user->hasRole($role)) {
@@ -211,7 +217,7 @@ class UserController extends AbstractController
     /**
      * add role of user.
      *
-     * @Route("/{id}/addRole/{role}", name="user_add_role", methods={"GET"})
+     * @Route("/{id}/addRole/{role}", name="user_add_role", methods={"POST"})
      *
      * @Security("is_granted('ROLE_ADMIN')")
      *
@@ -219,10 +225,16 @@ class UserController extends AbstractController
      *
      * @return RedirectResponse
      */
-    public function addRoleAction(User $user, $role)
+    public function addRoleAction(Request $request, User $user, $role)
     {
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->getCurrentAppUser();
+
+        if (!$this->isCsrfTokenValid('user_role_' . $user->getId() . '_' . $role, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide, merci de réessayer depuis la fiche du membre.');
+
+            return $this->redirectToShow($user);
+        }
 
         // cannot add an existing role
         if ($user->hasRole($role)) {
