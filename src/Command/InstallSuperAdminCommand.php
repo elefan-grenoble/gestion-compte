@@ -16,6 +16,9 @@ use Symfony\Component\DependencyInjection\ParameterBag\ContainerBagInterface;
  */
 class InstallSuperAdminCommand extends Command
 {
+    /** Initial passwords that are never accepted: the .env.dist placeholder and well-known defaults. */
+    private const REFUSED_PASSWORDS = ['', '<change-me>', 'password', 'changeme', 'admin'];
+
     private $em;
     private $params;
 
@@ -44,9 +47,16 @@ class InstallSuperAdminCommand extends Command
             return 1;
         }
 
+        $password = (string) $this->params->get('super_admin.initial_password');
+        if (in_array(strtolower(trim($password)), self::REFUSED_PASSWORDS, true)) {
+            $output->writeln('<fg=red;>Set SUPER_ADMIN_INITIAL_PASSWORD to a password of your own first: nothing created.</>');
+
+            return 2;
+        }
+
         $admin = new User();
         $admin->setEmail($this->params->get('emails.admin')['address']);
-        $admin->setPlainPassword($this->params->get('super_admin.initial_password'));
+        $admin->setPlainPassword($password);
         $admin->setUsername($this->params->get('super_admin.username'));
         $admin->setEnabled(true);
         $admin->addRole('ROLE_SUPER_ADMIN');
