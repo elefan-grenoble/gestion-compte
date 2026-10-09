@@ -45,6 +45,7 @@ _cliquez pour voir l'image en grand_
 
 [Guide du développeur](doc/dev.md)
 [Lancer les tests en local sous docker (ISO CI)](doc/install.tests.linux.md)
+[Guide de la suite de tests (architecture, helpers, règles d'écriture, CI)](doc/tests.md)
 [Export anonymisé de la base](doc/anonymized-export.md)
 
 ## Liste des fonctionnalités
