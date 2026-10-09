@@ -662,14 +662,13 @@ class TimeLogEventListenerTest extends KernelTestCase
     }
 
     /**
-     * The toggle is persisted but never flushed: the cycle start command
-     * does not flush either, so the last member of a run keeps the old state
-     * in the database and is toggled again at the next cycle.
+     * The toggle reaches the database (CYCLE-FREEZE-FLUSH: it was persisted
+     * but never flushed, the cycle start command does not flush either, so
+     * the last member of a run kept the old state and was toggled again at
+     * the next cycle).
      */
     public function testCycleEndSavesAPendingFreezeToTheDatabase(): void
     {
-        $this->markTestIncomplete('CYCLE-FREEZE-FLUSH open: TimeLogEventListener::onMemberCycleEnd() persists the frozen toggle without flushing, and CycleStartCommand never flushes.');
-
         $member = $this->aMember();
         $member->setFrozenChange(true);
         static::persist($member);
