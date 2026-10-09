@@ -216,6 +216,23 @@ class BadgeSecurityTest extends FunctionalTestCase
     }
 
     /**
+     * The "lost badge" modal of the profile page disables the badge
+     * (SWIPE-DISABLE-MODAL: it posted no beneficiary and answered 500).
+     */
+    public function testTheHolderDisablesTheirLostBadgeFromTheProfilePage(): void
+    {
+        static::createClient();
+        $holder = $this->aMember();
+        $card = $this->aBadge($holder->getBeneficiary());
+        $client = static::createAuthenticatedClient($holder);
+        $crawler = $client->request('GET', '/profile/');
+
+        $client->submit($crawler->filterXPath(sprintf('//div[@id="swipe_disable_%d"]//form', $card->getId()))->form(), [], self::REFERER);
+
+        $this->assertFalse($this->reloaded($card)->getEnable());
+    }
+
+    /**
      * The badge forms themselves stay closed to anonymous visitors.
      *
      * @dataProvider badgeForms
