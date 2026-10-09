@@ -421,9 +421,8 @@ class ShiftController extends AbstractController
 
         }
         $this->addFlash($success ? 'success' : 'error', $message);
-        $referer = $request->headers->get('referer');
 
-        return new RedirectResponse($referer);
+        return $this->redirectToReferer($request);
 
     }
 
@@ -502,9 +501,8 @@ class ShiftController extends AbstractController
 
         }
         $this->addFlash($success ? 'success' : 'error', $message);
-        $referer = $request->headers->get('referer');
 
-        return new RedirectResponse($referer);
+        return $this->redirectToReferer($request);
 
     }
 
@@ -750,6 +748,20 @@ class ShiftController extends AbstractController
             'display_on_empty' => $display_on_empty,
             'title' => $title,
         ]);
+    }
+
+    /**
+     * Go back to the page the admin action was posted from, or to the
+     * admin booking page when the browser sent no Referer header.
+     */
+    private function redirectToReferer(Request $request): RedirectResponse
+    {
+        $referer = $request->headers->get('referer');
+        if (!$referer) {
+            return $this->redirectToRoute('booking_admin');
+        }
+
+        return new RedirectResponse($referer);
     }
 
     /**
