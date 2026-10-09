@@ -297,6 +297,8 @@ class SwipeCardController extends AbstractController
      * @return Response A Response instance
      *
      * @Route("/{code}/qr.png", name="swipe_qr", methods={"GET"})
+     *
+     * @Security("is_granted('ROLE_USER')")
      */
     public function qrAction(Request $request, $code)
     {
@@ -307,6 +309,7 @@ class SwipeCardController extends AbstractController
         if (!$card) {
             throw $this->createAccessDeniedException();
         }
+        $this->denyAccessUnlessGranted(SwipeCardVoter::VIEW, $card);
 
         $url = $this->generateUrl('swipe_in', ['code' => $this->swipeCardHelper->vigenereEncode($card->getCode())], UrlGeneratorInterface::ABSOLUTE_URL);
         $content = QrCodePng::fromText($url);
@@ -328,6 +331,8 @@ class SwipeCardController extends AbstractController
      * @return Response A Response instance
      *
      * @Route("/{code}/br.png", name="swipe_br", methods={"GET"})
+     *
+     * @Security("is_granted('ROLE_USER')")
      */
     public function brAction(Request $request, $code)
     {
@@ -338,6 +343,7 @@ class SwipeCardController extends AbstractController
         if (!$card instanceof SwipeCardEntity) {
             throw $this->createAccessDeniedException();
         }
+        $this->denyAccessUnlessGranted(SwipeCardVoter::VIEW, $card);
         $content = $card->getBarcode();
 
         return new Response(

@@ -64,7 +64,6 @@ security:
     - { path: ^/helloassoNotify$, role: IS_AUTHENTICATED_ANONYMOUSLY }
     - { path: ^/oauth/(login|logout|callback)$, role: IS_AUTHENTICATED_ANONYMOUSLY }
     - { path: ^/sw/in/, role: IS_AUTHENTICATED_ANONYMOUSLY }
-    - { path: ^/sw/.+/(qr|br)\.png$, role: IS_AUTHENTICATED_ANONYMOUSLY }
     - { path: ^/card_reader, role: IS_AUTHENTICATED_ANONYMOUSLY }
     - { path: ^/cardReader$, role: IS_AUTHENTICATED_ANONYMOUSLY }
     - { path: ^/codes/close_all$, role: IS_AUTHENTICATED_ANONYMOUSLY }
