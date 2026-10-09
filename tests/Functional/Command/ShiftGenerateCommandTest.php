@@ -219,8 +219,6 @@ class ShiftGenerateCommandTest extends CommandTestCase
 
     public function testRejectsAMalformedEndDate(): void
     {
-        $this->markTestIncomplete('CLI-GENERATE-TO open: a malformed --to makes ShiftGenerateCommand call format() on false (fatal Error) instead of failing with status 2 like a malformed date does.');
-
         $this->aPeriod($this->aJob(), self::MONDAY, '09:00', '12:00', 'B');
 
         $tester = $this->runCommand('app:shift:generate', ['date' => self::MONDAY_OF_WEEK_B, '--to' => 'not-a-date']);
