@@ -392,7 +392,7 @@ class ShiftController extends AbstractController
 
                 if ($this->use_time_log_saving) {
                     if (count($em->getRepository(TimeLog::class)->findAll($member, $shift, TimeLog::TYPE_SAVING))) {
-                        $message += 'Grâce au compteur épargne, le créneau a été comptabilisé (en échange, le compteur épargne a été décrémenté de la durée du créneau).';
+                        $message .= ' Grâce au compteur épargne, le créneau a été comptabilisé (en échange, le compteur épargne a été décrémenté de la durée du créneau).';
                     }
                 }
             }
