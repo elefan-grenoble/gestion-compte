@@ -35,7 +35,6 @@ use Monolog\Handler\NullHandler;
 use Monolog\Logger;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 use Symfony\Bundle\FrameworkBundle\Test\MailerAssertionsTrait;
-use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Mime\Email;
 
 /**
@@ -540,63 +539,31 @@ class EmailingEventListenerTest extends KernelTestCase
     }
 
     /**
-     * onAnonymousBeneficiaryRecall() and onCodeNew() (and the helloasso
-     * listener) fetch the helper with $this->container->get(SwipeCard::class),
-     * but the service is private: the compiled container inlines it and get()
-     * throws ServiceNotFoundException. Tracked as MAIL-SWIPECARD-DI in TODO-PRIORISEE.md.
+     * The mails that carry a coded link use the injected SwipeCard helper:
+     * the compiled container does not expose the private service
+     * (MAIL-SWIPECARD-DI: onAnonymousBeneficiaryRecall() and onCodeNew()
+     * fetched it there and threw ServiceNotFoundException).
      */
     public function testSwipeCardHelperIsReachableFromTheContainer(): void
     {
-        $this->markTestIncomplete('MAIL-SWIPECARD-DI open: App\Helper\SwipeCard is private, EmailingEventListener::onAnonymousBeneficiaryRecall()/onCodeNew() get() it from the container and throw.');
+        $this->assertFalse(static::$kernel->getContainer()->has(SwipeCard::class), 'Precondition: the compiled container hides the helper.');
+        $this->setDynamicContent('PRE_MEMBERSHIP_EMAIL', 'Still time to register');
 
-        $this->assertTrue(static::$kernel->getContainer()->has(SwipeCard::class));
+        $this->listener()->onAnonymousBeneficiaryRecall(new AnonymousBeneficiaryRecallEvent($this->anAnonymousBeneficiary('newcomer@example.org')));
+
+        $this->assertEmailHtmlBodyContains($this->theOnlyEmail(), '/member/new?code=');
     }
 
     // ---------------------------------------------------------------------
     // helpers
     // ---------------------------------------------------------------------
 
-    /**
-     * The listener is given the application container. It looks the SwipeCard
-     * helper up there, which the compiled container does not expose (see
-     * testSwipeCardHelperIsReachableFromTheContainer): the tests hand it over
-     * through a thin wrapper, to check the mails themselves.
-     */
     private function listener(bool $copyToAdmin = true): EmailingEventListener
     {
-        $real = static::$kernel->getContainer();
-        $swipeCard = static::$container->get(SwipeCard::class);
-        $container = new class ($real, $swipeCard) extends Container {
-            private $real;
-            private $swipeCard;
-
-            public function __construct(Container $real, SwipeCard $swipeCard)
-            {
-                parent::__construct();
-                $this->real = $real;
-                $this->swipeCard = $swipeCard;
-            }
-
-            public function get($id, $invalidBehavior = 1)
-            {
-                return SwipeCard::class === $id ? $this->swipeCard : $this->real->get($id, $invalidBehavior);
-            }
-
-            public function has($id)
-            {
-                return SwipeCard::class === $id || $this->real->has($id);
-            }
-
-            public function getParameter($name)
-            {
-                return $this->real->getParameter($name);
-            }
-        };
-
         return new EmailingEventListener(
             static::entityManager(),
             new Logger('test', [new NullHandler()]),
-            $container,
+            static::$kernel->getContainer(),
             static::$container->get('mailer.mailer'),
             $copyToAdmin,
             static::$container->get(SwipeCard::class)
