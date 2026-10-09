@@ -9,7 +9,6 @@ use App\Tests\Support\Builder\BeneficiaryBuilder;
 use App\Tests\Support\Builder\MembershipBuilder;
 use App\Tests\Support\Builder\ShiftBuilder;
 use App\Tests\Support\ShiftScenarios;
-use App\Tests\Support\Security\KnownOpenVulnerability;
 
 /**
  * The form with which a shifter mails the co-shifters of a shift
@@ -20,7 +19,6 @@ use App\Tests\Support\Security\KnownOpenVulnerability;
  */
 class ShiftControllerContactFormTest extends FunctionalTestCase
 {
-    use KnownOpenVulnerability;
     use ShiftScenarios;
 
     public static function setUpBeforeClass(): void
@@ -50,7 +48,7 @@ class ShiftControllerContactFormTest extends FunctionalTestCase
         static::logIn($client, $shifter->getUser());
         $client->enableProfiler();
 
-        $this->postContact($client, $shift, $shifter, [$coShifter], 'I will be late');
+        $this->postContact($client, $shift, [$coShifter], 'I will be late');
 
         $this->assertTrue($client->getResponse()->isRedirect('/'));
         $this->assertSame(['Ton message a été transmis à ' . $coShifter->getFirstname()], static::flashes($client)['success'] ?? []);
@@ -65,8 +63,9 @@ class ShiftControllerContactFormTest extends FunctionalTestCase
     }
 
     /**
-     * The sender is a hidden field, so any logged-in member can mail the
-     * co-shifters in the name of the shifter (reply-to included).
+     * The sender is the logged-in member, who must belong to the membership
+     * holding the shift (SHIFT-CONTACT-FROM: the sender was a hidden field,
+     * so any member could mail the co-shifters in the name of the shifter).
      */
     public function testAMemberCannotMailTheCoShiftersInTheNameOfTheShifter(): void
     {
@@ -76,13 +75,12 @@ class ShiftControllerContactFormTest extends FunctionalTestCase
         static::logIn($client, $intruder->getUser());
         $client->enableProfiler();
 
-        $this->postContact($client, $shift, $shifter, [$coShifter], 'Send me your password');
+        $this->postContact($client, $shift, [$coShifter], 'Send me your password');
 
-        $this->assertSecureOrKnownOpen('SHIFT-CONTACT-FROM', 'any member can send the co-shifters a mail in the shifter\'s name', function () use ($client) {
-            $profile = $client->getProfile();
-            $sent = $profile ? count($profile->getCollector('mailer')->getEvents()->getMessages()) : 0;
-            $this->assertSame(0, $sent, 'A mail was sent in the name of somebody else.');
-        });
+        $this->assertSame(403, $client->getResponse()->getStatusCode());
+        $profile = $client->getProfile();
+        $sent = $profile ? count($profile->getCollector('mailer')->getEvents()->getMessages()) : 0;
+        $this->assertSame(0, $sent, 'A mail was sent in the name of somebody else.');
     }
 
     /**
@@ -114,11 +112,10 @@ class ShiftControllerContactFormTest extends FunctionalTestCase
         return [$mine, $shifter, $coShifter];
     }
 
-    private function postContact($client, Shift $shift, Beneficiary $from, array $to, string $message): void
+    private function postContact($client, Shift $shift, array $to, string $message): void
     {
         $name = 'shift_contact_form_' . $shift->getId();
         $client->request('POST', '/shift/' . $shift->getId() . '/contact_form', [$name => [
-            'from' => $from->getId(),
             'to' => array_map(function (Beneficiary $b) {
                 return sprintf('#%d %s %s', static::reloaded($b)->getMemberNumber(), $b->getFirstname(), $b->getLastname());
             }, $to),
