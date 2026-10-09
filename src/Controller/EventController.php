@@ -375,7 +375,7 @@ class EventController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
-        if (($proxy->getEvent() === $event) && ($proxy->getOwner()->getUser() == $current_app_user)) {
+        if (($proxy->getEvent() === $event) && $proxy->getOwner() && ($proxy->getOwner()->getUser() == $current_app_user)) {
             $em->remove($proxy);
             $em->flush();
 
