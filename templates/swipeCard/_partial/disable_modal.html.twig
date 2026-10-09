@@ -6,6 +6,7 @@
             <p>
                 Alors comme ça tu ne retrouves plus ton badge ? Désactive-le ici.
             </p>
+            <input type="hidden" name="beneficiary" value="{{ card.beneficiary.id }}" />
             <input type="hidden" name="code" value="{{ card.code | vigenere_encode }}"/>
             <input type="hidden" name="_token" value="{{ csrf_token('swipe_card') }}"/>
         </div>
