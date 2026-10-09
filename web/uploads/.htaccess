@@ -1,0 +1,11 @@
+# Uploaded files are served as static files only, never executed (C-SEC-3).
+# Only FileInfo directives, which web/.htaccess already needs (mod_rewrite):
+# Options, php_flag or Require would answer 500 without the matching AllowOverride.
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteRule \.(php\d?|phtml|phar|pht|cgi|pl|py|sh)(\.|$) - [NC,F,L]
+</IfModule>
+<IfModule mod_mime.c>
+    RemoveHandler .php .php3 .php4 .php5 .php7 .php8 .phtml .phar .pht
+    RemoveType .php .php3 .php4 .php5 .php7 .php8 .phtml .phar .pht
+</IfModule>

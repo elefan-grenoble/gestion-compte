@@ -75,6 +75,14 @@ location ~* ^/sw/(.*)/(qr|br)\.png$ {
 }
 ```
 
+Les fichiers envoyés (logos de services, images d'événements) sont stockés dans `web/uploads/` et ne doivent jamais être exécutés. `web/uploads/.htaccess` le garantit avec Apache ; avec nginx, ajouter :
+
+```
+location ^~ /uploads/ {
+	location ~* \.(php\d?|phtml|phar|pht)$ { return 403; }
+}
+```
+
 ### Sécurité PHP (CVE-2026-109618 / CVE-2026-109619)
 
 Ces deux failles permettent une exécution de code à distance sans authentification, avant même que l'application ne s'exécute. Versions corrigées : 8.2.35, 8.3.36, 8.4.27 et 8.5.12. Les branches en fin de vie (8.1 et antérieures, dont 7.4) ne recevront pas de version corrigée : l'équipe sécurité PHP n'a publié pour 7.4, 8.0 et 8.1 qu'un correctif source à recompiler.
