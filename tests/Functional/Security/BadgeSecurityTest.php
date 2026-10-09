@@ -2,6 +2,7 @@
 
 namespace App\Tests\Functional\Security;
 
+use App\Controller\SwipeCardController;
 use App\Entity\Beneficiary;
 use App\Entity\Shift;
 use App\Entity\SwipeCard;
@@ -110,8 +111,9 @@ class BadgeSecurityTest extends FunctionalTestCase
     }
 
     /**
-     * I-SEC-6 (SEC.3-5): no CSRF token on the badge forms; a forged POST from
-     * any page disables the badge of whoever opens it (no shop access).
+     * The badge forms carry a CSRF token (I-SEC-6, SEC.3-5: without it, a
+     * forged POST from any page disabled the badge of whoever opened it, no
+     * shop access).
      */
     public function testAForgedPostCannotDisableABadge(): void
     {
@@ -125,9 +127,7 @@ class BadgeSecurityTest extends FunctionalTestCase
             'beneficiary' => $holder->getBeneficiary()->getId(),
         ], [], self::REFERER);
 
-        $this->assertSecureOrKnownOpen('I-SEC-6', 'a POST without CSRF token disables a badge', function () use ($card) {
-            $this->assertTrue($this->reloaded($card)->getEnable(), 'A POST without CSRF token disabled the badge.');
-        });
+        $this->assertTrue($this->reloaded($card)->getEnable(), 'A POST without CSRF token disabled the badge.');
     }
 
     /**
@@ -145,9 +145,7 @@ class BadgeSecurityTest extends FunctionalTestCase
             'beneficiary' => $holder->getBeneficiary()->getId(),
         ], [], self::REFERER);
 
-        $this->assertSecureOrKnownOpen('I-SEC-6', 'a POST without CSRF token re-enables a badge', function () use ($card) {
-            $this->assertFalse($this->reloaded($card)->getEnable(), 'A POST without CSRF token enabled the badge.');
-        });
+        $this->assertFalse($this->reloaded($card)->getEnable(), 'A POST without CSRF token enabled the badge.');
     }
 
     /**
@@ -164,9 +162,7 @@ class BadgeSecurityTest extends FunctionalTestCase
             'beneficiary' => $victim->getBeneficiary()->getId(),
         ], [], self::REFERER);
 
-        $this->assertSecureOrKnownOpen('I-SEC-6', 'a POST without CSRF token pairs a badge with the account', function () {
-            $this->assertSame(0, static::entityManager()->getRepository(SwipeCard::class)->count(['code' => '200000000042']), 'A POST without CSRF token paired the badge.');
-        });
+        $this->assertSame(0, static::entityManager()->getRepository(SwipeCard::class)->count(['code' => '200000000042']), 'A POST without CSRF token paired the badge.');
     }
 
     /**
@@ -180,10 +176,44 @@ class BadgeSecurityTest extends FunctionalTestCase
         $client = static::createAuthenticatedClient($this->aMember('ROLE_ADMIN'));
         $client->request('POST', '/sw/delete', ['code' => self::encode($card->getCode())], [], self::REFERER);
 
-        $this->assertSecureOrKnownOpen('I-SEC-6', 'a POST without CSRF token deletes a badge', function () use ($card) {
-            static::entityManager()->clear();
-            $this->assertNotNull(static::entityManager()->find(SwipeCard::class, $card->getId()), 'A POST without CSRF token deleted the badge.');
-        });
+        static::entityManager()->clear();
+        $this->assertNotNull(static::entityManager()->find(SwipeCard::class, $card->getId()), 'A POST without CSRF token deleted the badge.');
+    }
+
+    /**
+     * The forms of the profile page carry the token: the holder disables,
+     * re-enables and pairs their badge.
+     */
+    public function testTheHolderManagesTheirBadgeWithTheToken(): void
+    {
+        static::createClient();
+        $holder = $this->aMember();
+        $card = $this->aBadge($holder->getBeneficiary());
+        $client = static::createAuthenticatedClient($holder);
+        $token = $client->getContainer()->get('security.csrf.token_manager')->getToken(SwipeCardController::CSRF_TOKEN_ID)->getValue();
+        $client->getContainer()->get('session')->save();
+        $form = ['code' => self::encode($card->getCode()), 'beneficiary' => $holder->getBeneficiary()->getId(), '_token' => $token];
+
+        $client->request('POST', '/sw/disable', $form, [], self::REFERER);
+        $this->assertFalse($this->reloaded($card)->getEnable());
+
+        $client->request('POST', '/sw/enable', $form, [], self::REFERER);
+        $this->assertTrue($this->reloaded($card)->getEnable());
+    }
+
+    public function testTheProfilePageFormsCarryTheToken(): void
+    {
+        static::createClient();
+        $holder = $this->aMember();
+        $this->aBadge($holder->getBeneficiary());
+        $client = static::createAuthenticatedClient($holder);
+
+        $crawler = $client->request('GET', '/profile/');
+
+        $this->assertSame(200, $client->getResponse()->getStatusCode());
+        $forms = $crawler->filterXPath('//form[contains(@action, "/sw/")]');
+        $this->assertGreaterThan(0, $forms->count());
+        $this->assertSame($forms->count(), $crawler->filterXPath('//form[contains(@action, "/sw/")]//input[@name="_token"]')->count());
     }
 
     /**
