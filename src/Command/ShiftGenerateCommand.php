@@ -69,6 +69,11 @@ class ShiftGenerateCommand extends Command
         }
         if ($to_given) {
             $to = date_create_from_format('Y-m-d', $to_given);
+            if (!$to || $to->format('Y-m-d') != $to_given) {
+                $output->writeln('<fg=red;> wrong date format for --to. Use Y-m-d </>');
+
+                return 2;
+            }
             $output->writeln('<fg=yellow;>Shift generation from <fg=cyan;>' . $from->format('d M Y') . '</><fg=yellow;> to </><fg=cyan;>' . $to->format('d M Y') . '</>');
         } else {
             $to = clone $from;
