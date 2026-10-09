@@ -157,10 +157,11 @@ est désactivée à dessein (voir §5, `@coversNothing`). Les classes de test po
 - **Identity map Doctrine** : une entité construite en mémoire garde ses collections
   d'origine dans l'EM du test. Appeler `entityManager()->clear()` avant la requête
   quand l'action parcourt ces collections.
-- **Cache de 5 s des cumuls de créneaux** (`ShiftRepository::findShiftsForBeneficiaries()`) :
-  deux réservations enchaînées voient un cumul périmé. Vider avec
-  `ShiftRepository::functionsResultCache()->clear()` entre les deux, ou attendre en E2E.
-  Ce comportement est lui-même un bug ouvert (SHIFT-QUOTA-CACHE).
+- **Cache des cumuls de créneaux** (`ShiftRepository::findShiftsForBeneficiaries()`) : il
+  vit le temps d'une requête (il appartient au repository, donc à l'entity manager). Deux
+  requêtes du client de test, qui redémarre le noyau entre elles, ne partagent rien.
+  L'ancien cache fichier de 5 s, partagé entre utilisateurs, faussait deux réservations
+  enchaînées (SHIFT-QUOTA-CACHE, corrigé).
 - **Pare-feu** : `main` (`^/`) est déclaré avant `oauth_token`, `oauth_authorize` et `api`
   qui sont donc inopérants (I-SEC-14). Les tests d'accès à `/api` s'appuient sur
   `access_control`, pas sur le pare-feu.
