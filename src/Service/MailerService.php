@@ -78,7 +78,8 @@ class MailerService implements FOSMailerInterface
         $emailObject = 'Bienvenue à ' . $this->project_name;
         $emailTo = $user->getEmail();
 
-        $dynamicContent = $this->entity_manager->getRepository(DynamicContent::class)->findOneByCode('WELCOME_EMAIL')->getContent();
+        $dynamicContent = $this->entity_manager->getRepository(DynamicContent::class)->findOneByCode('WELCOME_EMAIL');
+        $dynamicContent = $dynamicContent ? $dynamicContent->getContent() : ''; // the coop may have deleted it
 
         $login_url = $url = $this->router->generate('fos_user_registration_confirm', ['token' => $user->getConfirmationToken()], UrlGeneratorInterface::ABSOLUTE_URL);
         $welcome = (new Email())
