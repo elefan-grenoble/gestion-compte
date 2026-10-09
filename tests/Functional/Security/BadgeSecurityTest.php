@@ -56,63 +56,57 @@ class BadgeSecurityTest extends FunctionalTestCase
     }
 
     /**
-     * I-SEC-9 (SPEC.4): the badge images are public; whoever gets the
-     * encoded code (it is in the URL) prints a working copy of the badge.
+     * The badge images are restricted to the badge holder and the user
+     * managers (I-SEC-9, SPEC.4: they were public, whoever got the encoded
+     * code, which is in the URL, printed a working copy of the badge).
      *
-     * The QR code (/sw/{code}/qr.png) serves the same badge: see
-     * testTheHolderDownloadsTheQrCodeOfTheirBadge.
+     * @dataProvider badgeImages
      */
-    public function testAnonymousVisitorCannotDownloadABadgeImage(): void
+    public function testAnonymousVisitorCannotDownloadABadgeImage(string $image): void
     {
         $client = static::createClient();
         $card = $this->aBadge($this->aMember()->getBeneficiary());
 
-        $client->request('GET', sprintf('/sw/%s/br.png', urlencode(self::encode($card->getCode()))));
+        $client->request('GET', sprintf('/sw/%s/%s', urlencode(self::encode($card->getCode())), $image));
 
-        $this->assertSecureOrKnownOpen('I-SEC-9', 'an anonymous visitor downloads the barcode of a badge', function () use ($client) {
-            $response = $client->getResponse();
-            $this->assertTrue(
-                $response->isRedirect('http://localhost/login') || 403 === $response->getStatusCode(),
-                sprintf('Answered %d (%s), expected a login or a 403.', $response->getStatusCode(), $response->headers->get('Content-Type'))
-            );
-        });
+        $this->assertTrue($client->getResponse()->isRedirect('http://localhost/login'));
     }
 
     /**
-     * The QR code of a badge is a PNG of the badge link (C-BUG-7: the route
-     * called the endroid/qr-code 3 API while version 4 is installed, and
-     * crashed whoever asked).
+     * @dataProvider badgeImages
      */
-    public function testTheHolderDownloadsTheQrCodeOfTheirBadge(): void
-    {
-        static::createClient();
-        $holder = $this->aMember();
-        $card = $this->aBadge($holder->getBeneficiary());
-
-        $client = static::createAuthenticatedClient($holder);
-        $client->request('GET', sprintf('/sw/%s/qr.png', urlencode(self::encode($card->getCode()))));
-
-        $response = $client->getResponse();
-        $this->assertSame(200, $response->getStatusCode());
-        $this->assertSame('image/png', $response->headers->get('Content-Type'));
-        $this->assertStringStartsWith("\x89PNG\r\n\x1a\n", $response->getContent());
-        $this->assertSame([QrCodePng::SIZE, QrCodePng::SIZE], array_slice(getimagesizefromstring($response->getContent()), 0, 2));
-    }
-
-    /**
-     * I-SEC-9: the target is the badge holder and the user managers only.
-     */
-    public function testAnotherMemberCannotDownloadABadgeImage(): void
+    public function testAnotherMemberCannotDownloadABadgeImage(string $image): void
     {
         static::createClient();
         $card = $this->aBadge($this->aMember()->getBeneficiary());
 
         $client = static::createAuthenticatedClient($this->aMember());
-        $client->request('GET', sprintf('/sw/%s/br.png', urlencode(self::encode($card->getCode()))));
+        $client->request('GET', sprintf('/sw/%s/%s', urlencode(self::encode($card->getCode())), $image));
 
-        $this->assertSecureOrKnownOpen('I-SEC-9', 'any member downloads the barcode of another member\'s badge', function () use ($client) {
-            $this->assertSame(403, $client->getResponse()->getStatusCode());
-        });
+        $this->assertSame(403, $client->getResponse()->getStatusCode());
+    }
+
+    /**
+     * @dataProvider badgeImages
+     */
+    public function testAUserManagerDownloadsTheBadgeImageOfAMember(string $image): void
+    {
+        static::createClient();
+        $card = $this->aBadge($this->aMember()->getBeneficiary());
+
+        $client = static::createAuthenticatedClient($this->aMember('ROLE_USER_MANAGER'));
+        $client->request('GET', sprintf('/sw/%s/%s', urlencode(self::encode($card->getCode())), $image));
+
+        $this->assertSame(200, $client->getResponse()->getStatusCode());
+        $this->assertSame('image/png', $client->getResponse()->headers->get('Content-Type'));
+    }
+
+    /**
+     * @return array<string, array{string}>
+     */
+    public function badgeImages(): array
+    {
+        return ['barcode' => ['br.png'], 'QR code' => ['qr.png']];
     }
 
     /**

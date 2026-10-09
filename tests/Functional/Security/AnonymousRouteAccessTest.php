@@ -76,8 +76,6 @@ class AnonymousRouteAccessTest extends FunctionalTestCase
 
         // Badges, card reader and emailed one-click links.
         'swipe_in' => 'badge QR code login',
-        'swipe_qr' => 'OPEN HOLE I-SEC-9: badge QR image downloadable by whoever has the code',
-        'swipe_br' => 'OPEN HOLE I-SEC-9: badge barcode image downloadable by whoever has the code',
         'root' => '/cardReader, legacy redirect to the card reader',
         'card_reader_index' => 'card reader kiosk, gated by the card_reader voter',
         'card_reader_check' => 'OPEN HOLE I-SEC-4: validates shifts from a badge number, no login',
