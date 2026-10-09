@@ -89,7 +89,8 @@ global.myCookieInit = function(defaultData){
     return data;
 }
 
-function initCollapsible(id){
+// Called from the templates (member/show.html.twig): exposed like myCookieInit().
+global.initCollapsible = function(id){
     $(id+' .collapsible-header').on('click', function () {
         var data = myCookieInit();
         data.user_show[id.substr(1)+"_open"] = !$(this).hasClass("active");
