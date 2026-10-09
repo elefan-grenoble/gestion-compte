@@ -135,9 +135,7 @@ class ShiftControllerFreeTest extends FunctionalTestCase
     }
 
     /**
-     * The refusal should tell why; the code writes
-     * `$check['message'] || "Impossible d'annuler ce créneau."`, which is
-     * true, so the flash reads "1".
+     * The refusal tells why (SHIFT-FREE-MESSAGE: the flash used to read "1").
      */
     public function testTheRefusalToFreeAStartedShiftSaysWhy(): void
     {
@@ -148,11 +146,7 @@ class ShiftControllerFreeTest extends FunctionalTestCase
 
         $this->postFree($client, $shift);
 
-        $errors = static::flashes($client)['error'] ?? [];
-        if (['1'] === $errors || [true] === $errors) {
-            $this->markTestIncomplete('SHIFT-FREE-MESSAGE open: the refusal flash is "1" because ShiftController::freeShiftAction() uses || where it means ?:.');
-        }
-        $this->assertSame(['Impossible de libérer un créneau dans le passé.'], $errors);
+        $this->assertSame(['Impossible de libérer un créneau dans le passé.'], static::flashes($client)['error'] ?? []);
     }
 
     // --- a shift manager frees a shift -----------------------------------
