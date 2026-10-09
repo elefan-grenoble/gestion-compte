@@ -292,7 +292,9 @@ class HelloassoController extends AbstractController
     {
         $code = urldecode($code);
         $email = $swipeCardHelper->vigenereDecode($code);
-        if ($email == $payment->getEmail()) {
+        if ($email == $payment->getEmail() && $payment->getRegistration()) {
+            $this->addFlash('error', 'Le paiement helloasso que tu cherches à corriger n\'a plus besoin de ton aide !');
+        } elseif ($email == $payment->getEmail()) {
             $this->addFlash('success', 'Merci !');
             $event_dispatcher->dispatch(
                 new HelloassoEvent($payment, $this->getUser()),
