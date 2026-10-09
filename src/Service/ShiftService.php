@@ -280,7 +280,7 @@ class ShiftService
      *
      * @return array
      */
-    public function canFreeShift(Beneficiary $beneficiary, Shift $shift, $from_admin = false)
+    public function canFreeShift(?Beneficiary $beneficiary, Shift $shift, $from_admin = false)
     {
         // init
         $result = true;
@@ -317,7 +317,7 @@ class ShiftService
             // Saving account mode
             // - check if there is a min time in advance rule & that it is respected
             // - check if there is a min savingTime amount rule & shifter has enough time on its savingTime
-            if ($this->use_time_log_saving) {
+            if ($this->use_time_log_saving && $shift->getShifter()) {
                 $member = $shift->getShifter()->getMembership();
                 if ($this->time_log_saving_shift_free_min_time_in_advance_days) {
                     if ($shift->isBefore($this->time_log_saving_shift_free_min_time_in_advance_days . ' days')) {
