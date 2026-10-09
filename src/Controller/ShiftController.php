@@ -304,7 +304,7 @@ class ShiftController extends AbstractController
             // check if beneficiary can free this shift
             $shift_can_be_freed = $shift_service->canFreeShift($current_user->getBeneficiary(), $shift);
             if (!$shift_can_be_freed['result']) {
-                $this->addFlash('error', $shift_can_be_freed['message'] || "Impossible d'annuler ce créneau.");
+                $this->addFlash('error', $shift_can_be_freed['message'] ?: "Impossible d'annuler ce créneau.");
 
                 return $this->redirectToRoute('homepage');
             }
@@ -362,7 +362,7 @@ class ShiftController extends AbstractController
             // check if shift can be freed
             elseif (!$shift_can_be_freed['result']) {
                 $success = false;
-                $message = $shift_can_be_freed['message'] || "Impossible d'annuler ce créneau.";
+                $message = $shift_can_be_freed['message'] ?: "Impossible d'annuler ce créneau.";
             } else {
                 // store shift beneficiary & reason (before shift free())
                 $beneficiary = $shift->getShifter();

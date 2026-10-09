@@ -159,7 +159,7 @@
 
 | # | Finding | Effort | Source |
 |---|---------|--------|--------|
-| SHIFT-FREE-MESSAGE | `ShiftController::freeShiftAction()` (l.307, l.365) utilise `||` au lieu de `?:` : le flash de refus affiche `1` au lieu du motif. **Test :** `ShiftControllerFreeTest::testTheRefusalToFreeAStartedShiftSaysWhy` *(incomplete)*. | XS | lot 3 (#9) |
+| SHIFT-FREE-MESSAGE | ✅ **Corrigé** (lot 8). `ShiftController::freeShiftAction()` (l.307, l.365) utilise `||` au lieu de `?:` : le flash de refus affiche `1` au lieu du motif. **Test :** `ShiftControllerFreeTest::testTheRefusalToFreeAStartedShiftSaysWhy` | XS | lot 3 (#9) |
 | CLI-GENERATE-TO | `app:shift:generate --to=<mal formé>` : `format()` appelé sur `false` (`Error` fatale) au lieu de sortir en statut 2 comme pour la date de début. **Test :** `ShiftGenerateCommandTest::testRejectsAMalformedEndDate` *(incomplete)*. | XS | lot 4 (#5) |
 | CYCLE-EXPIRED-START | Une adhésion expirée déclenche quand même `MemberCycleStartEvent` après le `MemberCycleEndEvent` qui la marque expirée (comportement actuel, à confirmer comme voulu). **Test :** `TimeLogEventListenerTest::testCycleEndOfAnExpiredRegistrationOnlyMarksIt` *(fige le comportement du listener)*. | XS | lot 5 (#8) |
 | m-BUG-1 | ✅ **Corrigé** (lot 8). `/helloassoNotify` sur une instance sans identifiants HelloAsso → `TypeError` (client id `null`) au lieu d'une réponse propre. Désormais 503 « HelloAsso is not configured » avant tout appel API. **Test :** `HelloassoNotifySecurityTest::testAnInstanceWithoutHelloassoCredentialsSaysSo`. | XS | lot 2 (#7) |
