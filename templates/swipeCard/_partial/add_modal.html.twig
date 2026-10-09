@@ -7,6 +7,7 @@
             <div class="row">
                 <div class="col s12 m6 input-field">
                     <input type="hidden" name="beneficiary" value="{{ beneficiary.id }}" />
+                    <input type="hidden" name="_token" value="{{ csrf_token('swipe_card') }}"/>
                     <input pattern=".{13,13}" type="text" name="code" autocomplete="off" />
                     <span class="helper-text" data-error="wrong" data-success="right">Code du badge à 13 chiffres</span>
                 </div>

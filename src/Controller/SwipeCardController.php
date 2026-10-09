@@ -29,6 +29,9 @@ use App\Entity\SwipeCard;
  */
 class SwipeCardController extends AbstractController
 {
+    /** CSRF token of the badge forms (pair, enable, disable, delete). */
+    public const CSRF_TOKEN_ID = 'swipe_card';
+
     private $logger;
     private SwipeCardHelper $swipeCardHelper;
 
@@ -86,6 +89,11 @@ class SwipeCardController extends AbstractController
      */
     public function activateSwipeCardAction(Request $request)
     {
+        if (!$this->isCsrfTokenValid(self::CSRF_TOKEN_ID, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide, merci de réessayer.');
+
+            return $this->redirectToRoute('homepage');
+        }
         $em = $this->getDoctrine()->getManager();
         $this->denyAccessUnlessGranted(SwipeCardVoter::PAIR, new SwipeCardEntity());
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
@@ -158,6 +166,11 @@ class SwipeCardController extends AbstractController
      */
     public function enableSwipeCardAction(Request $request)
     {
+        if (!$this->isCsrfTokenValid(self::CSRF_TOKEN_ID, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide, merci de réessayer.');
+
+            return $this->redirectToRoute('homepage');
+        }
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -210,6 +223,11 @@ class SwipeCardController extends AbstractController
      */
     public function disableSwipeCardAction(Request $request)
     {
+        if (!$this->isCsrfTokenValid(self::CSRF_TOKEN_ID, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide, merci de réessayer.');
+
+            return $this->redirectToRoute('homepage');
+        }
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -253,6 +271,11 @@ class SwipeCardController extends AbstractController
      */
     public function deleteAction(Request $request)
     {
+        if (!$this->isCsrfTokenValid(self::CSRF_TOKEN_ID, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide, merci de réessayer.');
+
+            return $this->redirectToRoute('homepage');
+        }
         $em = $this->getDoctrine()->getManager();
 
         $referer = $request->headers->get('referer');

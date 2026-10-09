@@ -15,6 +15,7 @@
                 <form action="{% if swipeCard.enable %}{{ path('disable_swipe')}}{% else %}{{ path('enable_swipe')}}{% endif %}" method="post" class="swipe-card-status-switcher">
                     <input type="hidden" name="beneficiary" value="{{ beneficiary.id }}" />
                     <input type="hidden" name="code" value="{{ swipeCard.code | vigenere_encode }}"/>
+                    <input type="hidden" name="_token" value="{{ csrf_token('swipe_card') }}"/>
                     <div class="switch">
                         <label>
                             Désactivé
@@ -50,6 +51,7 @@
                     <form action="{% if swipeCard.enable %}{{ path('disable_swipe') }}{% else %}{{ path('enable_swipe') }}{% endif %}" method="POST" class="swipe-card-status-switcher">
                         <input type="hidden" name="beneficiary" value="{{ beneficiary.id }}" />
                         <input type="hidden" name="code" value="{{ swipeCard.code | vigenere_encode }}"/>
+                        <input type="hidden" name="_token" value="{{ csrf_token('swipe_card') }}"/>
                         <div class="switch">
                             <label>
                                 Désactivé
@@ -63,6 +65,7 @@
                         <br />
                         <form action="{{ path('delete_swipe')}}" method="POST">
                             <input type="hidden" name="code" value="{{ swipeCard.code | vigenere_encode }}"/>
+                            <input type="hidden" name="_token" value="{{ csrf_token('swipe_card') }}"/>
                             <button type="submit" class="btn btn-small red btn-flat">
                                 <i class="material-icons left">close</i>supprimer
                             </button>
