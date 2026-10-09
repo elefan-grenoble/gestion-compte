@@ -5,15 +5,19 @@ namespace App\Tests\Functional\Controller;
 use App\Entity\Event;
 use App\Tests\Functional\FunctionalTestCase;
 use App\Tests\Support\Builder\MembershipBuilder;
+use App\Tests\Support\ShiftScenarios;
 
 /**
- * I-BUG-10 (SPEC.11): the eligibility check of the proxies reads the date of
- * the last registration without checking there is one.
+ * I-BUG-10 (SPEC.11): the eligibility check of the proxies read the date of
+ * the last registration without checking there is one. A membership without
+ * registration is refused like an outdated one.
  *
  * @internal
  */
 class EventProxyNoRegistrationTest extends FunctionalTestCase
 {
+    use ShiftScenarios;
+
     /**
      * @dataProvider proxyRoutes
      */
@@ -26,14 +30,10 @@ class EventProxyNoRegistrationTest extends FunctionalTestCase
 
         $client = static::createAuthenticatedClient($membership->getMainBeneficiary()->getUser());
 
-        try {
-            $client->request('GET', sprintf('/events/%d/proxy/%s', $event->getId(), $route));
-        } catch (\Error $e) {
-            $this->markTestIncomplete('I-BUG-10 open: a membership without registration crashes /proxy/' . $route . ' (' . $e->getMessage() . ').');
-        }
+        $client->request('GET', sprintf('/events/%d/proxy/%s', $event->getId(), $route));
 
-        $this->assertLessThan(500, $client->getResponse()->getStatusCode());
-        $this->assertTrue($client->getResponse()->isRedirection() || $client->getResponse()->isSuccessful());
+        $this->assertTrue($client->getResponse()->isRedirect('/'));
+        $this->assertStringContainsString('peuvent voter à cet événement', static::flashes($client)['error'][0] ?? '');
     }
 
     /**
