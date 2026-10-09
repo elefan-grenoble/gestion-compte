@@ -129,13 +129,11 @@ class PeriodPositionFreeLogServiceTest extends TestCase
     }
 
     /**
-     * I-BUG-9, same defect as ShiftFreeLogService: no current request outside
-     * HTTP, and the service dereferences it unguarded.
+     * Outside an HTTP request the log carries no route (I-BUG-9, as for
+     * ShiftFreeLogService).
      */
     public function testInitPeriodPositionFreeLogOutsideAnHttpRequest(): void
     {
-        $this->markTestIncomplete('I-BUG-9 open: PeriodPositionFreeLogService::initPeriodPositionFreeLog() calls get() on a null request outside HTTP; the log should have a null request route.');
-
         $log = $this->service->initPeriodPositionFreeLog($this->aPosition(), new Beneficiary());
 
         $this->assertNull($log->getRequestRoute());
