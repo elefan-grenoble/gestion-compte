@@ -85,15 +85,14 @@ class HelloassoNotifySecurityTest extends FunctionalTestCase
     }
 
     /**
-     * Target: data['id'] is a payment number, nothing else reaches the API path.
+     * data['id'] is a payment number, nothing else reaches the API path
+     * (I-SEC-7, second half: it was pasted into the path unchecked).
      */
     public function testAPaymentIdThatIsNotANumberIsRejected(): void
     {
         $outcome = $this->notify(['eventType' => 'Payment', 'data' => ['id' => '../organizations/someone-else/forms', 'state' => 'Authorized']]);
 
-        $this->assertSecureOrKnownOpen('I-SEC-7', 'data[id] is pasted into the HelloAsso API path unchecked', function () use ($outcome) {
-            $this->assertTrue(is_int($outcome) && $outcome >= 400 && $outcome < 500, sprintf('Answered %s, expected a 4xx.', $outcome));
-        });
+        $this->assertSame(422, $outcome);
     }
 
     /**
