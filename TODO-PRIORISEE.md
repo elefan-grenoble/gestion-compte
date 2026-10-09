@@ -88,7 +88,7 @@
 
 | # | Finding | Effort | Source |
 |---|---------|--------|--------|
-| I-BUG-1 | **`EventController::deleteProxyLiteAction` (l.358) : NPE** `$proxy->getOwner()->getUser()` sans null-guard sur proxy en attente (owner null), atteignable par URL forgée. | XS | [SPEC.11](audit/SPEC.11.md) |
+| I-BUG-1 | ✅ **Corrigé** (lot 8). **`EventController::deleteProxyLiteAction` (l.358) : NPE** `$proxy->getOwner()->getUser()` sans null-guard sur proxy en attente (owner null), atteignable par URL forgée. **Test :** `EventProxyTakeTest::testRemovingAProxyWaitingForItsOwnerIsIgnored`. | XS | [SPEC.11](audit/SPEC.11.md) |
 | I-BUG-2 | **`Event::getProxiesByOwnerMembershipMainBeneficiary()` (l.432-436) : NPE** sur proxies en attente dans la collection. | XS | [SPEC.11](audit/SPEC.11.md) |
 | I-BUG-3 | **`EventExtension::receivedProxies()` : TypeError** — signature `: array` mais `return null` si pas d'utilisateur connecté. | XS | [SPEC.11](audit/SPEC.11.md) |
 | I-BUG-4 | **`EmailingEventListener` + `MailerService` : `findOneByCode(...)->getContent()` sans null-guard** (codes `PRE_MEMBERSHIP_EMAIL`, `SHIFT_REMINDER_EMAIL`, `WELCOME_EMAIL`) → exception fatale si le `DynamicContent` est absent. Fix : garde + fallback. **Test :** `EmailingEventListenerTest::testAnonymousBeneficiaryMailsSurviveAMissingDynamicContent` ; `EmailingEventListenerTest::testReminderSurvivesAMissingDynamicContent` ; `MailerServiceTest::testConfirmationEmailSurvivesAMissingWelcomeContent`. *(incomplete)* | XS ×4 | [SPEC.7](audit/SPEC.7.md) |
