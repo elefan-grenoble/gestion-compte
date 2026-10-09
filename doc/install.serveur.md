@@ -73,6 +73,14 @@ location ~* ^/sw/(.*)/(qr|br)\.png$ {
 }
 ```
 
+Les fichiers envoyés (logos de services, images d'événements) sont stockés dans `web/uploads/` et ne doivent jamais être exécutés. `web/uploads/.htaccess` le garantit avec Apache ; avec nginx, ajouter :
+
+```
+location ^~ /uploads/ {
+	location ~* \.(php\d?|phtml|phar|pht)$ { return 403; }
+}
+```
+
 ### crontab
 
 ```
