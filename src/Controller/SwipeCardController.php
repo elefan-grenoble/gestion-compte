@@ -7,7 +7,6 @@ use App\Entity\Beneficiary;
 use App\Helper\SwipeCard as SwipeCardHelper;
 use App\Entity\SwipeCard as SwipeCardEntity;
 use App\Security\SwipeCardVoter;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -32,12 +31,10 @@ class SwipeCardController extends AbstractController
     /** CSRF token of the badge forms (pair, enable, disable, delete). */
     public const CSRF_TOKEN_ID = 'swipe_card';
 
-    private $logger;
     private SwipeCardHelper $swipeCardHelper;
 
-    public function __construct(LoggerInterface $logger, SwipeCardHelper $swipeCardHelper)
+    public function __construct(SwipeCardHelper $swipeCardHelper)
     {
-        $this->logger = $logger;
         $this->swipeCardHelper = $swipeCardHelper;
     }
 

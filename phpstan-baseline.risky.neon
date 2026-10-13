@@ -87,13 +87,13 @@ parameters:
 		-
 			message: '#^Cannot call method getBeneficiary\(\) on string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface\.$#'
 			identifier: method.nonObject
-			count: 3
+			count: 1
 			path: src/Controller/CommissionController.php
 
 		-
 			message: '#^Cannot call method hasRole\(\) on string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface\.$#'
 			identifier: method.nonObject
-			count: 5
+			count: 3
 			path: src/Controller/CommissionController.php
 
 		-
@@ -221,18 +221,6 @@ parameters:
 			identifier: arguments.count
 			count: 9
 			path: src/Controller/ShiftController.php
-
-		-
-			message: '#^Access to constant HIGH on an unknown class Endroid\\QrCode\\ErrorCorrectionLevel\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Controller/SwipeCardController.php
-
-		-
-			message: '#^Call to an undefined method Endroid\\QrCode\\QrCode\:\:writeString\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Controller/SwipeCardController.php
 
 		-
 			message: '#^Method Symfony\\Contracts\\EventDispatcher\\EventDispatcherInterface\:\:dispatch\(\) invoked with 2 parameters, 1 required\.$#'
@@ -427,24 +415,6 @@ parameters:
 			path: src/Service/ShiftService.php
 
 		-
-			message: '#^Access to constant HIGH on an unknown class Endroid\\QrCode\\ErrorCorrectionLevel\.$#'
-			identifier: class.notFound
-			count: 1
-			path: src/Twig/Extension/AppExtension.php
-
-		-
-			message: '#^Call to an undefined method Endroid\\QrCode\\QrCode\:\:getContentType\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Twig/Extension/AppExtension.php
-
-		-
-			message: '#^Call to an undefined method Endroid\\QrCode\\QrCode\:\:writeString\(\)\.$#'
-			identifier: method.notFound
-			count: 1
-			path: src/Twig/Extension/AppExtension.php
-
-		-
 			message: '#^Access to an undefined property Symfony\\Component\\Validator\\Constraint\:\:\$message\.$#'
 			identifier: property.notFound
 			count: 4
@@ -455,3 +425,4 @@ parameters:
 			identifier: property.notFound
 			count: 1
 			path: src/Validator/Constraints/UniqueEmailValidator.php
+
