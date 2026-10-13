@@ -196,6 +196,7 @@ class CommissionController extends AbstractController
         }
 
         $em = $this->getDoctrine()->getManager();
+
         /** @var null|Beneficiary $beneficiary */
         $beneficiary = $em->getRepository(Beneficiary::class)->find((int) $request->request->get('beneficiary'));
         if (!$beneficiary) {

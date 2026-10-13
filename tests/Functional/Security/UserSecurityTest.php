@@ -108,6 +108,14 @@ class UserSecurityTest extends FunctionalTestCase
         $this->assertSame(null === $initialRole, in_array('ROLE_USER_MANAGER', $this->reloaded($target)->getRoles(), true));
     }
 
+    /**
+     * @return array<string, array{string, ?string}>
+     */
+    public function roleChanges(): array
+    {
+        return ['add' => ['addRole', null], 'remove' => ['removeRole', 'ROLE_USER_MANAGER']];
+    }
+
     public function testTheMemberPageOffersTheRoleChangesAsForms(): void
     {
         static::createClient();
@@ -121,14 +129,6 @@ class UserSecurityTest extends FunctionalTestCase
         $client->submit($crawler->filterXPath(sprintf('//form[contains(@action, "/user/%d/addRole/ROLE_USER_MANAGER")]', $target->getId()))->form());
 
         $this->assertContains('ROLE_USER_MANAGER', $this->reloaded($target)->getRoles());
-    }
-
-    /**
-     * @return array<string, array{string, ?string}>
-     */
-    public function roleChanges(): array
-    {
-        return ['add' => ['addRole', null], 'remove' => ['removeRole', 'ROLE_USER_MANAGER']];
     }
 
     /**

@@ -2373,7 +2373,7 @@ parameters:
 		-
 			message: '#^Negated boolean expression is always false\.$#'
 			identifier: booleanNot.alwaysFalse
-			count: 3
+			count: 4
 			path: src/Controller/ShiftController.php
 
 		-
@@ -2485,18 +2485,6 @@ parameters:
 			path: src/Controller/SocialNetworkController.php
 
 		-
-			message: '#^Method App\\Controller\\SwipeCardController\:\:_getQr\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Controller/SwipeCardController.php
-
-		-
-			message: '#^Method App\\Controller\\SwipeCardController\:\:_getQr\(\) has parameter \$url with no type specified\.$#'
-			identifier: missingType.parameter
-			count: 1
-			path: src/Controller/SwipeCardController.php
-
-		-
 			message: '#^Method App\\Controller\\SwipeCardController\:\:activateSwipeCardAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -2527,32 +2515,8 @@ parameters:
 			path: src/Controller/SwipeCardController.php
 
 		-
-			message: '#^Parameter \#1 \$backgroundColor of method Endroid\\QrCode\\QrCode\:\:setBackgroundColor\(\) expects Endroid\\QrCode\\Color\\ColorInterface, array\<string, int\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/SwipeCardController.php
-
-		-
-			message: '#^Parameter \#1 \$encoding of method Endroid\\QrCode\\QrCode\:\:setEncoding\(\) expects Endroid\\QrCode\\Encoding\\Encoding, string given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/SwipeCardController.php
-
-		-
-			message: '#^Parameter \#1 \$foregroundColor of method Endroid\\QrCode\\QrCode\:\:setForegroundColor\(\) expects Endroid\\QrCode\\Color\\ColorInterface, array\<string, int\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Controller/SwipeCardController.php
-
-		-
 			message: '#^Parameter \#2 \$values of method Symfony\\Component\\HttpFoundation\\ResponseHeaderBag\:\:set\(\) expects array\<string\>\|string\|null, int\<0, max\> given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Controller/SwipeCardController.php
-
-		-
-			message: '#^Property App\\Controller\\SwipeCardController\:\:\$logger has no type specified\.$#'
-			identifier: missingType.property
 			count: 1
 			path: src/Controller/SwipeCardController.php
 
@@ -8299,12 +8263,6 @@ parameters:
 			path: src/Repository/ShiftRepository.php
 
 		-
-			message: '#^Method App\\Repository\\ShiftRepository\:\:functionsResultCache\(\) has no return type specified\.$#'
-			identifier: missingType.return
-			count: 1
-			path: src/Repository/ShiftRepository.php
-
-		-
 			message: '#^Method App\\Repository\\ShiftRepository\:\:getBeneficiaryShiftCount\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -9985,18 +9943,6 @@ parameters:
 			path: src/Twig/Extension/AppExtension.php
 
 		-
-			message: '#^Parameter \#1 \$backgroundColor of method Endroid\\QrCode\\QrCode\:\:setBackgroundColor\(\) expects Endroid\\QrCode\\Color\\ColorInterface, array\<string, int\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Twig/Extension/AppExtension.php
-
-		-
-			message: '#^Parameter \#1 \$foregroundColor of method Endroid\\QrCode\\QrCode\:\:setForegroundColor\(\) expects Endroid\\QrCode\\Color\\ColorInterface, array\<string, int\> given\.$#'
-			identifier: argument.type
-			count: 1
-			path: src/Twig/Extension/AppExtension.php
-
-		-
 			message: '#^Property App\\Twig\\Extension\\AppExtension\:\:\$basePathPicture has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -10139,3 +10085,4 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: src/Validator/Constraints/UniqueEmailValidator.php
+

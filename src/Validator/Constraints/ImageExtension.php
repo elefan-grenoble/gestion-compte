@@ -15,5 +15,6 @@ class ImageExtension extends Constraint
 {
     public const EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
 
+    /** @var string */
     public $message = 'Le fichier doit avoir l\'extension d\'une image ({{ extensions }}).';
 }

@@ -7,7 +7,6 @@ use App\Entity\Beneficiary;
 use App\Entity\Shift;
 use App\Entity\SwipeCard;
 use App\Entity\User;
-use App\Helper\QrCodePng;
 use App\Helper\SwipeCard as SwipeCardHelper;
 use App\Tests\Functional\FunctionalTestCase;
 use App\Tests\Support\Builder\BeneficiaryBuilder;

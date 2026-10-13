@@ -19,8 +19,8 @@ class InstallSuperAdminCommand extends Command
     /** Initial passwords that are never accepted: the .env.dist placeholder and well-known defaults. */
     private const REFUSED_PASSWORDS = ['', '<change-me>', 'password', 'changeme', 'admin'];
 
-    private $em;
-    private $params;
+    private EntityManagerInterface $em;
+    private ContainerBagInterface $params;
 
     public function __construct(EntityManagerInterface $em, ContainerBagInterface $params)
     {
@@ -30,7 +30,7 @@ class InstallSuperAdminCommand extends Command
         parent::__construct();
     }
 
-    protected function configure()
+    protected function configure(): void
     {
         $this
             ->setName('app:user:install_super_admin')
