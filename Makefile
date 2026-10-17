@@ -75,8 +75,10 @@ check-hosts: ## Vérifie que membres.yourcoop.local est dans /etc/hosts
 # Fichiers de configuration (local uniquement)
 # ------------------------------------------------------------------
 
+# L'étape `test` du Dockerfile ajoute pcov ; le .dist (dev) reste sans.
 compose.yaml:
 	@sed -e '/^version:/d' \
+	     -e 's|^\(\s*\)dockerfile: \.docker/Dockerfile$$|&\n\1target: test|' \
 	     -e 's|^\(\s*\)- \./mysql:/var/lib/mysql|\1- db_data:/var/lib/mysql|' \
 	     docker-compose.symfony_server.yml.dist > compose.yaml
 	@echo "✔ compose.yaml créé (version retirée, volume nommé db_data)"

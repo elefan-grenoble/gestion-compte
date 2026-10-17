@@ -1,4 +1,4 @@
-FROM php:7.4
+FROM php:7.4 AS base
 
 COPY --link \
     --from=ghcr.io/symfony-cli/symfony-cli:latest \
@@ -33,10 +33,15 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 # Installation des extensions nécessaires
 RUN docker-php-ext-install -j$(nproc) pdo_mysql pcntl gd
 
-# Pilote de couverture pour `make test-coverage`, désactivé par défaut
-# (composer test-coverage le réactive avec -d pcov.enabled=1)
+WORKDIR /var/www/app/
+
+# Image de tests (`make up`) : base + pilote de couverture pour
+# `make test-coverage`, désactivé par défaut (composer test-coverage le
+# réactive avec -d pcov.enabled=1)
+FROM base AS test
 RUN pecl install pcov \
     && docker-php-ext-enable pcov \
     && echo 'pcov.enabled=0' > /usr/local/etc/php/conf.d/zz-pcov.ini
 
-WORKDIR /var/www/app/
+# Image de développement : dernière étape, donc cible par défaut. Sans pcov.
+FROM base AS dev

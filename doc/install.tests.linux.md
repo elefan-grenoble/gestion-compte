@@ -55,8 +55,9 @@ Cela :
 - crée des stubs Webpack Encore (`public/build/`),
 - recrée le schéma de test et charge les fixtures.
 
-L'image PHP embarque `pcov` (désactivé par défaut) pour `make test-coverage`.
-Si ton image date d'avant cet ajout, reconstruis-la : `docker compose build php`.
+L'image de tests (étape `test` de `.docker/Dockerfile`, sélectionnée par le `compose.yaml` que génère `make`) embarque `pcov` (désactivé par défaut) pour `make test-coverage`.
+L'image de développement (étape `dev`, cible par défaut du Dockerfile) n'en contient pas.
+Si tu as déjà un `compose.yaml` (généré avant cet ajout), supprime-le (`rm compose.yaml`) pour que `make` le régénère avec `target: test`, puis relance `make up` : l'image est alors reconstruite avec pcov.
 
 ## 3) Lancer les tests
 
