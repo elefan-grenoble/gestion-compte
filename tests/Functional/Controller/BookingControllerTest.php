@@ -128,6 +128,12 @@ class BookingControllerTest extends FunctionalTestCase
             $this->markTestIncomplete('BOOKING-FOREIGN-CHOICE open: choosing an invalid beneficiary crashes (' . get_class($e) . ': ' . $e->getMessage() . ').');
         }
 
+        // The test client usually turns the crash into an error page rather
+        // than letting it through; the name is absent from that page too.
+        if ($client->getResponse()->getStatusCode() >= 500) {
+            $this->markTestIncomplete('BOOKING-FOREIGN-CHOICE open: choosing an invalid beneficiary answers ' . $client->getResponse()->getStatusCode() . '.');
+        }
+        $this->assertLessThan(400, $client->getResponse()->getStatusCode());
         $this->assertStringNotContainsString('<span class="teal-text">' . $stranger->getFirstname() . '</span>', $client->getResponse()->getContent());
     }
 
