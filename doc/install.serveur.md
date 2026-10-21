@@ -73,6 +73,44 @@ location ~* ^/sw/(.*)/(qr|br)\.png$ {
 }
 ```
 
+### Sécurité PHP (CVE-2026-109618 / CVE-2026-109619)
+
+Ces deux failles permettent une exécution de code à distance sans authentification, avant même que l'application ne s'exécute. Elles touchent toutes les versions de PHP antérieures à 8.2.35 / 8.3.36 / 8.4.27 / 8.5.12, ainsi que PHP 7.4.
+
+* **Docker** : l'image (`.docker/Dockerfile`) recompile PHP 7.4.33 avec le correctif officiel de l'équipe sécurité PHP (`.docker/patches/`). Il suffit de reconstruire l'image et de recréer les conteneurs :
+
+  ```shell
+  docker compose build --pull php && docker compose up -d --force-recreate php
+  ```
+
+* **Serveur sans Docker** : installer un PHP corrigé (paquet de la distribution ou d'un fournisseur LTS incluant le correctif, ou recompilation depuis la branche [`PHP-7.4-CVE-2026-109618-109619`](https://github.com/php/php-src/tree/PHP-7.4-CVE-2026-109618-109619)). Seule cette mise à jour protège complètement.
+
+Durcissement recommandé dans tous les cas, à mettre dans le pool php-fpm (et non dans un `.user.ini` ni via `ini_set()`, appliqués trop tard). Redémarrer ensuite php-fpm : un simple `reload` ne suffit pas.
+
+```ini
+php_admin_flag[session.upload_progress.enabled] = off
+php_admin_value[post_max_size] = 32M
+php_admin_value[upload_max_filesize] = 24M
+php_admin_value[max_file_uploads] = 5
+php_admin_value[max_input_nesting_level] = 16
+```
+
+Côté nginx, limiter la taille des requêtes en cohérence avec `post_max_size`, et ne transmettre à PHP que le contrôleur frontal :
+
+```nginx
+client_max_body_size 32m;
+
+location ~ ^/index\.php(/|$) {
+    # fastcgi_pass … ;
+    internal;
+}
+location ~ \.php$ { return 404; }
+```
+
+Tant que PHP n'est pas corrigé, l'avis de sécurité recommande aussi `php_admin_value[memory_limit] = -1` (accompagné d'une limite mémoire cgroup sur le service) et `pm.max_requests = 1`. Ne jamais limiter php-fpm avec `RLIMIT_AS`/`RLIMIT_DATA` (`LimitAS=` systemd, `ulimit -v`).
+
+Références : [GHSA-w8hw-w9fx-j79w](https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w), [GHSA-6wmf-4rv5-p3rp](https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp).
+
 ### crontab
 
 ```
