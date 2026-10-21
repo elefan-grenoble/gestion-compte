@@ -50,7 +50,7 @@ Vous pouvez commenter ou supprimer la ligne qui porte cette variable dans votre 
 ```
 
 Les variables concernées sont les suivantes :
-- `TIME_LOG_SAVING_SHIFT_FREE_MIN_TIME_IN_ADVANCE`
+- `TIME_LOG_SAVING_SHIFT_FREE_MIN_TIME_IN_ADVANCE_DAYS`
 - `MAX_TIME_IN_ADVANCE_TO_BOOK_EXTRA_SHIFTS`
 - `HELLOASSO_*`
 - `IGLOOHOME_*`
@@ -70,15 +70,43 @@ Penser à mettre à jour le `root` et le `fastcgi_param SCRIPT_FILENAME` dans la
 La modification du fichier de configuration nginx pourra donc ressembler à ceci :
 
 ```diff
--    root   /elefan/public/;
-+    root   /elefan/web/;
+-    root   /elefan/web/;
++    root   /elefan/public/;
 
     location / {
--        index  index.php;
-+        index  app.php;
--        try_files $uri /index.php$is_args$args;
-+        try_files $uri /app.php$is_args$args;
+-        index  app.php;
++        index  index.php;
+-        try_files $uri /app.php$is_args$args;
++        try_files $uri /index.php$is_args$args;
     }
+```
+
+Si votre configuration contient la règle des images de badge (`/sw/…/qr.png`, `/sw/…/br.png`), remplacez-y aussi `/app.php` par `/index.php` (voir le [guide d'installation sur serveur](install.serveur.md#nginx)).
+
+
+## Fichiers envoyés (logos de services, images d'événements)
+
+En 1.x, les fichiers envoyés étaient stockés dans `web/uploads/`. Le dossier `web/` n'étant plus servi en 2.0, ils sont désormais stockés dans `public/uploads/`.
+
+Copiez les fichiers existants de l'ancienne installation vers la nouvelle (adaptez les chemins) :
+
+```shell
+cp -a /var/www/gestion-compte/web/uploads /var/www/gestion-compte-sf4/public/
+```
+
+Le dossier `public/uploads/` doit être accessible en écriture par l'utilisateur PHP. Sans cette copie, les logos de services et les images d'événements déjà envoyés ne s'affichent plus.
+
+
+## Commande `app:code:update_igloohome`
+
+La commande utilise désormais la nouvelle API Igloohome (identifiants OAuth) au lieu de la clé d'API partenaire. Ses arguments `api_key` et `lock_id` sont supprimés ; restent `start`, `end` et les destinataires des alertes.
+
+1. Renseignez dans `.env` les variables `IGLOOHOME_CLIENT_ID`, `IGLOOHOME_CLIENT_SECRET`, `IGLOOHOME_API_AUTH_URL` et `IGLOOHOME_API_DEVICE` (voir `.env.dist`).
+2. Mettez à jour votre crontab :
+
+```diff
+- php bin/console app:code:update_igloohome <api_key> <lock_id> <start> <end> <destinataires>
++ php bin/console app:code:update_igloohome <start> <end> <destinataires>
 ```
 
 ## Stratégie de migration recommandée
@@ -101,3 +129,5 @@ sudo systemctl reload nginx
 ```
 
 Cette approche permet de basculer (et revenir en arrière) sans interruption de service.
+
+⚠️ Si vous voulez garder la possibilité de revenir en 1.47, ne lancez pas `php bin/console doctrine:migrations:migrate`. La 2.0 ne contient aucune nouvelle migration, mais elle utilise doctrine/migrations 3 : sa première exécution convertit la table `migration_versions` dans un format que la 1.47 ne reconnaît plus (elle croirait alors qu'aucune migration n'a été appliquée).
