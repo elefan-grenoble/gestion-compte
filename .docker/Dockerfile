@@ -1,4 +1,7 @@
-FROM php:7.4
+# php:7.4 (CLI, used by the dev compose with `symfony serve`) by default;
+# pass --build-arg PHP_BASE_IMAGE=php:7.4-fpm to get a patched php-fpm.
+ARG PHP_BASE_IMAGE=php:7.4
+FROM ${PHP_BASE_IMAGE}
 
 # Debian 11 (bullseye) left LTS on 2026-08-31: deb.debian.org still serves the
 # indexes but the security pool is gone, so installs fail with 404s.
@@ -39,6 +42,10 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*; \
     # Fail the build if the patched engine is not the one installed
     grep -q zend_new_array_singleton /usr/local/bin/php; \
+    if [ -e /usr/local/sbin/php-fpm ]; then \
+        grep -q zend_new_array_singleton /usr/local/sbin/php-fpm; \
+        php-fpm -t; \
+    fi; \
     php -r 'exit(PHP_VERSION === "7.4.33" ? 0 : 1);'; \
     php -v
 
@@ -73,6 +80,6 @@ COPY php.ini usr/local/etc/php/php.ini
 RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 
 # Installation des extensions nécessaires
-RUN docker-php-ext-install -j$(nproc) pdo_mysql pcntl gd
+RUN docker-php-ext-install -j$(nproc) pdo_mysql pcntl gd opcache
 
 WORKDIR /var/www/app/
