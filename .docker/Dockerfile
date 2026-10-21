@@ -1,5 +1,9 @@
 FROM php:7.4
 
+# Debian 11 (bullseye) left LTS on 2026-08-31: deb.debian.org still serves the
+# indexes but the security pool is gone, so installs fail with 404s.
+RUN sed -i 's#http://deb.debian.org#http://archive.debian.org#g' /etc/apt/sources.list
+
 COPY --link \
     --from=ghcr.io/symfony-cli/symfony-cli:latest \
     /usr/local/bin/symfony /usr/local/bin/symfony
