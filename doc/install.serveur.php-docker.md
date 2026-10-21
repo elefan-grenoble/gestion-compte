@@ -43,6 +43,9 @@ quelques secondes (étape 4).
   sudo cp -a /etc/php/7.4/fpm/pool.d /root/php-fpm-pool.d.bak
   ```
 
+* Vérifier que le service `php7.4-fpm` ne sert **que** cette application (un seul pool dans
+  `/etc/php/7.4/fpm/pool.d/`, aucun autre vhost nginx qui l'utilise) : il va être arrêté, et le conteneur ne
+  reprend que ce pool.
 * Relire l'ancien pool (`/etc/php/7.4/fpm/pool.d/www.conf`) et noter tout ce qui a été modifié par rapport
   aux valeurs par défaut (`pm.*`, `php_admin_value[…]`, `env[…]`, `request_terminate_timeout`…) : à
   reporter à l'étape 3.
@@ -110,7 +113,8 @@ php_admin_value[max_input_nesting_level] = 16
 
 > Si les fichiers de l'application n'appartiennent pas à `www-data` (UID 33), ajoutez
 > `user = <uid>` et `group = <gid>` **en numérique** dans ce fichier : l'utilisateur de l'hôte n'existe
-> pas dans le conteneur. Gardez `listen.owner`/`listen.group` sur l'utilisateur de nginx.
+> pas dans le conteneur. `listen.owner`/`listen.group` désignent l'utilisateur de nginx (`www-data` sous
+> Debian/Ubuntu) ; s'il est différent, indiquez-le lui aussi en numérique.
 
 Créer `/opt/gestion-compte-php/compose.yaml` :
 
@@ -131,7 +135,7 @@ services:
       - /var/www/gestion-compte:/var/www/gestion-compte
       # Socket partagé avec nginx
       - /run/php:/run/php
-      # Socket MySQL de l'hôte
+      # Socket MySQL de l'hôte (supprimer ce montage si la base est sur une autre machine)
       - /run/mysqld:/run/mysqld
       - ./zzz-pool.conf:/usr/local/etc/php-fpm.d/zzz-pool.conf:ro
     deploy:
@@ -148,6 +152,13 @@ place et PHP-FPM démarre **exposé sur le port 9000** :
 
 ```shell
 test -f /opt/gestion-compte-php/zzz-pool.conf && echo OK
+```
+
+Vérifier aussi que l'image et le fichier compose sont valides, pour ne pas couper le site à l'étape suivante :
+
+```shell
+cd /opt/gestion-compte-php
+sudo docker image inspect gestion-compte-php:7.4.33-fpm-cve > /dev/null && sudo docker compose config -q && echo OK
 ```
 
 ## 4. Basculer
@@ -167,14 +178,17 @@ Contrôle de sécurité, **obligatoire** : cette commande ne doit **rien** affic
 sudo ss -ltn | grep ':9000'
 ```
 
-Si elle affiche quoi que ce soit (`0.0.0.0:9000`, `[::]:9000`, `*:9000`…), **arrêtez tout**
-(`sudo docker compose down && sudo systemctl start php7.4-fpm`) et vérifiez `zzz-pool.conf`.
+Si elle affiche quoi que ce soit (`0.0.0.0:9000`, `[::]:9000`, `*:9000`…), identifiez le processus avec
+`sudo ss -ltnp | grep ':9000'`. S'il s'agit de `php-fpm`, **arrêtez tout**
+(`sudo docker compose down && sudo systemctl start php7.4-fpm`) et vérifiez `zzz-pool.conf`. Un autre
+service déjà présent sur ce port avant la bascule n'est pas en cause.
 
-Si tout est correct, désactiver l'ancien PHP-FPM pour qu'il ne redémarre pas au prochain reboot, puis
-vider le cache Symfony, généré par l'ancien PHP :
+Si tout est correct, neutraliser l'ancien PHP-FPM. `mask` l'empêche de redémarrer, même par erreur ou lors
+d'une mise à jour de paquet : il reprendrait alors le socket et servirait de nouveau un PHP vulnérable.
+Vider ensuite le cache Symfony, généré par l'ancien PHP :
 
 ```shell
-sudo systemctl disable php7.4-fpm
+sudo systemctl disable php7.4-fpm && sudo systemctl mask php7.4-fpm
 sudo docker compose exec -u www-data php php bin/console cache:clear --env=prod
 ```
 
@@ -221,7 +235,7 @@ Le script `dploy.sh` appelle encore le PHP de l'hôte : ne l'utilisez plus tel q
 
 ```shell
 cd /opt/gestion-compte-php && sudo docker compose down
-sudo systemctl enable --now php7.4-fpm
+sudo systemctl unmask php7.4-fpm && sudo systemctl enable --now php7.4-fpm
 ```
 
 Il n'y a rien à changer dans nginx. Attention : le retour arrière remet en service le PHP **vulnérable**
