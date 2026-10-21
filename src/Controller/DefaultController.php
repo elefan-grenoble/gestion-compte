@@ -192,8 +192,18 @@ class DefaultController extends AbstractController
         // les notifications ne sont disponibles que pour les partenaires pour le moment
         // https://dev.helloasso.com/docs/secure-webhook#signature-de-notification
         // On va donc chercher les données depuis l'api helloasso pour s'assurer que les données sont correctes
+        if (!$helloassoClient->isConfigured()) {
+            return new Response('HelloAsso is not configured on this instance.', Response::HTTP_SERVICE_UNAVAILABLE);
+        }
+
+        // the id is pasted into the API path: only a payment number may reach it
+        $paymentId = $notification->data['id'] ?? null;
+        if (!is_int($paymentId) && !(is_string($paymentId) && ctype_digit($paymentId))) {
+            return new Response('invalid payment id in helloasso notification', Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
         try {
-            $payment = $helloassoClient->getPayment($notification->data['id']);
+            $payment = $helloassoClient->getPayment((string) $paymentId);
         } catch (ClientExceptionInterface $e) {
             return new Response($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }

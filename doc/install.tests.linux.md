@@ -160,8 +160,8 @@ sur le code HTTP. Le trait `tests/Support/ShiftScenarios` fournit les scénarios
   du noyau (`FORBID_OWN_SHIFT_*_ADMIN`…) ;
 - une entité construite en mémoire reste dans l'identity map du premier appel : appeler
   `entityManager()->clear()` avant la requête si l'action parcourt ses collections ;
-- `ShiftRepository::functionsResultCache()->clear()` vide le cache de 5 s des cumuls de
-  créneaux, qui fausserait deux réservations enchaînées.
+- le cache des cumuls de créneaux ne vit que le temps d'une requête : deux réservations
+  enchaînées voient bien la première (SHIFT-QUOTA-CACHE, corrigé).
 
 Un bug de production découvert est écrit comme test du comportement cible, marqué
 *incomplete* avec une référence (`SHIFT-…`, `BOOKING-…`, `MEMBER-…`, `I-BUG-10`).

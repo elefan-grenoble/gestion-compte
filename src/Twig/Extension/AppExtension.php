@@ -9,8 +9,7 @@ use App\Helper\SwipeCard;
 use App\Service\Picture\BasePathPicture;
 use App\Entity\Task;
 use Doctrine\ORM\EntityManagerInterface;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\ErrorCorrectionLevel;
+use App\Helper\QrCodePng;
 use Michelf\Markdown;
 use Picqer\Barcode\BarcodeGeneratorPNG;
 use Psr\Log\LoggerInterface;
@@ -337,17 +336,8 @@ class AppExtension extends AbstractExtension
 
     public function qr($text)
     {
-        $qrCode = new QrCode($text);
-
         try {
-            $qrCode->setSize(200)
-                ->setMargin(0)
-                ->setErrorCorrectionLevel(ErrorCorrectionLevel::HIGH)
-                ->setForegroundColor(['r' => 0, 'g' => 0, 'b' => 0])
-                ->setBackgroundColor(['r' => 255, 'g' => 255, 'b' => 255])
-            ;
-
-            return '<img src="data:' . $qrCode->getContentType() . ';base64,' . base64_encode($qrCode->writeString()) . '" />';
+            return '<img src="data:image/png;base64,' . base64_encode(QrCodePng::fromText((string) $text)) . '" />';
         } catch (\Exception $exception) {
             $this->logger->error('QR Code generation error: ' . $exception->getMessage());
         }

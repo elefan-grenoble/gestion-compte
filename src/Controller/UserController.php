@@ -77,21 +77,11 @@ class UserController extends AbstractController
 
             return $this->redirectToRoute('homepage');
 
-        }   // main super user not created yet
-        $admin = new User();
-        $admin->setEmail($this->getParameter('emails.admin')['address']);
-        $admin->setPlainPassword($this->getParameter('super_admin.initial_password'));
-        $admin->setUsername($this->getParameter('super_admin.username'));
-        $admin->setEnabled(true);
-        $admin->addRole('ROLE_SUPER_ADMIN');
-        $em->persist($admin);
-        $em->flush();
-
-        $this->addFlash('success', 'user super admin created with success !');
+        }
+        // main super admin not created yet: created from the command line only (I-SEC-11)
+        $this->addFlash('error', 'Aucun super admin : le créer en ligne de commande avec bin/console app:user:install_super_admin.');
 
         return $this->redirectToRoute('homepage');
-
-
     }
 
     /**
@@ -173,7 +163,7 @@ class UserController extends AbstractController
     /**
      * remove role of user.
      *
-     * @Route("/{id}/removeRole/{role}", name="user_remove_role", methods={"GET","POST"})
+     * @Route("/{id}/removeRole/{role}", name="user_remove_role", methods={"POST"})
      *
      * @Security("is_granted('ROLE_ADMIN')")
      *
@@ -181,10 +171,16 @@ class UserController extends AbstractController
      *
      * @return RedirectResponse
      */
-    public function removeRoleAction(User $user, $role)
+    public function removeRoleAction(Request $request, User $user, $role)
     {
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->getCurrentAppUser();
+
+        if (!$this->isCsrfTokenValid('user_role_' . $user->getId() . '_' . $role, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide, merci de réessayer depuis la fiche du membre.');
+
+            return $this->redirectToShow($user);
+        }
 
         // cannot remove a nonexistant role
         if (!$user->hasRole($role)) {
@@ -211,7 +207,7 @@ class UserController extends AbstractController
     /**
      * add role of user.
      *
-     * @Route("/{id}/addRole/{role}", name="user_add_role", methods={"GET"})
+     * @Route("/{id}/addRole/{role}", name="user_add_role", methods={"POST"})
      *
      * @Security("is_granted('ROLE_ADMIN')")
      *
@@ -219,10 +215,16 @@ class UserController extends AbstractController
      *
      * @return RedirectResponse
      */
-    public function addRoleAction(User $user, $role)
+    public function addRoleAction(Request $request, User $user, $role)
     {
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->getCurrentAppUser();
+
+        if (!$this->isCsrfTokenValid('user_role_' . $user->getId() . '_' . $role, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide, merci de réessayer depuis la fiche du membre.');
+
+            return $this->redirectToShow($user);
+        }
 
         // cannot add an existing role
         if ($user->hasRole($role)) {
