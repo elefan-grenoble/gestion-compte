@@ -14,33 +14,38 @@ Seul **PHP-FPM** passe dans un conteneur, construit depuis l'image corrigée du 
 **Rien d'autre ne bouge** : nginx, MySQL/MariaDB, le code, le fichier `.env`, les uploads et la base restent
 sur le serveur, à leur place. Aucune migration de données.
 
+Le conteneur reprend **le même socket** que l'ancien PHP-FPM (`/run/php/php7.4-fpm.sock`). La
+configuration nginx n'a donc pas à être modifiée, et aucun port n'est ouvert.
+
 ```
-Internet ── nginx (hôte) ──fastcgi 127.0.0.1:9000──> php-fpm (conteneur) ──> MySQL (hôte)
-                                                        │
-                                       code monté depuis l'hôte, au même chemin
+Internet ── nginx (hôte) ──socket /run/php/php7.4-fpm.sock──> php-fpm (conteneur) ──> MySQL (hôte)
+                                                                 │
+                                                code monté depuis l'hôte, au même chemin
 ```
 
 Dans les commandes ci-dessous, on suppose :
 
 * le code installé dans `/var/www/gestion-compte` (à adapter partout) ;
-* l'ancien PHP-FPM de l'hôte est le service `php7.4-fpm` (voir `PHP_SERVICE_NAME` dans `.env`).
+* l'ancien PHP-FPM de l'hôte est le service `php7.4-fpm` et écoute sur le socket
+  `/run/php/php7.4-fpm.sock` : c'est le chemin du `fastcgi_pass unix:…` de votre vhost nginx
+  (`/var/run/…` et `/run/…` désignent le même endroit). Si votre chemin est différent, adaptez-le partout.
 
 Durée : environ 15 minutes, dont la construction de l'image. L'interruption de service ne dure que
-quelques secondes (rechargement de nginx).
+quelques secondes (étape 4).
 
 ## 1. Prérequis
 
 * Docker Engine et le plugin `docker compose` : [installation](https://docs.docker.com/engine/install/).
   Vérifier avec `docker compose version`.
-* Sauvegarder la configuration actuelle :
+* Sauvegarder la configuration actuelle du pool PHP-FPM :
 
   ```shell
-  sudo cp -a /etc/nginx/sites-available /root/nginx-sites-available.bak
   sudo cp -a /etc/php/7.4/fpm/pool.d /root/php-fpm-pool.d.bak
   ```
 
-* Noter les réglages actuels du pool PHP-FPM (`pm`, `pm.max_children`…) dans
-  `/etc/php/7.4/fpm/pool.d/www.conf`, pour les reporter à l'étape 3.
+* Relire l'ancien pool (`/etc/php/7.4/fpm/pool.d/www.conf`) et noter tout ce qui a été modifié par rapport
+  aux valeurs par défaut (`pm.*`, `php_admin_value[…]`, `env[…]`, `request_terminate_timeout`…) : à
+  reporter à l'étape 3.
 * Vérifier que l'utilisateur `www-data` a l'UID 33 sur l'hôte (c'est le cas sous Debian/Ubuntu),
   comme dans l'image :
 
@@ -49,6 +54,9 @@ quelques secondes (rechargement de nginx).
   ```
 
   Si les fichiers de l'application appartiennent à un autre utilisateur, voir la note de l'étape 3.
+* Le code doit se trouver **réellement** dans `/var/www/gestion-compte` : si des liens symboliques pointent
+  ailleurs (par exemple un dossier `shared/` ou `current -> releases/…`), montez aussi ces dossiers dans le
+  conteneur, au même chemin.
 
 ## 2. Construire l'image PHP corrigée
 
@@ -56,6 +64,7 @@ L'image se construit depuis un clone séparé du dépôt. Ce clone **ne remplace
 fonctionne quelle que soit la version de l'application que vous faites tourner.
 
 ```shell
+# Tant que la PR #1301 n'est pas fusionnée, ajouter : -b fix/php-7.4-cve-2026-109618-109619
 sudo git clone https://github.com/elefan-grenoble/gestion-compte.git /opt/gestion-compte-php/src
 cd /opt/gestion-compte-php/src
 sudo docker build -f .docker/Dockerfile \
@@ -72,10 +81,17 @@ Créer `/opt/gestion-compte-php/zzz-pool.conf`. Ce fichier surcharge la configur
 
 ```ini
 [www]
-; IMPORTANT : écouter uniquement en local. Par défaut, l'image écoute sur toutes
-; les interfaces. Avec network_mode: host, PHP-FPM serait alors joignable depuis
-; Internet, ce qui permet d'exécuter du code à distance.
-listen = 127.0.0.1:9000
+; Même socket que l'ancien PHP-FPM : nginx n'a pas à être modifié.
+; IMPORTANT : sans cette ligne, l'image écoute sur le port 9000 de TOUTES les
+; interfaces, ce qui permet d'exécuter du code à distance.
+listen = /run/php/php7.4-fpm.sock
+listen.owner = www-data
+listen.group = www-data
+listen.mode = 0660
+
+; Base de données : si DATABASE_URL utilise "localhost", PHP passe par le socket
+; Unix de MySQL, dont l'emplacement Debian/Ubuntu n'est pas celui par défaut de l'image.
+php_admin_value[pdo_mysql.default_socket] = /run/mysqld/mysqld.sock
 
 ; Reporter ici les réglages de votre ancien pool
 pm = dynamic
@@ -94,7 +110,7 @@ php_admin_value[max_input_nesting_level] = 16
 
 > Si les fichiers de l'application n'appartiennent pas à `www-data` (UID 33), ajoutez
 > `user = <uid>` et `group = <gid>` **en numérique** dans ce fichier : l'utilisateur de l'hôte n'existe
-> pas dans le conteneur.
+> pas dans le conteneur. Gardez `listen.owner`/`listen.group` sur l'utilisateur de nginx.
 
 Créer `/opt/gestion-compte-php/compose.yaml` :
 
@@ -103,7 +119,7 @@ services:
   php:
     image: gestion-compte-php:7.4.33-fpm-cve
     # Le conteneur partage le réseau de l'hôte : 127.0.0.1 désigne le serveur,
-    # donc nginx et le DATABASE_URL existant fonctionnent sans modification.
+    # donc DATABASE_URL et MAILER_DSN fonctionnent sans modification.
     network_mode: host
     restart: unless-stopped
     environment:
@@ -113,76 +129,70 @@ services:
       # Le code est monté au MÊME chemin que sur l'hôte : la configuration nginx
       # (root, SCRIPT_FILENAME) reste valable telle quelle.
       - /var/www/gestion-compte:/var/www/gestion-compte
+      # Socket partagé avec nginx
+      - /run/php:/run/php
+      # Socket MySQL de l'hôte
+      - /run/mysqld:/run/mysqld
       - ./zzz-pool.conf:/usr/local/etc/php-fpm.d/zzz-pool.conf:ro
-      # Seulement si DATABASE_URL utilise "localhost" (socket Unix MySQL) :
-      # - /run/mysqld:/run/mysqld
     deploy:
       resources:
         limits:
           memory: 2G
 ```
 
-À propos de la connexion à la base, dans le `.env` de l'application :
-
-* `DATABASE_URL` pointe vers `127.0.0.1` : rien à faire ;
-* il pointe vers `localhost` : PHP passe par le socket Unix de MySQL, décommentez la ligne
-  `/run/mysqld` ci-dessus (ou remplacez `localhost` par `127.0.0.1`).
-
 Si `MAILER_DSN` utilise `sendmail://`, il ne fonctionnera pas depuis le conteneur : passez en
 `smtp://` (vers votre relais, ou `smtp://127.0.0.1:25` si un MTA tourne sur l'hôte).
 
-## 4. Démarrer PHP en conteneur
+Avant de continuer, vérifier que le fichier du pool est bien là. S'il manque, Docker crée un dossier à sa
+place et PHP-FPM démarre **exposé sur le port 9000** :
 
-Si l'ancien PHP-FPM écoute lui aussi sur `127.0.0.1:9000` (et non sur un socket), arrêtez-le d'abord avec
-`sudo systemctl stop php7.4-fpm` : les deux ne peuvent pas écouter sur le même port.
+```shell
+test -f /opt/gestion-compte-php/zzz-pool.conf && echo OK
+```
+
+## 4. Basculer
+
+Les deux PHP-FPM ne peuvent pas utiliser le même socket : on arrête l'ancien juste avant de démarrer le
+conteneur (coupure de quelques secondes).
 
 ```shell
 cd /opt/gestion-compte-php
-sudo docker compose up -d
+sudo systemctl stop php7.4-fpm && sudo docker compose up -d
 sudo docker compose logs php          # doit afficher "ready to handle connections"
-sudo ss -ltnp | grep ':9000'          # doit afficher 127.0.0.1:9000 UNIQUEMENT
 ```
 
-Si `ss` affiche `0.0.0.0:9000` ou `*:9000`, **arrêtez tout** (`sudo docker compose down`) et vérifiez
-le montage de `zzz-pool.conf`.
-
-Vider le cache Symfony, généré par l'ancien PHP :
+Contrôle de sécurité, **obligatoire** : cette commande ne doit **rien** afficher.
 
 ```shell
+sudo ss -ltn | grep ':9000'
+```
+
+Si elle affiche quoi que ce soit (`0.0.0.0:9000`, `[::]:9000`, `*:9000`…), **arrêtez tout**
+(`sudo docker compose down && sudo systemctl start php7.4-fpm`) et vérifiez `zzz-pool.conf`.
+
+Si tout est correct, désactiver l'ancien PHP-FPM pour qu'il ne redémarre pas au prochain reboot, puis
+vider le cache Symfony, généré par l'ancien PHP :
+
+```shell
+sudo systemctl disable php7.4-fpm
 sudo docker compose exec -u www-data php php bin/console cache:clear --env=prod
 ```
 
-## 5. Basculer nginx
-
-Dans le vhost de l'application (`/etc/nginx/sites-available/…`), remplacer **chaque** `fastcgi_pass`
-vers l'ancien PHP-FPM :
-
-```diff
--        fastcgi_pass unix:/var/run/php/php7.4-fpm.sock;
-+        fastcgi_pass 127.0.0.1:9000;
-```
-
-Puis :
-
-```shell
-sudo nginx -t && sudo systemctl reload nginx
-sudo systemctl disable --now php7.4-fpm
-```
-
-## 6. Vérifier
+## 5. Vérifier
 
 ```shell
 sudo docker compose exec php php -v                      # PHP 7.4.33
-sudo docker compose exec php sh -c 'grep -c zend_new_array_singleton /usr/local/sbin/php-fpm'   # > 0 = correctif présent
+sudo docker compose exec php grep -c zend_new_array_singleton /usr/local/sbin/php-fpm   # > 0 = correctif présent
 ```
 
 Dans le navigateur : se connecter, afficher le planning des créneaux, une fiche membre, et un QR code
-(`/sw/…/qr.png`). En cas d'erreur : `sudo docker compose logs php` et les logs nginx.
+(`/sw/…/qr.png`). En cas d'erreur : `sudo docker compose logs php` et les logs nginx. Une erreur 502 de
+nginx signale en général un problème de droits sur le socket (`ls -l /run/php/`).
 
-## 7. Tâches planifiées (cron)
+## 6. Tâches planifiées (cron)
 
-Dans la crontab qui lance les commandes de l'application (`sudo crontab -e`, ou celle de `www-data`),
-remplacer `php /var/www/gestion-compte/bin/console` par une exécution dans le conteneur. Par exemple :
+Dans la crontab de **root** (`sudo crontab -e`), remplacer `php /var/www/gestion-compte/bin/console` par une
+exécution dans le conteneur. Par exemple :
 
 ```diff
 -55 5 * * * php /var/www/gestion-compte/bin/console app:shift:generate $(date -d "+27 days" +\%Y-\%m-\%d)
@@ -190,17 +200,17 @@ remplacer `php /var/www/gestion-compte/bin/console` par une exécution dans le c
 ```
 
 `-u www-data` est important : sans lui, la commande tourne en root et crée dans `var/` des fichiers que
-PHP-FPM ne pourra plus modifier. La crontab doit appartenir à un utilisateur autorisé à utiliser Docker
-(root, ou membre du groupe `docker`).
+PHP-FPM ne pourra plus modifier. Si ces tâches étaient dans la crontab de `www-data`, déplacez-les dans
+celle de root : ne donnez pas à `www-data` l'accès à Docker (cela équivaut à un accès root).
 
-## 8. Mises à jour de l'application
+## 7. Mises à jour de l'application
 
 Les commandes PHP (`composer`, `bin/console`) se lancent désormais dans le conteneur. Composer y est
 installé :
 
 ```shell
 cd /opt/gestion-compte-php
-sudo docker compose exec -u www-data php composer install --no-dev --optimize-autoloader
+sudo docker compose exec -u www-data -e COMPOSER_HOME=/tmp/composer php composer install --no-dev --optimize-autoloader
 sudo docker compose exec -u www-data php php bin/console doctrine:migrations:migrate
 sudo docker compose restart php      # remplace "systemctl restart php7.4-fpm"
 ```
@@ -210,17 +220,16 @@ Le script `dploy.sh` appelle encore le PHP de l'hôte : ne l'utilisez plus tel q
 ## Retour arrière
 
 ```shell
-# remettre l'ancien fastcgi_pass dans le vhost, puis :
-sudo systemctl enable --now php7.4-fpm
-sudo nginx -t && sudo systemctl reload nginx
 cd /opt/gestion-compte-php && sudo docker compose down
+sudo systemctl enable --now php7.4-fpm
 ```
 
-Attention : le retour arrière remet en service le PHP **vulnérable** de l'hôte.
+Il n'y a rien à changer dans nginx. Attention : le retour arrière remet en service le PHP **vulnérable**
+de l'hôte.
 
 ## Et après
 
-* À chaque nouveau correctif de sécurité publié dans le dépôt : `git pull` dans
+* À chaque nouveau correctif de sécurité publié sur la branche `main` du dépôt : `sudo git pull` dans
   `/opt/gestion-compte-php/src`, reconstruire l'image (étape 2, en ajoutant `--pull --no-cache`), puis
   `sudo docker compose up -d --force-recreate`.
 * Une fois la bascule validée, le PHP de l'hôte peut être désinstallé.
