@@ -73,7 +73,7 @@ location ~* ^/sw/(.*)/(qr|br)\.png$ {
 }
 ```
 
-Les fichiers envoyés (logos de services, images d'événements) sont stockés dans `web/uploads/` et ne doivent jamais être exécutés. `web/uploads/.htaccess` le garantit avec Apache ; avec nginx, ajouter :
+Les fichiers envoyés (logos de services, images d'événements) sont stockés dans `public/uploads/` et ne doivent jamais être exécutés. `public/uploads/.htaccess` le garantit avec Apache ; avec nginx, ajouter :
 
 ```
 location ^~ /uploads/ {
