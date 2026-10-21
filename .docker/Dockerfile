@@ -2,7 +2,9 @@ FROM php:7.4
 
 # Debian 11 (bullseye) left LTS on 2026-08-31: deb.debian.org still serves the
 # indexes but the security pool is gone, so installs fail with 404s.
-RUN sed -i 's#http://deb.debian.org#http://archive.debian.org#g' /etc/apt/sources.list
+RUN sed -i 's#http://deb.debian.org#http://archive.debian.org#g' /etc/apt/sources.list \
+    && ! grep -q deb.debian.org /etc/apt/sources.list \
+    && grep -q archive.debian.org /etc/apt/sources.list
 
 # PHP 7.4 is EOL: rebuild the image's 7.4.33 sources with the upstream security
 # backport for CVE-2026-109618 / CVE-2026-109619 (php-src commit 712e60f9ed,
@@ -37,6 +39,7 @@ RUN set -eux; \
     rm -rf /var/lib/apt/lists/*; \
     # Fail the build if the patched engine is not the one installed
     grep -q zend_new_array_singleton /usr/local/bin/php; \
+    php -r 'exit(PHP_VERSION === "7.4.33" ? 0 : 1);'; \
     php -v
 
 COPY --link \
