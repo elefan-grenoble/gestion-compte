@@ -12,6 +12,11 @@
 /public/media/cache/
 ###< liip/imagine-bundle ###
 
+###> vich/uploader-bundle ###
+# Uploaded files (one sub-directory per mapping, see config/packages/vich_uploader.yaml)
+/public/uploads/*/
+###< vich/uploader-bundle ###
+
 ###> phpstan/phpstan ###
 phpstan.neon
 ###< phpstan/phpstan ###
