@@ -39,6 +39,27 @@ class EventProxyTakeTest extends FunctionalTestCase
         $this->assertSame(1, static::entityManager()->getRepository(Proxy::class)->count(['event' => $event]));
     }
 
+    /**
+     * A proxy waiting for its owner has none: removing it through a forged
+     * URL is ignored (I-BUG-1: getOwner()->getUser() on null).
+     */
+    public function testRemovingAProxyWaitingForItsOwnerIsIgnored(): void
+    {
+        static::createClient();
+        $event = $this->anEvent();
+        $giver = static::persist(MembershipBuilder::aMembership()->build());
+        $proxy = new Proxy();
+        $proxy->setEvent($event);
+        $proxy->setGiver($giver);
+        static::persist($proxy);
+
+        $client = static::createAuthenticatedClient($giver->getMainBeneficiary()->getUser());
+        $client->request('GET', sprintf('/events/%d/proxy/%d/remove', $event->getId(), $proxy->getId()));
+
+        $this->assertTrue($client->getResponse()->isRedirect('/'));
+        $this->assertSame(1, static::entityManager()->getRepository(Proxy::class)->count(['event' => $event]));
+    }
+
     private function anEvent(): Event
     {
         $event = new Event();

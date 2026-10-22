@@ -147,7 +147,8 @@ class EventController extends AbstractController
         if ($registrationDuration) {
             $minDateOfLastRegistration = clone $event->getMaxDateOfLastRegistration();
             $minDateOfLastRegistration->modify('-' . $registrationDuration);
-            if ($membership->getLastRegistration()->getDate() < $minDateOfLastRegistration) {
+            $lastRegistration = $membership->getLastRegistration();
+            if (!$lastRegistration || $lastRegistration->getDate() < $minDateOfLastRegistration) {
                 $this->addFlash('error', 'Oups, seuls les membres qui ont adhéré ou ré-adhéré après le '
                     . $minDateOfLastRegistration->format('d M Y')
                     . ' peuvent voter à cet événement. Pense à mettre à jour ton adhésion pour participer !');
@@ -375,7 +376,7 @@ class EventController extends AbstractController
         $em = $this->getDoctrine()->getManager();
         $current_app_user = $this->get('security.token_storage')->getToken()->getUser();
 
-        if (($proxy->getEvent() === $event) && ($proxy->getOwner()->getUser() == $current_app_user)) {
+        if (($proxy->getEvent() === $event) && $proxy->getOwner() && ($proxy->getOwner()->getUser() == $current_app_user)) {
             $em->remove($proxy);
             $em->flush();
 
@@ -412,7 +413,8 @@ class EventController extends AbstractController
         if ($registrationDuration) {
             $minDateOfLastRegistration = clone $event->getMaxDateOfLastRegistration();
             $minDateOfLastRegistration->modify('-' . $registrationDuration);
-            if ($current_app_user->getBeneficiary()->getMembership()->getLastRegistration()->getDate() < $minDateOfLastRegistration) {
+            $lastRegistration = $current_app_user->getBeneficiary()->getMembership()->getLastRegistration();
+            if (!$lastRegistration || $lastRegistration->getDate() < $minDateOfLastRegistration) {
                 $this->addFlash('error', 'Oups, seuls les membres qui ont adhéré ou ré-adhéré après le '
                     . $minDateOfLastRegistration->format('d M Y')
                     . ' peuvent voter à cet événement. Pense à mettre à jour ton adhésion pour participer !');

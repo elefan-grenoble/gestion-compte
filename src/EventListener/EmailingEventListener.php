@@ -70,7 +70,8 @@ class EmailingEventListener
         $emailObject = 'Bienvenue à ' . $this->container->getParameter('project_name') . ', tu te présentes ?';
         $emailTo = $event->getAnonymousBeneficiary()->getEmail();
 
-        $dynamicContent = $this->em->getRepository(DynamicContent::class)->findOneByCode('PRE_MEMBERSHIP_EMAIL')->getContent();
+        $dynamicContent = $this->em->getRepository(DynamicContent::class)->findOneByCode('PRE_MEMBERSHIP_EMAIL');
+        $dynamicContent = $dynamicContent ? $dynamicContent->getContent() : ''; // the coop may have deleted it
 
         $router = $this->container->get('router');
         if (!$event->getAnonymousBeneficiary()->getJoinTo()) {
@@ -107,13 +108,14 @@ class EmailingEventListener
         $emailObject = 'Bienvenue à ' . $this->container->getParameter('project_name') . ', souhaites-tu te présenter ?';
         $emailTo = $event->getAnonymousBeneficiary()->getEmail();
 
-        $dynamicContent = $this->em->getRepository(DynamicContent::class)->findOneByCode('PRE_MEMBERSHIP_EMAIL')->getContent();
+        $dynamicContent = $this->em->getRepository(DynamicContent::class)->findOneByCode('PRE_MEMBERSHIP_EMAIL');
+        $dynamicContent = $dynamicContent ? $dynamicContent->getContent() : ''; // the coop may have deleted it
 
         $router = $this->container->get('router');
         if (!$event->getAnonymousBeneficiary()->getJoinTo()) {
-            $url = $router->generate('member_new', ['code' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($emailTo)], UrlGeneratorInterface::ABSOLUTE_URL);
+            $url = $router->generate('member_new', ['code' => $this->swipeCardHelper->vigenereEncode($emailTo)], UrlGeneratorInterface::ABSOLUTE_URL);
         } else {
-            $url = $router->generate('member_add_beneficiary', ['code' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($emailTo)], UrlGeneratorInterface::ABSOLUTE_URL);
+            $url = $router->generate('member_add_beneficiary', ['code' => $this->swipeCardHelper->vigenereEncode($emailTo)], UrlGeneratorInterface::ABSOLUTE_URL);
         }
 
         $email = (new Email())
@@ -405,7 +407,8 @@ class EmailingEventListener
         $router = $this->container->get('router');
         $home_url = $router->generate('homepage', [], UrlGeneratorInterface::ABSOLUTE_URL);
 
-        $dynamicContent = $this->em->getRepository(DynamicContent::class)->findOneByCode('SHIFT_REMINDER_EMAIL')->getContent();
+        $dynamicContent = $this->em->getRepository(DynamicContent::class)->findOneByCode('SHIFT_REMINDER_EMAIL');
+        $dynamicContent = $dynamicContent ? $dynamicContent->getContent() : ''; // the coop may have deleted it
         $template = $this->container->get('twig')->createTemplate($dynamicContent);
         $dynamicContent = $this->container->get('twig')->render($template, ['beneficiary' => $beneficiary]);
 
@@ -669,7 +672,7 @@ class EmailingEventListener
         $emailTo = $code->getRegistrar()->getEmail();
 
         $router = $this->container->get('router');
-        $code_change_done_url = $router->generate('code_change_done', ['token' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($code->getRegistrar()->getUsername() . ',code:' . $code->getId() . ',ts:' . time())], UrlGeneratorInterface::ABSOLUTE_URL);
+        $code_change_done_url = $router->generate('code_change_done', ['token' => $this->swipeCardHelper->vigenereEncode($code->getRegistrar()->getUsername() . ',code:' . $code->getId() . ',ts:' . time())], UrlGeneratorInterface::ABSOLUTE_URL);
 
         $email = (new Email())
             ->subject($emailObject)

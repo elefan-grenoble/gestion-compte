@@ -245,6 +245,7 @@ class TimeLogEventListener
             $member->setFrozen(!$member->getFrozen());
             $member->setFrozenChange(false);
             $this->em->persist($member);
+            $this->em->flush();
         }
 
         if (!$member->getFrozen()) {

@@ -697,18 +697,6 @@ parameters:
 			path: src/Controller/AdminEventController.php
 
 		-
-			message: '#^If condition is always true\.$#'
-			identifier: if.alwaysTrue
-			count: 2
-			path: src/Controller/AdminEventController.php
-
-		-
-			message: '#^Left side of && is always true\.$#'
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 2
-			path: src/Controller/AdminEventController.php
-
-		-
 			message: '#^Method App\\Controller\\AdminEventController\:\:deleteAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -787,12 +775,6 @@ parameters:
 			path: src/Controller/AdminEventController.php
 
 		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 2
-			path: src/Controller/AdminEventController.php
-
-		-
 			message: '#^Parameter \#1 \$user of method App\\Entity\\Event\:\:setCreatedBy\(\) expects App\\Entity\\User\|null, string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface given\.$#'
 			identifier: argument.type
 			count: 1
@@ -801,18 +783,6 @@ parameters:
 		-
 			message: '#^Parameter \#1 \$user of method App\\Entity\\Event\:\:setUpdatedBy\(\) expects App\\Entity\\User\|null, string\|Stringable\|Symfony\\Component\\Security\\Core\\User\\UserInterface given\.$#'
 			identifier: argument.type
-			count: 1
-			path: src/Controller/AdminEventController.php
-
-		-
-			message: '#^Right side of && is always true\.$#'
-			identifier: booleanAnd.rightAlwaysTrue
-			count: 2
-			path: src/Controller/AdminEventController.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
 			count: 1
 			path: src/Controller/AdminEventController.php
 
@@ -1645,12 +1615,6 @@ parameters:
 			path: src/Controller/EventController.php
 
 		-
-			message: '#^Left side of && is always true\.$#'
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: src/Controller/EventController.php
-
-		-
 			message: '#^Method App\\Controller\\EventController\:\:acceptProxyAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -1689,12 +1653,6 @@ parameters:
 		-
 			message: '#^Method App\\Controller\\EventController\:\:widgetAction\(\) has no return type specified\.$#'
 			identifier: missingType.return
-			count: 1
-			path: src/Controller/EventController.php
-
-		-
-			message: '#^Right side of && is always true\.$#'
-			identifier: booleanAnd.rightAlwaysTrue
 			count: 1
 			path: src/Controller/EventController.php
 
@@ -2251,24 +2209,6 @@ parameters:
 			path: src/Controller/ServiceController.php
 
 		-
-			message: '#^If condition is always false\.$#'
-			identifier: if.alwaysFalse
-			count: 1
-			path: src/Controller/ShiftController.php
-
-		-
-			message: '#^If condition is always true\.$#'
-			identifier: if.alwaysTrue
-			count: 1
-			path: src/Controller/ShiftController.php
-
-		-
-			message: '#^Left side of && is always true\.$#'
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 1
-			path: src/Controller/ShiftController.php
-
-		-
 			message: '#^Method App\\Controller\\ShiftController\:\:__construct\(\) has parameter \$time_log_saving_shift_free_min_time_in_advance_days with no type specified\.$#'
 			identifier: missingType.parameter
 			count: 1
@@ -2373,7 +2313,7 @@ parameters:
 		-
 			message: '#^Negated boolean expression is always false\.$#'
 			identifier: booleanNot.alwaysFalse
-			count: 4
+			count: 1
 			path: src/Controller/ShiftController.php
 
 		-
@@ -2439,18 +2379,6 @@ parameters:
 		-
 			message: '#^Property App\\Controller\\ShiftController\:\:\$use_time_log_saving has no type specified\.$#'
 			identifier: missingType.property
-			count: 1
-			path: src/Controller/ShiftController.php
-
-		-
-			message: '#^Right side of \|\| is always true\.$#'
-			identifier: booleanOr.rightAlwaysTrue
-			count: 2
-			path: src/Controller/ShiftController.php
-
-		-
-			message: '#^Ternary operator condition is always false\.$#'
-			identifier: ternary.alwaysFalse
 			count: 1
 			path: src/Controller/ShiftController.php
 
@@ -4663,12 +4591,6 @@ parameters:
 			path: src/Entity/Service.php
 
 		-
-			message: '#^If condition is always true\.$#'
-			identifier: if.alwaysTrue
-			count: 1
-			path: src/Entity/Shift.php
-
-		-
 			message: '#^Method App\\Entity\\Shift\:\:getDisplayDateFullWithTime\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4849,18 +4771,6 @@ parameters:
 			path: src/Entity/ShiftAlert.php
 
 		-
-			message: '#^If condition is always true\.$#'
-			identifier: if.alwaysTrue
-			count: 1
-			path: src/Entity/ShiftBucket.php
-
-		-
-			message: '#^Left side of && is always true\.$#'
-			identifier: booleanAnd.leftAlwaysTrue
-			count: 2
-			path: src/Entity/ShiftBucket.php
-
-		-
 			message: '#^Method App\\Entity\\ShiftBucket\:\:addShift\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
@@ -4984,12 +4894,6 @@ parameters:
 			message: '#^Method App\\Entity\\ShiftBucket\:\:shiftIntersectFormations\(\) has no return type specified\.$#'
 			identifier: missingType.return
 			count: 1
-			path: src/Entity/ShiftBucket.php
-
-		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 8
 			path: src/Entity/ShiftBucket.php
 
 		-
@@ -5731,12 +5635,6 @@ parameters:
 			path: src/Event/ShiftBookedEvent.php
 
 		-
-			message: '#^Property App\\Event\\ShiftBookedEvent\:\:\$fromAdmin is never written, only read\.$#'
-			identifier: property.onlyRead
-			count: 1
-			path: src/Event/ShiftBookedEvent.php
-
-		-
 			message: '#^Property App\\Event\\ShiftBookedEvent\:\:\$shift has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -5867,12 +5765,6 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: src/Event/SwipeCardEvent.php
-
-		-
-			message: '#^Method App\\EventListener\\AuthenticationSuccessHandler\:\:onAuthenticationSuccess\(\) should return Symfony\\Component\\HttpFoundation\\Response but return statement is missing\.$#'
-			identifier: return.missing
-			count: 1
-			path: src/EventListener/AuthenticationSuccessHandler.php
 
 		-
 			message: '#^Method App\\EventListener\\AuthenticationSuccessHandler\:\:onSecurityInteractiveLogin\(\) has no return type specified\.$#'
@@ -8683,12 +8575,6 @@ parameters:
 			path: src/Security/ShiftVoter.php
 
 		-
-			message: '#^Right side of && is always true\.$#'
-			identifier: booleanAnd.rightAlwaysTrue
-			count: 1
-			path: src/Security/ShiftVoter.php
-
-		-
 			message: '#^Class App\\Security\\SwipeCardVoter extends generic class Symfony\\Component\\Security\\Core\\Authorization\\Voter\\Voter but does not specify its types\: TAttribute, TSubject$#'
 			identifier: missingType.generics
 			count: 1
@@ -9571,12 +9457,6 @@ parameters:
 			path: src/Service/ShiftService.php
 
 		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
-			count: 2
-			path: src/Service/ShiftService.php
-
-		-
 			message: '#^Property App\\Service\\ShiftService\:\:\$allowExtraShifts has no type specified\.$#'
 			identifier: missingType.property
 			count: 1
@@ -9657,18 +9537,6 @@ parameters:
 		-
 			message: '#^Property App\\Service\\ShiftService\:\:\$use_time_log_saving has no type specified\.$#'
 			identifier: missingType.property
-			count: 1
-			path: src/Service/ShiftService.php
-
-		-
-			message: '#^Right side of \|\| is always true\.$#'
-			identifier: booleanOr.rightAlwaysTrue
-			count: 1
-			path: src/Service/ShiftService.php
-
-		-
-			message: '#^Unreachable statement \- code above always terminates\.$#'
-			identifier: deadCode.unreachable
 			count: 1
 			path: src/Service/ShiftService.php
 
@@ -9979,12 +9847,6 @@ parameters:
 			path: src/Twig/Extension/EventExtension.php
 
 		-
-			message: '#^Method App\\Twig\\Extension\\EventExtension\:\:receivedProxies\(\) should return array but returns null\.$#'
-			identifier: return.type
-			count: 1
-			path: src/Twig/Extension/EventExtension.php
-
-		-
 			message: '#^Negated boolean expression is always false\.$#'
 			identifier: booleanNot.alwaysFalse
 			count: 2
@@ -10085,4 +9947,3 @@ parameters:
 			identifier: missingType.property
 			count: 1
 			path: src/Validator/Constraints/UniqueEmailValidator.php
-
