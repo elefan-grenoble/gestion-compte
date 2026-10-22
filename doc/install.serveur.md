@@ -85,8 +85,6 @@ Ces deux failles permettent une exécution de code à distance sans authentifica
 
   Le correctif désactive définitivement la progression d'upload des sessions (non utilisée par l'application). En conséquence, les tests php-src `ext/session/tests/rfc1867*.phpt` échouent, et `tests/lang/bug45392.phpt` aussi (un saut de ligne en plus avant le message d'erreur mémoire) : c'est attendu.
 
-* **Serveur sans Docker, solution rapide et temporaire** : faire tourner uniquement PHP-FPM dans l'image corrigée, sans toucher à nginx, à la base ni au code. Voir [Passer PHP en Docker sur une installation serveur](install.serveur.php-docker.md).
-
 * **Serveur sans Docker, PHP natif** : installer un PHP corrigé, soit le paquet de la distribution ou d'un fournisseur LTS incluant le correctif, soit une recompilation des sources 7.4.33 avec `.docker/patches/php-7.4-cve-2026-109618-109619.patch` (`patch -p1`). Préférer ce patch à la branche [`PHP-7.4-CVE-2026-109618-109619`](https://github.com/php/php-src/tree/PHP-7.4-CVE-2026-109618-109619) compilée telle quelle : elle se déclare en version `7.4.31-dev`. Seule cette mise à jour protège complètement.
 
 Durcissement recommandé dans tous les cas, à mettre dans le pool php-fpm (et non dans un `.user.ini` ni via `ini_set()`, appliqués trop tard). Redémarrer ensuite php-fpm : un simple `reload` ne suffit pas.
