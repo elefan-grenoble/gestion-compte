@@ -2,7 +2,8 @@
 
 ## Prérequis
 
-* PHP (version 7.2 et supérieure)
+* PHP 7.4
+* Node.js (construction des fichiers JavaScript et CSS)
 * [Composer](https://getcomposer.org/)
 * Mysql (ou mariadb)
 * php-mysql (ou php-pdo_mysql)
@@ -33,13 +34,14 @@ php bin/console doctrine:database:create
 Migrer : creation du schema
 
 ```shell
-php bin/console doctrine:migration:migrate
+php bin/console doctrine:migrations:migrate
 ```
 
-Installer les medias
+Construire les fichiers JavaScript et CSS (Webpack Encore)
 
 ```shell
-php bin/console assetic:dump
+npm ci
+npm run build
 ```
 
 Lancer le serveur (si pas de serveur web)
@@ -69,7 +71,7 @@ Avec nginx, ligne necessaire pour avoir les images dynamiques de qr et barecode 
 
 ```
 location ~* ^/sw/(.*)/(qr|br)\.png$ {
-	rewrite ^/sw/(.*)/(qr|br)\.png$ /app.php/sw/$1/$2.png last;
+	rewrite ^/sw/(.*)/(qr|br)\.png$ /index.php/sw/$1/$2.png last;
 }
 ```
 

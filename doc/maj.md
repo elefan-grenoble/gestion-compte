@@ -48,10 +48,11 @@ composer install
 php bin/console doctrine:migrations:migrate
 ```
 
-3. Installer les nouveaux media
+3. Construire les fichiers JavaScript et CSS (Webpack Encore, nécessite Node.js)
 
 ```shell
-php bin/console assetic:dump
+npm ci
+npm run build
 ```
 
 4. Vider le cache de production
