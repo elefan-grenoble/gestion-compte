@@ -1,6 +1,69 @@
 # Passer PHP en Docker sur une installation serveur (correctif rapide)
 
-> ⚠️ **Solution temporaire.** Cette procédure sert à corriger **vite et simplement** les failles
+> 🛑 **Procédure obsolète.** Des paquets PHP 7.4 corrigés sont désormais publiés par
+> [deb.sury.org](https://deb.sury.org/) pour Debian et Ubuntu. Sur ces systèmes, **mettez simplement à jour
+> les paquets PHP de l'hôte** (voir [ci-dessous](#méthode-recommandée--paquets-debsuryorg)) : c'est plus
+> simple et sans conteneur. Le reste de ce document ne concerne plus que les serveurs où les paquets
+> deb.sury.org ne sont pas utilisables.
+
+## Méthode recommandée : paquets deb.sury.org
+
+Sur Debian ou Ubuntu, PHP-FPM reste celui de l'hôte (`php7.4-fpm`) : ni nginx, ni le socket, ni le code
+ne changent. Seuls les paquets PHP sont remplacés par la version corrigée.
+
+> Les paquets deb.sury.org sont un build tiers de PHP, différent de celui de la distribution (bibliothèques,
+> valeurs par défaut des `.ini`). Après la mise à jour, relire la configuration du pool
+> (`/etc/php/7.4/fpm/pool.d/`) et tester l'application.
+
+0. **Si vous avez déjà appliqué la procédure Docker ci-dessous**, revenir d'abord à PHP-FPM de l'hôte
+   (le site est servi par l'ancien PHP, non corrigé, jusqu'à la fin de l'étape 2) :
+
+   ```shell
+   cd /opt/gestion-compte-php && sudo docker compose down
+   sudo systemctl unmask php7.4-fpm && sudo systemctl enable php7.4-fpm
+   ```
+
+1. **Ajouter le dépôt deb.sury.org** (s'il n'est pas déjà configuré :
+   `grep -rli sury /etc/apt/sources.list /etc/apt/sources.list.d/`).
+
+   *Debian* (la confiance repose sur TLS, comme dans la procédure officielle) :
+
+   ```shell
+   sudo apt-get update
+   sudo apt-get install -y lsb-release ca-certificates curl
+   tmp=$(mktemp -d) && curl -fsSLo "$tmp/debsuryorg-archive-keyring.deb" https://packages.sury.org/debsuryorg-archive-keyring.deb
+   sudo dpkg -i "$tmp/debsuryorg-archive-keyring.deb"
+   sudo sh -c 'echo "deb [signed-by=/usr/share/keyrings/debsuryorg-archive-keyring.gpg] https://packages.sury.org/php/ $(lsb_release -sc) main" > /etc/apt/sources.list.d/php.list'
+   ```
+
+   *Ubuntu* : `sudo apt-get install -y software-properties-common && sudo add-apt-repository ppa:ondrej/php`.
+
+   Procédure officielle : <https://packages.sury.org/php/README.txt>.
+
+2. **Mettre à jour PHP 7.4** (seulement les paquets déjà installés, sans changer de version majeure),
+   puis (re)démarrer PHP-FPM :
+
+   ```shell
+   sudo apt-get update
+   sudo apt-get install --only-upgrade 'php7.4*'
+   sudo systemctl restart php7.4-fpm
+   ```
+
+3. **Vérifier** que le correctif est bien présent :
+
+   ```shell
+   php7.4 -v                                        # PHP 7.4.33
+   dpkg-query -W -f='${Version}\n' php7.4-fpm       # version provenant de deb.sury.org
+   apt changelog php7.4-fpm | grep -n 'CVE-2026-109618\|CVE-2026-109619'
+   ```
+
+   La dernière commande doit citer les deux CVE. Si elle n'affiche rien, le correctif n'est pas (encore)
+   dans le paquet : ne pas considérer le serveur comme corrigé, et utiliser la procédure Docker ci-dessous.
+   Puis, dans le navigateur : connexion, planning, fiche membre, QR code.
+
+---
+
+> ⚠️ **Solution temporaire (obsolète).** Cette procédure sert à corriger **vite et simplement** les failles
 > [CVE-2026-109618](https://github.com/php/php-src/security/advisories/GHSA-w8hw-w9fx-j79w) et
 > [CVE-2026-109619](https://github.com/php/php-src/security/advisories/GHSA-6wmf-4rv5-p3rp) (21/10/2026)
 > sur une installation sans Docker, **sans recompiler PHP sur le serveur**.
