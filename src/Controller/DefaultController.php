@@ -198,6 +198,13 @@ class DefaultController extends AbstractController
             return new Response($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
+        // le webhook reçoit les paiements de tous les formulaires de l'organisation (précommandes, dons...),
+        // seuls ceux du formulaire d'adhésion doivent être traités comme des adhésions
+        $membershipFormSlug = $this->getParameter('helloasso_campaign_slug');
+        if ($membershipFormSlug && ($payment->order->formSlug ?? null) !== $membershipFormSlug) {
+            return new Response('Successfully handled, but not a membership payment.', Response::HTTP_OK);
+        }
+
         $handler->savePayments([$payment]);
 
         return new Response('Successfully handled.', Response::HTTP_CREATED);
