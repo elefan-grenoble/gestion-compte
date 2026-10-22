@@ -54,11 +54,13 @@ ne changent. Seuls les paquets PHP sont remplacés par la version corrigée.
    ```shell
    php7.4 -v                                        # PHP 7.4.33
    dpkg-query -W -f='${Version}\n' php7.4-fpm       # version provenant de deb.sury.org
-   apt changelog php7.4-fpm | grep -n 'CVE-2026-109618\|CVE-2026-109619'
+   dpkg --compare-versions "$(dpkg-query -W -f='${Version}' php7.4-fpm)" ge '7.4.33-31+0~20261021.121' && echo OK
    ```
 
-   La dernière commande doit citer les deux CVE. Si elle n'affiche rien, le correctif n'est pas (encore)
-   dans le paquet : ne pas considérer le serveur comme corrigé, et utiliser la procédure Docker ci-dessous.
+   La version installée doit être **`7.4.33-31+0~20261021.121` ou plus récente** : la dernière commande
+   doit afficher `OK`. Sinon, le correctif n'est pas présent : relancer l'étape 2 (`apt-get update` inclus)
+   et, si la version reste inférieure, ne pas considérer le serveur comme corrigé (utiliser la procédure
+   Docker ci-dessous). Les deux CVE doivent aussi apparaître dans `apt changelog php7.4-fpm`.
    Puis, dans le navigateur : connexion, planning, fiche membre, QR code.
 
 ---
