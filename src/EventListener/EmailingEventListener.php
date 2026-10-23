@@ -111,9 +111,9 @@ class EmailingEventListener
 
         $router = $this->container->get('router');
         if (!$event->getAnonymousBeneficiary()->getJoinTo()) {
-            $url = $router->generate('member_new', ['code' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($emailTo)], UrlGeneratorInterface::ABSOLUTE_URL);
+            $url = $router->generate('member_new', ['code' => $this->swipeCardHelper->vigenereEncode($emailTo)], UrlGeneratorInterface::ABSOLUTE_URL);
         } else {
-            $url = $router->generate('member_add_beneficiary', ['code' => $this->container->get('App\Helper\SwipeCard')->vigenereEncode($emailTo)], UrlGeneratorInterface::ABSOLUTE_URL);
+            $url = $router->generate('member_add_beneficiary', ['code' => $this->swipeCardHelper->vigenereEncode($emailTo)], UrlGeneratorInterface::ABSOLUTE_URL);
         }
 
         $email = (new Email())
