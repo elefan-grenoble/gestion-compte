@@ -2,9 +2,9 @@ Bonjour {{ code.registrar.firstname }},<br>
 {% if codes | length < 1 %}
 Oups, aucun code n'est noté comme actif. Essai d'ouvrir le boîtier avec le code <strong>0000</strong><br>
 {% else %}
-Pour ouvrir le boitier, le code en cours est <strong>{{ codes[0].value }}</strong>.<br>
+Pour ouvrir le boitier, le code en cours est <strong>{{ codes[0].value | to_code_groups }}</strong>.<br>
 {% endif %}
-Une fois ouvert, il faut saisir le nouveau code <strong>{{ code.value }}</strong>
+Une fois ouvert, il faut saisir le nouveau code <strong>{{ code.value | to_code_groups }}</strong>
 <br>
 <br>
 {% if wiki_keys_url %}

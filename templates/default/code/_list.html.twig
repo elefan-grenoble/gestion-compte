@@ -6,7 +6,7 @@
         <div class="row">
             <div class="col s12">
                 <div class="card-panel">
-                    <h5><i class="material-icons left">vpn_key</i>{{ codes | first.value }}</h5>
+                    <h5><i class="material-icons left">vpn_key</i>{{ (codes | first).value | to_code_groups }}</h5>
                     entré à {{ codes | first.createdAt | date('H:m:i') }} le {{ codes | first.createdAt | date_fr_long }} par {{ codes | first.getRegistrar }}
                 </div>
             </div>
@@ -28,7 +28,7 @@
                     <tr id="code_{{ code.id }}">
                         <td>
                             {% if code.closed %}<del>{% endif %}
-                            <b>{{ code.value }}</b>
+                            <b>{{ code.value | to_code_groups }}</b>
                             {% if code.closed %}</del>{% endif %}
                         </td>
                         <td>
@@ -96,7 +96,7 @@
                     <tr id="code_{{ code.id }}">
                         <td>
                             {% if code.closed %}<del>{% endif %}
-                            <b>{{ code.value }}</b>
+                            <b>{{ code.value | to_code_groups }}</b>
                             {% if code.closed %}</del>{% endif %}
                         </td>
                         <td>
