@@ -215,14 +215,36 @@ class MembershipServiceTest extends TestCase
     // getRemainder()
     // -------------------------------------------------------
 
-    public function testGetRemainderReturnsDateInterval(): void
+    public function testGetRemainderCountsTheDaysLeftBeforeExpiration(): void
     {
-        $service = $this->createService(['registration_every_civil_year' => true]);
+        $service = $this->createService([
+            'registration_every_civil_year' => false,
+            'registration_duration' => '1 year',
+        ]);
 
-        $membership = $this->createMembershipWithRegistration(new \DateTime('now'));
+        // A registration of one year expires the day before its anniversary:
+        // registered 1 year ago + 10 days, it expires in 9 days (at 23:59:59)
+        $membership = $this->createMembershipWithRegistration(new \DateTime('-1 year +10 days'));
         $remainder = $service->getRemainder($membership);
 
         $this->assertInstanceOf(\DateInterval::class, $remainder);
+        $this->assertSame(0, $remainder->invert, 'The membership has not expired yet.');
+        $this->assertSame(9, $remainder->days);
+    }
+
+    public function testGetRemainderIsNegativeOnceExpired(): void
+    {
+        $service = $this->createService([
+            'registration_every_civil_year' => false,
+            'registration_duration' => '1 year',
+        ]);
+
+        // Expired 4 days ago (23:59:59 of that day)
+        $membership = $this->createMembershipWithRegistration(new \DateTime('-1 year -3 days'));
+        $remainder = $service->getRemainder($membership);
+
+        $this->assertSame(1, $remainder->invert, 'The membership has expired.');
+        $this->assertSame(3, $remainder->days);
     }
 
     // -------------------------------------------------------

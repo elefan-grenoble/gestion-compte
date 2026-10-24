@@ -1,10 +1,5 @@
 // NO PERMANENT CHANGE TO DATABASE
 
-// temporarily disable uncaught exception handling
-Cypress.on('uncaught:exception', (err, runnable) => {
-    return false
-})
-
 describe('super admin can login', function () {
     it('super admin path', function () {
 

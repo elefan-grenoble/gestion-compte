@@ -1,9 +1,26 @@
-// MODIFIES DATABASE: creates a new registration for a member
+// MODIFIES DATABASE: creates a new registration for member 50
+//
+// Relies on the seeded fixtures (FIXTURES_SEED, see .env.test): every member
+// has one registration, dated a fixed number of days before the day the
+// fixtures were loaded. A member can register again when the current
+// registration expires within 28 days, i.e. when it is at least ~337 days old.
+//   - member 1 registered 279 days ago: too early to register again
+//   - member 50 registered 356 days ago: can register again
+// Reload the fixtures (make db-fixtures-load) before running this spec again,
+// as member 50 is not eligible anymore once it has passed.
 
-// temporarily disable uncaught exception handling
-Cypress.on('uncaught:exception', (err, runnable) => {
-    return false
-})
+const TOO_EARLY_MEMBER = 1
+const ELIGIBLE_MEMBER = 50
+
+function openRegistrationSection(memberNumber) {
+    cy.visit(`/member/${memberNumber}/show`)
+    cy.url().should('include', '/member/')
+
+    cy.get('#registration', { timeout: 10000 }).should('exist')
+    // Direct child only, not the nested sub-collapsibles
+    cy.get('#registration > .collapsible-header').click()
+    cy.get('#registration > .collapsible-body').should('be.visible')
+}
 
 describe('admin can manage membership registrations', function () {
 
@@ -12,104 +29,55 @@ describe('admin can manage membership registrations', function () {
     })
 
     it('member show page displays registration section', function () {
-        // Visit member 1's show page directly (super admin can view any member)
-        cy.visit('/member/1/show')
-        cy.url().should('include', '/member/')
+        openRegistrationSection(TOO_EARLY_MEMBER)
 
-        // The "Adhésions" collapsible section should exist
-        cy.get('#registration', { timeout: 10000 }).should('exist')
+        // The fixtures create one registration per member
+        cy.get('#registration > .collapsible-body li[id^="registration_"]').should('have.length', 1)
 
-        // Open the "Adhésions" collapsible (direct child only, not nested sub-collapsibles)
-        cy.get('#registration > .collapsible-header').click()
-
-        // The registration body should be visible and contain registration info
-        cy.get('#registration > .collapsible-body', { timeout: 5000 }).should('be.visible')
-
-        // There should be at least one registration entry (fixtures create one per member)
-        cy.get('#registration > .collapsible-body').then($body => {
-            // Check either the registration list is visible or a "no registration" message
-            const hasRegistrations = $body.find('li[id^="registration_"]').length > 0
-            const hasNoRegistrationMessage = $body.text().includes("pas encore d'adhésion")
-
-            expect(hasRegistrations || hasNoRegistrationMessage).to.be.true
-            if (hasRegistrations) {
-                cy.log('Member has registration history displayed')
-            } else {
-                cy.log('Member has no registrations yet')
-            }
-        })
-
-        // The "Ré-adhésion" or "Adhésion" sub-collapsible should exist
-        // (since super admin != member 1, and from_admin is true)
+        // The "Ré-adhésion" sub-collapsible exists (the admin is not member 1)
         cy.get('#registration > .collapsible-body').within(() => {
-            cy.get('.collapsible-header').should('exist')
+            cy.get('.collapsible-header').should('contain', 'Ré-adhésion')
         })
     })
 
-    it('admin can re-register a member if eligible', function () {
-        // Try multiple members to find one eligible for re-registration
-        // Members are numbered 1-50 (regular users), their registration dates are random
-        // canRegister = true when membership expires within 28 days
-        const memberNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
+    it('tells that it is too early to register a member again', function () {
+        openRegistrationSection(TOO_EARLY_MEMBER)
 
-        // Visit the first member and check for the registration form
-        cy.visit('/member/1/show')
-        cy.url().should('include', '/member/')
+        cy.get('#registration .new_registration_form').closest('li').find('> .collapsible-header').click()
+        cy.get('#registration .new_registration_form')
+            .should('be.visible')
+            .and('contain', 'trop tôt pour ré-adhérer')
+        cy.get('#registration .new_registration_form form').should('not.exist')
+    })
 
-        // Open the "Adhésions" collapsible
-        cy.get('#registration', { timeout: 10000 }).should('exist')
+    it('admin can re-register a member whose registration is about to expire', function () {
+        openRegistrationSection(ELIGIBLE_MEMBER)
+
+        cy.get('#registration > .collapsible-body li[id^="registration_"]').should('have.length', 1)
+
+        // Open the Ré-adhésion collapsible to reveal the form. The form is
+        // there only when the member can register again: if this fails, the
+        // fixtures are not the seeded ones, or were already used by this spec.
+        cy.get('#registration .new_registration_form').closest('li').find('> .collapsible-header').click()
+        cy.get('#registration .new_registration_form form', { timeout: 10000 }).should('be.visible')
+
+        // Fill the amount field (required, must be > 0)
+        cy.get('#registration .new_registration_form form input[id$="_amount"]').clear().type('15')
+
+        // Select a payment mode (Espèce = cash)
+        cy.get('#registration .new_registration_form form select[id$="_mode"]').select('1', { force: true })
+
+        cy.get('#registration .new_registration_form form button[type="submit"]').click()
+
+        // Redirected to the member page with the success flash
+        cy.url({ timeout: 10000 }).should('include', `/member/${ELIGIBLE_MEMBER}/show`)
+        cy.get('body').should('contain', 'Enregistrement effectu')
+
+        // The registration is listed, and the new one is valid for a year:
+        // the member cannot register again right away.
         cy.get('#registration > .collapsible-header').click()
-        cy.get('#registration > .collapsible-body', { timeout: 5000 }).should('be.visible')
-
-        // Check if the re-registration form is available
-        cy.get('#registration > .collapsible-body').then($body => {
-            const hasForm = $body.find('.new_registration_form form').length > 0
-            const hasTooEarly = $body.text().includes('trop tôt pour ré-adhérer')
-
-            if (hasForm) {
-                cy.log('Re-registration form is available — filling and submitting')
-
-                // Open the Ré-adhésion collapsible to reveal the form
-                cy.get('#registration .new_registration_form').closest('li').find('> .collapsible-header').click()
-                cy.wait(500) // wait for Materialize collapsible animation
-
-                // Fill the amount field (required, must be > 0)
-                cy.get('#registration .new_registration_form form').should('be.visible')
-                cy.get('#registration .new_registration_form form input[id$="_amount"]').clear().type('15')
-
-                // Select a payment mode (Espèce = cash)
-                cy.get('#registration .new_registration_form form select[id$="_mode"]').select('1', { force: true })
-
-                // Submit the form
-                cy.get('#registration .new_registration_form form button[type="submit"]').click()
-
-                // After submission, we should be redirected back to the member show page
-                // with a success flash message
-                cy.url({ timeout: 10000 }).should('include', '/member/')
-                cy.get('body').then($redirectedBody => {
-                    const text = $redirectedBody.text()
-                    // Check for success or known error messages
-                    const hasSuccess = text.includes('Enregistrement effectué')
-                    const hasAlreadyValid = text.includes('encore valable')
-                    const hasError = text.includes('prix libre')
-
-                    if (hasSuccess) {
-                        cy.log('✅ Registration submitted successfully')
-                    } else if (hasAlreadyValid) {
-                        cy.log('⚠️ Previous registration still valid — expected with random fixtures')
-                    } else {
-                        cy.log('Registration form submitted, checking page state')
-                    }
-                })
-
-            } else if (hasTooEarly) {
-                cy.log('⏳ Re-registration not yet available (too early) — this is expected with random fixture data')
-                // Verify the "too early" message is correctly displayed
-                cy.get('#registration .new_registration_form').should('contain', 'trop tôt')
-            } else {
-                cy.log('ℹ️ No registration form found on this member page — may be the admin\'s own membership')
-            }
-        })
+        cy.get('#registration > .collapsible-body li[id^="registration_"]').should('have.length', 2)
+        cy.get('#registration .new_registration_form').should('contain', 'trop tôt pour ré-adhérer')
     })
 
 })

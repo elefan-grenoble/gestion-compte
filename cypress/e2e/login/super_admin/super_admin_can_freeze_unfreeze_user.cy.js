@@ -1,10 +1,5 @@
 // NO PERMANENT CHANGE TO DATABASE
 
-// temporarily disable uncaught exception handling
-Cypress.on('uncaught:exception', (err, runnable) => {
-    return false
-})
-
 describe('super admin can freeze and unfreeze user', function () {
     it('super admin path', function () {
 
@@ -23,16 +18,12 @@ describe('super admin can freeze and unfreeze user', function () {
         cy.log('open freeze collapsible')
         cy.get('[data-cy=freeze] .collapsible-header').click()
 
-        cy.log('wait for the "freeze immediately" button to be visible')
+        cy.log('the "freeze immediately" button shows once the collapsible is open')
         cy.get('[data-cy=open_freeze_member_confirmation_modal]', { timeout: 5000 }).should('be.visible')
-        // small wait for Materialize collapsible animation to finish
-        cy.wait(500)
         cy.get('[data-cy=open_freeze_member_confirmation_modal]').click()
 
         cy.log('wait for modal to open, then confirm')
         cy.get('[data-cy=freeze_member_confirmation_modal_confirm]', { timeout: 5000 }).should('be.visible')
-        // small wait for Materialize modal animation to finish
-        cy.wait(500)
         cy.get('[data-cy=freeze_member_confirmation_modal_confirm]').click()
 
         // Wait for the POST to complete and the redirect to load
@@ -53,14 +44,10 @@ describe('super admin can freeze and unfreeze user', function () {
 
         cy.log('wait for the "unfreeze immediately" button to be visible')
         cy.get('[data-cy=open_unfreeze_member_confirmation_modal]', { timeout: 5000 }).should('be.visible')
-        // small wait for Materialize collapsible animation to finish
-        cy.wait(500)
         cy.get('[data-cy=open_unfreeze_member_confirmation_modal]').click()
 
         cy.log('wait for modal to open, then confirm')
         cy.get('[data-cy=unfreeze_member_confirmation_modal_confirm]', { timeout: 5000 }).should('be.visible')
-        // small wait for Materialize modal animation to finish
-        cy.wait(500)
         cy.get('[data-cy=unfreeze_member_confirmation_modal_confirm]').click()
 
         // Wait for the POST to complete and the redirect to load

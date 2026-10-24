@@ -1,12 +1,10 @@
-// This test verifies the shift booking page loads correctly and
-// books a shift if one is available.
-// Uses "Liam Smith" (user_1 / beneficiary_1) who has formation_1,
-// allowing them to book shifts that require that formation.
-
-// temporarily disable uncaught exception handling
-Cypress.on('uncaught:exception', (err, runnable) => {
-    return false
-})
+// This test verifies the shift booking page loads correctly and books a shift.
+// MODIFIES DATABASE: books a shift for "Liam Smith".
+//
+// Relies on the seeded fixtures (FIXTURES_SEED, see .env.test).
+// "Liam Smith" (user_1 / beneficiary_1) has formation_1 (Réception des
+// livraisons) and no shift yet, so he is a beginner: he can only join a
+// bucket where someone already booked.
 
 describe('member can book a shift', function () {
     it('booking page displays the shift grid', function () {
@@ -31,66 +29,47 @@ describe('member can book a shift', function () {
 
     it('book a shift from the booking page', function () {
 
-        // Login as Liam Smith (user_1, has formation_1)
         cy.login('Liam Smith', 'password')
 
         // Intercept the shift booking POST request
         cy.intercept('POST', '**/shift/*/book').as('shiftBook')
 
-        // navigate directly to the booking page
         cy.visit('/booking/')
-
-        // Verify the booking page loaded
-        cy.url({ timeout: 10000 }).should('include', '/booking')
         cy.get('h4.header', { timeout: 10000 }).should('contain', 'Créneaux disponibles')
 
-        // Look for bookable shifts: .shift-bucket elements with a link to a #book modal
-        cy.get('body').then($body => {
-            const $bookable = $body.find('.shift-bucket a[href^="#book"]')
-
-            if ($bookable.length === 0) {
-                // No bookable shifts available (all booked or formations mismatch).
-                // This can happen with random fixtures. Skip gracefully.
-                cy.log('No bookable shifts found — skipping booking test (random fixture data)')
-                return
+        // The fixtures create one bucket per day from tomorrow on, so the
+        // second day of the list is the shift created for "+2 days": job
+        // "Reception des livraisons" (formation_1), 4 places, 2 of them already
+        // booked by other members, not locked. Liam can book one of the 2 left.
+        // (Picked by position, not by date, so that a run past midnight does
+        // not shift the target.)
+        cy.get('#weeks li[data-date]').eq(1).as('day')
+        cy.get('@day').find('.collapsible-header').should('be.visible')
+        cy.get('@day').then(($day) => {
+            // The first days open by themselves; open this one otherwise
+            if (!$day.hasClass('active')) {
+                cy.wrap($day).find('.collapsible-header').click()
             }
-
-            // Get the first bookable shift link
-            const modalId = $bookable.first().attr('href') // e.g. "#book123"
-
-            // Scroll the link into view and click it (real user interaction)
-            cy.get(`.shift-bucket a[href="${modalId}"]`).first()
-                .scrollIntoView()
-                .should('be.visible')
-                .click()
-
-            // Wait for the Materialize modal animation to complete
-            cy.get(modalId, { timeout: 10000 }).should('be.visible')
-
-            // Select the first available formation radio button (shift radio)
-            cy.get(modalId).find('.checkedFormation').first().check({ force: true })
-
-            // Click the "Confirmer" button
-            cy.get(modalId).find('button').contains('Confirmer').should('be.visible').click()
-
-            // Wait for the XHR POST to complete and verify it succeeded
-            cy.wait('@shiftBook', { timeout: 15000 }).then((interception) => {
-                const status = interception.response.statusCode
-                cy.log(`Shift book POST returned status: ${status}`)
-
-                // Status 200 = success (response body is the redirect URL)
-                // Status 205 = booking error (e.g. shift already taken)
-                if (status === 200) {
-                    // The JS does window.location.replace(responseText) on success
-                    // Wait for the redirect to complete and check for the flash message
-                    cy.url({ timeout: 15000 }).should('not.include', '/booking')
-                    cy.get('body', { timeout: 10000 }).should('contain', 'réservé')
-                } else {
-                    // If status is not 200, the booking failed (shift already taken, etc.)
-                    // This can happen with random fixtures. Log and skip gracefully.
-                    cy.log(`Shift booking returned status ${status} — shift may already be taken (random fixtures)`)
-                }
-            })
         })
+
+        cy.get('@day')
+            .find('.shift-bucket a.modal-trigger[data-tooltip="Reception des livraisons"]', { timeout: 15000 })
+            .should('have.length', 1)
+            .scrollIntoView()
+            .click()
+
+        // The modal loads the bucket (XHR) and lists the free places
+        cy.get('#modal-bucket', { timeout: 10000 }).should('be.visible')
+        cy.get('#modal-bucket').should('contain', 'Nombre de places restantes : 2/4')
+        cy.get('#modal-bucket .checkedFormation').should('have.length', 2)
+        cy.get('#modal-bucket .checkedFormation').first().check({ force: true })
+
+        cy.get('#modal-bucket #confirmButton').should('be.visible').click()
+
+        // 200: the response body is the URL the page then redirects to
+        cy.wait('@shiftBook', { timeout: 15000 }).its('response.statusCode').should('eq', 200)
+
+        cy.url({ timeout: 15000 }).should('not.include', '/booking')
+        cy.get('body', { timeout: 10000 }).should('contain', 'réservé')
     })
 })
