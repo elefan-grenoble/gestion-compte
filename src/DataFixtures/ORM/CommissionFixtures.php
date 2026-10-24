@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures\ORM;
 
+use App\DataFixtures\FixtureTools;
 use App\DataFixtures\FixturesConstants;
 use App\Entity\Commission;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -16,6 +17,7 @@ class CommissionFixtures extends Fixture implements FixtureGroupInterface, Order
      */
     public function load(ObjectManager $manager)
     {
+        FixtureTools::seedRandomGenerator(static::class);
 
         $commissions = FixturesConstants::COMMISSIONS;
         $descriptions = FixturesConstants::DESCRIPTIONS;

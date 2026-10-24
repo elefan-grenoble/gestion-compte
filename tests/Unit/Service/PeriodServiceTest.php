@@ -14,8 +14,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * @internal
- *
- * @coversNothing
  */
 class PeriodServiceTest extends TestCase
 {

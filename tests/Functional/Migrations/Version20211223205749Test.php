@@ -4,6 +4,7 @@ namespace App\Tests\Functional\Migrations;
 
 use app\Migrations\Version20211223205749;
 use App\Tests\Functional\DatabasePrimer;
+use App\Tests\PHPUnit\SkipDatabaseRollback;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Schema;
 use Psr\Log\NullLogger;
@@ -35,11 +36,13 @@ require_once dirname(__DIR__, 3) . '/src/Migrations/Version20211223205749.php';
  * class of bug Version20210425170158 was fixed for) — a preexisting,
  * unrelated issue in a migration nobody runs down() on in practice.
  *
- * @internal
+ * Its ALTER/CREATE TABLE statements commit implicitly, so it cannot run
+ * inside the per-test transaction: it commits, and replaying the migration
+ * forward is what puts the schema back.
  *
- * @coversNothing
+ * @internal
  */
-class Version20211223205749Test extends DatabasePrimer
+class Version20211223205749Test extends DatabasePrimer implements SkipDatabaseRollback
 {
     private Connection $connection;
 

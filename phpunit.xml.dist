@@ -32,16 +32,23 @@
       <!-- env name="TRUSTED_HOSTS" value="'^(localhost|example\.com)$'" -->
       <!-- ###- symfony/framework-bundle ### -->
   </php>
+  <extensions>
+    <!-- Rolls back, after each Kernel-booted test, whatever it wrote to the DB.
+         See tests/PHPUnit/DatabaseIsolationExtension.php for the rules. -->
+    <extension class="App\Tests\PHPUnit\DatabaseIsolationExtension"/>
+  </extensions>
   <testsuites>
-    <!-- unit: pure PHP tests, no Symfony Kernel, no DB. Fast. -->
+    <!-- unit: pure PHP tests (TestCase), no Symfony Kernel, no DB. Fast. -->
     <testsuite name="unit">
       <directory>tests/Unit</directory>
     </testsuite>
-    <!-- integration: tests with the Symfony Kernel booted but no DB access. -->
+    <!-- integration: KernelTestCase against a real DB (repositories, DQL,
+         services wired by the container). Each test is rolled back. -->
     <testsuite name="integration">
       <directory>tests/Integration</directory>
     </testsuite>
-    <!-- functional: HTTP-level tests with the Kernel booted and a real DB (fixtures loaded). -->
+    <!-- functional: HTTP-level tests (WebTestCase) with a real DB and fixtures
+         loaded per class. Each test is rolled back. -->
     <testsuite name="functional">
       <directory>tests/Functional</directory>
     </testsuite>

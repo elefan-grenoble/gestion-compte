@@ -4,6 +4,33 @@ namespace App\DataFixtures;
 
 class FixtureTools
 {
+    /**
+     * Environment variable holding the seed of the fixtures' random draws.
+     *
+     * Set in .env.test, so the test suite and the Cypress run always get the
+     * same dataset. Left unset elsewhere, which keeps dev fixtures random.
+     */
+    public const SEED_ENV_VAR = 'FIXTURES_SEED';
+
+    /**
+     * Seeds the Mersenne Twister when FIXTURES_SEED is set, so rand() and
+     * mt_rand() (rand() is an alias of mt_rand() since PHP 7.1) draw the same
+     * sequence on every load.
+     *
+     * Each fixture seeds itself with its own scope rather than relying on one
+     * seed at the start of the run: a fixture then produces the same rows
+     * whatever --group selection loaded the fixtures before it.
+     */
+    public static function seedRandomGenerator(string $scope): void
+    {
+        $seed = $_SERVER[self::SEED_ENV_VAR] ?? $_ENV[self::SEED_ENV_VAR] ?? getenv(self::SEED_ENV_VAR);
+        if (false === $seed || '' === $seed) {
+            return;
+        }
+
+        mt_srand(((int) $seed) ^ crc32($scope));
+    }
+
     public static function biased_random($min, $max, $bias)
     {
         // Calculate the probability for non-maximum values

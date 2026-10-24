@@ -1,7 +1,7 @@
 # php:7.4 (CLI, used by the dev compose with `symfony serve`) by default;
 # pass --build-arg PHP_BASE_IMAGE=php:7.4-fpm to get a patched php-fpm.
 ARG PHP_BASE_IMAGE=php:7.4
-FROM ${PHP_BASE_IMAGE}
+FROM ${PHP_BASE_IMAGE} AS base
 
 # Debian 11 (bullseye) left LTS on 2026-08-31: deb.debian.org still serves the
 # indexes but the security pool is gone, so installs fail with 404s.
@@ -83,3 +83,14 @@ RUN docker-php-ext-configure gd --with-freetype --with-jpeg
 RUN docker-php-ext-install -j$(nproc) pdo_mysql pcntl gd opcache
 
 WORKDIR /var/www/app/
+
+# Image de tests (`make up`) : base + pilote de couverture pour
+# `make test-coverage`, désactivé par défaut (composer test-coverage le
+# réactive avec -d pcov.enabled=1)
+FROM base AS test
+RUN pecl install pcov \
+    && docker-php-ext-enable pcov \
+    && echo 'pcov.enabled=0' > /usr/local/etc/php/conf.d/zz-pcov.ini
+
+# Image de développement : dernière étape, donc cible par défaut. Sans pcov.
+FROM base AS dev

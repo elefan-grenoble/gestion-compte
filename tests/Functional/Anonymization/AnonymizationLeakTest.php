@@ -25,8 +25,6 @@ use App\Entity\User;
  * the export never anonymizes in place.
  *
  * @internal
- *
- * @coversNothing
  */
 class AnonymizationLeakTest extends KernelTestCase
 {

@@ -12,8 +12,6 @@ use PHPUnit\Framework\MockObject\MockObject;
 
 /**
  * @internal
- *
- * @coversNothing
  */
 class MembershipServiceTest extends TestCase
 {

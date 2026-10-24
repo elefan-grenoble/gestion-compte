@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures\ORM;
 
+use App\DataFixtures\FixtureTools;
 use App\DataFixtures\FixturesConstants;
 use App\Entity\Shift;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -16,6 +17,7 @@ class ShiftFixtures extends Fixture implements OrderedFixtureInterface, FixtureG
      */
     public function load(ObjectManager $manager)
     {
+        FixtureTools::seedRandomGenerator(static::class);
 
         $usersCount = FixturesConstants::USERS_COUNT;
         $adminsCount = FixturesConstants::ADMINS_COUNT;

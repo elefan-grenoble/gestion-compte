@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures\ORM;
 
+use App\DataFixtures\FixtureTools;
 use App\DataFixtures\FixturesConstants;
 use App\Entity\Period;
 use App\Entity\PeriodPosition;
@@ -17,6 +18,7 @@ class PeriodFixtures extends Fixture implements OrderedFixtureInterface, Fixture
      */
     public function load(ObjectManager $manager)
     {
+        FixtureTools::seedRandomGenerator(static::class);
 
         $enabled_jobs_count = FixturesConstants::ENABLED_JOBS_COUNT;
         $adminsCount = FixturesConstants::ADMINS_COUNT;

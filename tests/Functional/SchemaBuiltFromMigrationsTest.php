@@ -21,8 +21,6 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  * caught here rather than there.
  *
  * @internal
- *
- * @coversNothing
  */
 class SchemaBuiltFromMigrationsTest extends KernelTestCase
 {

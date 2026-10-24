@@ -3,6 +3,7 @@
 namespace App\DataFixtures\Purger;
 
 use Doctrine\Common\DataFixtures\Purger\ORMPurger;
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Exception;
 use Doctrine\ORM\EntityManagerInterface;
 
@@ -38,5 +39,27 @@ class CustomPurger extends ORMPurger
             }
         }
         $conn->executeQuery('SET FOREIGN_KEY_CHECKS = 1;');
+
+        $this->reopenTransactionClosedByTruncate($conn);
+    }
+
+    /**
+     * The fixtures executor purges inside the transaction it opens around the
+     * whole load, and TRUNCATE commits it implicitly. DBAL still counts it as
+     * open, so its final commit() reaches PDO with nothing to commit, which
+     * PHP 8 reports as "There is no active transaction" (PHP 7.4 only tracked
+     * its own flag and let it pass). Reopening it keeps the fixtures load in
+     * one transaction, as the executor intends.
+     */
+    private function reopenTransactionClosedByTruncate(Connection $conn): void
+    {
+        if (!$conn->isTransactionActive()) {
+            return;
+        }
+
+        $driverConnection = $conn->getWrappedConnection();
+        if ($driverConnection instanceof \PDO && !$driverConnection->inTransaction()) {
+            $driverConnection->beginTransaction();
+        }
     }
 }

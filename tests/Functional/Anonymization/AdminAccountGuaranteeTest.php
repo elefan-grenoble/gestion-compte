@@ -13,8 +13,6 @@ use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
  * AnonymizationLeakTest already covers for the full anonymization pass.
  *
  * @internal
- *
- * @coversNothing
  */
 class AdminAccountGuaranteeTest extends KernelTestCase
 {

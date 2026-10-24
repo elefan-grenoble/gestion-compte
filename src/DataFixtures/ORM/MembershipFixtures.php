@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures\ORM;
 
+use App\DataFixtures\FixtureTools;
 use App\DataFixtures\FixturesConstants;
 use App\Entity\Membership;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -16,6 +17,7 @@ class MembershipFixtures extends Fixture implements OrderedFixtureInterface, Fix
      */
     public function load(ObjectManager $manager)
     {
+        FixtureTools::seedRandomGenerator(static::class);
 
         $roleGoesToId = FixturesConstants::ROLE_GOES_TO_ID;
         $adminsAmount = FixturesConstants::ADMINS_COUNT;

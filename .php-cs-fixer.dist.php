@@ -10,6 +10,8 @@ return (new PhpCsFixer\Config())
         '@PhpCsFixer' => true,
         '@auto' => true,
         'yoda_style' => false,
+        // @coversNothing on every test class would leave the coverage report empty.
+        'php_unit_test_class_requires_covers' => false,
     ])
     ->setFinder($finder)
 ;

@@ -8,19 +8,13 @@ use App\Tests\Functional\FunctionalTestCase;
  * Functional tests for MembershipController.
  *
  * @internal
- *
- * @coversNothing
  */
 class MembershipControllerTest extends FunctionalTestCase
 {
-    private static bool $fixturesLoaded = false;
-
-    public function setUp(): void
+    public static function setUpBeforeClass(): void
     {
-        if (!self::$fixturesLoaded) {
-            $this->loadFixturesWithGroups(['period']);
-            self::$fixturesLoaded = true;
-        }
+        parent::setUpBeforeClass();
+        static::loadFixtures(['period']);
     }
 
     // -------------------------------------------------------

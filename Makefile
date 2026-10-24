@@ -9,8 +9,10 @@
 # Usage :
 #   make setup-test    Bootstrap complet (Docker + DB + fixtures)
 #   make test          Tous les tests PHPUnit
-#   make test-unit     Tests unitaires + intégration
-#   make test-func     Tests fonctionnels
+#   make test-unit     Tests unitaires (sans DB)
+#   make test-integration  Tests d'intégration (Kernel + DB)
+#   make test-func     Tests fonctionnels (HTTP + DB)
+#   make test-coverage Tous les tests + couverture (var/coverage/)
 #   make lint          Analyse statique PHPStan
 #   make test-e2e      Tests Cypress E2E (hors OIDC)
 #   make clean         Arrête les conteneurs et supprime les volumes
@@ -41,7 +43,7 @@ else
 endif
 
 .PHONY: help check-docker check-hosts setup-test \
-        test test-unit test-func test-coverage lint \
+        test test-unit test-integration test-func test-coverage lint \
         test-e2e test-e2e-main test-e2e-shift test-e2e-membership test-e2e-oidc \
         npm-install encore-build encore-stubs \
         db-reset db-migrate db-fixtures db-fixtures-load \
@@ -73,8 +75,10 @@ check-hosts: ## Vérifie que membres.yourcoop.local est dans /etc/hosts
 # Fichiers de configuration (local uniquement)
 # ------------------------------------------------------------------
 
+# L'étape `test` du Dockerfile ajoute pcov ; le .dist (dev) reste sans.
 compose.yaml:
 	@sed -e '/^version:/d' \
+	     -e 's|^\(\s*\)dockerfile: \.docker/Dockerfile$$|&\n\1target: test|' \
 	     -e 's|^\(\s*\)- \./mysql:/var/lib/mysql|\1- db_data:/var/lib/mysql|' \
 	     docker-compose.symfony_server.yml.dist > compose.yaml
 	@echo "✔ compose.yaml créé (version retirée, volume nommé db_data)"
@@ -113,8 +117,11 @@ clean: ## Arrête les conteneurs et supprime volumes + fichiers générés
 # Dépendances & assets
 # ------------------------------------------------------------------
 
-vendor: $(_DOCKER_DEP)
+# Prérequis composer.json/composer.lock : en CI, le vendor/ restauré du cache
+# peut dater d'un autre lock, et sans eux make le jugerait à jour.
+vendor: composer.json composer.lock $(_DOCKER_DEP)
 	$(EXEC) composer install --no-interaction --prefer-dist
+	@touch vendor
 
 npm-install: ## Installe les paquets NPM
 	npm ci
@@ -161,8 +168,9 @@ setup-test: check-hosts vendor encore-stubs db-fixtures cache-clear ## Bootstrap
 	@echo ""
 	@echo "✅ Environnement de test prêt."
 	@echo "  make test          Tous les tests"
-	@echo "  make test-unit     Unit + intégration"
-	@echo "  make test-func     Fonctionnels"
+	@echo "  make test-unit     Unitaires (sans DB)"
+	@echo "  make test-integration  Intégration (DB)"
+	@echo "  make test-func     Fonctionnels (DB)"
 	@echo "  make lint          Outils de linting"
 	@echo "  make test-e2e      Cypress E2E"
 
@@ -173,13 +181,20 @@ setup-test: check-hosts vendor encore-stubs db-fixtures cache-clear ## Bootstrap
 test: ## Tous les tests PHPUnit
 	$(EXEC) composer test
 
-test-unit: ## Tests unitaires + intégration (sans DB)
+# Chaque test qui démarre le Kernel tourne dans une transaction annulée à sa
+# fin (tests/PHPUnit/DatabaseIsolationExtension.php) : l'ordre des tests ne
+# change rien à l'état de la base qu'ils voient.
+
+test-unit: ## Tests unitaires (TestCase pur, sans DB)
 	$(EXEC) composer test-unit
 
-test-func: ## Tests fonctionnels (avec DB)
+test-integration: ## Tests d'intégration (KernelTestCase + DB : repositories, DQL)
+	$(EXEC) composer test-integration
+
+test-func: ## Tests fonctionnels (HTTP + DB, fixtures par classe)
 	$(EXEC) composer test-functional
 
-test-coverage: ## Tests avec rapport de couverture HTML
+test-coverage: ## Tous les tests + couverture (HTML, Clover, texte) dans var/coverage/
 	$(EXEC) composer test-coverage
 
 # ------------------------------------------------------------------

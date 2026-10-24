@@ -2,6 +2,7 @@
 
 namespace App\DataFixtures\ORM;
 
+use App\DataFixtures\FixtureTools;
 use App\DataFixtures\FixturesConstants;
 use App\Entity\Registration;
 use Doctrine\Bundle\FixturesBundle\Fixture;
@@ -16,6 +17,7 @@ class RegistrationFixtures extends Fixture implements OrderedFixtureInterface, F
      */
     public function load(ObjectManager $manager)
     {
+        FixtureTools::seedRandomGenerator(static::class);
 
         $registration_amounts = FixturesConstants::REGISTRATION_AMOUNTS;
         $usersCount = FixturesConstants::USERS_COUNT;

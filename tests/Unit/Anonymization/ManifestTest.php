@@ -8,8 +8,6 @@ use PHPUnit\Framework\TestCase;
 
 /**
  * @internal
- *
- * @coversNothing
  */
 class ManifestTest extends TestCase
 {
