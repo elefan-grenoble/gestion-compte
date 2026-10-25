@@ -191,4 +191,18 @@ class Address
     {
         $this->beneficiary = $beneficiary;
     }
+
+    /**
+     * True when no field has been filled in.
+     */
+    public function isBlank(): bool
+    {
+        foreach ([$this->street1, $this->street2, $this->zipcode, $this->city] as $value) {
+            if (null !== $value && '' !== trim((string) $value)) {
+                return false;
+            }
+        }
+
+        return true;
+    }
 }

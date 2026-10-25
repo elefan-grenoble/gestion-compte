@@ -59,11 +59,11 @@ class Beneficiary
      * @var Address
      *              One Beneficiary has One Address
      *
-     * @ORM\OneToOne(targetEntity="Address", inversedBy="beneficiary", cascade={"persist", "remove"})
+     * @ORM\OneToOne(targetEntity="Address", inversedBy="beneficiary", cascade={"persist", "remove"}, orphanRemoval=true)
      *
      * @ORM\JoinColumn(name="address_id", referencedColumnName="id")
      *
-     * @Assert\NotNull
+     * The address is required or optional depending on ADDRESS_REQUIRED_FOR_MEMBERSHIP (see BeneficiaryType).
      *
      * @Assert\Valid
      */
