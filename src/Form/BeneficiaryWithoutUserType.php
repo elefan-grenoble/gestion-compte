@@ -12,9 +12,9 @@ class BeneficiaryWithoutUserType extends BeneficiaryType
     private $use_fly_and_fixed;
     private $fly_and_fixed_entity_flying;
 
-    public function __construct(bool $use_fly_and_fixed, string $fly_and_fixed_entity_flying, bool $address_required_for_membership, TokenStorageInterface $tokenStorage, ValidatorInterface $validator, BeneficiaryInitializationSubscriber $beneficiaryInitializationSubscriber)
+    public function __construct(bool $use_fly_and_fixed, string $fly_and_fixed_entity_flying, bool $address_required_for_membership, bool $hide_address_field, TokenStorageInterface $tokenStorage, ValidatorInterface $validator, BeneficiaryInitializationSubscriber $beneficiaryInitializationSubscriber)
     {
-        parent::__construct($use_fly_and_fixed, $fly_and_fixed_entity_flying, $address_required_for_membership, $tokenStorage, $validator, $beneficiaryInitializationSubscriber);
+        parent::__construct($use_fly_and_fixed, $fly_and_fixed_entity_flying, $address_required_for_membership, $hide_address_field, $tokenStorage, $validator, $beneficiaryInitializationSubscriber);
     }
 
     public function buildForm(FormBuilderInterface $builder, array $options)
