@@ -17,6 +17,7 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class BeneficiaryType extends AbstractType
@@ -25,16 +26,18 @@ class BeneficiaryType extends AbstractType
     private $fly_and_fixed_entity_flying;
     private $address_required_for_membership;
     private $hide_address_field;
+    private $phone_required_for_membership;
     private $tokenStorage;
     private $validator;
     private $beneficiaryInitializationSubscriber;
 
-    public function __construct(bool $use_fly_and_fixed, string $fly_and_fixed_entity_flying, bool $address_required_for_membership, bool $hide_address_field, TokenStorageInterface $tokenStorage, ValidatorInterface $validator, BeneficiaryInitializationSubscriber $beneficiaryInitializationSubscriber)
+    public function __construct(bool $use_fly_and_fixed, string $fly_and_fixed_entity_flying, bool $address_required_for_membership, bool $hide_address_field, bool $phone_required_for_membership, TokenStorageInterface $tokenStorage, ValidatorInterface $validator, BeneficiaryInitializationSubscriber $beneficiaryInitializationSubscriber)
     {
         $this->use_fly_and_fixed = $use_fly_and_fixed;
         $this->fly_and_fixed_entity_flying = $fly_and_fixed_entity_flying;
         $this->address_required_for_membership = $address_required_for_membership;
         $this->hide_address_field = $hide_address_field;
+        $this->phone_required_for_membership = $phone_required_for_membership;
         $this->tokenStorage = $tokenStorage;
         $this->validator = $validator;
         $this->beneficiaryInitializationSubscriber = $beneficiaryInitializationSubscriber;
@@ -64,6 +67,15 @@ class BeneficiaryType extends AbstractType
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user): void {
             $form = $event->getForm();
+            // The phone is only mandatory when registering a new beneficiary: existing ones can still be edited without it
+            $beneficiary = $event->getData();
+            if ($this->phone_required_for_membership && (!$beneficiary instanceof Beneficiary || null === $beneficiary->getId())) {
+                $form->add('phone', TextType::class, [
+                    'label' => 'Téléphone',
+                    'required' => true,
+                    'constraints' => [new NotBlank(['message' => 'Le téléphone du bénéficiaire est requis'])],
+                ]);
+            }
             if (is_object($user) && ($user->hasRole('ROLE_USER_MANAGER') || $user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN'))) {
                 if ($this->use_fly_and_fixed && $this->fly_and_fixed_entity_flying == 'Beneficiary') {
                     $form->add('flying', ChoiceType::class, [

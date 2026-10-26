@@ -137,6 +137,8 @@ parameters:
   oidc_formations_map: '%env(OIDC_FORMATIONS_MAP)%'
   oidc_commissions_claim: '%env(OIDC_COMMISSIONS_CLAIM)%'
   oidc_commissions_map: '%env(OIDC_COMMISSIONS_MAP)%'
+  phone_required_for_membership: '%env(default:phone_required_for_membership_default:bool:PHONE_REQUIRED_FOR_MEMBERSHIP)%'
+  phone_required_for_membership_default: true
   place_local_ip_address: '%env(PLACE_LOCAL_IP_ADDRESS)%'
   profile_display_period_position_free_log: '%env(bool:PROFILE_DISPLAY_PERIOD_POSITION_FREE_LOG)%'
   profile_display_shift_free_log: '%env(bool:PROFILE_DISPLAY_SHIFT_FREE_LOG)%'
@@ -548,6 +550,7 @@ services:
       $fly_and_fixed_entity_flying: '%fly_and_fixed_entity_flying%'
       $address_required_for_membership: '%address_required_for_membership%'
       $hide_address_field: '%hide_address_field%'
+      $phone_required_for_membership: '%phone_required_for_membership%'
 
   App\Form\BeneficiaryWithoutUserType:
     arguments:
@@ -555,6 +558,7 @@ services:
       $fly_and_fixed_entity_flying: '%fly_and_fixed_entity_flying%'
       $address_required_for_membership: '%address_required_for_membership%'
       $hide_address_field: '%hide_address_field%'
+      $phone_required_for_membership: '%phone_required_for_membership%'
 
 
 
