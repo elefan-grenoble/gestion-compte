@@ -40,7 +40,7 @@
 <div class="row">
     <div class="col s12">
         <i class="material-icons tiny">phone</i>
-        <span>{{ beneficiary.phone }}</span>
+        <span>{{ beneficiary.phone|to_phone_groups }}</span>
     </div>
     {% if phone_only is not defined %}
         <div class="col s12">

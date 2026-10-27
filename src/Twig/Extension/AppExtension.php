@@ -53,6 +53,7 @@ class AppExtension extends AbstractExtension
         return [
             new TwigFilter('markdown', [$this, 'markdown']),
             new TwigFilter('ellipsis', [$this, 'ellipsis']),
+            new TwigFilter('to_phone_groups', [$this, 'toPhoneGroups']),
             new TwigFilter('json_decode', [$this, 'jsonDecode']),
             new TwigFilter('email_encode', [$this, 'encodeText']),
             new TwigFilter('priority_to_color', [$this, 'priority_to_color']),
@@ -95,6 +96,25 @@ class AppExtension extends AbstractExtension
         }
 
         return substr($text, 0, $maxLen - strlen($ellipsis)) . $ellipsis;
+    }
+
+    //Affiche un numéro de téléphone français par groupes de 2 chiffres, sans points : 0607080910 => 06 07 08 09 10, +33607080910 => +33 6 07 08 09 10. Les autres formats (texte libre, autres pays) sont laissés tels quels
+    public function toPhoneGroups($phone)
+    {
+        $phone = (string) $phone;
+        if (!preg_match('/^\+?[\d\s.]+$/D', $phone)) {
+            return $phone;
+        }
+
+        $compact = preg_replace('/[\s.]/', '', $phone);
+        if (preg_match('/^0\d{9}$/', $compact)) {
+            return implode(' ', str_split($compact, 2));
+        }
+        if (preg_match('/^\+33(\d)(\d{8})$/', $compact, $matches)) {
+            return '+33 ' . $matches[1] . ' ' . implode(' ', str_split($matches[2], 2));
+        }
+
+        return $phone;
     }
 
     public function encodeText($text)
