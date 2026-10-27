@@ -24,11 +24,13 @@ class CardReaderController extends AbstractController
 {
     private $swipeCardLogging;
     private $swipeCardLoggingAnonymous;
+    private $shiftValidationAdvanceMinutes;
 
-    public function __construct(bool $swipeCardLogging, bool $swipeCardLoggingAnonymous)
+    public function __construct(bool $swipeCardLogging, bool $swipeCardLoggingAnonymous, int $shiftValidationAdvanceMinutes)
     {
         $this->swipeCardLogging = $swipeCardLogging;
         $this->swipeCardLoggingAnonymous = $swipeCardLoggingAnonymous;
+        $this->shiftValidationAdvanceMinutes = max(0, $shiftValidationAdvanceMinutes);
     }
 
     /**
@@ -85,8 +87,8 @@ class CardReaderController extends AbstractController
 
         // validate beneficiary ongoing shift(s)
         $now = new \DateTime('now');
-        $now_plus_ten = new \DateTime('now +10 minutes');
-        $ongoingShifts = $em->getRepository(Shift::class)->findShiftsForBeneficiaries(new ArrayCollection([$beneficiary]), null, null, $now_plus_ten, $now);
+        $now_plus_advance = new \DateTime(sprintf('now +%d minutes', $this->shiftValidationAdvanceMinutes));
+        $ongoingShifts = $em->getRepository(Shift::class)->findShiftsForBeneficiaries(new ArrayCollection([$beneficiary]), null, null, $now_plus_advance, $now);
         $ongoingShiftsValidated = 0;
         if ($ongoingShifts) {
             foreach ($ongoingShifts as $shift) {

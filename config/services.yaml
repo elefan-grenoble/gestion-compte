@@ -7,6 +7,8 @@ parameters:
   beneficiary_flying_icon: '%env(BENEFICIARY_FLYING_ICON)%'
   beneficiary_main_icon: '%env(BENEFICIARY_MAIN_ICON)%'
   beneficiary_new_icon: '%env(BENEFICIARY_NEW_ICON)%'
+  card_reader_shift_validation_advance_minutes: '%env(default:card_reader_shift_validation_advance_minutes_default:int:CARD_READER_SHIFT_VALIDATION_ADVANCE_MINUTES)%'
+  card_reader_shift_validation_advance_minutes_default: 15
   code_generation_enabled: '%env(bool:CODE_GENERATION_ENABLED)%'
   cycle_duration: '%env(CYCLE_DURATION)%'
   cycle_type: '%env(CYCLE_TYPE)%'
@@ -239,6 +241,7 @@ services:
     arguments:
       - '%swipe_card_logging%'
       - '%swipe_card_logging_anonymous%'
+      - '%card_reader_shift_validation_advance_minutes%'
   App\Controller\AmbassadorController:
     arguments:
       - "%time_after_which_members_are_late_with_shifts%"
