@@ -727,7 +727,7 @@ class ShiftServiceUnitTest extends TestCase
 
         if ($this->createService()->hasPreviousValidShifts($beneficiary)) {
             $this->markTestIncomplete(
-                'TC.4.2 open: ShiftService::hasPreviousValidShifts() counts a past shift that was not carried out '
+                'SHIFT-PREVIOUS-VALID open: ShiftService::hasPreviousValidShifts() counts a past shift that was not carried out '
                 . '(wasCarriedOut=false). Product decision needed before changing it.'
             );
         }
