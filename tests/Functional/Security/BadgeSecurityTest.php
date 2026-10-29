@@ -7,6 +7,7 @@ use App\Entity\Beneficiary;
 use App\Entity\Shift;
 use App\Entity\SwipeCard;
 use App\Entity\User;
+use App\Helper\QrCodePng;
 use App\Helper\SwipeCard as SwipeCardHelper;
 use App\Tests\Functional\FunctionalTestCase;
 use App\Tests\Support\Builder\BeneficiaryBuilder;
@@ -107,6 +108,27 @@ class BadgeSecurityTest extends FunctionalTestCase
     public function badgeImages(): array
     {
         return ['barcode' => ['br.png'], 'QR code' => ['qr.png']];
+    }
+
+    /**
+     * The QR code of a badge is a PNG of the badge link (C-BUG-7: the route
+     * called the endroid/qr-code 3 API while version 4 is installed, and
+     * crashed whoever asked).
+     */
+    public function testTheHolderDownloadsTheQrCodeOfTheirBadge(): void
+    {
+        static::createClient();
+        $holder = $this->aMember();
+        $card = $this->aBadge($holder->getBeneficiary());
+
+        $client = static::createAuthenticatedClient($holder);
+        $client->request('GET', sprintf('/sw/%s/qr.png', urlencode(self::encode($card->getCode()))));
+
+        $response = $client->getResponse();
+        $this->assertSame(200, $response->getStatusCode());
+        $this->assertSame('image/png', $response->headers->get('Content-Type'));
+        $this->assertStringStartsWith("\x89PNG\r\n\x1a\n", $response->getContent());
+        $this->assertSame([QrCodePng::SIZE, QrCodePng::SIZE], array_slice(getimagesizefromstring($response->getContent()), 0, 2));
     }
 
     /**
@@ -213,6 +235,23 @@ class BadgeSecurityTest extends FunctionalTestCase
         $forms = $crawler->filterXPath('//form[contains(@action, "/sw/")]');
         $this->assertGreaterThan(0, $forms->count());
         $this->assertSame($forms->count(), $crawler->filterXPath('//form[contains(@action, "/sw/")]//input[@name="_token"]')->count());
+    }
+
+    /**
+     * The "lost badge" modal of the profile page disables the badge
+     * (SWIPE-DISABLE-MODAL: it posted no beneficiary and answered 500).
+     */
+    public function testTheHolderDisablesTheirLostBadgeFromTheProfilePage(): void
+    {
+        static::createClient();
+        $holder = $this->aMember();
+        $card = $this->aBadge($holder->getBeneficiary());
+        $client = static::createAuthenticatedClient($holder);
+        $crawler = $client->request('GET', '/profile/');
+
+        $client->submit($crawler->filterXPath(sprintf('//div[@id="swipe_disable_%d"]//form', $card->getId()))->form(), [], self::REFERER);
+
+        $this->assertFalse($this->reloaded($card)->getEnable());
     }
 
     /**

@@ -731,7 +731,8 @@ class MembershipController extends AbstractController
 
         if ($code) {
             $email = $swipeCardHelper->vigenereDecode($code);
-            if ($email) {
+            // a malformed code decodes to anything, which the database refuses as an email
+            if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $a_beneficiary = $em->getRepository(AnonymousBeneficiary::class)->findOneBy(['email' => $email]);
             }
             if (!$a_beneficiary) {
@@ -862,7 +863,8 @@ class MembershipController extends AbstractController
         $a_beneficiary = null;
         if ($code) {
             $email = $swipeCardHelper->vigenereDecode($code);
-            if ($email) {
+            // a malformed code decodes to anything, which the database refuses as an email
+            if (filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $a_beneficiary = $em->getRepository(AnonymousBeneficiary::class)->findOneBy(['email' => $email]);
             }
             if (!$a_beneficiary) {

@@ -56,16 +56,7 @@ class BookingControllerTest extends FunctionalTestCase
         $member = static::persist(MembershipBuilder::aMembership()->registeredOn(new \DateTime('-2 years'))->build())->getMainBeneficiary();
         static::logIn($client, $member->getUser());
 
-        try {
-            $client->request('GET', '/booking/');
-        } catch (\Error $e) {
-            $this->markTestIncomplete('BOOKING-EXPIRED open: an expired member crashes the booking page (' . $e->getMessage() . '); a stray unary plus in front of $remainder on PHP 8.');
-        }
-
-        if (500 === $client->getResponse()->getStatusCode()) {
-            // PHP 7.4 turns the unary plus on a DateInterval into a notice, so an error page instead of a TypeError.
-            $this->markTestIncomplete('BOOKING-EXPIRED open: an expired member gets a 500 on the booking page (stray unary plus in front of $remainder).');
-        }
+        $client->request('GET', '/booking/');
 
         $this->assertTrue($client->getResponse()->isRedirect('/'));
         $this->assertStringContainsString('Oups, ton adhésion a expiré', static::flashes($client)['warning'][0] ?? '');

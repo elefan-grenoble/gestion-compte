@@ -19,6 +19,9 @@ class MembershipService
     protected $registration_duration;
     protected $registration_every_civil_year;
     protected $cycle_type;
+
+    /** @var int */
+    protected $cycle_days;
     protected $use_fly_and_fixed;
     protected $fly_and_fixed_entity_flying;
 
@@ -29,8 +32,28 @@ class MembershipService
         $this->registration_duration = $this->container->getParameter('registration_duration');
         $this->registration_every_civil_year = $this->container->getParameter('registration_every_civil_year');
         $this->cycle_type = $this->container->getParameter('cycle_type');
+        // cycles of weeks (abcd) always last 4 weeks
+        $this->cycle_days = $this->cycle_type === 'abcd' ? 28 : self::durationInDays($this->container->getParameter('cycle_duration'));
         $this->use_fly_and_fixed = $this->container->getParameter('use_fly_and_fixed');
         $this->fly_and_fixed_entity_flying = $this->container->getParameter('fly_and_fixed_entity_flying');
+    }
+
+    /**
+     * Number of days of a duration such as CYCLE_DURATION ("28 days", "4 weeks").
+     */
+    public static function durationInDays(string $duration): int
+    {
+        $start = new \DateTimeImmutable('2000-01-03');
+
+        return (int) $start->diff($start->modify('+' . $duration))->days;
+    }
+
+    /**
+     * Number of days of a cycle.
+     */
+    public function getCycleDurationInDays(): int
+    {
+        return $this->cycle_days;
     }
 
     /**
@@ -142,8 +165,8 @@ class MembershipService
                 $date = clone $firstShiftDate;
                 // Compute the number of elapsed cycles until today
                 $diff = $firstShiftDate->diff($now)->format('%r%a');
-                $currentCycleCount = floor($diff / 28);
-                $date->modify((($currentCycleCount > 0) ? '+' : '') . (28 * $currentCycleCount) . ' days');
+                $currentCycleCount = floor((int) $diff / $this->cycle_days);
+                $date->modify((($currentCycleCount > 0) ? '+' : '') . ($this->cycle_days * $currentCycleCount) . ' days');
             }
         }
         // Set time to 0h:0m:0s
@@ -151,8 +174,7 @@ class MembershipService
         // offset
         if ($cycleOffset != 0) {
             // Set date cycleOffset
-            // TODO should use cycle_duration instead of hardcoded 28
-            $date->modify((($cycleOffset > 0) ? '+' : '') . (28 * $cycleOffset) . ' days');
+            $date->modify((($cycleOffset > 0) ? '+' : '') . ($this->cycle_days * $cycleOffset) . ' days');
         }
 
         return $date;
@@ -168,7 +190,7 @@ class MembershipService
     public function getEndOfCycle(Membership $member, $cycleOffset = 0)
     {
         $date = clone $this->getStartOfCycle($member, $cycleOffset);
-        $date->modify('+27 days');
+        $date->modify('+' . ($this->cycle_days - 1) . ' days');
         $date->setTime(23, 59, 59);
 
         return $date;
@@ -181,7 +203,7 @@ class MembershipService
             if ($date <= $cycle_end) {
                 return $cycle;
             }
-            $cycle_end->modify('+28 days');
+            $cycle_end->modify('+' . $this->cycle_days . ' days');
         }
 
         return null;
