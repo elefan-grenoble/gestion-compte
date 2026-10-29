@@ -188,6 +188,17 @@ class DefaultController extends AbstractController
             return new Response('Successfully handled, but not validated payment.', Response::HTTP_OK);
         }
 
+        // le webhook reçoit les paiements de tous les formulaires de l'organisation (précommandes, dons...),
+        // seuls ceux du formulaire d'adhésion doivent être traités comme des adhésions
+        $membershipFormSlug = $this->getParameter('helloasso_campaign_slug');
+
+        // pré-filtre : évite l'appel à l'api helloasso quand la notification indique déjà un autre formulaire
+        // (la notification n'est pas authentifiée : ce n'est qu'un raccourci, la vérification fait foi plus bas)
+        $notificationFormSlug = $notification->data['order']['formSlug'] ?? null;
+        if ($membershipFormSlug && $notificationFormSlug && $notificationFormSlug !== $membershipFormSlug) {
+            return new Response('Successfully handled, but not a membership payment.', Response::HTTP_OK);
+        }
+
         // la notification devrait pouvoir être traitée directement, mais la signature permettant d'authentifier
         // les notifications ne sont disponibles que pour les partenaires pour le moment
         // https://dev.helloasso.com/docs/secure-webhook#signature-de-notification
@@ -196,6 +207,11 @@ class DefaultController extends AbstractController
             $payment = $helloassoClient->getPayment($notification->data['id']);
         } catch (ClientExceptionInterface $e) {
             return new Response($e->getMessage(), Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        // vérification sur les données de l'api, seules fiables
+        if ($membershipFormSlug && ($payment->order->formSlug ?? null) !== $membershipFormSlug) {
+            return new Response('Successfully handled, but not a membership payment.', Response::HTTP_OK);
         }
 
         $handler->savePayments([$payment]);
