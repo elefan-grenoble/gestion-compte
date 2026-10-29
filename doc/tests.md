@@ -157,13 +157,15 @@ est désactivée à dessein (voir §5, `@coversNothing`). Les classes de test po
 - **Identity map Doctrine** : une entité construite en mémoire garde ses collections
   d'origine dans l'EM du test. Appeler `entityManager()->clear()` avant la requête
   quand l'action parcourt ces collections.
-- **Cache de 5 s des cumuls de créneaux** (`ShiftRepository::findShiftsForBeneficiaries()`) :
-  deux réservations enchaînées voient un cumul périmé. Vider avec
-  `ShiftRepository::functionsResultCache()->clear()` entre les deux, ou attendre en E2E.
-  Ce comportement est lui-même un bug ouvert (SHIFT-QUOTA-CACHE).
-- **Pare-feu** : `main` (`^/`) est déclaré avant `oauth_token`, `oauth_authorize` et `api`
-  qui sont donc inopérants (I-SEC-14). Les tests d'accès à `/api` s'appuient sur
-  `access_control`, pas sur le pare-feu.
+- **Cache des cumuls de créneaux** (`ShiftRepository::findShiftsForBeneficiaries()`) : il
+  vit le temps d'une requête (il appartient au repository, donc à l'entity manager). Deux
+  requêtes du client de test, qui redémarre le noyau entre elles, ne partagent rien.
+  L'ancien cache fichier de 5 s, partagé entre utilisateurs, faussait deux réservations
+  enchaînées (SHIFT-QUOTA-CACHE, corrigé).
+- **Pare-feu** : `oauth_token` et `api` sont déclarés avant `main` (`^/`) : `/api` est sans
+  état et n'accepte qu'un jeton Bearer (anonyme ou session → 401, voir `ApiFirewallTest`).
+  `oauth_authorize`, déclaré après `main`, reste inopérant : le flux d'autorisation SSO
+  s'appuie sur la session de `main` (I-SEC-14).
 - **Variables d'environnement** lues à la construction du conteneur : les poser *avant* le
   premier démarrage du noyau du test, avec `withEnv()` (`ShiftScenarios::withEnv([...], $callable)`
   pour les tests HTTP, `CommandTestCase::withEnv($nom, $valeur)` pour les commandes), qui

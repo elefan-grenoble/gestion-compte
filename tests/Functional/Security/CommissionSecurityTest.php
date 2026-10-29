@@ -8,21 +8,18 @@ use App\Tests\Functional\FunctionalTestCase;
 use App\Tests\Support\Builder\BeneficiaryBuilder;
 use App\Tests\Support\Builder\MembershipBuilder;
 use App\Tests\Support\Builder\UserBuilder;
-use App\Tests\Support\Security\KnownOpenVulnerability;
 use Symfony\Bundle\FrameworkBundle\KernelBrowser;
 
 /**
  * I-SEC-5 (SEC.2-3): adding a member to a commission, or removing one, is
- * authorized by hand in the controller (super admin, or owner of the
- * commission) instead of by @Security or a voter, and the removal reads
+ * reserved to the super admin and the owners of the commission. The check
+ * was hand-written (it crashed without beneficiary) and the removal read
  * $_POST directly.
  *
  * @internal
  */
 class CommissionSecurityTest extends FunctionalTestCase
 {
-    use KnownOpenVulnerability;
-
     /**
      * The original symptom, a fatal error on "anon."->hasRole(), is gone
      * since the default-deny rule (C-SEC-2) sends anonymous visitors to the
@@ -62,8 +59,9 @@ class CommissionSecurityTest extends FunctionalTestCase
     }
 
     /**
-     * An account without a beneficiary (an admin account, say) crashes the
-     * hand-written check, which calls getBeneficiary()->getOwnedCommissions().
+     * An account without a beneficiary (an admin account, say) is refused
+     * (I-SEC-5: the hand-written check called getBeneficiary()->getOwnedCommissions()
+     * and crashed).
      *
      * @dataProvider membershipChanges
      */
@@ -74,17 +72,13 @@ class CommissionSecurityTest extends FunctionalTestCase
         $account = static::persist(UserBuilder::aUser()->withRoles('ROLE_ADMIN')->build());
 
         $client = static::createAuthenticatedClient($account);
-        $outcome = $this->send($client, sprintf('/commissions/%d/%s/', $commission->getId(), $change), []);
 
-        $this->assertSecureOrKnownOpen('I-SEC-5', 'the hand-written check crashes for an account without beneficiary', function () use ($outcome) {
-            $this->assertSame(403, $outcome);
-        });
+        $this->assertSame(403, $this->send($client, sprintf('/commissions/%d/%s/', $commission->getId(), $change), []));
     }
 
     /**
-     * The owner's removal reads $_POST, which only the front controller
-     * fills: the request the controller is given (here by the test client)
-     * is ignored.
+     * The owner's removal reads the request data (I-SEC-5: it read $_POST,
+     * which only the front controller fills).
      */
     public function testTheOwnerRemovesAMemberFromTheRequestData(): void
     {
@@ -94,12 +88,20 @@ class CommissionSecurityTest extends FunctionalTestCase
         $member = $this->aMemberOf($commission);
 
         $client = static::createAuthenticatedClient($owner->getUser());
-        $outcome = $this->send($client, sprintf('/commissions/%d/remove_beneficiary/', $commission->getId()), ['beneficiary' => $member->getId()]);
 
-        $this->assertSecureOrKnownOpen('I-SEC-5', 'remove_beneficiary reads $_POST instead of the Request', function () use ($outcome, $member, $commission) {
-            $this->assertSame(302, $outcome);
-            $this->assertFalse($this->isStillIn($member, $commission));
-        });
+        $this->assertSame(302, $this->send($client, sprintf('/commissions/%d/remove_beneficiary/', $commission->getId()), ['beneficiary' => $member->getId()]));
+        $this->assertFalse($this->isStillIn($member, $commission));
+    }
+
+    public function testRemovingAnUnknownMemberAnswers404(): void
+    {
+        static::createClient();
+        $commission = $this->aCommission();
+        $owner = $this->anOwnerOf($commission);
+
+        $client = static::createAuthenticatedClient($owner->getUser());
+
+        $this->assertSame(404, $this->send($client, sprintf('/commissions/%d/remove_beneficiary/', $commission->getId()), ['beneficiary' => 0]));
     }
 
     /**
