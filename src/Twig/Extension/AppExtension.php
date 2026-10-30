@@ -98,8 +98,12 @@ class AppExtension extends AbstractExtension
         return substr($text, 0, $maxLen - strlen($ellipsis)) . $ellipsis;
     }
 
-    //Affiche un code par groupes de 3 chiffres (123456789 => 123 456 789). Les codes courts (ou non numériques) sont laissés tels quels
-    public function toCodeGroups($code)
+    /**
+     * Affiche un code par groupes de 3 chiffres (123456789 => 123 456 789). Les codes courts (ou non numériques) sont laissés tels quels.
+     *
+     * @param null|int|string $code
+     */
+    public function toCodeGroups($code): string
     {
         $code = (string) $code;
         if (strlen($code) <= 4 || !ctype_digit($code)) {
