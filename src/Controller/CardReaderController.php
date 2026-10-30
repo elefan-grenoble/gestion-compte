@@ -24,7 +24,7 @@ class CardReaderController extends AbstractController
 {
     private $swipeCardLogging;
     private $swipeCardLoggingAnonymous;
-    private $shiftValidationAdvanceMinutes;
+    private int $shiftValidationAdvanceMinutes;
 
     public function __construct(bool $swipeCardLogging, bool $swipeCardLoggingAnonymous, int $shiftValidationAdvanceMinutes)
     {
