@@ -30,7 +30,7 @@ class AppExtensionTest extends TestCase
     /**
      * @dataProvider phoneProvider
      */
-    public function testToPhoneGroups($phone, string $expected): void
+    public function testToPhoneGroups(?string $phone, string $expected): void
     {
         $this->assertSame($expected, $this->createExtension()->toPhoneGroups($phone));
     }
