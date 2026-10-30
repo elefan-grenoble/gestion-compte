@@ -8511,7 +8511,7 @@ parameters:
 		-
 			message: '#^If condition is always true\.$#'
 			identifier: if.alwaysTrue
-			count: 4
+			count: 3
 			path: src/Security/KeycloakAuthenticator.php
 
 		-
@@ -8559,12 +8559,6 @@ parameters:
 		-
 			message: '#^Method App\\Security\\KeycloakAuthenticator\:\:getKeycloakUserAvailableKeys\(\) has parameter \$keycloakUser with no type specified\.$#'
 			identifier: missingType.parameter
-			count: 1
-			path: src/Security/KeycloakAuthenticator.php
-
-		-
-			message: '#^Negated boolean expression is always false\.$#'
-			identifier: booleanNot.alwaysFalse
 			count: 1
 			path: src/Security/KeycloakAuthenticator.php
 
