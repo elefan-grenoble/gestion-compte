@@ -26,7 +26,7 @@ class BeneficiaryType extends AbstractType
     private $fly_and_fixed_entity_flying;
     private bool $address_required_for_membership;
     private bool $hide_address_field;
-    private $phone_required_for_membership;
+    private bool $phone_required_for_membership;
     private $tokenStorage;
     private $validator;
     private $beneficiaryInitializationSubscriber;
@@ -69,7 +69,7 @@ class BeneficiaryType extends AbstractType
             $form = $event->getForm();
             // The phone is only mandatory when registering a new beneficiary: existing ones can still be edited without it
             $beneficiary = $event->getData();
-            if ($this->phone_required_for_membership && (!$beneficiary instanceof Beneficiary || null === $beneficiary->getId())) {
+            if ($this->phone_required_for_membership && (!$beneficiary instanceof Beneficiary || !$beneficiary->getId())) {
                 $form->add('phone', TextType::class, [
                     'label' => 'Téléphone',
                     'required' => true,
