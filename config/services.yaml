@@ -1,6 +1,8 @@
 # Learn more about services, parameters and containers at
 # https://symfony.com/doc/current/service_container.html
 parameters:
+  address_required_for_membership: '%env(default:address_required_for_membership_default:bool:ADDRESS_REQUIRED_FOR_MEMBERSHIP)%'
+  address_required_for_membership_default: false
   admin_member_display_period_position_free_log: '%env(bool:ADMIN_MEMBER_DISPLAY_PERIOD_POSITION_FREE_LOG)%'
   admin_member_display_shift_free_log: '%env(bool:ADMIN_MEMBER_DISPLAY_SHIFT_FREE_LOG)%'
   allow_extra_shifts: '%env(bool:ALLOW_EXTRA_SHIFTS)%'
@@ -63,6 +65,8 @@ parameters:
   helloasso_api_base_url: '%env(default::HELLOASSO_API_BASE_URL)%'
   helloasso_api_auth_url: '%env(default::HELLOASSO_API_AUTH_URL)%'
 
+  hide_address_field: '%env(default:hide_address_field_default:bool:HIDE_ADDRESS_FIELD)%'
+  hide_address_field_default: true
   igloohome_client_id: '%env(default::IGLOOHOME_CLIENT_ID)%'
   igloohome_client_secret: '%env(default::IGLOOHOME_CLIENT_SECRET)%'
   igloohome_api_auth_url: '%env(default::IGLOOHOME_API_AUTH_URL)%'
@@ -133,6 +137,8 @@ parameters:
   oidc_formations_map: '%env(OIDC_FORMATIONS_MAP)%'
   oidc_commissions_claim: '%env(OIDC_COMMISSIONS_CLAIM)%'
   oidc_commissions_map: '%env(OIDC_COMMISSIONS_MAP)%'
+  phone_required_for_membership: '%env(default:phone_required_for_membership_default:bool:PHONE_REQUIRED_FOR_MEMBERSHIP)%'
+  phone_required_for_membership_default: true
   place_local_ip_address: '%env(PLACE_LOCAL_IP_ADDRESS)%'
   profile_display_period_position_free_log: '%env(bool:PROFILE_DISPLAY_PERIOD_POSITION_FREE_LOG)%'
   profile_display_shift_free_log: '%env(bool:PROFILE_DISPLAY_SHIFT_FREE_LOG)%'
@@ -542,11 +548,17 @@ services:
     arguments:
       $use_fly_and_fixed: '%use_fly_and_fixed%'
       $fly_and_fixed_entity_flying: '%fly_and_fixed_entity_flying%'
+      $address_required_for_membership: '%address_required_for_membership%'
+      $hide_address_field: '%hide_address_field%'
+      $phone_required_for_membership: '%phone_required_for_membership%'
 
   App\Form\BeneficiaryWithoutUserType:
     arguments:
       $use_fly_and_fixed: '%use_fly_and_fixed%'
       $fly_and_fixed_entity_flying: '%fly_and_fixed_entity_flying%'
+      $address_required_for_membership: '%address_required_for_membership%'
+      $hide_address_field: '%hide_address_field%'
+      $phone_required_for_membership: '%phone_required_for_membership%'
 
 
 

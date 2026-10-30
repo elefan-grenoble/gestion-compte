@@ -17,20 +17,27 @@ use Symfony\Component\Form\FormEvent;
 use Symfony\Component\Form\FormEvents;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Security\Core\Authentication\Token\Storage\TokenStorageInterface;
+use Symfony\Component\Validator\Constraints\NotBlank;
 use Symfony\Component\Validator\Validator\ValidatorInterface;
 
 class BeneficiaryType extends AbstractType
 {
     private $use_fly_and_fixed;
     private $fly_and_fixed_entity_flying;
+    private bool $address_required_for_membership;
+    private bool $hide_address_field;
+    private bool $phone_required_for_membership;
     private $tokenStorage;
     private $validator;
     private $beneficiaryInitializationSubscriber;
 
-    public function __construct(bool $use_fly_and_fixed, string $fly_and_fixed_entity_flying, TokenStorageInterface $tokenStorage, ValidatorInterface $validator, BeneficiaryInitializationSubscriber $beneficiaryInitializationSubscriber)
+    public function __construct(bool $use_fly_and_fixed, string $fly_and_fixed_entity_flying, bool $address_required_for_membership, bool $hide_address_field, bool $phone_required_for_membership, TokenStorageInterface $tokenStorage, ValidatorInterface $validator, BeneficiaryInitializationSubscriber $beneficiaryInitializationSubscriber)
     {
         $this->use_fly_and_fixed = $use_fly_and_fixed;
         $this->fly_and_fixed_entity_flying = $fly_and_fixed_entity_flying;
+        $this->address_required_for_membership = $address_required_for_membership;
+        $this->hide_address_field = $hide_address_field;
+        $this->phone_required_for_membership = $phone_required_for_membership;
         $this->tokenStorage = $tokenStorage;
         $this->validator = $validator;
         $this->beneficiaryInitializationSubscriber = $beneficiaryInitializationSubscriber;
@@ -51,11 +58,24 @@ class BeneficiaryType extends AbstractType
             ->add('lastname', TextType::class, ['label' => 'Nom de famille'])
             ->add('firstname', TextType::class, ['label' => 'Prénom'])
             ->add('phone', TextType::class, ['label' => 'Téléphone', 'required' => false])
-            ->add('address', AddressType::class, ['label' => false])
         ;
+
+        // Hiding the field has no effect while the address is required: it must still be filled in
+        if ($this->address_required_for_membership || !$this->hide_address_field) {
+            $builder->add('address', AddressType::class, ['label' => false, 'required' => $this->address_required_for_membership]);
+        }
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user): void {
             $form = $event->getForm();
+            // The phone is only mandatory when registering a new beneficiary: existing ones can still be edited without it
+            $beneficiary = $event->getData();
+            if ($this->phone_required_for_membership && (!$beneficiary instanceof Beneficiary || !$beneficiary->getId())) {
+                $form->add('phone', TextType::class, [
+                    'label' => 'Téléphone',
+                    'required' => true,
+                    'constraints' => [new NotBlank(['message' => 'Le téléphone du bénéficiaire est requis'])],
+                ]);
+            }
             if (is_object($user) && ($user->hasRole('ROLE_USER_MANAGER') || $user->hasRole('ROLE_ADMIN') || $user->hasRole('ROLE_SUPER_ADMIN'))) {
                 if ($this->use_fly_and_fixed && $this->fly_and_fixed_entity_flying == 'Beneficiary') {
                     $form->add('flying', ChoiceType::class, [
@@ -107,6 +127,16 @@ class BeneficiaryType extends AbstractType
                 ]);
             }
         });
+
+        if (!$this->hide_address_field && !$this->address_required_for_membership) {
+            // An address left completely blank means "no address" (a partially filled one is still rejected by validation)
+            $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event): void {
+                $beneficiary = $event->getData();
+                if ($beneficiary instanceof Beneficiary && $beneficiary->getAddress() && $beneficiary->getAddress()->isBlank()) {
+                    $beneficiary->setAddress(null);
+                }
+            });
+        }
 
         $builder->addEventSubscriber($this->beneficiaryInitializationSubscriber);
     }
