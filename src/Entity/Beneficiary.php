@@ -694,7 +694,7 @@ class Beneficiary
     }
 
     /**
-     * @return Address
+     * @return null|Address
      */
     public function getAddress()
     {
