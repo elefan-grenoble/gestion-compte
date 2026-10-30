@@ -98,8 +98,12 @@ class AppExtension extends AbstractExtension
         return substr($text, 0, $maxLen - strlen($ellipsis)) . $ellipsis;
     }
 
-    //Affiche un numéro de téléphone français par groupes de 2 chiffres, sans points : 0607080910 => 06 07 08 09 10, +33607080910 => +33 6 07 08 09 10. Les autres formats (texte libre, autres pays) sont laissés tels quels
-    public function toPhoneGroups($phone)
+    /**
+     * Affiche un numéro de téléphone français par groupes de 2 chiffres, sans points : 0607080910 => 06 07 08 09 10, +33607080910 => +33 6 07 08 09 10. Les autres formats (texte libre, autres pays) sont laissés tels quels.
+     *
+     * @param null|string $phone
+     */
+    public function toPhoneGroups($phone): string
     {
         $phone = (string) $phone;
         if (!preg_match('/^\+?[\d\s.]+$/D', $phone)) {
