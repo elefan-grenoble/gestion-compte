@@ -198,7 +198,7 @@ class Address
     public function isBlank(): bool
     {
         foreach ([$this->street1, $this->street2, $this->zipcode, $this->city] as $value) {
-            if (null !== $value && '' !== trim((string) $value)) {
+            if ('' !== trim((string) $value)) {
                 return false;
             }
         }

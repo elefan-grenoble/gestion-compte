@@ -24,8 +24,8 @@ class BeneficiaryType extends AbstractType
 {
     private $use_fly_and_fixed;
     private $fly_and_fixed_entity_flying;
-    private $address_required_for_membership;
-    private $hide_address_field;
+    private bool $address_required_for_membership;
+    private bool $hide_address_field;
     private $phone_required_for_membership;
     private $tokenStorage;
     private $validator;
