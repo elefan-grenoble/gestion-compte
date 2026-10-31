@@ -28,7 +28,7 @@
                         {% if is_granted("view",c) and c != code %}
                             <div class="card-panel">
                                 <h4>Ancien code</h4>
-                                <h5><i class="material-icons left">vpn_key</i>{{ c.value }}</h5>
+                                <h5><i class="material-icons left">vpn_key</i>{{ c.value | to_code_groups }}</h5>
                                 entré à {{ c.createdAt | date('H:m:i') }} le {{ c.createdAt | date_fr_long }} par {{ c.getRegistrar }}
                             </div>
                         {% elseif c != code %}
@@ -53,7 +53,7 @@
             <div class="col s6{% if old_codes | length == 1 and old_codes | first == code %} push-s3{% endif %}">
                 <div class="card-panel green lighten-5">
                     <h4>Mon nouveau code</h4>
-                    <h5><i class="material-icons left">vpn_key</i>{{ code.value }}</h5>
+                    <h5><i class="material-icons left">vpn_key</i>{{ code.value | to_code_groups }}</h5>
                     généré par mes soins le {{ code.createdAt | date_fr_long }} à {{ code.createdAt | date('H:m:i') }}
                 </div>
             </div>

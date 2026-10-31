@@ -53,6 +53,7 @@ class AppExtension extends AbstractExtension
         return [
             new TwigFilter('markdown', [$this, 'markdown']),
             new TwigFilter('ellipsis', [$this, 'ellipsis']),
+            new TwigFilter('to_code_groups', [$this, 'toCodeGroups']),
             new TwigFilter('json_decode', [$this, 'jsonDecode']),
             new TwigFilter('email_encode', [$this, 'encodeText']),
             new TwigFilter('priority_to_color', [$this, 'priority_to_color']),
@@ -95,6 +96,21 @@ class AppExtension extends AbstractExtension
         }
 
         return substr($text, 0, $maxLen - strlen($ellipsis)) . $ellipsis;
+    }
+
+    /**
+     * Affiche un code par groupes de 3 chiffres (123456789 => 123 456 789). Les codes courts (ou non numériques) sont laissés tels quels.
+     *
+     * @param null|int|string $code
+     */
+    public function toCodeGroups($code): string
+    {
+        $code = (string) $code;
+        if (strlen($code) <= 4 || !ctype_digit($code)) {
+            return $code;
+        }
+
+        return trim(chunk_split($code, 3, ' '));
     }
 
     public function encodeText($text)
