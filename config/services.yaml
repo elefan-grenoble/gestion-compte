@@ -71,12 +71,10 @@ parameters:
   send_email_copy_to_admin_for_booked_shift: '%env(default:send_email_copy_to_admin_for_booked_shift_default:bool:SEND_EMAIL_COPY_TO_ADMIN_FOR_BOOKED_SHIFT)%'
   send_email_copy_to_admin_for_booked_shift_default: true
 
-  remember_me_lifetime: '%env(default:remember_me_lifetime_default:int:REMEMBER_ME_LIFETIME)%'
-  remember_me_lifetime_default: 2592000
-  session_cookie_lifetime: '%env(default:session_cookie_lifetime_default:int:SESSION_COOKIE_LIFETIME)%'
-  session_cookie_lifetime_default: 0
-  session_gc_maxlifetime: '%env(default:session_gc_maxlifetime_default:int:SESSION_GC_MAXLIFETIME)%'
-  session_gc_maxlifetime_default: 3600
+  # Valeurs par défaut des variables d'environnement lues par config/packages/{framework,security}.yaml
+  env(REMEMBER_ME_LIFETIME): '2592000'
+  env(SESSION_COOKIE_LIFETIME): '0'
+  env(SESSION_GC_MAXLIFETIME): '3600'
 
   images_tmp_dir: '%kernel.project_dir%/web/tmp'
   locale: fr_FR.UTF8
