@@ -71,6 +71,11 @@ parameters:
   send_email_copy_to_admin_for_booked_shift: '%env(default:send_email_copy_to_admin_for_booked_shift_default:bool:SEND_EMAIL_COPY_TO_ADMIN_FOR_BOOKED_SHIFT)%'
   send_email_copy_to_admin_for_booked_shift_default: true
 
+  # Valeurs par défaut des variables d'environnement lues par config/packages/{framework,security}.yaml
+  env(REMEMBER_ME_LIFETIME): '2592000'
+  env(SESSION_COOKIE_LIFETIME): '0'
+  env(SESSION_GC_MAXLIFETIME): '3600'
+
   images_tmp_dir: '%kernel.project_dir%/web/tmp'
   locale: fr_FR.UTF8
   local_currency_name: '%env(LOCAL_CURRENCY_NAME)%'
