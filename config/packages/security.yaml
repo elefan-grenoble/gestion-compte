@@ -27,7 +27,7 @@ security:
       anonymous:    true
       remember_me:
         secret: '%env(APP_SECRET)%'
-        lifetime: '%remember_me_lifetime%'
+        lifetime: '%env(int:REMEMBER_ME_LIFETIME)%'
         path: /
       switch_user:
         role: ROLE_ADMIN
@@ -49,7 +49,7 @@ security:
         login_path: fos_user_security_login
       remember_me:
         secret: '%env(APP_SECRET)%'
-        lifetime: '%remember_me_lifetime%'
+        lifetime: '%env(int:REMEMBER_ME_LIFETIME)%'
         path: /
       anonymous: true
     api:
