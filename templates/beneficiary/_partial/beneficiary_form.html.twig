@@ -37,6 +37,7 @@
             {{ form_label(form.phone) }}
         </div>
     </div>
+    {% if form.children.address is defined %}
     <div class="input-field street1 col s6">
         <div class="errors">
             {{ form_errors(form.address.street1) }}
@@ -73,6 +74,7 @@
             {{ form_label(form.address.city) }}
         </div>
     </div>
+    {% endif %}
     <div class="checkboxes col s12">
         {% if form.children.flying is defined %}
             {{ form_label(form.flying) }}

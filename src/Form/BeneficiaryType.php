@@ -23,14 +23,18 @@ class BeneficiaryType extends AbstractType
 {
     private $use_fly_and_fixed;
     private $fly_and_fixed_entity_flying;
+    private bool $address_required_for_membership;
+    private bool $hide_address_field;
     private $tokenStorage;
     private $validator;
     private $beneficiaryInitializationSubscriber;
 
-    public function __construct(bool $use_fly_and_fixed, string $fly_and_fixed_entity_flying, TokenStorageInterface $tokenStorage, ValidatorInterface $validator, BeneficiaryInitializationSubscriber $beneficiaryInitializationSubscriber)
+    public function __construct(bool $use_fly_and_fixed, string $fly_and_fixed_entity_flying, bool $address_required_for_membership, bool $hide_address_field, TokenStorageInterface $tokenStorage, ValidatorInterface $validator, BeneficiaryInitializationSubscriber $beneficiaryInitializationSubscriber)
     {
         $this->use_fly_and_fixed = $use_fly_and_fixed;
         $this->fly_and_fixed_entity_flying = $fly_and_fixed_entity_flying;
+        $this->address_required_for_membership = $address_required_for_membership;
+        $this->hide_address_field = $hide_address_field;
         $this->tokenStorage = $tokenStorage;
         $this->validator = $validator;
         $this->beneficiaryInitializationSubscriber = $beneficiaryInitializationSubscriber;
@@ -51,8 +55,12 @@ class BeneficiaryType extends AbstractType
             ->add('lastname', TextType::class, ['label' => 'Nom de famille'])
             ->add('firstname', TextType::class, ['label' => 'Prénom'])
             ->add('phone', TextType::class, ['label' => 'Téléphone', 'required' => false])
-            ->add('address', AddressType::class, ['label' => false])
         ;
+
+        // Hiding the field has no effect while the address is required: it must still be filled in
+        if ($this->address_required_for_membership || !$this->hide_address_field) {
+            $builder->add('address', AddressType::class, ['label' => false, 'required' => $this->address_required_for_membership]);
+        }
 
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event) use ($user): void {
             $form = $event->getForm();
@@ -107,6 +115,16 @@ class BeneficiaryType extends AbstractType
                 ]);
             }
         });
+
+        if (!$this->hide_address_field && !$this->address_required_for_membership) {
+            // An address left completely blank means "no address" (a partially filled one is still rejected by validation)
+            $builder->addEventListener(FormEvents::SUBMIT, function (FormEvent $event): void {
+                $beneficiary = $event->getData();
+                if ($beneficiary instanceof Beneficiary && $beneficiary->getAddress() && $beneficiary->getAddress()->isBlank()) {
+                    $beneficiary->setAddress(null);
+                }
+            });
+        }
 
         $builder->addEventSubscriber($this->beneficiaryInitializationSubscriber);
     }

@@ -47,7 +47,7 @@
             <i class="material-icons tiny">mail</i>
             <span>{{ beneficiary.email }}</span>
         </div>
-        {% if beneficiary.address %}
+        {% if beneficiary.address and not hide_address_field %}
             <div class="col s12">
                 <i class="material-icons tiny">location_on</i>
                 {{ beneficiary.address.street1 }}
