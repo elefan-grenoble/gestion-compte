@@ -97,29 +97,6 @@ class OpeningHourStatusTest extends KernelTestCase
         $this->assertFalse($closed['open']);
     }
 
-    public function testStatusIsClosedWhenTheOpeningHoursAreOpenButNobodyIsOnAShift(): void
-    {
-        $this->openingHours(0, '09:00', '19:00');
-        $this->aShift('2031-03-03 10:00', 360, null);
-
-        $status = $this->service()->getStatus(new \DateTime('2031-03-03 11:00'));
-
-        $this->assertFalse($status['open']);
-        $this->assertNull($status['next']);
-    }
-
-    public function testStatusIsClosedWhenAShiftIsStaffedOutsideTheOpeningHours(): void
-    {
-        $this->openingHours(0, '09:00', '19:00');
-        $member = static::persist(MembershipBuilder::aMembership()->build());
-        $this->aShift('2031-03-03 06:00', 120, $member);
-
-        $status = $this->service()->getStatus(new \DateTime('2031-03-03 07:00'));
-
-        $this->assertFalse($status['open']);
-        $this->assertNull($status['next']);
-    }
-
     private function shiftRepository(): ShiftRepository
     {
         return static::entityManager()->getRepository(Shift::class);

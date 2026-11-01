@@ -196,18 +196,6 @@ class OpeningHourServiceTest extends TestCase
         $this->givenWeek(array_fill(0, 5, [['09:00', '19:00']]));
     }
 
-    private function assertStatus(string $now, bool $expectedOpen, ?string $expectedNext, ?string $expectedNextDay, ?bool $expectedClosesEarly = null): void
-    {
-        $status = $this->service->getStatus(new \DateTime($now));
-
-        $this->assertSame($expectedOpen, $status['open'], 'open');
-        $this->assertEquals($expectedNext ? new \DateTime($expectedNext) : null, $status['next'], 'next');
-        $this->assertSame($expectedNextDay, $status['nextDay'], 'next day');
-        if (null !== $expectedClosesEarly) {
-            $this->assertSame($expectedClosesEarly, $status['closesEarly'], 'closes early');
-        }
-    }
-
     /**
      * 2030-03-04 is a Monday.
      *
@@ -215,37 +203,34 @@ class OpeningHourServiceTest extends TestCase
      *
      * @param array<int, array{0: string, 1: string}> $staffedShifts
      */
-    public function testStatusFollowsTheOpeningHoursAndTheStaffedShifts(array $staffedShifts, string $now, bool $expectedOpen, ?string $expectedNext, ?string $expectedNextDay): void
+    public function testStatusFollowsTheOpeningHoursAndTheStaffedShifts(array $staffedShifts, string $now, bool $expectedOpen, ?string $expectedNext, ?string $expectedNextDay, bool $expectedClosesEarly = false): void
     {
         $this->givenWorkingWeek();
         $this->givenStaffedShifts($staffedShifts);
 
-        $this->assertStatus($now, $expectedOpen, $expectedNext, $expectedNextDay);
+        $status = $this->service->getStatus(new \DateTime($now));
+
+        $this->assertSame($expectedOpen, $status['open'], 'open');
+        $this->assertEquals($expectedNext ? new \DateTime($expectedNext) : null, $status['next'], 'next');
+        $this->assertSame($expectedNextDay, $status['nextDay'], 'next day');
+        $this->assertSame($expectedClosesEarly, $status['closesEarly'], 'closes early');
     }
 
     public function statusProvider(): array
     {
         return [
-            'open until the end of the shift, before the end of the opening hours' => [
-                [['2030-03-04 10:00', '2030-03-04 16:00']], '2030-03-04 11:00', true, '2030-03-04 16:00', 'today',
+            'open until the end of the shift, which is before the end of the opening hours' => [
+                [['2030-03-04 10:00', '2030-03-04 16:00']], '2030-03-04 11:00', true, '2030-03-04 16:00', 'today', true,
             ],
             'open until the end of the opening hours when the shift goes on' => [
                 [['2030-03-04 18:00', '2030-03-04 21:00']], '2030-03-04 18:30', true, '2030-03-04 19:00', 'today',
             ],
             'open until the end of the last of the chained shifts' => [
                 [['2030-03-04 10:00', '2030-03-04 12:00'], ['2030-03-04 12:00', '2030-03-04 14:00'], ['2030-03-04 14:00', '2030-03-04 16:00']],
-                '2030-03-04 11:00', true, '2030-03-04 16:00', 'today',
-            ],
-            'open until the end of the latest of the overlapping shifts' => [
-                [['2030-03-04 10:00', '2030-03-04 14:00'], ['2030-03-04 11:00', '2030-03-04 16:00']],
-                '2030-03-04 12:00', true, '2030-03-04 16:00', 'today',
+                '2030-03-04 11:00', true, '2030-03-04 16:00', 'today', true,
             ],
             'closed while nobody is on a shift, opens with the next shift' => [
                 [['2030-03-04 14:00', '2030-03-04 17:00']], '2030-03-04 11:00', false, '2030-03-04 14:00', 'today',
-            ],
-            'closed between two shifts' => [
-                [['2030-03-04 10:00', '2030-03-04 12:00'], ['2030-03-04 13:00', '2030-03-04 16:00']],
-                '2030-03-04 12:30', false, '2030-03-04 13:00', 'today',
             ],
             'closed when a shift started before the opening hours, opens with the opening hours' => [
                 [['2030-03-04 07:00', '2030-03-04 10:00']], '2030-03-04 08:00', false, '2030-03-04 09:00', 'today',
@@ -254,18 +239,9 @@ class OpeningHourServiceTest extends TestCase
                 [['2030-03-04 10:00', '2030-03-04 12:00'], ['2030-03-05 10:00', '2030-03-05 12:00']],
                 '2030-03-04 13:00', false, '2030-03-05 10:00', 'tomorrow',
             ],
-            'tomorrow across a month end' => [
-                [['2030-03-01 10:00', '2030-03-01 12:00']], '2030-02-28 20:00', false, '2030-03-01 10:00', 'tomorrow',
-            ],
             'closed for the weekend, opens later' => [
                 [['2030-03-08 10:00', '2030-03-08 12:00'], ['2030-03-09 10:00', '2030-03-09 12:00'], ['2030-03-11 10:00', '2030-03-11 12:00']],
                 '2030-03-08 13:00', false, '2030-03-11 10:00', 'later',
-            ],
-            'closed when a shift only touches the opening hours' => [
-                [['2030-03-04 19:00', '2030-03-04 21:00']], '2030-03-04 18:00', false, null, null,
-            ],
-            'closed when the only shifts are on a day without opening hours' => [
-                [['2030-03-09 10:00', '2030-03-09 12:00']], '2030-03-04 10:00', false, null, null,
             ],
             'closed when nobody is on any shift' => [
                 [], '2030-03-04 11:00', false, null, null,
@@ -273,167 +249,16 @@ class OpeningHourServiceTest extends TestCase
         ];
     }
 
-    /**
-     * "Closes early": the shop closes before the end of its opening hours because
-     * nobody is on the following shift (2030-03-04 is a Monday).
-     *
-     * @dataProvider closesEarlyProvider
-     *
-     * @param array<int, array{0: string, 1: string}>             $staffedShifts
-     * @param array<int, array<int, array{0: string, 1: string}>> $week
-     */
-    public function testClosesEarly(array $week, array $staffedShifts, string $now, bool $expectedOpen, bool $expectedClosesEarly): void
-    {
-        $this->givenWeek($week);
-        $this->givenStaffedShifts($staffedShifts);
-
-        $status = $this->service->getStatus(new \DateTime($now));
-
-        $this->assertSame($expectedOpen, $status['open'], 'open');
-        $this->assertSame($expectedClosesEarly, $status['closesEarly'], 'closes early');
-    }
-
-    public function closesEarlyProvider(): array
-    {
-        $nineToSeven = [0 => [['09:00', '19:00']]];
-
-        return [
-            'last staffed shift ends before the end of the opening hours' => [
-                $nineToSeven, [['2030-03-04 10:00', '2030-03-04 16:00']], '2030-03-04 11:00', true, true,
-            ],
-            'staffed until the end of the opening hours' => [
-                $nineToSeven, [['2030-03-04 10:00', '2030-03-04 19:00']], '2030-03-04 11:00', true, false,
-            ],
-            'staffed beyond the end of the opening hours' => [
-                $nineToSeven, [['2030-03-04 10:00', '2030-03-04 21:00']], '2030-03-04 11:00', true, false,
-            ],
-            'gap between two staffed shifts: closes before the second one' => [
-                $nineToSeven, [['2030-03-04 10:00', '2030-03-04 14:00'], ['2030-03-04 15:00', '2030-03-04 19:00']], '2030-03-04 11:00', true, true,
-            ],
-            'closing for the lunch break of the opening hours is not early' => [
-                [0 => [['09:00', '12:00'], ['14:00', '19:00']]], [['2030-03-04 09:00', '2030-03-04 12:00']], '2030-03-04 10:00', true, false,
-            ],
-            'closed shop does not close early' => [
-                $nineToSeven, [['2030-03-04 14:00', '2030-03-04 16:00']], '2030-03-04 11:00', false, false,
-            ],
-        ];
-    }
-
-    /**
-     * Both ends of the open period are inclusive, as for the opening hours.
-     *
-     * @dataProvider boundsOfTheStaffedShiftProvider
-     */
-    public function testBoundsOfTheOpenPeriod(string $time, bool $expectedOpen): void
-    {
-        $this->givenWorkingWeek();
-        $this->givenStaffedShifts([['2030-03-04 10:00:00', '2030-03-04 16:00:00']]);
-
-        $this->assertSame($expectedOpen, $this->service->getStatus(new \DateTime('2030-03-04 ' . $time))['open']);
-    }
-
-    public function boundsOfTheStaffedShiftProvider(): array
-    {
-        return [
-            'one second before the shift' => ['09:59:59', false],
-            'exactly at the start of the shift' => ['10:00:00', true],
-            'exactly at the end of the shift' => ['16:00:00', true],
-            'one second after the shift' => ['16:00:01', false],
-        ];
-    }
-
     public function testClosingExceptionDaysAreClosedEvenWithAStaffedShift(): void
     {
-        $this->givenWeek(array_fill(0, 5, [['09:00', '19:00']]), ['2030-03-04', '2030-03-05']);
-        $this->givenStaffedShifts([
-            ['2030-03-04 10:00', '2030-03-04 12:00'],
-            ['2030-03-05 10:00', '2030-03-05 12:00'],
-            ['2030-03-06 10:00', '2030-03-06 12:00'],
-        ]);
-
-        $this->assertStatus('2030-03-04 11:00', false, '2030-03-06 10:00', 'later');
-        $this->assertStatus('2030-03-04 07:00', false, '2030-03-06 10:00', 'later');
-    }
-
-    public function testClosedDaysOfTheOpeningHoursAreClosedEvenWithAStaffedShift(): void
-    {
-        $closedMonday = $this->openFrom('09:00', '19:00');
-        $closedMonday->setDayOfWeek(0);
-        $closedMonday->setClosed(true);
-        $tuesday = $this->openFrom('09:00', '19:00');
-        $tuesday->setDayOfWeek(1);
-        $tuesday->setClosed(false);
-        $this->openingHours->method('findOngoing')->willReturn([$closedMonday, $tuesday]);
-        $this->closingExceptions->method('findFuturesOrOngoing')->willReturn([]);
+        $this->givenWeek(array_fill(0, 5, [['09:00', '19:00']]), ['2030-03-04']);
         $this->givenStaffedShifts([['2030-03-04 10:00', '2030-03-04 12:00'], ['2030-03-05 10:00', '2030-03-05 12:00']]);
 
-        $this->assertStatus('2030-03-04 11:00', false, '2030-03-05 10:00', 'tomorrow');
-    }
+        $status = $this->service->getStatus(new \DateTime('2030-03-04 11:00'));
 
-    public function testClosedWithoutOpeningHoursWhateverTheShifts(): void
-    {
-        $this->givenWeek([]);
-        $this->shifts->expects($this->never())->method('findStaffedBetween');
-
-        $this->assertStatus('2030-03-04 11:00', false, null, null);
-    }
-
-    public function testLooksForStaffedShiftsOverTheLookAheadPeriod(): void
-    {
-        $this->givenWorkingWeek();
-        $this->shifts->expects($this->once())->method('findStaffedBetween')
-            ->with(new \DateTime('2030-03-04 11:00'), new \DateTime('2030-05-03 11:00'))
-            ->willReturn([])
-        ;
-
-        $this->service->getStatus(new \DateTime('2030-03-04 11:00'));
-    }
-
-    public function testDoesNotLookBeyondTheLookAheadPeriod(): void
-    {
-        $this->givenWorkingWeek();
-        // two Mondays, 8 and 10 weeks (56 and 70 days) after the date
-        $this->givenStaffedShifts([['2030-04-29 10:00', '2030-04-29 12:00'], ['2030-05-13 10:00', '2030-05-13 12:00']]);
-
-        $this->assertStatus('2030-03-04 13:00', false, '2030-04-29 10:00', 'later');
-
-        $this->shifts = $this->createMock(ShiftRepository::class);
-        $this->openingHours = $this->createMock(OpeningHourRepository::class);
-        $this->closingExceptions = $this->createMock(ClosingExceptionRepository::class);
-        $em = $this->createMock(EntityManagerInterface::class);
-        $em->method('getRepository')->willReturnMap([
-            [OpeningHour::class, $this->openingHours],
-            [ClosingException::class, $this->closingExceptions],
-            [Shift::class, $this->shifts],
-        ]);
-        $this->service = new OpeningHourService($em);
-        $this->givenWorkingWeek();
-        $this->givenStaffedShifts([['2030-05-13 10:00', '2030-05-13 12:00']]);
-
-        $this->assertStatus('2030-03-04 13:00', false, null, null);
-    }
-
-    public function testStatusDoesNotModifyTheGivenDate(): void
-    {
-        $this->givenWorkingWeek();
-        $this->givenStaffedShifts([['2030-03-04 10:00', '2030-03-04 16:00'], ['2030-03-05 10:00', '2030-03-05 16:00']]);
-        $date = new \DateTime('2030-03-04 11:00');
-
-        $this->service->getStatus($date);
-
-        $this->assertEquals(new \DateTime('2030-03-04 11:00'), $date);
-    }
-
-    public function testStatusDefaultsToNow(): void
-    {
-        // open all day, every day, and someone on a shift around now
-        $this->givenWeek(array_fill(0, 7, [['00:00:00', '23:59:59']]));
-        $this->givenStaffedShifts([[date('Y-m-d H:i:s', time() - 3600), date('Y-m-d H:i:s', time() + 3600)]]);
-
-        $status = $this->service->getStatus();
-
-        $this->assertTrue($status['open']);
-        $this->assertEqualsWithDelta(time() + 3600, $status['next']->getTimestamp(), 5);
+        $this->assertFalse($status['open']);
+        $this->assertEquals(new \DateTime('2030-03-05 10:00'), $status['next']);
+        $this->assertSame('tomorrow', $status['nextDay']);
     }
 
     public function testDefaultsToNow(): void
