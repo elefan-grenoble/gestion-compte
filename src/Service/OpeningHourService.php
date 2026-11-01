@@ -63,7 +63,7 @@ class OpeningHourService
 
     /**
      * Actual state of the shop, with the next time it changes, e.g. to display
-     * "Open (closes at 4pm)" or "Closed (opens tomorrow at 9am)".
+     * "Open → closes at 4pm" or "Closed → opens tomorrow at 9am".
      *
      * The shop is open when the opening hours say so AND someone is on a shift
      * (a shift with nobody on it does not count). Shifts outside the opening hours
@@ -72,8 +72,10 @@ class OpeningHourService
      * - open:    whether the shop is open
      * - next:    when it closes (if open) or reopens (if closed); null if it does not reopen soon
      * - nextDay: 'today', 'tomorrow' or 'later' (relative to $date); null when there is no next change
+     * - closesEarly: when open, whether it closes before the end of the opening hours
+     *                because nobody is on the following shift
      *
-     * @return array{open: bool, next: ?\DateTime, nextDay: ?string}
+     * @return array{open: bool, next: ?\DateTime, nextDay: ?string, closesEarly: bool}
      */
     public function getStatus(?\DateTime $date = null): array
     {
@@ -81,12 +83,14 @@ class OpeningHourService
 
         $open = false;
         $next = null;
+        $closesEarly = false;
         $periods = $this->getOpenPeriods($date);
         if ($periods) {
             // the first period ends after $date: either it contains it (open until its end) or it starts later
-            [$start, $end] = $periods[0];
+            [$start, $end, $openingHoursEnd] = $periods[0];
             $open = $start <= $date;
             $next = $open ? $end : $start;
+            $closesEarly = $open && $end < $openingHoursEnd;
         }
 
         $nextDay = null;
@@ -100,14 +104,15 @@ class OpeningHourService
             }
         }
 
-        return ['open' => $open, 'next' => $next, 'nextDay' => $nextDay];
+        return ['open' => $open, 'next' => $next, 'nextDay' => $nextDay, 'closesEarly' => $closesEarly];
     }
 
     /**
      * Periods when the shop is open from $from on (opening hours AND staffed shifts),
-     * sorted, not overlapping, and not ended before $from.
+     * sorted, not overlapping, and not ended before $from. Each one is [start, end,
+     * end of the period of the opening hours it belongs to].
      *
-     * @return array<int, array{0: \DateTime, 1: \DateTime}>
+     * @return array<int, array{0: \DateTime, 1: \DateTime, 2: \DateTime}>
      */
     private function getOpenPeriods(\DateTime $from): array
     {
@@ -221,12 +226,13 @@ class OpeningHourService
 
     /**
      * Parts of the periods of $a that are also in a period of $b (both sorted and not
-     * overlapping). A part reduced to a single instant is not a period.
+     * overlapping), as [start, end, end of the period of $a]. A part reduced to a
+     * single instant is not a period.
      *
      * @param array<int, array{0: \DateTime, 1: \DateTime}> $a
      * @param array<int, array{0: \DateTime, 1: \DateTime}> $b
      *
-     * @return array<int, array{0: \DateTime, 1: \DateTime}>
+     * @return array<int, array{0: \DateTime, 1: \DateTime, 2: \DateTime}>
      */
     private function intersect(array $a, array $b): array
     {
@@ -237,7 +243,7 @@ class OpeningHourService
             $start = $a[$i][0] > $b[$j][0] ? $a[$i][0] : $b[$j][0];
             $end = $a[$i][1] < $b[$j][1] ? $a[$i][1] : $b[$j][1];
             if ($start < $end) {
-                $intersection[] = [$start, $end];
+                $intersection[] = [$start, $end, $a[$i][1]];
             }
 
             if ($a[$i][1] < $b[$j][1]) {

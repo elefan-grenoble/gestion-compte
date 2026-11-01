@@ -196,13 +196,16 @@ class OpeningHourServiceTest extends TestCase
         $this->givenWeek(array_fill(0, 5, [['09:00', '19:00']]));
     }
 
-    private function assertStatus(string $now, bool $expectedOpen, ?string $expectedNext, ?string $expectedNextDay): void
+    private function assertStatus(string $now, bool $expectedOpen, ?string $expectedNext, ?string $expectedNextDay, ?bool $expectedClosesEarly = null): void
     {
         $status = $this->service->getStatus(new \DateTime($now));
 
         $this->assertSame($expectedOpen, $status['open'], 'open');
         $this->assertEquals($expectedNext ? new \DateTime($expectedNext) : null, $status['next'], 'next');
         $this->assertSame($expectedNextDay, $status['nextDay'], 'next day');
+        if (null !== $expectedClosesEarly) {
+            $this->assertSame($expectedClosesEarly, $status['closesEarly'], 'closes early');
+        }
     }
 
     /**
@@ -266,6 +269,52 @@ class OpeningHourServiceTest extends TestCase
             ],
             'closed when nobody is on any shift' => [
                 [], '2030-03-04 11:00', false, null, null,
+            ],
+        ];
+    }
+
+    /**
+     * "Closes early": the shop closes before the end of its opening hours because
+     * nobody is on the following shift (2030-03-04 is a Monday).
+     *
+     * @dataProvider closesEarlyProvider
+     *
+     * @param array<int, array{0: string, 1: string}>             $staffedShifts
+     * @param array<int, array<int, array{0: string, 1: string}>> $week
+     */
+    public function testClosesEarly(array $week, array $staffedShifts, string $now, bool $expectedOpen, bool $expectedClosesEarly): void
+    {
+        $this->givenWeek($week);
+        $this->givenStaffedShifts($staffedShifts);
+
+        $status = $this->service->getStatus(new \DateTime($now));
+
+        $this->assertSame($expectedOpen, $status['open'], 'open');
+        $this->assertSame($expectedClosesEarly, $status['closesEarly'], 'closes early');
+    }
+
+    public function closesEarlyProvider(): array
+    {
+        $nineToSeven = [0 => [['09:00', '19:00']]];
+
+        return [
+            'last staffed shift ends before the end of the opening hours' => [
+                $nineToSeven, [['2030-03-04 10:00', '2030-03-04 16:00']], '2030-03-04 11:00', true, true,
+            ],
+            'staffed until the end of the opening hours' => [
+                $nineToSeven, [['2030-03-04 10:00', '2030-03-04 19:00']], '2030-03-04 11:00', true, false,
+            ],
+            'staffed beyond the end of the opening hours' => [
+                $nineToSeven, [['2030-03-04 10:00', '2030-03-04 21:00']], '2030-03-04 11:00', true, false,
+            ],
+            'gap between two staffed shifts: closes before the second one' => [
+                $nineToSeven, [['2030-03-04 10:00', '2030-03-04 14:00'], ['2030-03-04 15:00', '2030-03-04 19:00']], '2030-03-04 11:00', true, true,
+            ],
+            'closing for the lunch break of the opening hours is not early' => [
+                [0 => [['09:00', '12:00'], ['14:00', '19:00']]], [['2030-03-04 09:00', '2030-03-04 12:00']], '2030-03-04 10:00', true, false,
+            ],
+            'closed shop does not close early' => [
+                $nineToSeven, [['2030-03-04 14:00', '2030-03-04 16:00']], '2030-03-04 11:00', false, false,
             ],
         ];
     }

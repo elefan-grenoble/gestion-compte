@@ -91,6 +91,7 @@ class OpeningHourStatusTest extends KernelTestCase
         $this->assertTrue($open['open']);
         $this->assertEquals(new \DateTime('2031-03-03 16:00'), $open['next']);
         $this->assertSame('today', $open['nextDay']);
+        $this->assertTrue($open['closesEarly'], 'the opening hours go on until 7pm');
 
         $closed = $this->service()->getStatus(new \DateTime('2031-03-03 17:00'));
         $this->assertFalse($closed['open']);

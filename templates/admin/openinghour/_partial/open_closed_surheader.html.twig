@@ -7,9 +7,9 @@
             </strong>
             {% if shop.next %}
                 <span class="opening-hour-header__next">
-                    {{- '(' }}{% if shop.open %}ferme{% else %}ouvre{% endif %} à {{ shop.next|time_short|trim -}}
+                    {{- '→ ' }}{% if shop.open %}ferme{% else %}ouvre{% endif %} à {{ shop.next|time_short|trim -}}
                     {%- if shop.nextDay == 'tomorrow' %} demain{% elseif shop.nextDay == 'later' %} le {{ shop.next|date('d/m') }}{% endif -%}
-                    {{- ')' -}}
+                    {%- if shop.closesEarly %} (créneau vide){% endif -%}
                 </span>
             {% endif %}
         </div>
