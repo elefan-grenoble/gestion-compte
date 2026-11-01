@@ -226,10 +226,14 @@ jobs:
         run: make test-func
 
       # The log is kept (and still streamed) so that the deprecation report
-      # printed by symfony/phpunit-bridge can be summarised below.
+      # printed by symfony/phpunit-bridge can be summarised below. pipefail:
+      # the default shell (bash -e) takes the exit status of tee, so a failing
+      # test would leave this step green.
       - name: Run all PHPUnit suites with coverage
         if: ${{ matrix.coverage }}
-        run: make test-coverage 2>&1 | tee "$RUNNER_TEMP/phpunit.log"
+        run: |
+          set -o pipefail
+          make test-coverage 2>&1 | tee "$RUNNER_TEMP/phpunit.log"
 
       - name: Publish coverage summary
         if: ${{ matrix.coverage }}
@@ -257,6 +261,7 @@ jobs:
         run: |
           git fetch --no-tags origin "${{ github.base_ref }}"
           pip install --quiet 'diff-cover==9.2.0'
+          ./tests/bin/diff-coverage-test.sh
           status=0
           make diff-coverage || status=$?
           cat var/coverage/diff-coverage.md >> "$GITHUB_STEP_SUMMARY" || true
@@ -269,6 +274,7 @@ jobs:
           name: coverage-report
           path: |
             var/coverage/clover.xml
+            var/coverage/cobertura.xml
             var/coverage/coverage.txt
             var/coverage/diff-coverage.md
             var/coverage/html/
