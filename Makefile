@@ -205,20 +205,16 @@ test-func: ## Tests fonctionnels (HTTP + DB, fixtures par classe)
 test-coverage: ## Tous les tests + couverture (HTML, Clover, texte) dans var/coverage/
 	$(EXEC) composer test-coverage
 
-# Coverage of the lines this branch changes, read from the Clover report of
-# `make test-coverage`. Fails below DIFF_COVER_THRESHOLD % of the changed
-# executable lines of src/. Needs diff-cover (pip install diff-cover==9.2.0)
-# and DIFF_COVER_COMPARE_BRANCH fetched. The report is also written as
-# Markdown in var/coverage/diff-coverage.md.
+# Coverage of the lines this branch changes, read from the Cobertura report
+# of `make test-coverage` (diff-cover does not read PHPUnit's Clover). Fails
+# below DIFF_COVER_THRESHOLD % of the changed executable lines of src/.
+# Needs diff-cover (pip install diff-cover==9.2.0) and
+# DIFF_COVER_COMPARE_BRANCH fetched, and runs on the host: the report must
+# have been generated in this checkout (see tests/tools/diff-coverage.sh).
+# The report is also written as Markdown in var/coverage/diff-coverage.md.
 diff-coverage: ## Couverture des lignes modifiées vs DIFF_COVER_COMPARE_BRANCH (seuil DIFF_COVER_THRESHOLD)
-	@test -f var/coverage/clover.xml || { echo "Run make test-coverage first."; exit 1; }
-	@status=0; \
-	diff-cover var/coverage/clover.xml \
-		--compare-branch=$(DIFF_COVER_COMPARE_BRANCH) \
-		--fail-under=$(DIFF_COVER_THRESHOLD) \
-		--markdown-report=var/coverage/diff-coverage.md || status=$$?; \
-	cat var/coverage/diff-coverage.md; \
-	exit $$status
+	@./tests/tools/diff-coverage.sh var/coverage/cobertura.xml \
+		$(DIFF_COVER_COMPARE_BRANCH) $(DIFF_COVER_THRESHOLD) var/coverage/diff-coverage.md
 
 # ------------------------------------------------------------------
 # Analyse statique

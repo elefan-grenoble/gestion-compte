@@ -257,6 +257,7 @@ jobs:
         run: |
           git fetch --no-tags origin "${{ github.base_ref }}"
           pip install --quiet 'diff-cover==9.2.0'
+          ./tests/bin/diff-coverage-test.sh
           status=0
           make diff-coverage || status=$?
           cat var/coverage/diff-coverage.md >> "$GITHUB_STEP_SUMMARY" || true
@@ -269,6 +270,7 @@ jobs:
           name: coverage-report
           path: |
             var/coverage/clover.xml
+            var/coverage/cobertura.xml
             var/coverage/coverage.txt
             var/coverage/diff-coverage.md
             var/coverage/html/

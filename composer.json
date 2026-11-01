@@ -87,7 +87,7 @@
         "test-functional": "php vendor/bin/phpunit --testsuite functional",
         "test-coverage": [
             "@putenv XDEBUG_MODE=coverage",
-            "php -d pcov.enabled=1 vendor/bin/phpunit --coverage-html var/coverage/html --coverage-clover var/coverage/clover.xml --coverage-text=var/coverage/coverage.txt",
+            "php -d pcov.enabled=1 vendor/bin/phpunit --coverage-html var/coverage/html --coverage-clover var/coverage/clover.xml --coverage-cobertura var/coverage/cobertura.xml --coverage-text=var/coverage/coverage.txt",
             "php tests/tools/coverage-summary.php var/coverage/clover.xml"
         ]
     },
