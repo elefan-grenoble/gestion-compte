@@ -155,10 +155,21 @@ class CloseMembershipCommandTest extends CommandTestCase
     /**
      * The last day of registration that app:member:close closes for the
      * default configuration (registration of 1 year) and DELAY.
+     *
+     * Computed step by step, as the command does: a single relative string
+     * ('today -1 year -1 day -1 month') applies the units together and,
+     * on the 1st of most months, lands one or more days away from the
+     * command's sequential modify() calls (e.g. on 1 November: 30 September
+     * instead of 1 October), which made these tests fail on those days.
      */
     private static function cutoff(): \DateTime
     {
-        return new \DateTime('today -1 year -1 day -' . self::DELAY);
+        $cutoff = new \DateTime('today');
+        $cutoff->modify('-1 year');
+        $cutoff->modify('-1 day');
+        $cutoff->modify('-' . self::DELAY);
+
+        return $cutoff;
     }
 
     private function membershipRegisteredOn(\DateTime ...$dates): Membership
