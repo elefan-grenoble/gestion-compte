@@ -25,7 +25,10 @@
                 <div class="input-field col s12">
                     <i class="material-icons prefix">lock_outline</i>
                     <label for="password">{{ 'security.login.password' | trans }}</label>
-                    <input type="password" id="password" name="_password" required="required" data-cy="password"/>
+                    <input type="password" id="password" name="_password" class="has-password-toggle" required="required" data-cy="password"/>
+                    <button type="button" id="togglePassword" class="password-toggle btn-flat" aria-controls="password" aria-pressed="false" aria-label="Afficher le mot de passe" title="Afficher le mot de passe">
+                        <i class="material-icons">visibility</i>
+                    </button>
                 </div>
                 <div class="col s12">
                     <label>
@@ -46,3 +49,20 @@
         </div>
     </div>
 </div>
+
+<script>
+    (function () {
+        var input = document.getElementById('password');
+        var button = document.getElementById('togglePassword');
+        button.addEventListener('click', function () {
+            var show = input.type === 'password';
+            var label = show ? 'Masquer le mot de passe' : 'Afficher le mot de passe';
+            input.type = show ? 'text' : 'password';
+            button.setAttribute('aria-pressed', show ? 'true' : 'false');
+            button.setAttribute('aria-label', label);
+            button.title = label;
+            button.querySelector('i').textContent = show ? 'visibility_off' : 'visibility';
+            input.focus();
+        });
+    })();
+</script>
