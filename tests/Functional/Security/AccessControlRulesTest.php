@@ -3,8 +3,6 @@
 namespace App\Tests\Functional\Security;
 
 use App\Tests\Functional\FunctionalTestCase;
-use App\Tests\Support\Security\ChecksRoleAccess;
-use App\Tests\Support\Security\RoleMatrix;
 use Symfony\Component\HttpFoundation\Request;
 
 /**
@@ -20,8 +18,6 @@ use Symfony\Component\HttpFoundation\Request;
  */
 class AccessControlRulesTest extends FunctionalTestCase
 {
-    use ChecksRoleAccess;
-
     /**
      * C-SEC-2: a path no rule mentions is not public by default.
      */
@@ -68,15 +64,7 @@ class AccessControlRulesTest extends FunctionalTestCase
         $this->assertSame(['IS_AUTHENTICATED_FULLY'], $this->rolesRequiredFor('/api/swipe/in', 'POST'));
     }
 
-    public function testAMemberWithoutTheOauthLoginRoleIsRefusedTheOauthApi(): void
-    {
-        $this->assertRouteAccessForRole('api_user', 'ROLE_USER', RoleMatrix::DENIED);
-    }
-
-    public function testAMemberWithTheOauthLoginRoleGetsTheOauthApi(): void
-    {
-        $this->assertRouteAccessForRole('api_user', 'ROLE_OAUTH_LOGIN', 200);
-    }
+    // Access to the API itself, by bearer token only since I-SEC-14: see ApiFirewallTest.
 
     /**
      * @return null|string[]

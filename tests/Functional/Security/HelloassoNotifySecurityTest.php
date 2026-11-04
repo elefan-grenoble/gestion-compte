@@ -85,15 +85,26 @@ class HelloassoNotifySecurityTest extends FunctionalTestCase
     }
 
     /**
-     * Target: data['id'] is a payment number, nothing else reaches the API path.
+     * data['id'] is a payment number, nothing else reaches the API path
+     * (I-SEC-7, second half: it was pasted into the path unchecked).
      */
     public function testAPaymentIdThatIsNotANumberIsRejected(): void
     {
         $outcome = $this->notify(['eventType' => 'Payment', 'data' => ['id' => '../organizations/someone-else/forms', 'state' => 'Authorized']]);
 
-        $this->assertSecureOrKnownOpen('I-SEC-7', 'data[id] is pasted into the HelloAsso API path unchecked', function () use ($outcome) {
-            $this->assertTrue(is_int($outcome) && $outcome >= 400 && $outcome < 500, sprintf('Answered %s, expected a 4xx.', $outcome));
-        });
+        $this->assertSame(422, $outcome);
+    }
+
+    /**
+     * An instance without HelloAsso credentials answers that the webhook is
+     * not configured (m-BUG-1: a TypeError on the null client id).
+     */
+    public function testAnInstanceWithoutHelloassoCredentialsSaysSo(): void
+    {
+        $_ENV['HELLOASSO_CLIENT_ID'] = $_SERVER['HELLOASSO_CLIENT_ID'] = '';
+        $_ENV['HELLOASSO_CLIENT_SECRET'] = $_SERVER['HELLOASSO_CLIENT_SECRET'] = '';
+
+        $this->assertSame(503, $this->notify(['eventType' => 'Payment', 'data' => ['id' => 1234, 'state' => 'Authorized']]));
     }
 
     /**

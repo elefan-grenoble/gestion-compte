@@ -24,9 +24,10 @@ class UserSecurityTest extends FunctionalTestCase
     use KnownOpenVulnerability;
 
     /**
-     * I-SEC-11 (SEC.2-5, SPEC.4): until a super admin exists, the first
-     * visitor of /user/install_admin creates it, with the initial password
-     * from the environment.
+     * The super admin of a fresh install is created from the command line
+     * (I-SEC-11, SEC.2-5, SPEC.4: until a super admin existed, the first
+     * visitor of /user/install_admin created it, with the initial password
+     * from the environment). See InstallSuperAdminCommandTest.
      */
     public function testAnonymousVisitorCannotCreateTheSuperAdminOfAFreshInstall(): void
     {
@@ -35,9 +36,8 @@ class UserSecurityTest extends FunctionalTestCase
 
         $client->request('GET', '/user/install_admin');
 
-        $this->assertSecureOrKnownOpen('I-SEC-11', 'the first anonymous visitor creates the super admin of a fresh install', function () {
-            $this->assertSame([], $this->superAdmins(), 'An anonymous request created a super admin.');
-        });
+        $this->assertSame([], $this->superAdmins(), 'An anonymous request created a super admin.');
+        $this->assertTrue($client->getResponse()->isRedirect('/'));
     }
 
     /**
@@ -57,8 +57,9 @@ class UserSecurityTest extends FunctionalTestCase
     }
 
     /**
-     * I-SEC-10 (SPEC.4): roles are added by a plain GET link, so a forged
-     * link opened by an admin (an image tag on any page will do) grants them.
+     * Roles change by a POST carrying a CSRF token (I-SEC-10, SPEC.4: they
+     * were added by a plain GET link, so a forged link opened by an admin,
+     * an image tag on any page will do, granted them).
      */
     public function testAGetLinkCannotGrantARole(): void
     {
@@ -69,9 +70,65 @@ class UserSecurityTest extends FunctionalTestCase
         $client = static::createAuthenticatedClient($superAdmin);
         $client->request('GET', sprintf('/user/%d/addRole/ROLE_USER_MANAGER', $target->getId()));
 
-        $this->assertSecureOrKnownOpen('I-SEC-10', 'a GET link opened by an admin grants a role, no CSRF token', function () use ($target) {
-            $this->assertNotContains('ROLE_USER_MANAGER', $this->reloaded($target)->getRoles());
-        });
+        $this->assertSame(405, $client->getResponse()->getStatusCode());
+        $this->assertNotContains('ROLE_USER_MANAGER', $this->reloaded($target)->getRoles());
+    }
+
+    /**
+     * @dataProvider roleChanges
+     */
+    public function testAPostWithoutValidTokenCannotChangeARole(string $action, ?string $initialRole): void
+    {
+        static::createClient();
+        $superAdmin = $this->aMember('ROLE_SUPER_ADMIN');
+        $target = $this->aMember($initialRole);
+
+        $client = static::createAuthenticatedClient($superAdmin);
+        $client->request('POST', sprintf('/user/%d/%s/ROLE_USER_MANAGER', $target->getId(), $action), ['_token' => 'forged']);
+
+        $this->assertTrue($client->getResponse()->isRedirection());
+        $this->assertSame(null !== $initialRole, in_array('ROLE_USER_MANAGER', $this->reloaded($target)->getRoles(), true));
+    }
+
+    /**
+     * @dataProvider roleChanges
+     */
+    public function testAnAdminChangesARoleFromTheMemberPage(string $action, ?string $initialRole): void
+    {
+        static::createClient();
+        $superAdmin = $this->aMember('ROLE_SUPER_ADMIN');
+        $target = $this->aMember($initialRole);
+
+        $client = static::createAuthenticatedClient($superAdmin);
+        $token = $client->getContainer()->get('security.csrf.token_manager')->getToken('user_role_' . $target->getId() . '_ROLE_USER_MANAGER')->getValue();
+        $client->getContainer()->get('session')->save();
+        $client->request('POST', sprintf('/user/%d/%s/ROLE_USER_MANAGER', $target->getId(), $action), ['_token' => $token]);
+
+        $this->assertTrue($client->getResponse()->isRedirection());
+        $this->assertSame(null === $initialRole, in_array('ROLE_USER_MANAGER', $this->reloaded($target)->getRoles(), true));
+    }
+
+    /**
+     * @return array<string, array{string, ?string}>
+     */
+    public function roleChanges(): array
+    {
+        return ['add' => ['addRole', null], 'remove' => ['removeRole', 'ROLE_USER_MANAGER']];
+    }
+
+    public function testTheMemberPageOffersTheRoleChangesAsForms(): void
+    {
+        static::createClient();
+        $superAdmin = $this->aMember('ROLE_SUPER_ADMIN');
+        $target = $this->aMember();
+
+        $client = static::createAuthenticatedClient($superAdmin);
+        $crawler = $client->request('GET', sprintf('/member/%d/show', $target->getBeneficiary()->getMembership()->getMemberNumber()));
+        $this->assertSame(200, $client->getResponse()->getStatusCode());
+
+        $client->submit($crawler->filterXPath(sprintf('//form[contains(@action, "/user/%d/addRole/ROLE_USER_MANAGER")]', $target->getId()))->form());
+
+        $this->assertContains('ROLE_USER_MANAGER', $this->reloaded($target)->getRoles());
     }
 
     /**

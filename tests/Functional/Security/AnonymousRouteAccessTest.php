@@ -76,8 +76,6 @@ class AnonymousRouteAccessTest extends FunctionalTestCase
 
         // Badges, card reader and emailed one-click links.
         'swipe_in' => 'badge QR code login',
-        'swipe_qr' => 'OPEN HOLE I-SEC-9: badge QR image downloadable by whoever has the code',
-        'swipe_br' => 'OPEN HOLE I-SEC-9: badge barcode image downloadable by whoever has the code',
         'root' => '/cardReader, legacy redirect to the card reader',
         'card_reader_index' => 'card reader kiosk, gated by the card_reader voter',
         'card_reader_check' => 'OPEN HOLE I-SEC-4: validates shifts from a badge number, no login',
@@ -85,7 +83,7 @@ class AnonymousRouteAccessTest extends FunctionalTestCase
 
         // Machine-to-machine and bootstrap.
         'helloasso_notify' => 'OPEN HOLE I-SEC-7: HelloAsso webhook, no authentication',
-        'user_install_admin' => 'OPEN HOLE I-SEC-11: creates the super admin when none exists',
+        'user_install_admin' => 'tells a fresh install to create its super admin from the command line (I-SEC-11)',
     ];
 
     /**
@@ -142,6 +140,12 @@ class AnonymousRouteAccessTest extends FunctionalTestCase
         $client->request($method, $path);
 
         $response = $client->getResponse();
+        if (0 === strpos($path, '/api/')) {
+            // The api firewall is stateless and OAuth only (I-SEC-14): no login page, a 401.
+            $this->assertSame(401, $response->getStatusCode(), sprintf('Anonymous %s %s (%s) answered %d, expected 401.', $method, $path, $name, $response->getStatusCode()));
+
+            return;
+        }
         if (array_key_exists($name, self::HANDLED_BEFORE_ACCESS_CONTROL)) {
             $this->assertTrue($response->isRedirection(), sprintf('%s answered %d, expected a redirect.', $name, $response->getStatusCode()));
 

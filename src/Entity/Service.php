@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use App\Validator\Constraints as AppAssert;
 use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Doctrine\Common\Collections\Collection;
@@ -86,6 +87,10 @@ class Service
      * NOTE: This is not a mapped field of entity metadata, just a simple property.
      *
      * @Vich\UploadableField(mapping="service_logo", fileNameProperty="logo", size="logoSize")
+     *
+     * @Assert\Image(maxSize="5M", mimeTypes={"image/jpeg", "image/png", "image/gif", "image/webp"})
+     *
+     * @AppAssert\ImageExtension
      *
      * @var File
      */

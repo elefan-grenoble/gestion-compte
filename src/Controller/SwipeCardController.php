@@ -2,13 +2,11 @@
 
 namespace App\Controller;
 
+use App\Helper\QrCodePng;
 use App\Entity\Beneficiary;
 use App\Helper\SwipeCard as SwipeCardHelper;
 use App\Entity\SwipeCard as SwipeCardEntity;
 use App\Security\SwipeCardVoter;
-use Endroid\QrCode\QrCode;
-use Endroid\QrCode\ErrorCorrectionLevel;
-use Psr\Log\LoggerInterface;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\HttpFoundation\HeaderUtils;
 use Symfony\Component\HttpFoundation\RedirectResponse;
@@ -30,12 +28,13 @@ use App\Entity\SwipeCard;
  */
 class SwipeCardController extends AbstractController
 {
-    private $logger;
+    /** CSRF token of the badge forms (pair, enable, disable, delete). */
+    public const CSRF_TOKEN_ID = 'swipe_card';
+
     private SwipeCardHelper $swipeCardHelper;
 
-    public function __construct(LoggerInterface $logger, SwipeCardHelper $swipeCardHelper)
+    public function __construct(SwipeCardHelper $swipeCardHelper)
     {
-        $this->logger = $logger;
         $this->swipeCardHelper = $swipeCardHelper;
     }
 
@@ -87,6 +86,11 @@ class SwipeCardController extends AbstractController
      */
     public function activateSwipeCardAction(Request $request)
     {
+        if (!$this->isCsrfTokenValid(self::CSRF_TOKEN_ID, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide, merci de réessayer.');
+
+            return $this->redirectToRoute('homepage');
+        }
         $em = $this->getDoctrine()->getManager();
         $this->denyAccessUnlessGranted(SwipeCardVoter::PAIR, new SwipeCardEntity());
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
@@ -159,6 +163,11 @@ class SwipeCardController extends AbstractController
      */
     public function enableSwipeCardAction(Request $request)
     {
+        if (!$this->isCsrfTokenValid(self::CSRF_TOKEN_ID, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide, merci de réessayer.');
+
+            return $this->redirectToRoute('homepage');
+        }
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -211,6 +220,11 @@ class SwipeCardController extends AbstractController
      */
     public function disableSwipeCardAction(Request $request)
     {
+        if (!$this->isCsrfTokenValid(self::CSRF_TOKEN_ID, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide, merci de réessayer.');
+
+            return $this->redirectToRoute('homepage');
+        }
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
 
@@ -254,6 +268,11 @@ class SwipeCardController extends AbstractController
      */
     public function deleteAction(Request $request)
     {
+        if (!$this->isCsrfTokenValid(self::CSRF_TOKEN_ID, $request->request->get('_token'))) {
+            $this->addFlash('error', 'Jeton de sécurité invalide, merci de réessayer.');
+
+            return $this->redirectToRoute('homepage');
+        }
         $em = $this->getDoctrine()->getManager();
 
         $referer = $request->headers->get('referer');
@@ -290,26 +309,6 @@ class SwipeCardController extends AbstractController
         ]);
     }
 
-    private function _getQr($url)
-    {
-        $qrCode = new QrCode($url);
-
-        try {
-            $qrCode->setSize(200)
-                ->setMargin(0)
-                ->setErrorCorrectionLevel(ErrorCorrectionLevel::HIGH)
-                ->setForegroundColor(['r' => 0, 'g' => 0, 'b' => 0])
-                ->setBackgroundColor(['r' => 255, 'g' => 255, 'b' => 255])
-                ->setEncoding('UTF-8')
-            ;
-
-            // Return the QR code as a base64-encoded PNG image:
-            return 'data:image/png;base64,' . base64_encode($qrCode->writeString());
-        } catch (\Exception $exception) {
-            $this->logger->error($exception->getMessage());
-        }
-    }
-
     /**
      * Swipe Card QR Code.
      *
@@ -318,6 +317,8 @@ class SwipeCardController extends AbstractController
      * @return Response A Response instance
      *
      * @Route("/{code}/qr.png", name="swipe_qr", methods={"GET"})
+     *
+     * @Security("is_granted('ROLE_USER')")
      */
     public function qrAction(Request $request, $code)
     {
@@ -328,9 +329,10 @@ class SwipeCardController extends AbstractController
         if (!$card) {
             throw $this->createAccessDeniedException();
         }
+        $this->denyAccessUnlessGranted(SwipeCardVoter::VIEW, $card);
 
         $url = $this->generateUrl('swipe_in', ['code' => $this->swipeCardHelper->vigenereEncode($card->getCode())], UrlGeneratorInterface::ABSOLUTE_URL);
-        $content = base64_decode($this->_getQr($url));
+        $content = QrCodePng::fromText($url);
         $response = new Response();
         $disposition = $response->headers->makeDisposition(ResponseHeaderBag::DISPOSITION_INLINE, 'qr.png');
         $response->headers->set('Content-Disposition', $disposition);
@@ -349,6 +351,8 @@ class SwipeCardController extends AbstractController
      * @return Response A Response instance
      *
      * @Route("/{code}/br.png", name="swipe_br", methods={"GET"})
+     *
+     * @Security("is_granted('ROLE_USER')")
      */
     public function brAction(Request $request, $code)
     {
@@ -359,6 +363,7 @@ class SwipeCardController extends AbstractController
         if (!$card instanceof SwipeCardEntity) {
             throw $this->createAccessDeniedException();
         }
+        $this->denyAccessUnlessGranted(SwipeCardVoter::VIEW, $card);
         $content = $card->getBarcode();
 
         return new Response(

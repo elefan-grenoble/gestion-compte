@@ -12,17 +12,23 @@
                 <i class="material-icons right">{{ icons[role] }}</i>
             </button>
         {% elseif beneficiary.user.hasRole(role) %}
-            <a href="{{ path('user_remove_role', { 'id': beneficiary.user.id, 'role': role }) }}" class="btn light-green" title="Retirer ce rôle">
-                <i class="material-icons left">clear</i>
-                {{ names[role] }}
-                <i class="material-icons right">{{ icons[role] }}</i>
-            </a>
+            <form method="post" action="{{ path('user_remove_role', { 'id': beneficiary.user.id, 'role': role }) }}" style="display: inline">
+                <input type="hidden" name="_token" value="{{ csrf_token('user_role_' ~ beneficiary.user.id ~ '_' ~ role) }}">
+                <button type="submit" class="btn light-green" title="Retirer ce rôle">
+                    <i class="material-icons left">clear</i>
+                    {{ names[role] }}
+                    <i class="material-icons right">{{ icons[role] }}</i>
+                </button>
+            </form>
         {% else %}
-            <a href="{{ path('user_add_role', { 'id': beneficiary.user.id, 'role': role }) }}" class="btn blue-grey" title="Ajouter ce rôle">
-                <i class="material-icons left">add</i>
-                {{ names[role] }}
-                <i class="material-icons right">{{ icons[role] }}</i>
-            </a>
+            <form method="post" action="{{ path('user_add_role', { 'id': beneficiary.user.id, 'role': role }) }}" style="display: inline">
+                <input type="hidden" name="_token" value="{{ csrf_token('user_role_' ~ beneficiary.user.id ~ '_' ~ role) }}">
+                <button type="submit" class="btn blue-grey" title="Ajouter ce rôle">
+                    <i class="material-icons left">add</i>
+                    {{ names[role] }}
+                    <i class="material-icons right">{{ icons[role] }}</i>
+                </button>
+            </form>
         {% endif %}
     {% endfor %}
 {% endfor %}

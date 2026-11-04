@@ -17,6 +17,7 @@ class SwipeCardVoter extends Voter
     public const DISABLE = 'disable';
     public const ENABLE = 'enable';
     public const DELETE = 'delete';
+    public const VIEW = 'view';
 
     private $decisionManager;
 
@@ -28,7 +29,7 @@ class SwipeCardVoter extends Voter
     protected function supports($attribute, $subject)
     {
         // if the attribute isn't one we support, return false
-        if (!in_array($attribute, [self::PAIR, self::DISABLE, self::ENABLE, self::DELETE])) {
+        if (!in_array($attribute, [self::PAIR, self::DISABLE, self::ENABLE, self::DELETE, self::VIEW])) {
             return false;
         }
 
@@ -68,6 +69,13 @@ class SwipeCardVoter extends Voter
                 }
 
                 return false;
+
+            case self::VIEW:
+                if ($this->decisionManager->decide($token, $allowedRoles)) {
+                    return true;
+                }
+
+                return $this->own($swipeCard, $user);
 
             case self::DISABLE:
                 if ($this->decisionManager->decide($token, $allowedRoles)) {

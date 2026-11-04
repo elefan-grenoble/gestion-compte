@@ -3,6 +3,7 @@
 namespace App\Entity;
 
 use Doctrine\ORM\Mapping as ORM;
+use App\Validator\Constraints as AppAssert;
 use Symfony\Component\Validator\Constraints as Assert;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
 use Doctrine\Common\Collections\ArrayCollection;
@@ -87,6 +88,10 @@ class Event
      * NOTE: This is not a mapped field of entity metadata, just a simple property.
      *
      * @Vich\UploadableField(mapping="event_img", fileNameProperty="img", size="imgSize")
+     *
+     * @Assert\Image(maxSize="5M", mimeTypes={"image/jpeg", "image/png", "image/gif", "image/webp"})
+     *
+     * @AppAssert\ImageExtension
      *
      * @var File
      */

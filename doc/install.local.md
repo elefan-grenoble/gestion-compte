@@ -51,8 +51,8 @@ Ajouter `127.0.0.1 membres.yourcoop.local` au fichier _/etc/hosts_.
 
 Le site est en ligne à l'adresse [http://membres.yourcoop.local:8000](http://membres.yourcoop.local:8000).
 
-Pour créer l'utilisateur super admin, visiter :
-[http://membres.yourcoop.local:8000/user/install_admin](http://membres.yourcoop.local:8000/user/install_admin).
+Pour créer l'utilisateur super admin (si la base ne contient pas les fixtures) :
+`php bin/console app:user:install_super_admin`.
 
 Vous pouvez vous connecter avec l'utilisateur super admin :
 **admin** / **password**.

@@ -10,7 +10,7 @@ use App\Entity\Shift;
 use App\Entity\User;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
-use Symfony\Component\Cache\Adapter\FilesystemAdapter;
+use Symfony\Component\Cache\Adapter\ArrayAdapter;
 use Symfony\Contracts\Cache\ItemInterface;
 use Doctrine\ORM\EntityRepository;
 
@@ -22,17 +22,22 @@ use Doctrine\ORM\EntityRepository;
  */
 class ShiftRepository extends EntityRepository
 {
-    private static $functions_result_cache;
+    /**
+     * Results kept the time of a page computation. The cache belongs to the
+     * repository, hence to the entity manager of the request (or command):
+     * a shared filesystem cache let a booking ignore the one made just before
+     * and exceed the cycle quota (SHIFT-QUOTA-CACHE), and handed back
+     * detached copies of the shifts.
+     */
+    private $functions_result_cache;
 
-    public static function functionsResultCache()
+    public function functionsResultCache(): ArrayAdapter
     {
-        if (isset(self::$functions_result_cache)) {
-            return self::$functions_result_cache;
+        if (null === $this->functions_result_cache) {
+            $this->functions_result_cache = new ArrayAdapter(0, false);
         }
 
-        self::$functions_result_cache = new FilesystemAdapter();
-
-        return self::$functions_result_cache;
+        return $this->functions_result_cache;
     }
 
     public function findBucket($shift)
@@ -393,7 +398,7 @@ class ShiftRepository extends EntityRepository
 
         $cache_key = join(',', $key_bits);
 
-        return self::functionsResultCache()->get($cache_key, function (ItemInterface $item) use ($beneficiaries, $start_after, $end_before, $start_before, $end_after) {
+        return $this->functionsResultCache()->get($cache_key, function (ItemInterface $item) use ($beneficiaries, $start_after, $end_before, $start_before, $end_after) {
             // On met le résultat de la requête en cache, juste assez de temps pour le calcul d'une page
             $item->expiresAfter(5);
 
