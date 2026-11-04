@@ -5,8 +5,7 @@
 // their details and the membership is created. Needs the mailcatcher of the
 // Cypress job.
 //
-// Not covered: a malformed ?code= makes /member/new answer a 500 (an unhandled
-// decoding error of the application), so no E2E assertion can be written on it.
+// A malformed ?code= is covered by MemberInviteCodeTest (PHPUnit, I-BUG-12).
 //
 // Limit: the "welcome" mail that asks to confirm the account is only checked
 // for existence; following its link would test FOSUser, not this application.

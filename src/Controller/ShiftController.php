@@ -304,7 +304,7 @@ class ShiftController extends AbstractController
             // check if beneficiary can free this shift
             $shift_can_be_freed = $shift_service->canFreeShift($current_user->getBeneficiary(), $shift);
             if (!$shift_can_be_freed['result']) {
-                $this->addFlash('error', $shift_can_be_freed['message'] || "Impossible d'annuler ce créneau.");
+                $this->addFlash('error', $shift_can_be_freed['message'] ?: "Impossible d'annuler ce créneau.");
 
                 return $this->redirectToRoute('homepage');
             }
@@ -362,7 +362,7 @@ class ShiftController extends AbstractController
             // check if shift can be freed
             elseif (!$shift_can_be_freed['result']) {
                 $success = false;
-                $message = $shift_can_be_freed['message'] || "Impossible d'annuler ce créneau.";
+                $message = $shift_can_be_freed['message'] ?: "Impossible d'annuler ce créneau.";
             } else {
                 // store shift beneficiary & reason (before shift free())
                 $beneficiary = $shift->getShifter();
@@ -392,7 +392,7 @@ class ShiftController extends AbstractController
 
                 if ($this->use_time_log_saving) {
                     if (count($em->getRepository(TimeLog::class)->findAll($member, $shift, TimeLog::TYPE_SAVING))) {
-                        $message += 'Grâce au compteur épargne, le créneau a été comptabilisé (en échange, le compteur épargne a été décrémenté de la durée du créneau).';
+                        $message .= ' Grâce au compteur épargne, le créneau a été comptabilisé (en échange, le compteur épargne a été décrémenté de la durée du créneau).';
                     }
                 }
             }
@@ -421,9 +421,8 @@ class ShiftController extends AbstractController
 
         }
         $this->addFlash($success ? 'success' : 'error', $message);
-        $referer = $request->headers->get('referer');
 
-        return new RedirectResponse($referer);
+        return $this->redirectToReferer($request);
 
     }
 
@@ -502,9 +501,8 @@ class ShiftController extends AbstractController
 
         }
         $this->addFlash($success ? 'success' : 'error', $message);
-        $referer = $request->headers->get('referer');
 
-        return new RedirectResponse($referer);
+        return $this->redirectToReferer($request);
 
     }
 
@@ -750,6 +748,20 @@ class ShiftController extends AbstractController
             'display_on_empty' => $display_on_empty,
             'title' => $title,
         ]);
+    }
+
+    /**
+     * Go back to the page the admin action was posted from, or to the
+     * admin booking page when the browser sent no Referer header.
+     */
+    private function redirectToReferer(Request $request): RedirectResponse
+    {
+        $referer = $request->headers->get('referer');
+        if (!$referer) {
+            return $this->redirectToRoute('booking_admin');
+        }
+
+        return new RedirectResponse($referer);
     }
 
     /**

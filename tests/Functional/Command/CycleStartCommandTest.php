@@ -159,8 +159,6 @@ class CycleStartCommandTest extends CommandTestCase
 
     public function testCycleLengthFollowsTheCycleDurationParameter(): void
     {
-        $this->markTestIncomplete('C-BUG-4 open: MembershipRepository::findWithNewCycleStarting() hardcodes 28 days instead of reading CYCLE_DURATION (the cycle-end listener does read it).');
-
         $this->withEnv('CYCLE_TYPE', 'standard');
         $this->withEnv('CYCLE_DURATION', '14 days');
         $this->spyOn(MemberCycleEndEvent::NAME);

@@ -2,7 +2,9 @@
 
 namespace App\Tests\Functional\Controller;
 
+use App\Entity\Membership;
 use App\Entity\Shift;
+use App\Entity\TimeLog;
 use App\Entity\ShiftFreeLog;
 use App\Tests\Functional\FunctionalTestCase;
 use App\Tests\Support\Builder\ShiftBuilder;
@@ -22,6 +24,16 @@ use App\Entity\User;
 class ShiftControllerFreeTest extends FunctionalTestCase
 {
     use ShiftScenarios;
+
+    /**
+     * Saving mode, without a minimum delay to free a shift (.env.test sets
+     * the delay to the string "null", which is not empty).
+     */
+    private const SAVING_MODE = [
+        'USE_TIME_LOG_SAVING' => 'true',
+        'USE_CARD_READER_TO_VALIDATE_SHIFTS' => 'true',
+        'TIME_LOG_SAVING_SHIFT_FREE_MIN_TIME_IN_ADVANCE_DAYS' => '',
+    ];
 
     public static function setUpBeforeClass(): void
     {
@@ -135,9 +147,7 @@ class ShiftControllerFreeTest extends FunctionalTestCase
     }
 
     /**
-     * The refusal should tell why; the code writes
-     * `$check['message'] || "Impossible d'annuler ce créneau."`, which is
-     * true, so the flash reads "1".
+     * The refusal tells why (SHIFT-FREE-MESSAGE: the flash used to read "1").
      */
     public function testTheRefusalToFreeAStartedShiftSaysWhy(): void
     {
@@ -148,11 +158,7 @@ class ShiftControllerFreeTest extends FunctionalTestCase
 
         $this->postFree($client, $shift);
 
-        $errors = static::flashes($client)['error'] ?? [];
-        if (['1'] === $errors || [true] === $errors) {
-            $this->markTestIncomplete('SHIFT-FREE-MESSAGE open: the refusal flash is "1" because ShiftController::freeShiftAction() uses || where it means ?:.');
-        }
-        $this->assertSame(['Impossible de libérer un créneau dans le passé.'], $errors);
+        $this->assertSame(['Impossible de libérer un créneau dans le passé.'], static::flashes($client)['error'] ?? []);
     }
 
     // --- a shift manager frees a shift -----------------------------------
@@ -273,8 +279,51 @@ class ShiftControllerFreeTest extends FunctionalTestCase
     }
 
     /**
-     * Without a Referer header the action builds `new RedirectResponse(null)`,
-     * which throws; a privacy extension or a cross-origin post gets a 500.
+     * In saving mode, freeing a shift whose time is not taken from the
+     * member's saving counter only says that the shift is freed, whatever
+     * the saving of the other members.
+     */
+    public function testFreeingInSavingModeWithoutSavingOnlySaysTheShiftIsFreed(): void
+    {
+        static::withEnv(self::SAVING_MODE, function () {
+            $client = static::createClient();
+            $shifter = static::aMembership()->getMainBeneficiary();
+            $shift = $this->aShiftBookedBy($shifter, new \DateTime('+3 days 09:00'));
+            $this->aSavingTimeLog(static::aMembership(), 600);
+            static::logIn($client, $this->aShiftManager());
+
+            $this->postFreeAdmin($client, $shift);
+
+            $this->assertSame(['Le créneau a bien été libéré !'], static::flashes($client)['success'] ?? []);
+            $this->assertNull(static::reloaded($shift)->getShifter());
+        });
+    }
+
+    /**
+     * In saving mode, the shift's time comes out of the member's saving
+     * counter and the message says so (SHIFT-FREE-SAVING-MESSAGE: the
+     * message was appended with `+=`, a TypeError on PHP 8).
+     */
+    public function testFreeingInSavingModeTellsTheTimeComesFromTheSaving(): void
+    {
+        static::withEnv(self::SAVING_MODE, function () {
+            $client = static::createClient();
+            $membership = static::aMembership();
+            $this->aSavingTimeLog($membership, 600);
+            $shift = $this->aShiftBookedBy($membership->getMainBeneficiary(), new \DateTime('+3 days 09:00'));
+            static::logIn($client, $this->aShiftManager());
+
+            $this->postFreeAdmin($client, $shift);
+
+            $this->assertSame(['Le créneau a bien été libéré ! Grâce au compteur épargne, le créneau a été comptabilisé (en échange, le compteur épargne a été décrémenté de la durée du créneau).'], static::flashes($client)['success'] ?? []);
+            $this->assertNull(static::reloaded($shift)->getShifter());
+        });
+    }
+
+    /**
+     * Without a Referer header (privacy extension, cross-origin post) the
+     * manager is sent to the admin booking page (SHIFT-NO-REFERER: the
+     * action used to build `new RedirectResponse(null)` and answer 500).
      */
     public function testFreeingWithoutARefererStillRedirects(): void
     {
@@ -286,31 +335,24 @@ class ShiftControllerFreeTest extends FunctionalTestCase
 
         $client->request('POST', '/shift/' . $shift->getId() . '/free_admin', ['shift_free_forms_' . $shift->getId() => ['reason' => '', '_token' => $token]]);
 
-        if (500 === $client->getResponse()->getStatusCode()) {
-            $this->markTestIncomplete('SHIFT-NO-REFERER open: free_admin answers 500 without a Referer header (RedirectResponse(null)); the shift is freed but the manager gets an error page.');
-        }
-        $this->assertTrue($client->getResponse()->isRedirection());
+        $this->assertTrue($client->getResponse()->isRedirect('/booking/admin'), (string) $client->getResponse()->headers->get('Location'));
+        $this->assertNull(static::reloaded($shift)->getShifter());
     }
 
     /**
-     * Freeing a shift nobody holds passes null to a typed argument of
-     * ShiftService::canFreeShift() instead of reaching the message
-     * "not currently booked".
+     * Freeing a shift nobody holds is refused with the message "not
+     * currently booked" (SHIFT-FREE-FREE: it used to pass null to a typed
+     * argument of ShiftService::canFreeShift()).
      */
     public function testFreeingAFreeShiftIsRefusedWithAMessage(): void
     {
         $client = static::createClient();
         $shift = static::aBookableShift(new \DateTime('+3 days 09:00'));
         static::logIn($client, $this->aShiftManager());
-        $token = static::csrfToken($client, 'shift_free_forms_' . $shift->getId());
 
-        try {
-            $client->request('POST', '/shift/' . $shift->getId() . '/free_admin', ['shift_free_forms_' . $shift->getId() => ['reason' => '', '_token' => $token]], [], ['HTTP_REFERER' => 'http://localhost/booking/admin']);
-        } catch (\Throwable $e) {
-            $this->markTestIncomplete('SHIFT-FREE-FREE open: freeing an unbooked shift crashes (' . get_class($e) . ': ' . $e->getMessage() . ').');
-        }
+        $this->postFreeAdmin($client, $shift);
 
-        $this->assertArrayHasKey('error', static::flashes($client));
+        $this->assertSame(["Impossible de libérer le créneau car il n'est actuellement pas réservé."], static::flashes($client)['error'] ?? []);
     }
 
     // --- helpers ----------------------------------------------------------
@@ -323,6 +365,16 @@ class ShiftControllerFreeTest extends FunctionalTestCase
         static::entityManager()->clear();
 
         return $shift;
+    }
+
+    private function aSavingTimeLog(Membership $membership, int $minutes): TimeLog
+    {
+        $log = new TimeLog();
+        $log->setMembership(static::entityManager()->find(Membership::class, $membership->getId()));
+        $log->setType(TimeLog::TYPE_SAVING);
+        $log->setTime($minutes);
+
+        return static::persist($log);
     }
 
     private function aShiftManager(): User
