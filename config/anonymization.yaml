@@ -85,6 +85,12 @@ tables:
       Pending invitations, holding e-mail addresses of people who are
       not even members yet.
 
+  sent_email:
+    strategy: truncate
+    reason: >-
+      History of the sent mails: recipient addresses, and the body of
+      the mails written by admins.
+
   # ---- Identities --------------------------------------------------
 
   fos_user:

@@ -7,6 +7,8 @@ use App\Entity\Shift;
 use App\Entity\User;
 use App\Form\AutocompleteBeneficiaryCollectionType;
 use App\Form\MarkdownEditorType;
+use App\Mail\MailMetadata;
+use App\Mail\MailQueueStatus;
 use App\Service\MailerService;
 use App\Service\SearchUserFormHelper;
 use Michelf\Markdown;
@@ -108,7 +110,7 @@ class MailController extends AbstractController
      *
      * @Route("/send", name="mail_send", methods={"POST"})
      */
-    public function sendAction(Request $request, MailerInterface $mailer, MailerService $mailer_service)
+    public function sendAction(Request $request, MailerInterface $mailer, MailerService $mailer_service, MailQueueStatus $queueStatus)
     {
         $mailform = $this->getMailForm($mailer_service);
         $mailform->handleRequest($request);
@@ -135,6 +137,11 @@ class MailController extends AbstractController
 
             $nb = 0;
             $errored = [];
+            // The mails of one sending are one line of the mail history.
+            $sentBy = $this->getUser() instanceof User ? $this->getUser() : null;
+            $batchId = bin2hex(random_bytes(16));
+            // Waiting in the history for the crontab to send them, or sent now (see MailQueueStatus).
+            $queue = $queueStatus->shouldQueue();
 
             $from_email = $mailform->get('from')->getData();
             if (in_array($from_email, $mailer_service->getAllowedEmails())) {
@@ -167,13 +174,28 @@ class MailController extends AbstractController
                         ->to(new Address($beneficiary->getEmail(), $beneficiary->getFirstname() . ' ' . $beneficiary->getLastname()))
                         ->html($body)
                     ;
+                    MailMetadata::written($message, $sentBy, $batchId);
+                    if ($queue) {
+                        MailMetadata::queue($message);
+                    }
                     $mailer->send($message);
                     ++$nb;
                 } catch (TransportExceptionInterface $exception) {
                     $errored[] = $beneficiary->getEmail();
                 }
             }
-            if ($nb > 1) {
+            if ($queue) {
+                // Flashes are shown as HTML: the link is ours, the number is an integer.
+                $this->addFlash('success', sprintf(
+                    '%d message%s en file d\'envoi : l\'avancement est visible dans l\'<a href="%s" style="color: inherit; text-decoration: underline;">historique des mails</a>.',
+                    $nb,
+                    $nb > 1 ? 's' : '',
+                    $this->generateUrl('admin_sent_email_index')
+                ));
+                if (!empty($errored)) {
+                    $this->addFlash('warning', 'Impossible d\'envoyer à : ' . implode(', ', $errored));
+                }
+            } elseif ($nb > 1) {
                 $this->addFlash('success', $nb . ' messages envoyés');
                 if (!empty($errored)) {
                     $this->addFlash('warning', 'Impossible d\'envoyer à : ' . implode(', ', $errored));

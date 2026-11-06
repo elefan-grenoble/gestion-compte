@@ -86,6 +86,8 @@ parameters:
   logging.mattermost.url: '%env(LOGGING_MATTERMOST_URL)%'
   logging.stdout.enabled: '%env(bool:LOGGING_STDOUT_ENABLED)%'
   logging.stdout.level: '%env(LOGGING_STDOUT_LEVEL)%'
+  mail_queue_enabled: '%env(default:mail_queue_enabled_default:bool:MAIL_QUEUE_ENABLED)%'
+  mail_queue_enabled_default: true
   main_color: '%env(MAIN_COLOR)%'
   max_event_proxy_per_member: '%env(MAX_EVENT_PROXY_PER_MEMBER)%'
   max_nb_of_past_cycles_to_display: '%env(MAX_NB_OF_PAST_CYCLES_TO_DISPLAY)%'
@@ -495,6 +497,21 @@ services:
   beneficiary_service:
     class: App\Service\BeneficiaryService
     public: true
+  # Mail history: every mail goes through the RecordingMailer (see src/Mail)
+  App\Mail\RecordingMailer:
+    decorates: mailer.mailer
+    arguments:
+      $inner: '@App\Mail\RecordingMailer.inner'
+      $connection: '@doctrine.dbal.default_connection'
+  # Background sending: talks to the real mailer, the history line already exists
+  App\Mail\MailQueueSender:
+    arguments:
+      $mailer: '@App\Mail\RecordingMailer.inner'
+      $connection: '@doctrine.dbal.default_connection'
+  # The queue is only used while the crontab runs app:mail:send-pending
+  App\Mail\MailQueueStatus:
+    arguments:
+      $enabled: '%mail_queue_enabled%'
   mailer_service:
     class: App\Service\MailerService
     public: true

@@ -135,6 +135,10 @@ Références : [GHSA-w8hw-w9fx-j79w](https://github.com/php/php-src/security/adv
 
 # send a reminder mail to the user who generate the last code but did not validate the change.
 45 21 * * * php YOUR_INSTALL_DIR_ABSOLUT_PATH/bin/console app:code:verify_change --last_run 24
+
+# send the mails written by an admin in the background (page "Envoyer un mail")
+# until this line runs, those mails are sent during the request, as before
+* * * * * php YOUR_INSTALL_DIR_ABSOLUT_PATH/bin/console app:mail:send-pending
 ```
 
 ## Mise en route
