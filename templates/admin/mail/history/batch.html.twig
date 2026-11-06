@@ -15,7 +15,7 @@ Envoi groupé
     <p class="grey-text text-darken-1">
         Ces mails ont été envoyés ensemble, un par destinataire.
         {% if summary.failed > 0 %}<span class="orange-text">{{ summary.failed }} refusé{{ summary.failed > 1 ? 's' : '' }} par le serveur d'envoi.</span>{% endif %}
-        {% if summary.pending > 0 %}<span class="orange-text">{{ summary.sent + summary.failed }}/{{ summary.total }} traités, {{ summary.pending }} en attente d'envoi.</span>{% endif %}
+        {% if summary.queued + summary.pending > 0 %}<span class="orange-text">{{ summary.sent + summary.failed }}/{{ summary.total }} traités, {{ summary.queued + summary.pending }} en attente d'envoi.</span>{% endif %}
     </p>
 
     {% include 'admin/mail/history/_table.html.twig' with {sent_emails: sent_emails, batches: {}} only %}
