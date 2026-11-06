@@ -1,0 +1,42 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Envoi groupé - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+<a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+<a href="{{ path('admin_sent_email_index') }}"><i class="material-icons">history</i>&nbsp;Historique des mails</a><i class="material-icons">chevron_right</i>
+Envoi groupé
+{% endblock %}
+
+{% block content %}
+    <h4>Envoi groupé ({{ summary.total }} mails)</h4>
+
+    <p class="grey-text text-darken-1">
+        Ces mails ont été envoyés ensemble, un par destinataire.
+        {% if summary.failed > 0 %}<span class="orange-text">{{ summary.failed }} refusé{{ summary.failed > 1 ? 's' : '' }} par le serveur d'envoi.</span>{% endif %}
+        {% if summary.pending > 0 %}<span class="orange-text">{{ summary.sent + summary.failed }}/{{ summary.total }} traités, {{ summary.pending }} en attente d'envoi.</span>{% endif %}
+    </p>
+
+    {% include 'admin/mail/history/_table.html.twig' with {sent_emails: sent_emails, batches: {}} only %}
+
+    {% if page_count > 1 %}
+        <ul class="pagination">
+            <li class="{% if current_page == 1 %}disabled{% else %}waves-effect{% endif %}">
+                <a href="{{ path('admin_sent_email_batch', {batchId: batch_id, page: current_page - 1}) }}"><i class="material-icons">chevron_left</i></a>
+            </li>
+            {% for i in range(1, page_count) %}
+                <li class="{% if current_page == i %}active{% else %}waves-effect{% endif %}">
+                    <a href="{{ path('admin_sent_email_batch', {batchId: batch_id, page: i}) }}">{{ i }}</a>
+                </li>
+            {% endfor %}
+            <li class="{% if current_page == page_count %}disabled{% else %}waves-effect{% endif %}">
+                <a href="{{ path('admin_sent_email_batch', {batchId: batch_id, page: current_page + 1}) }}"><i class="material-icons">chevron_right</i></a>
+            </li>
+        </ul>
+    {% endif %}
+
+    <p>
+        <a href="{{ path('admin_sent_email_index') }}" class="btn white red-text"><i class="material-icons left">arrow_back</i>Retour à l'historique</a>
+    </p>
+{% endblock %}
