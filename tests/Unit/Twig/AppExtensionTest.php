@@ -11,8 +11,6 @@ use Psr\Log\LoggerInterface;
 
 /**
  * @internal
- *
- * @coversNothing
  */
 class AppExtensionTest extends TestCase
 {
