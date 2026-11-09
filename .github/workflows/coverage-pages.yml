@@ -1,0 +1,67 @@
+# ------------------------------------------------------------------
+# Coverage report on GitHub Pages
+#
+# After each successful CI run on a push to main, publishes the HTML
+# coverage report that the symfony-tests (8.1) job already produced
+# (artifact coverage-report) to GitHub Pages. Nothing is re-run and
+# nothing is committed.
+#
+# A separate workflow rather than a job of CI: it alone holds the Pages
+# permissions, and if Pages is not enabled (Settings → Pages → Source:
+# GitHub Actions) only this workflow fails, CI stays green.
+#
+# Source "GitHub Actions", not "Deploy from a branch": a branch would get
+# a commit of the ~80 MB report on every merge, and its Jekyll build would
+# drop the report's _css/, _js/ and _icons/ directories.
+# ------------------------------------------------------------------
+
+name: Coverage report
+
+on:
+  workflow_run:
+    workflows: [CI]
+    types: [completed]
+    branches: [main]
+
+permissions: {}
+
+# One deployment at a time; a newer one waits instead of cancelling a
+# deployment in progress.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    # Only a push to main of this repository: a pull request from a fork
+    # whose branch is also named main must not publish anything.
+    if: >-
+      github.event.workflow_run.conclusion == 'success'
+      && github.event.workflow_run.event == 'push'
+      && github.event.workflow_run.head_branch == 'main'
+      && github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-22.04
+    permissions:
+      actions: read # download the artifact of the CI run
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Download the coverage report of the CI run
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          name: coverage-report
+          path: coverage/
+          run-id: ${{ github.event.workflow_run.id }}
+          github-token: ${{ github.token }}
+
+      - name: Upload the HTML report as the Pages site
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
+        with:
+          path: coverage/html/
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1
