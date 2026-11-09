@@ -251,6 +251,12 @@ summary de la branche 8.1, sans jamais faire échouer un test. `tests/bootstrap.
 enregistre le gestionnaire (`config/bootstrap.php` ne le faisait pas : la valeur seule
 serait restée muette). Durcir (`max[self]=0`) une fois la migration Symfony traitée.
 
+**Rapport de couverture en ligne.** Après chaque CI réussie sur `main`, le workflow
+`coverage-pages.yml` publie le rapport HTML de couverture (par dossier, par fichier et
+par ligne) sur GitHub Pages : <https://elefan-grenoble.github.io/gestion-compte/>. Il
+reprend l'artefact `coverage-report` du job 8.1, sans relancer les tests ni rien
+commiter. Prérequis : Pages activé avec la source « GitHub Actions » (*Settings → Pages*).
+
 **Cypress.** Chaque fichier de spec s'exécute dans son propre processus Cypress après un
 rechargement des fixtures (`make db-fixtures-load`, même `FIXTURES_SEED`), car les specs
 qui écrivent en base laissent un état dont la suivante ne peut pas partir. Le reset est
