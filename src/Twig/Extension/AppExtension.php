@@ -115,7 +115,12 @@ class AppExtension extends AbstractExtension
     }
 
     /**
-     * Affiche un numéro de téléphone français par groupes de 2 chiffres, sans points : 0607080910 => 06 07 08 09 10, +33607080910 => +33 6 07 08 09 10. Les autres formats (texte libre, autres pays) sont laissés tels quels.
+     * Affiche un numéro de téléphone par groupes de chiffres, sans points :
+     * - France : 0607080910 => 06 07 08 09 10, +33607080910 => +33 6 07 08 09 10
+     * - DROM : +262692123456 => +262 692 12 34 56 (idem +590, +594, +596)
+     * - Suisse : +41791234567 => +41 79 123 45 67
+     * - Belgique (mobiles) : +32470123456 => +32 470 12 34 56
+     * Les autres formats (texte libre, autres pays, fixes belges) sont laissés tels quels.
      *
      * @param null|string $phone
      */
@@ -132,6 +137,18 @@ class AppExtension extends AbstractExtension
         }
         if (preg_match('/^\+33(\d)(\d{8})$/', $compact, $matches)) {
             return '+33 ' . $matches[1] . ' ' . implode(' ', str_split($matches[2], 2));
+        }
+        // DROM (Réunion/Mayotte, Guadeloupe, Guyane, Martinique) : préfixe + 3 + 2 + 2 + 2
+        if (preg_match('/^\+(262|590|594|596)(\d{3})(\d{6})$/', $compact, $matches)) {
+            return '+' . $matches[1] . ' ' . $matches[2] . ' ' . implode(' ', str_split($matches[3], 2));
+        }
+        // Suisse : +41 + 2 + 3 + 2 + 2
+        if (preg_match('/^\+41(\d{2})(\d{3})(\d{2})(\d{2})$/', $compact, $matches)) {
+            return '+41 ' . implode(' ', array_slice($matches, 1));
+        }
+        // Belgique, mobiles uniquement (les fixes ont des indicatifs de 1 ou 2 chiffres) : +32 + 3 + 2 + 2 + 2
+        if (preg_match('/^\+32(4\d{2})(\d{6})$/', $compact, $matches)) {
+            return '+32 ' . $matches[1] . ' ' . implode(' ', str_split($matches[2], 2));
         }
 
         return $phone;
