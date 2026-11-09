@@ -65,6 +65,10 @@ php bin/console cache:clear --env=prod
 
 ## Rétro-compatibilité et nouveautés
 
+### Novembre 2026 : historique des mails
+
+Tous les mails envoyés par l'application sont maintenant enregistrés (table `sent_email`, migration à jouer) et visibles dans **Administration > Mails > Historique**. Seul le contenu des mails écrits par un administrateur est conservé.
+
 ### Mars 2026
 
 [Documentation pour mise à jour de la version 1.47.2 à la version 2.0](maj-v2.0.md)

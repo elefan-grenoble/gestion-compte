@@ -7,6 +7,7 @@ use App\Entity\Shift;
 use App\Entity\User;
 use App\Form\AutocompleteBeneficiaryCollectionType;
 use App\Form\MarkdownEditorType;
+use App\Mail\MailMetadata;
 use App\Service\MailerService;
 use App\Service\SearchUserFormHelper;
 use Michelf\Markdown;
@@ -135,6 +136,9 @@ class MailController extends AbstractController
 
             $nb = 0;
             $errored = [];
+            // The mails of one sending are one line of the mail history.
+            $sentBy = $this->getUser() instanceof User ? $this->getUser() : null;
+            $batchId = bin2hex(random_bytes(16));
 
             $from_email = $mailform->get('from')->getData();
             if (in_array($from_email, $mailer_service->getAllowedEmails())) {
@@ -167,6 +171,7 @@ class MailController extends AbstractController
                         ->to(new Address($beneficiary->getEmail(), $beneficiary->getFirstname() . ' ' . $beneficiary->getLastname()))
                         ->html($body)
                     ;
+                    MailMetadata::written($message, $sentBy, $batchId);
                     $mailer->send($message);
                     ++$nb;
                 } catch (TransportExceptionInterface $exception) {

@@ -59,6 +59,13 @@
                 {% endif %}
             {% endif %}
 
+            {% if is_granted("ROLE_USER_MANAGER") %}
+                <h6><i class="material-icons">mail</i>&nbsp;Mails</h6>
+                <a href="{{ path('admin_sent_email_index') }}" class="waves-effect waves-light btn">
+                    <i class="material-icons left">history</i>Historique
+                </a>
+            {% endif %}
+
             {% if is_granted("ROLE_SHIFT_MANAGER") %}
                 <h6><i class="material-icons">date_range</i>&nbsp;Créneaux</h6>
                 <a href="{{ path("booking_admin") }}" class="waves-effect waves-light btn white black-text">
