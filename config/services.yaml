@@ -14,6 +14,8 @@ parameters:
   code_generation_enabled: '%env(bool:CODE_GENERATION_ENABLED)%'
   cycle_duration: '%env(CYCLE_DURATION)%'
   cycle_type: '%env(CYCLE_TYPE)%'
+  display_address_field: '%env(default:display_address_field_default:bool:DISPLAY_ADDRESS_FIELD)%'
+  display_address_field_default: false
   display_freeze_account: '%env(bool:DISPLAY_FREEZE_ACCOUNT)%'
   display_freeze_account_false_message: '%env(DISPLAY_FREEZE_ACCOUNT_FALSE_MESSAGE)%'
   display_gauge: '%env(bool:DISPLAY_GAUGE)%'
@@ -67,8 +69,6 @@ parameters:
   helloasso_api_base_url: '%env(default::HELLOASSO_API_BASE_URL)%'
   helloasso_api_auth_url: '%env(default::HELLOASSO_API_AUTH_URL)%'
 
-  hide_address_field: '%env(default:hide_address_field_default:bool:HIDE_ADDRESS_FIELD)%'
-  hide_address_field_default: true
   igloohome_client_id: '%env(default::IGLOOHOME_CLIENT_ID)%'
   igloohome_client_secret: '%env(default::IGLOOHOME_CLIENT_SECRET)%'
   igloohome_api_auth_url: '%env(default::IGLOOHOME_API_AUTH_URL)%'
@@ -550,14 +550,14 @@ services:
       $use_fly_and_fixed: '%use_fly_and_fixed%'
       $fly_and_fixed_entity_flying: '%fly_and_fixed_entity_flying%'
       $address_required_for_membership: '%address_required_for_membership%'
-      $hide_address_field: '%hide_address_field%'
+      $display_address_field: '%display_address_field%'
 
   App\Form\BeneficiaryWithoutUserType:
     arguments:
       $use_fly_and_fixed: '%use_fly_and_fixed%'
       $fly_and_fixed_entity_flying: '%fly_and_fixed_entity_flying%'
       $address_required_for_membership: '%address_required_for_membership%'
-      $hide_address_field: '%hide_address_field%'
+      $display_address_field: '%display_address_field%'
 
 
 
