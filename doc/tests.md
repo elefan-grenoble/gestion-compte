@@ -33,7 +33,7 @@ make test               # toutes les suites PHPUnit
 make test-unit          # unit (sans base)
 make test-integration   # integration (Kernel + base)
 make test-func          # functional (HTTP + base)
-make test-coverage      # tout, avec pcov : var/coverage/{html,clover.xml,coverage.txt}
+make test-coverage      # tout, avec pcov : var/coverage/{html,clover.xml,cobertura.xml,coverage.txt}
 make diff-coverage      # couverture des lignes modifiées vs origin/main (après test-coverage)
 make test-anon          # dispositif d'export anonymisé
 make lint               # PHPStan + php-cs-fixer (check)
@@ -227,21 +227,35 @@ de `TODO-PRIORISEE.md`. Ajouter l'entrée au TODO fait partie du même commit qu
 | `cypress-tests-oidc` | Specs OIDC avec Keycloak. |
 
 **Couverture.** La branche 8.1 publie la couverture par namespace dans le résumé du job
-et l'artefact `coverage-report` (HTML, Clover, texte). La couverture globale n'a pas de
-seuil (baseline mesurée : 29,6 % des lignes de `src/` avant les lots de tests).
+et l'artefact `coverage-report` (HTML, Clover, Cobertura, texte). La couverture globale
+n'a pas de seuil (baseline mesurée : 29,6 % des lignes de `src/` avant les lots de tests).
 
-**Couverture des lignes modifiées.** Sur les pull requests, `diff-cover` (clover de la
-branche 8.1, comparé à la base de la PR) bloque sous **70 %** des lignes exécutables
-modifiées de `src/` (`DIFF_COVER_THRESHOLD`, valeur en attente de validation produit —
-voir `TODO-PRIORISEE.md`). Rapport dans `var/coverage/diff-coverage.md` et dans le résumé
-du job ; en local : `make test-coverage && make diff-coverage`. Le checkout est complet
+**Couverture des lignes modifiées.** Sur les pull requests, `diff-cover` (rapport
+**Cobertura** de la branche 8.1, comparé à la base de la PR) bloque sous **70 %** des
+lignes exécutables modifiées de `src/` (`DIFF_COVER_THRESHOLD`, voir #1317). Rapport dans
+`var/coverage/diff-coverage.md` et dans le résumé du job. Le checkout est complet
 (`fetch-depth: 0`) pour pouvoir calculer le diff.
+
+`diff-cover` ne lit pas le Clover de PHPUnit (ce n'est pas le format Clover d'Atlassian
+qu'il attend) et ne trouve alors aucune ligne : il passe en affichant « No lines with
+coverage information in this diff ». Il passe de la même façon quand le rapport a été
+produit sous un autre chemin que le checkout. `tests/tools/diff-coverage.sh` refuse ces
+deux cas (testé par `tests/bin/diff-coverage-test.sh`, lancé par la CI). En local, le
+rapport de `make test-coverage` est produit dans le conteneur (`/var/www/app`) : le
+contrôle le refuse, il faut le produire dans le checkout (PHPUnit lancé sur l'hôte, ou
+conteneur monté au même chemin) avant `make diff-coverage`.
 
 **Dépréciations.** `SYMFONY_DEPRECATIONS_HELPER=weak` (`phpunit.xml.dist`) : le rapport
 `symfony/phpunit-bridge` est affiché en fin de sortie PHPUnit et résumé dans le job
 summary de la branche 8.1, sans jamais faire échouer un test. `tests/bootstrap.php`
 enregistre le gestionnaire (`config/bootstrap.php` ne le faisait pas : la valeur seule
 serait restée muette). Durcir (`max[self]=0`) une fois la migration Symfony traitée.
+
+**Rapport de couverture en ligne.** Après chaque CI réussie sur `main`, le workflow
+`coverage-pages.yml` publie le rapport HTML de couverture (par dossier, par fichier et
+par ligne) sur GitHub Pages : <https://elefan-grenoble.github.io/gestion-compte/>. Il
+reprend l'artefact `coverage-report` du job 8.1, sans relancer les tests ni rien
+commiter. Prérequis : Pages activé avec la source « GitHub Actions » (*Settings → Pages*).
 
 **Cypress.** Chaque fichier de spec s'exécute dans son propre processus Cypress après un
 rechargement des fixtures (`make db-fixtures-load`, même `FIXTURES_SEED`), car les specs
