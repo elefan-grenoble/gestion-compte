@@ -112,9 +112,9 @@ class SmokeTest extends FunctionalTestCase
         $this->assertGreaterThan(0, $crawler->filterXPath('//form')->count(), 'Login page should contain a form.');
 
         // FOSUserBundle labels are translated in French
-        $this->assertSame('Mot de passe', trim($crawler->filter('label[for="password"]')->text()));
-        $this->assertSame('Se souvenir de moi', trim($crawler->filter('#remember_me + span')->text()));
-        $this->assertSame('Connexion', trim($crawler->filter('#_submit')->text()));
+        $this->assertSame('Mot de passe', trim($crawler->filterXPath('//label[@for="password"]')->text()));
+        $this->assertSame('Se souvenir de moi', trim($crawler->filterXPath('//input[@id="remember_me"]/following-sibling::span')->text()));
+        $this->assertSame('Connexion', trim($crawler->filterXPath('//button[@id="_submit"]')->text()));
     }
 
     public function testLoginWithValidCredentials(): void
