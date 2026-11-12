@@ -56,6 +56,18 @@ Les variables concernées sont les suivantes :
 - `IGLOOHOME_*`
 
 
+## Correctifs de sécurité : actions avant la mise en production
+
+Les correctifs de sécurité issus de la suite de tests changent des comportements visibles. À faire pour chaque instance :
+
+1. **Clients OAuth** (Nextcloud, GitLab, tout client qui appelle `/api/*`) : `/api/*` n'accepte plus le cookie de session, seulement un jeton `Authorization: Bearer` ; une session de navigateur ou un anonyme reçoit 401. Avant la mise en production, vérifiez sur une instance de test que chaque client obtient un jeton (`/oauth/v2/token`), passe la page d'autorisation et lit `/api/*`.
+2. **Super admin d'une nouvelle installation** : il se crée par `php bin/console app:user:install_super_admin` (variables `SUPER_ADMIN_USERNAME` et `SUPER_ADMIN_INITIAL_PASSWORD`) ; la page `/user/install_admin` ne le crée plus. La commande refuse `'<change-me>'` (valeur de `.env.dist`), `password`, `changeme`, `admin` et le vide. Sans effet sur une instance déjà installée.
+3. **Fichier `.env`** : vérifiez que `SUPER_ADMIN_INITIAL_PASSWORD` ne vaut pas `password` (ancienne valeur de `.env.dist`). Si `APP_SECRET` vaut encore la valeur d'exemple de `.env.dist`, régénérez-le (`openssl rand -hex 32`) ; les sessions en cours seront invalidées.
+4. **nginx** : ajoutez la règle qui interdit l'exécution de scripts dans `/uploads/` (voir le [guide d'installation sur serveur](install.serveur.md#nginx)). Avec Apache, `public/uploads/.htaccess` s'en charge.
+5. **Rôles des membres** : l'ajout et le retrait d'un rôle se font désormais par formulaire (POST, avec jeton CSRF) ; d'éventuels liens directs vers `/user/{id}/addRole/…` ou `/user/{id}/removeRole/…` ne fonctionnent plus.
+6. **Images de badge** (`/sw/…/qr.png`, `/sw/…/br.png`) : elles exigent désormais une connexion (titulaire du badge ou gestionnaire).
+
+
 ## Point d'entrée de l'application (nginx)
 
 Le point d'entrée PHP a changé dans Symfony 4. La configuration nginx doit être mise à jour en conséquence :

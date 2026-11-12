@@ -45,18 +45,22 @@
                     {% if is_granted("ROLE_SUPER_ADMIN") %}
                         {% if not oidc_enable %}
                             <td>
-                                {{ form_start(delete_forms[admin.id]) }}
-                                {{ form_widget(delete_forms[admin.id]) }}
                                 {% if admin.beneficiary %}
-                                    <a href="{{ path('user_remove_role', { 'id': admin.id, 'role': 'ROLE_ADMIN' }) }}" class="orange btn-floating small" title="Enlever le rôle">
-                                        <i class="material-icons left">arrow_downward</i>
-                                    </a>
+                                    {# user_remove_role only answers POST with a CSRF token (I-SEC-10) #}
+                                    <form method="post" action="{{ path('user_remove_role', { 'id': admin.id, 'role': 'ROLE_ADMIN' }) }}" style="display: inline">
+                                        <input type="hidden" name="_token" value="{{ csrf_token('user_role_' ~ admin.id ~ '_ROLE_ADMIN') }}">
+                                        <button type="submit" class="orange btn-floating small" title="Enlever le rôle">
+                                            <i class="material-icons left">arrow_downward</i>
+                                        </button>
+                                    </form>
                                 {% else %}
+                                    {{ form_start(delete_forms[admin.id]) }}
+                                    {{ form_widget(delete_forms[admin.id]) }}
                                     <a href="#" class="btn-floating waves-effect waves-light red" onclick="var r = confirm('Etes-vous sûr de vouloir supprimer cet utilisateur ?!'); if (r == true) {$(this).closest('form').submit();}; event.stopPropagation();" title="⚠️ Supprimer l'utilisateur ⚠️">
                                         <i class="material-icons left">delete</i>
                                     </a>
+                                    {{ form_end(delete_forms[admin.id]) }}
                                 {% endif %}
-                                {{ form_end(delete_forms[admin.id]) }}
                             </td>
                         {% else %}
                             <td></td>

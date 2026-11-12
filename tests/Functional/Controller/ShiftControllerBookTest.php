@@ -260,8 +260,6 @@ class ShiftControllerBookTest extends FunctionalTestCase
         static::postJson($client, '/shift/' . $morning->getId() . '/book', ['beneficiaryId' => $me->getId(), 'typeService' => 0]);
         $this->assertSame(200, $client->getResponse()->getStatusCode(), 'The first 3 hours are within the quota.');
 
-        // The shift sums behind the quota are cached for 5 seconds: see the next test.
-        ShiftRepository::functionsResultCache()->clear();
         static::postJson($client, '/shift/' . $afternoon->getId() . '/book', ['beneficiaryId' => $me->getId(), 'typeService' => 0]);
         $this->assertRefused($client, $afternoon);
 
@@ -271,14 +269,13 @@ class ShiftControllerBookTest extends FunctionalTestCase
     }
 
     /**
-     * ShiftRepository::findShiftsForBeneficiaries() keeps its result for 5
-     * seconds in a filesystem cache, and the quota reads it: the sum of the
-     * beneficiary's shifts is stale right after a booking, so a second booking
-     * made at once slips through.
+     * A booking made right after another counts it in the quota
+     * (SHIFT-QUOTA-CACHE: ShiftRepository::findShiftsForBeneficiaries() kept
+     * its result for 5 seconds in a filesystem cache shared by every request,
+     * so a second booking made at once slipped through).
      */
     public function testTheQuotaHoldsForABookingMadeRightAfterAnother(): void
     {
-        ShiftRepository::functionsResultCache()->clear();
         $client = static::createClient();
         $me = static::aMembership()->getMainBeneficiary();
 
@@ -290,9 +287,6 @@ class ShiftControllerBookTest extends FunctionalTestCase
         static::postJson($client, '/shift/' . $morning->getId() . '/book', ['beneficiaryId' => $me->getId(), 'typeService' => 0]);
         static::postJson($client, '/shift/' . $afternoon->getId() . '/book', ['beneficiaryId' => $me->getId(), 'typeService' => 0]);
 
-        if (200 === $client->getResponse()->getStatusCode()) {
-            $this->markTestIncomplete('SHIFT-QUOTA-CACHE open: a second booking made within 5 s of the first ignores it and exceeds the cycle quota (stale findShiftsForBeneficiaries cache).');
-        }
         $this->assertRefused($client, $afternoon);
     }
 

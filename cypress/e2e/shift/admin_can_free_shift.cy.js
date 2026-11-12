@@ -35,10 +35,10 @@ function bookShiftAsLiam() {
     cy.get('body', { timeout: 10000 }).should('contain', 'Ce créneau a bien été réservé')
 }
 
-// ShiftRepository::findShiftsForBeneficiaries keeps its result for 5 seconds
-// (a result cache shared by all users): a member page read right after the
-// booking can still show the previous list. Reload, bounded, until the shift
-// is listed; fail with the content of the section when it never is.
+// Reload the member page, bounded, until the shift is listed; fail with the
+// content of the section when it never is. (The 5 s result cache shared by
+// all users that made this necessary is gone, SHIFT-QUOTA-CACHE; the bounded
+// reload stays as a guard.)
 function openMemberShifts(number, attemptsLeft) {
     cy.visit(`/member/${number}/show`)
     cy.url().should('include', `/member/${number}/show`)
@@ -52,12 +52,12 @@ function openMemberShifts(number, attemptsLeft) {
         if (attemptsLeft === 0) {
             throw new Error(`No shift card on /member/${number}/show. Shifts section: ` + $section.text().replace(/\s+/g, ' ').slice(0, 600))
         }
-        cy.wait(1000) // eslint-disable-line cypress/no-unnecessary-waiting -- see above: waits out a 5 s server-side cache
+        cy.wait(1000) // eslint-disable-line cypress/no-unnecessary-waiting -- see above: bounded reload
         openMemberShifts(number, attemptsLeft - 1)
     })
 }
 
-// Same 5 s cache as above, on the way out: reload until the list shrinks.
+// Same bounded reload as above, on the way out: reload until the list shrinks.
 function expectShiftCount(number, expected, attemptsLeft) {
     cy.visit(`/member/${number}/show`)
     cy.get('#shifts').then(($section) => {
@@ -68,7 +68,7 @@ function expectShiftCount(number, expected, attemptsLeft) {
         if (attemptsLeft === 0) {
             throw new Error(`Expected ${expected} shift card(s) on /member/${number}/show, found ${count}`)
         }
-        cy.wait(1000) // eslint-disable-line cypress/no-unnecessary-waiting -- waits out the 5 s server-side cache
+        cy.wait(1000) // eslint-disable-line cypress/no-unnecessary-waiting -- bounded reload
         expectShiftCount(number, expected, attemptsLeft - 1)
     })
 }

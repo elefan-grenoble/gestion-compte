@@ -7,6 +7,7 @@
                 Alors comme ça tu ne retrouves plus ton badge ? Désactive-le ici.
             </p>
             <input type="hidden" name="code" value="{{ card.code | vigenere_encode }}"/>
+            <input type="hidden" name="_token" value="{{ csrf_token('swipe_card') }}"/>
         </div>
         <div class="modal-footer">
             <a href="#!" class="modal-close waves-effect red-text btn-flat">Annuler</a>

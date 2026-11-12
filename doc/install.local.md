@@ -51,11 +51,13 @@ Ajouter `127.0.0.1 membres.yourcoop.local` au fichier _/etc/hosts_.
 
 Le site est en ligne à l'adresse [http://membres.yourcoop.local:8000](http://membres.yourcoop.local:8000).
 
-Pour créer l'utilisateur super admin, visiter :
-[http://membres.yourcoop.local:8000/user/install_admin](http://membres.yourcoop.local:8000/user/install_admin).
+Pour créer l'utilisateur super admin (si la base ne contient pas les fixtures) :
 
-Vous pouvez vous connecter avec l'utilisateur super admin :
-**admin** / **password**.
+1. Définir `SUPER_ADMIN_INITIAL_PASSWORD` dans `.env.local` (et `SUPER_ADMIN_USERNAME` si vous ne voulez pas `admin`). La valeur de `.env.dist` (`'<change-me>'`), `password`, `changeme`, `admin` et le vide sont refusés : sans mot de passe personnel, la commande ne crée aucun compte.
+2. Lancer `php bin/console app:user:install_super_admin`.
+
+Vous pouvez ensuite vous connecter avec les identifiants configurés (`SUPER_ADMIN_USERNAME` / `SUPER_ADMIN_INITIAL_PASSWORD`).
+Le couple **admin** / **password** n'existe qu'avec les fixtures (`doctrine:fixtures:load`, voir plus bas) : la commande le refuse.
 
 ## Ajout de données
 
