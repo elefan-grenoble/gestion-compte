@@ -426,6 +426,37 @@ strong {
   }
 }
 
+// Open / closed banner above the navbar
+.opening-hour-header {
+  padding: 6px 12px;
+  text-align: center;
+  line-height: 1.4;
+  border-bottom: 1px solid;
+
+  &__status {
+    font-weight: 600;
+  }
+
+  &__next {
+    margin-left: 4px;
+    font-weight: 400;
+    // on narrow screens, go to the next line rather than split "(ouvre à 9h le 04/11)"
+    white-space: nowrap;
+  }
+
+  &--open {
+    background-color: #d3eedb;
+    border-color: #b4dfc0;
+    color: #195a2d;
+  }
+
+  &--closed {
+    background-color: #fbe9e7;
+    border-color: #f3cfca;
+    color: #8c2f27;
+  }
+}
+
 .nav-wrapper {
   ul#nav-desktop {
     li a {
