@@ -132,6 +132,28 @@ class UserSecurityTest extends FunctionalTestCase
     }
 
     /**
+     * The admin list used to link to user_remove_role with a plain <a href>
+     * (GET), which I-SEC-10 turned into a 405: it must offer a POST form with
+     * the token.
+     */
+    public function testTheAdminListOffersTheRoleRemovalAsAForm(): void
+    {
+        static::createClient();
+        $superAdmin = $this->aMember('ROLE_SUPER_ADMIN');
+        $target = $this->aMember('ROLE_ADMIN');
+        $this->assertContains('ROLE_ADMIN', $this->reloaded($target)->getRoles());
+
+        $client = static::createAuthenticatedClient($superAdmin);
+        $crawler = $client->request('GET', '/admin/admin_users');
+        $this->assertSame(200, $client->getResponse()->getStatusCode());
+        $this->assertCount(0, $crawler->filterXPath(sprintf('//a[contains(@href, "/user/%d/removeRole/")]', $target->getId())), 'The role removal is still a GET link.');
+
+        $client->submit($crawler->filterXPath(sprintf('//form[contains(@action, "/user/%d/removeRole/ROLE_ADMIN")]', $target->getId()))->form());
+
+        $this->assertNotContains('ROLE_ADMIN', $this->reloaded($target)->getRoles());
+    }
+
+    /**
      * I-SEC-1 (SEC.1-2): switch_user answers a plain GET ?_login_as=, without
      * a CSRF token: a forged link opened by an admin impersonates a member.
      */
