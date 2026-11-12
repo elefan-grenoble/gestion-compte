@@ -449,7 +449,7 @@ class Event
     public function getProxiesByOwnerMembershipMainBeneficiary(Beneficiary $beneficiary)
     {
         return $this->proxies->filter(function (Proxy $proxy) use ($beneficiary) {
-            return $proxy->getOwner()->getMembership()->getMainBeneficiary() === $beneficiary;
+            return $proxy->getOwner() && $proxy->getOwner()->getMembership()->getMainBeneficiary() === $beneficiary;
         });
     }
 

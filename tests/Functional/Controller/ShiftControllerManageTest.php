@@ -145,6 +145,20 @@ class ShiftControllerManageTest extends FunctionalTestCase
         $this->assertTrue((bool) static::reloaded($shift)->getWasCarriedOut());
     }
 
+    public function testValidatingWithoutARefererStillRedirects(): void
+    {
+        $client = static::createClient();
+        $shifter = static::aMembership()->getMainBeneficiary();
+        $shift = $this->aShiftBookedBy($shifter, new \DateTime('-1 day 09:00'));
+        static::logIn($client, $this->aMemberWithRoles('ROLE_SHIFT_MANAGER'));
+        $name = 'shift_validate_invalidate_forms_' . $shift->getId();
+
+        $client->request('POST', '/shift/' . $shift->getId() . '/validate_admin', [$name => ['validate' => 1, '_token' => static::csrfToken($client, $name)]]);
+
+        $this->assertTrue($client->getResponse()->isRedirect('/booking/admin'), (string) $client->getResponse()->headers->get('Location'));
+        $this->assertTrue((bool) static::reloaded($shift)->getWasCarriedOut());
+    }
+
     public function testAShiftManagerInvalidatesAParticipation(): void
     {
         $client = static::createClient();
