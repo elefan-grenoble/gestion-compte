@@ -1,5 +1,7 @@
 # Installation sur un serveur
 
+> Pour une nouvelle installation, préférer l'[installation avec Docker](install.serveur.docker.md) : images prêtes à l'emploi, PHP corrigé, HTTPS automatique. Une installation existante peut y [migrer](migration.baremetal-docker.md). Cette page décrit l'installation sans Docker (PHP, nginx et MySQL sur le serveur, mises à jour avec `dploy.sh`).
+
 ## Prérequis
 
 * PHP 7.4

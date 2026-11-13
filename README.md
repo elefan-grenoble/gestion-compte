@@ -30,7 +30,8 @@ _cliquez pour voir l'image en grand_
 ## Installation
 
 * [Guide d'installation local](doc/install.local.md)
-* [Guide d'installation sur serveur](doc/install.serveur.md)
+* [Guide d'installation sur serveur avec Docker](doc/install.serveur.docker.md) (recommandé) et [migration depuis une installation sans Docker](doc/migration.baremetal-docker.md)
+* [Guide d'installation sur serveur sans Docker](doc/install.serveur.md)
 * [Guide de mise à jour](doc/maj.md)
 * [Guide de mise en route](doc/start.md)
 
