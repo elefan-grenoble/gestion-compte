@@ -1,0 +1,50 @@
+# SITE_ADDRESS
+#   membres.example.org   Caddy obtains and renews the TLS certificate itself
+#   :80                   plain HTTP, behind a reverse proxy that terminates TLS
+# CADDY_TRUSTED_PROXIES
+#   Proxies whose X-Forwarded-For is trusted (e.g. "private_ranges" behind a
+#   host reverse proxy). The default trusts nobody: the client IP is the peer.
+{
+	servers {
+		trusted_proxies static {$CADDY_TRUSTED_PROXIES:127.0.0.1/32}
+	}
+}
+
+{$SITE_ADDRESS} {
+	root * /var/www/app/public
+	encode zstd gzip
+
+	# Keep in line with post_max_size (.docker/prod/php.ini)
+	request_body {
+		max_size 32MB
+	}
+
+	header {
+		X-Content-Type-Options nosniff
+		Referrer-Policy strict-origin-when-cross-origin
+		-Server
+	}
+	header /build/* Cache-Control "public, max-age=31536000, immutable"
+
+	# Existing static files, except PHP sources, dotfiles and directories:
+	# an uploaded file is served as-is, never executed.
+	@static {
+		file
+		not path *.php */
+		not path_regexp /\.
+	}
+	handle @static {
+		file_server
+	}
+
+	# Everything else goes to the front controller, and only to it
+	handle {
+		# try_files /index.php: without it, php_fastcgi would execute any
+		# existing .php file, including one dropped in public/uploads/
+		php_fastcgi php:9000 {
+			try_files /index.php
+		}
+	}
+
+	log
+}
