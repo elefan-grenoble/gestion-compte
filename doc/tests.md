@@ -228,7 +228,7 @@ de `TODO-PRIORISEE.md`. Ajouter l'entrée au TODO fait partie du même commit qu
 | `setup` | `composer install`, `npm ci`, build des assets ; artefacts réutilisés par les autres jobs. |
 | `fast-tests` | `make test-unit` sur PHP **7.4 et 8.1** (matrice, `fail-fast: false`), tests de l'export anonymisé. |
 | `phpstan` | `make lint` (PHPStan + php-cs-fixer check), PHP 7.4. |
-| `symfony-tests` | `make test-integration` et `make test-func` sur PHP 7.4 et 8.1 (MariaDB 10.4). La branche 8.1 exécute **toutes les suites sous pcov** (`make test-coverage`). |
+| `symfony-tests` | `make test-integration` et `make test-func` sur PHP 7.4 et 8.1 (MariaDB 10.11, comme la stack de production). La branche 8.1 exécute **toutes les suites sous pcov** (`make test-coverage`). |
 | `composer-audit` | `composer audit --locked`, **non bloquant** : la liste des avis est publiée dans le résumé du job. |
 | `cypress-tests` | Specs E2E hors OIDC, avec un mailcatcher pour les emails. |
 | `cypress-tests-oidc` | Specs OIDC avec Keycloak. |
