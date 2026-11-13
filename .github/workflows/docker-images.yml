@@ -1,0 +1,202 @@
+# ------------------------------------------------------------------
+# Production images (.docker/Dockerfile, targets prod and web)
+#
+# - pull_request: build + smoke test, nothing is pushed
+# - push to main: images tagged "edge"
+# - release tag vX.Y.Z (release-please): X.Y.Z, X.Y and latest
+#
+# Each architecture is built on a native runner (the PHP recompilation is
+# too slow under QEMU), pushed by digest, then merged into one multi-arch
+# tag with a build provenance attestation.
+# ------------------------------------------------------------------
+
+name: Images Docker
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: docker-images-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  APP_IMAGE: ghcr.io/elefan-grenoble/gestion-compte
+  WEB_IMAGE: ghcr.io/elefan-grenoble/gestion-compte-web
+  PHP_BASE_IMAGE: php:7.4-fpm@sha256:3ac7c8c74b2b047c7cb273469d74fc0d59b857aa44043e6ea6a0084372811d5b
+
+jobs:
+  build:
+    strategy:
+      fail-fast: true
+      matrix:
+        include:
+          - arch: amd64
+            runner: ubuntu-24.04
+          - arch: arm64
+            runner: ubuntu-24.04-arm
+    runs-on: ${{ matrix.runner }}
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      # Build once into the local image store, test, then push the same layers
+      - name: Build prod image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: .docker/Dockerfile
+          target: prod
+          build-args: PHP_BASE_IMAGE=${{ env.PHP_BASE_IMAGE }}
+          platforms: linux/${{ matrix.arch }}
+          load: true
+          tags: ${{ env.APP_IMAGE }}:ci
+          cache-from: type=gha,scope=images-${{ matrix.arch }}
+          cache-to: type=gha,scope=images-${{ matrix.arch }},mode=max
+
+      - name: Build web image
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: .docker/Dockerfile
+          target: web
+          build-args: PHP_BASE_IMAGE=${{ env.PHP_BASE_IMAGE }}
+          platforms: linux/${{ matrix.arch }}
+          load: true
+          tags: ${{ env.WEB_IMAGE }}:ci
+          cache-from: type=gha,scope=images-${{ matrix.arch }}
+
+      - name: Smoke test
+        env:
+          APP_VERSION: ci
+        run: tests/docker/prod-stack-smoke.sh
+
+      - name: Log in to GHCR
+        if: github.event_name != 'pull_request'
+        uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Push prod image by digest
+        id: push-app
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: .docker/Dockerfile
+          target: prod
+          build-args: PHP_BASE_IMAGE=${{ env.PHP_BASE_IMAGE }}
+          platforms: linux/${{ matrix.arch }}
+          outputs: type=image,name=${{ env.APP_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=images-${{ matrix.arch }}
+
+      - name: Push web image by digest
+        id: push-web
+        if: github.event_name != 'pull_request'
+        uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
+        with:
+          context: .
+          file: .docker/Dockerfile
+          target: web
+          build-args: PHP_BASE_IMAGE=${{ env.PHP_BASE_IMAGE }}
+          platforms: linux/${{ matrix.arch }}
+          outputs: type=image,name=${{ env.WEB_IMAGE }},push-by-digest=true,name-canonical=true,push=true
+          cache-from: type=gha,scope=images-${{ matrix.arch }}
+
+      - name: Export digests
+        if: github.event_name != 'pull_request'
+        env:
+          APP_DIGEST: ${{ steps.push-app.outputs.digest }}
+          WEB_DIGEST: ${{ steps.push-web.outputs.digest }}
+        run: |
+          mkdir -p digests/app digests/web
+          touch "digests/app/${APP_DIGEST#sha256:}" "digests/web/${WEB_DIGEST#sha256:}"
+
+      - name: Upload digests
+        if: github.event_name != 'pull_request'
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
+        with:
+          name: digests-${{ matrix.arch }}
+          path: digests/
+          if-no-files-found: error
+          retention-days: 1
+
+  publish:
+    needs: build
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    strategy:
+      matrix:
+        include:
+          - image: app
+          - image: web
+    steps:
+      - name: Download digests
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8
+        with:
+          pattern: digests-*
+          path: digests
+          merge-multiple: true
+
+      - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
+
+      - uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Image name
+        id: name
+        env:
+          IMAGE: ${{ matrix.image == 'app' && env.APP_IMAGE || env.WEB_IMAGE }}
+        run: echo "image=${IMAGE}" >> "$GITHUB_OUTPUT"
+
+      - name: Tags
+        id: meta
+        uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
+        with:
+          images: ${{ steps.name.outputs.image }}
+          tags: |
+            type=semver,pattern={{version}}
+            type=semver,pattern={{major}}.{{minor}}
+            type=edge,branch=main
+
+      - name: Create the multi-arch manifest
+        id: manifest
+        env:
+          IMAGE: ${{ steps.name.outputs.image }}
+          DIGEST_DIR: digests/${{ matrix.image }}
+        run: |
+          tags=$(jq -r '.tags | map("--tag " + .) | join(" ")' <<< "${DOCKER_METADATA_OUTPUT_JSON}")
+          sources=$(find "${DIGEST_DIR}" -type f -printf "${IMAGE}@sha256:%f ")
+          # shellcheck disable=SC2086 # word splitting is intended
+          docker buildx imagetools create ${tags} ${sources}
+          first_tag=$(jq -r '.tags[0]' <<< "${DOCKER_METADATA_OUTPUT_JSON}")
+          digest=$(docker buildx imagetools inspect "${first_tag}" --format '{{json .Manifest}}' | jq -r .digest)
+          echo "digest=${digest}" >> "$GITHUB_OUTPUT"
+
+      - name: Attest build provenance
+        uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-name: ${{ steps.name.outputs.image }}
+          subject-digest: ${{ steps.manifest.outputs.digest }}
+          push-to-registry: true
