@@ -1,0 +1,115 @@
+# Production stack: Caddy (TLS) -> php-fpm -> MariaDB, plus a cron runner.
+# Configuration: .env next to this file (stack, see .env.dist) and app.env
+# (the application's Symfony .env). Guide: doc/install.serveur.docker.md
+name: gestion-compte
+
+x-app: &app
+  image: ${APP_IMAGE:-ghcr.io/elefan-grenoble/gestion-compte}:${APP_VERSION:?set APP_VERSION in .env}
+  # Fallback only (fork, offline): the images are normally pulled
+  build:
+    context: ../..
+    dockerfile: .docker/Dockerfile
+    target: prod
+    args:
+      PHP_BASE_IMAGE: php:7.4-fpm@sha256:3ac7c8c74b2b047c7cb273469d74fc0d59b857aa44043e6ea6a0084372811d5b
+  restart: unless-stopped
+  environment:
+    TZ: ${TZ:-Europe/Paris}
+  volumes:
+    - ${APP_ENV_FILE:-./app.env}:/var/www/app/.env:ro
+    - uploads:/var/www/app/public/uploads
+    - media_cache:/var/www/app/public/media/cache
+    - sessions:/var/www/app/var/sessions
+    - logs:/var/www/app/var/log
+  depends_on:
+    database:
+      condition: service_healthy
+  cap_drop: [ALL]
+  security_opt: [no-new-privileges:true]
+
+services:
+  web:
+    image: ${WEB_IMAGE:-ghcr.io/elefan-grenoble/gestion-compte-web}:${APP_VERSION:?set APP_VERSION in .env}
+    build:
+      context: ../..
+      dockerfile: .docker/Dockerfile
+      target: web
+      args:
+        PHP_BASE_IMAGE: php:7.4-fpm@sha256:3ac7c8c74b2b047c7cb273469d74fc0d59b857aa44043e6ea6a0084372811d5b
+    restart: unless-stopped
+    environment:
+      SITE_ADDRESS: ${SITE_ADDRESS:?set SITE_ADDRESS in .env}
+      CADDY_TRUSTED_PROXIES: ${CADDY_TRUSTED_PROXIES:-127.0.0.1/32}
+    ports:
+      - "${HTTP_PUBLISH:-80}:80"
+      - "${HTTPS_PUBLISH:-443}:443"
+      - "${HTTPS_PUBLISH:-443}:443/udp"
+    volumes:
+      - uploads:/var/www/app/public/uploads:ro
+      - media_cache:/var/www/app/public/media/cache:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    sysctls:
+      # Lets the unprivileged Caddy user bind ports 80 and 443
+      net.ipv4.ip_unprivileged_port_start: 0
+    depends_on:
+      php:
+        condition: service_healthy
+    networks: [edge]
+    cap_drop: [ALL]
+    security_opt: [no-new-privileges:true]
+
+  php:
+    <<: *app
+    healthcheck:
+      test: ["CMD", "php", "-r", "exit(@fsockopen('127.0.0.1', 9000) ? 0 : 1);"]
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+    deploy:
+      resources:
+        limits:
+          memory: ${PHP_MEMORY_LIMIT:-2G}
+    networks: [edge, db]
+
+  cron:
+    <<: *app
+    command: ["supercronic", "/etc/supercronic/crontab"]
+    networks: [edge, db]
+
+  database:
+    image: mariadb:10.11.19@sha256:7d829180b5b2a9ba74f6242876ab401a0d7dd338a807e522ef92bc9698760f20
+    restart: unless-stopped
+    command: ["--character-set-server=utf8mb4", "--collation-server=utf8mb4_unicode_ci"]
+    environment:
+      TZ: ${TZ:-Europe/Paris}
+      MARIADB_DATABASE: ${MARIADB_DATABASE:?set MARIADB_DATABASE in .env}
+      MARIADB_USER: ${MARIADB_USER:?set MARIADB_USER in .env}
+      MARIADB_PASSWORD: ${MARIADB_PASSWORD:?set MARIADB_PASSWORD in .env}
+      MARIADB_ROOT_PASSWORD: ${MARIADB_ROOT_PASSWORD:?set MARIADB_ROOT_PASSWORD in .env}
+      # Upgrade the system tables after a MariaDB minor version bump
+      MARIADB_AUTO_UPGRADE: "1"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 5
+    networks: [db]
+
+networks:
+  edge: {}
+  # No outbound access: only php and cron reach the database
+  db:
+    internal: true
+
+volumes:
+  db_data:
+  uploads:
+  media_cache:
+  sessions:
+  logs:
+  caddy_data:
+  caddy_config:

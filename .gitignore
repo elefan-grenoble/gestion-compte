@@ -41,6 +41,7 @@ yarn-error.log
 # Docker — local compose override and data
 docker-compose.yml
 compose.yaml
+!/.docker/prod/compose.yaml
 /mysql
 /.docker/keycloak/data
 
