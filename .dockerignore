@@ -8,6 +8,7 @@ mysql
 .claude
 .direnv
 .devenv
+.envrc
 claude.local.md
 *.cache
 .php-cs-fixer.cache
@@ -23,10 +24,14 @@ public/media
 public/uploads/*
 !public/uploads/.htaccess
 
-# Configuration files that may hold secrets: only the template ships
-.env
-.env.*
+# Configuration files that may hold secrets, at any depth (e.g. an
+# instance's .env / app.env next to .docker/prod/compose.yaml): only the
+# templates ship
+**/.env
+**/.env.*
+**/*.env
 !.env.dist
+!.docker/prod/.env.dist
 
 # Not needed at runtime
 cypress
