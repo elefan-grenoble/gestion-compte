@@ -35,7 +35,7 @@ Deux cas, signalés au fil du texte :
    Garder `APP_SECRET` à l'identique : il sert notamment à chiffrer certains liens envoyés par e-mail. `APP_ENV` peut rester tel quel : l'image impose `prod`.
 
    **Pour la répétition**, mettre provisoirement `MAILER_DSN=null://null` : la nouvelle stack travaille sur une copie des vraies données, elle ne doit envoyer aucun e-mail aux membres. Remettre le vrai `MAILER_DSN` juste avant la bascule.
-4. **Même serveur uniquement** : les ports 80 et 443 sont occupés par nginx jusqu'à la bascule. Pour la répétition, démarrer la stack sur d'autres ports en ajoutant temporairement dans `.env` :
+4. **Pour la répétition** : sur le même serveur, les ports 80 et 443 sont occupés par nginx jusqu'à la bascule ; sur un nouveau serveur, le DNS ne pointe pas encore vers lui, Caddy ne peut donc pas obtenir de certificat. Dans les deux cas, démarrer la stack en HTTP local en ajoutant temporairement dans `.env` :
 
    ```ini
    SITE_ADDRESS=:80
@@ -77,10 +77,19 @@ Le but est de valider l'import, les migrations et la configuration sur une copie
    ```
 3. Copier les fichiers envoyés (logos de services, images d'événements) :
 
-   ```shell
-   sudo tar -C /var/www/gestion-compte/public/uploads -c . \
-       | sudo docker compose run --rm --no-deps -T php tar -C public/uploads -x
-   ```
+   * **même serveur** :
+
+     ```shell
+     sudo tar -C /var/www/gestion-compte/public/uploads -c . \
+         | sudo docker compose run --rm --no-deps -T php tar -C public/uploads -x
+     ```
+
+   * **nouveau serveur** : l'archive est créée sur l'ancien serveur et extraite sur le nouveau (depuis le nouveau serveur, `ancien` étant l'ancien serveur, avec un compte qui peut lire les fichiers) :
+
+     ```shell
+     ssh ancien 'tar -C /var/www/gestion-compte/public/uploads -c .' \
+         | sudo docker compose run --rm --no-deps -T php tar -C public/uploads -x
+     ```
 
    L'extraction se fait dans le conteneur, en `www-data` : les droits sont corrects d'office.
 4. Démarrer l'application, **sans le service `cron`** (les tâches planifiées tournent encore sur l'ancienne installation), et jouer les migrations :
@@ -92,7 +101,9 @@ Le but est de valider l'import, les migrations et la configuration sur une copie
    ```
 
    Sur une base qui était déjà à jour, il ne doit y avoir aucune migration à jouer.
-5. Tester (voir [Recette](#4-recette)) : depuis le serveur, avec `curl -H 'Host: <domaine>' http://127.0.0.1:8080/login` ; depuis un poste, avec un tunnel SSH (`ssh -L 8080:127.0.0.1:8080 serveur`, puis `http://localhost:8080`). La connexion fonctionne, mais certains liens absolus pointent vers le vrai domaine.
+5. Tester (voir [Recette](#4-recette)) :
+   * **même serveur** (stack sur le port 8080, étape 1.4) : depuis le serveur, `curl -H 'Host: <domaine>' http://127.0.0.1:8080/login` ; depuis un poste, avec un tunnel SSH (`ssh -L 8080:127.0.0.1:8080 serveur`, puis `http://localhost:8080`). La connexion fonctionne, mais certains liens absolus pointent vers le vrai domaine.
+   * **nouveau serveur** : tant que le DNS pointe vers l'ancien, Caddy ne peut pas obtenir de certificat pour le domaine. Le plus simple est de répéter aussi en HTTP local : mêmes réglages provisoires qu'à l'étape 1.4 dans le `.env` du nouveau serveur, puis les mêmes tests sur son port 8080. Remettre le domaine avant la bascule.
 6. Remettre à zéro avant la vraie bascule : `sudo docker compose down --volumes` et `sudo rm backups/migration.sql`. **Attention** : `--volumes` supprime la base et les fichiers de la stack, ce qui est voulu ici, mais ne doit plus jamais être utilisé une fois en production.
 
 ## 3. Bascule (fenêtre de maintenance)
@@ -102,6 +113,7 @@ Prévenir les membres. Pendant la fenêtre, l'ancienne installation ne doit plus
 1. **Couper les écritures** sur l'ancienne installation :
    * mettre nginx en maintenance (page statique ou `return 503;` dans le `server` du site, puis `sudo systemctl reload nginx`) ;
    * suspendre les tâches planifiées (commenter les lignes de la crontab) ;
+   * arrêter PHP-FPM (`sudo systemctl stop php7.4-fpm`) : l'arrêt attend la fin des requêtes en cours, qu'un rechargement de nginx laisse terminer après la mise en maintenance ;
    * attendre la fin d'une éventuelle tâche en cours (`ps aux | grep bin/console`).
 2. **Remettre le vrai `MAILER_DSN`** dans `app.env`.
 3. **Copier les données**, avec les commandes de la répétition (étapes 2.1 à 2.3, vérification du `-- Dump completed` et des comptages comprises), sur une stack vide (`docker compose down --volumes` fait en fin de répétition).
@@ -144,17 +156,26 @@ Prévenir les membres. Pendant la fenêtre, l'ancienne installation ne doit plus
 
 Puis retirer la maintenance nginx et réactiver la crontab de l'ancienne installation.
 
-**Une fois la maintenance levée**, les membres écrivent dans la nouvelle base. Un retour arrière doit alors réimporter ces données dans l'ancienne base, dans l'autre sens :
+**Une fois la maintenance levée**, les membres écrivent dans la nouvelle base. Un retour arrière doit alors réimporter ces données dans l'ancienne base, dans l'autre sens.
 
-```shell
-cd /opt/gestion-compte
-sudo docker compose stop web php cron
-sudo docker compose exec -T database bash -o pipefail -c 'umask 077; mariadb-dump --single-transaction --routines --triggers -uroot -p"$MARIADB_ROOT_PASSWORD" "$MARIADB_DATABASE" | gzip > /backups/retour-arriere.sql.gz'
-sudo gunzip -c backups/retour-arriere.sql.gz | tail -n 1   # doit afficher "-- Dump completed on …"
-sudo gunzip -c backups/retour-arriere.sql.gz | sudo mysql gestion_compte
-```
+1. Arrêter l'application dans la stack et exporter la base (sur le serveur de la stack) :
 
-Faire de même pour les fichiers envoyés depuis la bascule. Fixer à l'avance un **point de non-retour** (par exemple une semaine sans incident), après lequel l'ancienne installation est désinstallée.
+   ```shell
+   cd /opt/gestion-compte
+   sudo docker compose stop web php cron
+   sudo docker compose exec -T database bash -o pipefail -c 'umask 077; mariadb-dump --single-transaction --routines --triggers -uroot -p"$MARIADB_ROOT_PASSWORD" "$MARIADB_DATABASE" | gzip > /backups/retour-arriere.sql.gz'
+   sudo gunzip -c backups/retour-arriere.sql.gz | tail -n 1   # doit afficher "-- Dump completed on …"
+   ```
+
+2. **Nouveau serveur** : copier `backups/retour-arriere.sql.gz` sur l'ancien serveur (`scp`), les étapes suivantes s'y déroulent.
+3. Sur l'ancien serveur, démarrer la base (**même serveur** : elle a été arrêtée à la bascule, et la stack doit libérer les ports 80 et 443 : `sudo docker compose down`, sans `--volumes`), puis importer :
+
+   ```shell
+   sudo systemctl enable --now mysql   # ou mariadb
+   sudo gunzip -c retour-arriere.sql.gz | sudo mysql gestion_compte
+   ```
+
+4. Faire de même pour les fichiers envoyés depuis la bascule, puis remettre l'ancienne installation en service : `sudo systemctl enable --now php7.4-fpm nginx`, crontab réactivée, et sur un nouveau serveur, l'ancien enregistrement DNS. Fixer à l'avance un **point de non-retour** (par exemple une semaine sans incident), après lequel l'ancienne installation est désinstallée.
 
 ## 6. Après la migration
 

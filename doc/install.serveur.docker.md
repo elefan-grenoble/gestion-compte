@@ -85,19 +85,25 @@ sudo docker compose up -d --wait
 sudo docker compose exec php php bin/console doctrine:migrations:migrate --no-interaction
 ```
 
-Visiter `https://<domaine>/user/install_admin` pour créer le super administrateur, puis suivre le [guide de mise en route](start.md).
+Créer le super administrateur en ligne de commande, avec les identifiants `SUPER_ADMIN_USERNAME` / `SUPER_ADMIN_INITIAL_PASSWORD` d'`app.env` (le mot de passe est à changer à la première connexion ; la page `/user/install_admin` ne crée plus le super administrateur d'une instance neuve) :
+
+```shell
+sudo docker compose exec php php bin/console app:user:install_super_admin
+```
+
+Puis suivre le [guide de mise en route](start.md).
 
 En cas de problème : `sudo docker compose ps` et `sudo docker compose logs <service>`. Le premier démarrage de `web` peut prendre quelques dizaines de secondes, le temps d'obtenir le certificat.
 
 ## Mettre à jour
 
-Avant chaque mise à jour, lire les notes de version, puis :
+Avant chaque mise à jour, lire les notes de version, puis lancer les commandes **une par une**, en vérifiant le résultat de la sauvegarde avant d'aller plus loin :
 
 ```shell
 cd /opt/gestion-compte
-# 1. Sauvegarde de la base (voir Sauvegardes) : ne pas continuer si elle échoue
+# 1. Sauvegarde de la base (voir Sauvegardes). Si « SAUVEGARDE ÉCHOUÉE » s'affiche : s'arrêter là.
 sudo docker compose exec -T database bash -o pipefail -c 'umask 077; mariadb-dump --single-transaction --routines --triggers -uroot -p"$MARIADB_ROOT_PASSWORD" "$MARIADB_DATABASE" | gzip > /backups/gestion-compte-$(date +%F-%H%M).sql.gz' \
-    && sudo ls -lh backups/
+    && sudo ls -lh backups/ || echo "SAUVEGARDE ÉCHOUÉE"
 # 2. Nouvelle version : APP_VERSION dans .env, et compose.yaml de cette version
 sudo nano .env
 sudo curl -fsSLo compose.yaml https://raw.githubusercontent.com/elefan-grenoble/gestion-compte/v<VERSION>/.docker/prod/compose.yaml
@@ -157,10 +163,18 @@ Copier ensuite `backups/` hors du serveur : une sauvegarde sur la même machine 
 
 ### Restaurer une sauvegarde
 
+D'abord vérifier le fichier : une archive tronquée s'importerait à moitié sans erreur visible.
+
 ```shell
 cd /opt/gestion-compte
-sudo gunzip -c backups/gestion-compte-<date>.sql.gz \
-    | sudo docker compose exec -T database sh -c 'mariadb -uroot -p"$MARIADB_ROOT_PASSWORD" "$MARIADB_DATABASE"'
+f=gestion-compte-<date>.sql.gz
+sudo gzip -t "backups/$f" && sudo gunzip -c "backups/$f" | tail -n 1   # doit afficher "-- Dump completed on …"
+```
+
+Puis importer, depuis le conteneur (`pipefail` : une erreur de décompression fait échouer l'import) :
+
+```shell
+sudo docker compose exec -T database bash -o pipefail -c "gunzip -c /backups/$f | mariadb -uroot -p\"\$MARIADB_ROOT_PASSWORD\" \"\$MARIADB_DATABASE\""
 ```
 
 ## Derrière un proxy existant
