@@ -48,18 +48,31 @@ class SentEmailControllerTest extends FunctionalTestCase
         $this->assertStringNotContainsString('Delivered mail', $text);
     }
 
-    public function testAMailBeingHandedOverIsShownAsWaiting(): void
+    public function testAWaitingMailIsShownAsWaitingWhetherItIsQueuedOrBeingHandedOver(): void
     {
         $client = $this->loginAs('admin');
+        $this->aMail('Queued mail', 'q@example.org', SentEmail::STATUS_QUEUED, '-1 hour');
         $this->aMail('Handed over mail', 'p@example.org', SentEmail::STATUS_PENDING, '-1 hour');
         $this->aMail('Delivered waiting test', 'ok@example.org', SentEmail::STATUS_SENT, '-1 hour');
 
         $crawler = $client->request('GET', '/admin/mails/historique/');
-        $this->assertStringContainsString('En attente', $crawler->filterXPath('//tbody')->text());
+        $rows = $crawler->filterXPath('//tbody/tr')->each(function ($row) {
+            return $row->text();
+        });
+        $queued = array_values(array_filter($rows, function ($text) {
+            return false !== strpos($text, 'Queued mail');
+        }));
+        $pending = array_values(array_filter($rows, function ($text) {
+            return false !== strpos($text, 'Handed over mail');
+        }));
+        $this->assertStringContainsString('En attente', $queued[0]);
+        $this->assertStringContainsString('En attente', $pending[0]);
+        $this->assertStringNotContainsString('En cours', $crawler->text());
 
-        $crawler = $client->submit($crawler->selectButton('Filtrer')->form(['form[status]' => SentEmail::STATUS_PENDING]));
+        $crawler = $client->submit($crawler->selectButton('Filtrer')->form(['form[status]' => SentEmail::STATUS_QUEUED]));
         $text = $crawler->filterXPath('//tbody')->text();
-        $this->assertStringContainsString('Handed over mail', $text);
+        $this->assertStringContainsString('Queued mail', $text);
+        $this->assertStringContainsString('Handed over mail', $text, 'Waiting covers both.');
         $this->assertStringNotContainsString('Delivered waiting test', $text);
     }
 

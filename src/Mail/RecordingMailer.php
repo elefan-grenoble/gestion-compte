@@ -47,7 +47,12 @@ class RecordingMailer implements MailerInterface
             return;
         }
 
-        $id = $this->open($message, $envelope);
+        $queued = $message->getHeaders()->has(MailMetadata::HEADER_QUEUE) && null === $envelope;
+        $id = $this->open($message, $envelope, $queued);
+        if ($queued) {
+            // Waiting in the history: MailQueueSender sends it later on.
+            return;
+        }
 
         try {
             $this->inner->send($message, $envelope);
@@ -63,9 +68,13 @@ class RecordingMailer implements MailerInterface
     /**
      * Writes the "pending" line of the history.
      *
+     * @param bool $queued in: the mail should wait in the queue; out: it does (it
+     *                     is sent at once if it cannot wait, e.g. attachments, or
+     *                     if the history could not be written)
+     *
      * @return null|int id of the line, null when it could not be written
      */
-    private function open(Email $message, ?Envelope $envelope): ?int
+    private function open(Email $message, ?Envelope $envelope, bool &$queued): ?int
     {
         $headers = $message->getHeaders();
         $source = $headers->has(MailMetadata::HEADER_SOURCE) ? $headers->get(MailMetadata::HEADER_SOURCE)->getBodyAsString() : SentEmail::SOURCE_AUTO;
@@ -104,6 +113,10 @@ class RecordingMailer implements MailerInterface
             }
         }
 
+        $queuedMessage = $queued ? QueuedMessage::encode($message) : null;
+        $queued = null !== $queuedMessage;
+        $status = $queued ? SentEmail::STATUS_QUEUED : SentEmail::STATUS_PENDING;
+
         try {
             $this->connection->insert('sent_email', [
                 'created_at' => (new \DateTime())->format('Y-m-d H:i:s'),
@@ -113,8 +126,9 @@ class RecordingMailer implements MailerInterface
                 'recipient_count' => count($recipients),
                 'subject' => mb_substr((string) $message->getSubject(), 0, 255),
                 'body' => $body,
-                'status' => SentEmail::STATUS_PENDING,
+                'status' => $status,
                 'error' => null,
+                'queued_message' => $queuedMessage,
                 'message_id' => $messageId,
                 'sent_by_id' => $sentBy,
                 'batch_id' => $batchId,
@@ -123,6 +137,7 @@ class RecordingMailer implements MailerInterface
             return (int) $this->connection->lastInsertId();
         } catch (\Throwable $e) {
             $this->logger->warning('Mail history: the mail could not be recorded: ' . $e->getMessage());
+            $queued = false;
 
             return null;
         }

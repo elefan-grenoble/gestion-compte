@@ -31,7 +31,13 @@ class SentEmail
     /** Written by an admin (the "send a mail" page or the mass mail command). */
     public const SOURCE_MANUAL = 'manual';
 
-    /** Being handed to the mail server (or interrupted before its answer). */
+    /** Waiting for the background sending (command app:mail:send-pending). */
+    public const STATUS_QUEUED = 'queued';
+
+    /**
+     * Being handed to the mail server (or interrupted before its answer). Shown as
+     * "waiting" like the queued mails: the person does not need the difference.
+     */
     public const STATUS_PENDING = 'pending';
     public const STATUS_SENT = 'sent';
     public const STATUS_FAILED = 'failed';
@@ -42,7 +48,7 @@ class SentEmail
     ];
 
     public const STATUSES = [
-        'En attente' => self::STATUS_PENDING,
+        'En attente' => self::STATUS_QUEUED,
         'Envoyé' => self::STATUS_SENT,
         'Échec' => self::STATUS_FAILED,
     ];
@@ -143,6 +149,16 @@ class SentEmail
      * @ORM\Column(name="batch_id", type="string", length=36, nullable=true)
      */
     private $batchId;
+
+    /**
+     * The mail to send (JSON, see App\Mail\QueuedMessage) while it waits in the
+     * queue; emptied once it has been handed to the mail server.
+     *
+     * @var null|string
+     *
+     * @ORM\Column(name="queued_message", type="text", nullable=true)
+     */
+    private $queuedMessage;
 
     /**
      * @var null|User
@@ -291,6 +307,18 @@ class SentEmail
     public function setBatchId(?string $batchId): self
     {
         $this->batchId = $batchId;
+
+        return $this;
+    }
+
+    public function getQueuedMessage(): ?string
+    {
+        return $this->queuedMessage;
+    }
+
+    public function setQueuedMessage(?string $queuedMessage): self
+    {
+        $this->queuedMessage = $queuedMessage;
 
         return $this;
     }

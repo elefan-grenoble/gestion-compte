@@ -19,12 +19,14 @@ final class MailMetadata
     public const HEADER_STORE_BODY = 'X-App-Store-Body';
     public const HEADER_SENT_BY = 'X-App-Sent-By';
     public const HEADER_BATCH = 'X-App-Mail-Batch';
+    public const HEADER_QUEUE = 'X-App-Mail-Queue';
 
     public const HEADERS = [
         self::HEADER_SOURCE,
         self::HEADER_STORE_BODY,
         self::HEADER_SENT_BY,
         self::HEADER_BATCH,
+        self::HEADER_QUEUE,
     ];
 
     /**
@@ -44,6 +46,18 @@ final class MailMetadata
         if ($sentBy && $sentBy->getId()) {
             $headers->addTextHeader(self::HEADER_SENT_BY, (string) $sentBy->getId());
         }
+
+        return $email;
+    }
+
+    /**
+     * Asks to send the mail in the background: it waits in the history with
+     * the status "queued" until the command app:mail:send-pending sends it.
+     * A mail that cannot wait (attachments) is sent at once.
+     */
+    public static function queue(Email $email): Email
+    {
+        $email->getHeaders()->addTextHeader(self::HEADER_QUEUE, '1');
 
         return $email;
     }
