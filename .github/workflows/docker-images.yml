@@ -197,7 +197,7 @@ jobs:
           # latest is explicit below: a workflow_call runs on a branch ref
           flavor: latest=false
           tags: |
-            type=raw,value=latest,enable=${{ (inputs.tag || '') != '' || startsWith(github.ref, 'refs/tags/v') }}
+            type=raw,value=latest,enable=${{ ((inputs.tag || '') != '' || startsWith(github.ref, 'refs/tags/v')) && !contains(inputs.tag || github.ref, '-') }}
             type=semver,pattern={{version}},value=${{ inputs.tag }}
             type=semver,pattern={{major}}.{{minor}},value=${{ inputs.tag }}
             type=edge,branch=main,enable=${{ (inputs.tag || '') == '' }}
