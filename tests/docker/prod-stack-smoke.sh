@@ -44,8 +44,9 @@ dc() { docker compose -p "${PROJECT}" -f "${COMPOSE_FILE}" --env-file "${WORK_DI
 
 cleanup() {
     dc down --volumes --remove-orphans >/dev/null 2>&1
-    rm -f "${WORK_DIR}/stack.env" "${WORK_DIR}/app.env" "${WORK_DIR}/body"
-    rmdir "${WORK_DIR}"
+    rm -f "${WORK_DIR}/stack.env" "${WORK_DIR}/app.env" "${WORK_DIR}/body" \
+        "${WORK_DIR}"/backups/*.sql.gz
+    rmdir "${WORK_DIR}/backups" "${WORK_DIR}"
 }
 trap cleanup EXIT
 
@@ -54,6 +55,7 @@ db_password="$(head -c 18 /dev/urandom | base64 | tr -d '+/=')"
 cat > "${WORK_DIR}/stack.env" <<EOF
 APP_VERSION=${APP_VERSION}
 APP_ENV_FILE=${WORK_DIR}/app.env
+BACKUP_DIR=${WORK_DIR}/backups
 SITE_ADDRESS=:80
 HTTP_PUBLISH=127.0.0.1:${HTTP_PORT}
 HTTPS_PUBLISH=127.0.0.1:$((HTTP_PORT + 1))
@@ -70,6 +72,8 @@ sed -e 's/^APP_ENV=.*/APP_ENV=prod/' \
     -e 's|^MAILER_DSN=.*|MAILER_DSN=null://null|' \
     "${PROJECT_DIR}/.env.dist" > "${WORK_DIR}/app.env"
 chmod 0644 "${WORK_DIR}/app.env"
+# Created here (not by Docker as root) so that cleanup can empty it
+mkdir "${WORK_DIR}/backups"
 
 printf '\nprod stack (project %s, %s)\n' "${PROJECT}" "${BASE_URL}"
 
@@ -102,8 +106,17 @@ check "php runs as www-data" \
     test "$(dc exec -T php id -un)" = www-data
 check "cron runs as www-data" \
     test "$(dc exec -T cron id -un)" = www-data
-check "the image refuses to start without the instance's .env" \
-    not docker run --rm "${APP_IMAGE}:${APP_VERSION}" true
+# Must fail, and for the right reason (a missing image would fail too)
+refuses_without_env() {
+    local out
+    out="$(docker run --rm "${APP_IMAGE}:${APP_VERSION}" true 2>&1)" && return 1
+    grep -q 'app-entrypoint: /var/www/app/.env is missing' <<< "${out}"
+}
+check "the image refuses to start without the instance's .env" refuses_without_env
+check "no configuration file other than the templates is in the image" \
+    test -z "$(docker run --rm --entrypoint find "${APP_IMAGE}:${APP_VERSION}" /var/www/app \
+        -path /var/www/app/vendor -prune -o \( -name '.env*' -o -name '*.env' \) \
+        ! -name '.env.dist' -print)"
 
 # --- Network exposure --------------------------------------------------------
 
@@ -136,17 +149,23 @@ check "build assets are cached as immutable" \
 dc exec -T php sh -c 'printf "uploaded" > public/uploads/event/smoke.txt'
 dc exec -T php sh -c 'printf "<?php echo \"EXEC\" . \"UTED\";" > public/uploads/event/smoke.php'
 
+# answered_without <path> <marker>: a real answer (not a connection error,
+# not a 5xx) whose body does not contain <marker>
+answered_without() {
+    local code
+    code="$(status "$1")"
+    [ "${code}" != 000 ] && [ "${code}" -lt 500 ] && ! grep -q "$2" "${WORK_DIR}/body"
+}
+
 check "an uploaded file is served from the shared volume" \
     sh -c "test \"\$(curl -s '${BASE_URL}/uploads/event/smoke.txt')\" = uploaded"
-check "an uploaded PHP file is never executed" \
-    sh -c "! curl -s '${BASE_URL}/uploads/event/smoke.php' | grep -q EXECUTED"
-check "an uploaded PHP file is never executed (path info)" \
-    sh -c "! curl -s '${BASE_URL}/uploads/event/smoke.php/x' | grep -q EXECUTED"
-check "an uploaded PHP file is not served as source" \
-    sh -c "! curl -s '${BASE_URL}/uploads/event/smoke.php' | grep -q '<?php'"
-check "dotfiles are not served" test "$(status /uploads/.htaccess)" != 200
-check "the front controller source is not served" \
-    sh -c "! curl -s '${BASE_URL}/index.php' | grep -q '<?php'"
+check "uploaded files are sandboxed (CSP)" \
+    sh -c "curl -sI '${BASE_URL}/uploads/event/smoke.txt' | grep -qi 'content-security-policy: sandbox'"
+check "an uploaded PHP file is never executed" answered_without /uploads/event/smoke.php EXECUTED
+check "an uploaded PHP file is never executed (path info)" answered_without /uploads/event/smoke.php/x EXECUTED
+check "an uploaded PHP file is not served as source" answered_without /uploads/event/smoke.php '<?php'
+check "dotfiles are not served" test "$(status /uploads/.htaccess)" = 404
+check "the front controller source is not served" answered_without /index.php '<?php'
 
 # --- Cron --------------------------------------------------------------------
 
@@ -157,6 +176,23 @@ check "supercronic schedules the 6 jobs" \
     test "$(dc exec -T cron sh -c 'timeout 3 supercronic -debug /etc/supercronic/crontab 2>&1' | grep -c 'job will run next')" -eq 6
 check "a scheduled command runs (date arithmetic included)" \
     dc exec -T cron sh -c 'php bin/console app:shift:generate "$(date -d "+27 days" +%Y-%m-%d)"'
+
+# --- Backups (the command of doc/install.serveur.docker.md) -----------------
+
+# backup [password-variable]: the documented dump, written inside the container
+backup() {
+    dc exec -T database bash -o pipefail -c "mariadb-dump --single-transaction --routines --triggers -uroot -p\"\$${1:-MARIADB_ROOT_PASSWORD}\" \"\$MARIADB_DATABASE\" | gzip > /backups/$2.sql.gz"
+}
+# A complete dump ends with mariadb-dump's "Dump completed" trailer
+backup_is_complete() {
+    backup MARIADB_ROOT_PASSWORD ok \
+        && gzip -t "${WORK_DIR}/backups/ok.sql.gz" \
+        && gunzip -c "${WORK_DIR}/backups/ok.sql.gz" | grep -q 'migration_versions' \
+        && gunzip -c "${WORK_DIR}/backups/ok.sql.gz" | tail -n 1 | grep -q 'Dump completed'
+}
+check "the documented backup produces a complete dump" backup_is_complete
+# Wrong password (the user name): the pipeline must fail, not leave an empty .gz
+check "a failing dump makes the backup command fail" not backup MARIADB_USER broken
 
 # --- Persistence -------------------------------------------------------------
 
