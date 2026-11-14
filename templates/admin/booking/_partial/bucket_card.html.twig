@@ -28,11 +28,8 @@
                                 {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %}
                                 {{ shift.shifter.publicDisplayName }}
                                 {% if shift.formation %}</b>{% endif %}
-                                {% if not shift.formation and shift.shifter.formations | length > 0 %}
-                                    &nbsp;<strong class="orange-text">(q)</strong>
-                                {% endif %}
                                 {% if shift.shifter.isNew %}
-                                    &nbsp;<strong class="red-text" title="Nouveau membre">{{ beneficiary_new_icon }}</strong>
+                                    &nbsp;<strong class="purple-text" title="Nouveau membre">{{ beneficiary_new_icon }}</strong>
                                 {% endif %}
                             </li>
                         {% else %}
