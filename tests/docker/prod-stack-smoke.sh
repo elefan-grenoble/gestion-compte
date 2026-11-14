@@ -72,6 +72,16 @@ sed -e 's/^APP_ENV=.*/APP_ENV=prod/' \
     -e 's|^MAILER_DSN=.*|MAILER_DSN=null://null|' \
     "${PROJECT_DIR}/.env.dist" > "${WORK_DIR}/app.env"
 chmod 0644 "${WORK_DIR}/app.env"
+
+# Compose gives the shell environment precedence over --env-file: export the
+# generated values, so that a variable inherited from the caller (an
+# APP_ENV_FILE pointing to a real instance, say) cannot override them. The
+# other stack variables fall back to their defaults.
+set -a
+# shellcheck source=/dev/null
+. "${WORK_DIR}/stack.env"
+set +a
+unset CADDY_TRUSTED_PROXIES TZ FPM_MAX_CHILDREN PHP_MEMORY_LIMIT
 # Created here (not by Docker as root) so that cleanup can empty it
 mkdir "${WORK_DIR}/backups"
 
@@ -113,18 +123,30 @@ refuses_without_env() {
     grep -q 'app-entrypoint: /var/www/app/.env is missing' <<< "${out}"
 }
 check "the image refuses to start without the instance's .env" refuses_without_env
-check "no configuration file other than the templates is in the image" \
-    test -z "$(docker run --rm --entrypoint find "${APP_IMAGE}:${APP_VERSION}" /var/www/app \
+# Fail closed: an inspection that fails must not read as "nothing found"
+no_config_file_in_image() {
+    local found
+    found="$(docker run --rm --entrypoint find "${APP_IMAGE}:${APP_VERSION}" /var/www/app \
         -path /var/www/app/vendor -prune -o \( -name '.env*' -o -name '*.env' \) \
-        ! -name '.env.dist' -print)"
+        ! -name '.env.dist' -print)" || return 1
+    [ -z "${found}" ]
+}
+check "no configuration file other than the templates is in the image" no_config_file_in_image
+check "php-fpm accepts its configuration with a single worker" \
+    docker run --rm -e FPM_MAX_CHILDREN=1 --entrypoint php-fpm "${APP_IMAGE}:${APP_VERSION}" -t
 
 # --- Network exposure --------------------------------------------------------
 
 # The images EXPOSE their ports: what matters is a binding on the host
-published() { dc ps --format json "$1" | jq -r '.Publishers[]? | select(.PublishedPort != 0) | .TargetPort'; }
-check "php-fpm publishes no port" test -z "$(published php)"
-check "the database publishes no port" test -z "$(published database)"
-check "cron publishes no port" test -z "$(published cron)"
+# (pipefail: a failing `dc ps` or a missing jq fails the check)
+publishes_no_port() {
+    local ports
+    ports="$(dc ps --format json "$1" | jq -er '[.Publishers[]? | select(.PublishedPort != 0) | .TargetPort] | join(",")')" || return 1
+    [ -z "${ports}" ]
+}
+check "php-fpm publishes no port" publishes_no_port php
+check "the database publishes no port" publishes_no_port database
+check "cron publishes no port" publishes_no_port cron
 
 # --- Database ----------------------------------------------------------------
 
