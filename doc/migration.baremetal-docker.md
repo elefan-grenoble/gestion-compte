@@ -113,7 +113,7 @@ Prévenir les membres. Pendant la fenêtre, l'ancienne installation ne doit plus
 1. **Couper les écritures** sur l'ancienne installation :
    * mettre nginx en maintenance (page statique ou `return 503;` dans le `server` du site, puis `sudo systemctl reload nginx`) ;
    * suspendre les tâches planifiées (commenter les lignes de la crontab) ;
-   * arrêter PHP-FPM (`sudo systemctl stop php7.4-fpm`) : l'arrêt attend la fin des requêtes en cours, qu'un rechargement de nginx laisse terminer après la mise en maintenance ;
+   * attendre une minute (les requêtes déjà engagées avant la mise en maintenance se terminent), puis arrêter PHP-FPM (`sudo systemctl stop php7.4-fpm`) : plus aucune écriture n'est possible ;
    * attendre la fin d'une éventuelle tâche en cours (`ps aux | grep bin/console`).
 2. **Remettre le vrai `MAILER_DSN`** dans `app.env`.
 3. **Copier les données**, avec les commandes de la répétition (étapes 2.1 à 2.3, vérification du `-- Dump completed` et des comptages comprises), sur une stack vide (`docker compose down --volumes` fait en fin de répétition).
@@ -128,7 +128,7 @@ Prévenir les membres. Pendant la fenêtre, l'ancienne installation ne doit plus
      ```
 
      Si nginx sert aussi d'autres sites, le laisser en place et suivre [Derrière un proxy existant](install.serveur.docker.md#derrière-un-proxy-existant) : seul le `server` du site change pour faire `proxy_pass http://127.0.0.1:8080`.
-   * **nouveau serveur** : changer l'enregistrement DNS vers la nouvelle adresse. Caddy obtient le certificat dès que le DNS résout vers lui (suivre `sudo docker compose logs -f web`). Pendant la propagation, laisser l'ancienne installation en maintenance.
+   * **nouveau serveur** : sur le nouveau serveur, retirer les trois réglages provisoires de l'étape 1.4 de `.env` (en remettant le domaine dans `SITE_ADDRESS`) et relancer : `cd /opt/gestion-compte && sudo nano .env && sudo docker compose up -d --wait web php`. Puis changer l'enregistrement DNS vers la nouvelle adresse. Caddy obtient le certificat dès que le DNS résout vers lui (suivre `sudo docker compose logs -f web`). Pendant la propagation, laisser l'ancienne installation en maintenance.
 6. **Recette** (ci-dessous), puis démarrer les tâches planifiées (`sudo docker compose up -d --wait`, qui ajoute `cron`) et lever la maintenance en annonçant la fin aux membres.
 
 ## 4. Recette
@@ -152,7 +152,7 @@ Prévenir les membres. Pendant la fenêtre, l'ancienne installation ne doit plus
   sudo systemctl enable --now mysql php7.4-fpm nginx   # ou mariadb
   ```
 
-* **nouveau serveur** : remettre l'ancien enregistrement DNS.
+* **nouveau serveur** : remettre l'ancien enregistrement DNS, et sur l'ancien serveur redémarrer PHP-FPM, arrêté à la bascule : `sudo systemctl start php7.4-fpm`.
 
 Puis retirer la maintenance nginx et réactiver la crontab de l'ancienne installation.
 
@@ -172,7 +172,8 @@ Puis retirer la maintenance nginx et réactiver la crontab de l'ancienne install
 
    ```shell
    sudo systemctl enable --now mysql   # ou mariadb
-   sudo gunzip -c retour-arriere.sql.gz | sudo mysql gestion_compte
+   f=/opt/gestion-compte/backups/retour-arriere.sql.gz   # nouveau serveur : là où le fichier a été copié
+   sudo gzip -t "$f" && sudo bash -o pipefail -c "gunzip -c '$f' | mysql gestion_compte"
    ```
 
 4. Faire de même pour les fichiers envoyés depuis la bascule, puis remettre l'ancienne installation en service : `sudo systemctl enable --now php7.4-fpm nginx`, crontab réactivée, et sur un nouveau serveur, l'ancien enregistrement DNS. Fixer à l'avance un **point de non-retour** (par exemple une semaine sans incident), après lequel l'ancienne installation est désinstallée.
