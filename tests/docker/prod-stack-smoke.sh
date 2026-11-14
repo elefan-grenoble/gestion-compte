@@ -181,16 +181,23 @@ check "a scheduled command runs (date arithmetic included)" \
 
 # backup [password-variable]: the documented dump, written inside the container
 backup() {
-    dc exec -T database bash -o pipefail -c "mariadb-dump --single-transaction --routines --triggers -uroot -p\"\$${1:-MARIADB_ROOT_PASSWORD}\" \"\$MARIADB_DATABASE\" | gzip > /backups/$2.sql.gz"
+    dc exec -T database bash -o pipefail -c "umask 077; mariadb-dump --single-transaction --routines --triggers -uroot -p\"\$${1:-MARIADB_ROOT_PASSWORD}\" \"\$MARIADB_DATABASE\" | gzip > /backups/$2.sql.gz"
 }
-# A complete dump ends with mariadb-dump's "Dump completed" trailer
+# A complete dump ends with mariadb-dump's "Dump completed" trailer. Read from
+# the container: the dump is root-only (umask 077), as it holds personal data.
+# (Read into a variable: under pipefail, `grep -q` closing the pipe early
+# would make the stream fail with SIGPIPE.)
 backup_is_complete() {
+    local dump
     backup MARIADB_ROOT_PASSWORD ok \
-        && gzip -t "${WORK_DIR}/backups/ok.sql.gz" \
-        && gunzip -c "${WORK_DIR}/backups/ok.sql.gz" | grep -q 'migration_versions' \
-        && gunzip -c "${WORK_DIR}/backups/ok.sql.gz" | tail -n 1 | grep -q 'Dump completed'
+        && dc exec -T database sh -c 'gzip -t /backups/ok.sql.gz' \
+        && dump="$(dc exec -T database sh -c 'gunzip -c /backups/ok.sql.gz')" \
+        && grep -q 'migration_versions' <<< "${dump}" \
+        && [[ "$(tail -n 1 <<< "${dump}")" == *'Dump completed'* ]]
 }
 check "the documented backup produces a complete dump" backup_is_complete
+check "the dump is readable by its owner only" \
+    test "$(dc exec -T database stat -c %a /backups/ok.sql.gz)" = 600
 # Wrong password (the user name): the pipeline must fail, not leave an empty .gz
 check "a failing dump makes the backup command fail" not backup MARIADB_USER broken
 

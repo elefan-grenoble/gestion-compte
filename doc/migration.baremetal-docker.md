@@ -50,8 +50,8 @@ Le but est de valider l'import, les migrations et la configuration sur une copie
 1. **Exporter** la base de production dans un fichier, sur l'ancien serveur. `--single-transaction` réalise une copie cohérente sans bloquer l'application :
 
    ```shell
-   sudo mkdir -p /opt/gestion-compte/backups
-   sudo sh -c 'mysqldump --single-transaction --routines --triggers --default-character-set=utf8mb4 gestion_compte > /opt/gestion-compte/backups/migration.sql'
+   sudo mkdir -p -m 700 /opt/gestion-compte/backups
+   sudo sh -c 'umask 077; mysqldump --single-transaction --routines --triggers --default-character-set=utf8mb4 gestion_compte > /opt/gestion-compte/backups/migration.sql'
    sudo tail -n 1 /opt/gestion-compte/backups/migration.sql   # doit afficher "-- Dump completed on …"
    ```
 
@@ -149,9 +149,9 @@ Puis retirer la maintenance nginx et réactiver la crontab de l'ancienne install
 ```shell
 cd /opt/gestion-compte
 sudo docker compose stop web php cron
-sudo docker compose exec -T database bash -o pipefail -c 'mariadb-dump --single-transaction --routines --triggers -uroot -p"$MARIADB_ROOT_PASSWORD" "$MARIADB_DATABASE" | gzip > /backups/retour-arriere.sql.gz'
-gunzip -c backups/retour-arriere.sql.gz | tail -n 1   # doit afficher "-- Dump completed on …"
-gunzip -c backups/retour-arriere.sql.gz | sudo mysql gestion_compte
+sudo docker compose exec -T database bash -o pipefail -c 'umask 077; mariadb-dump --single-transaction --routines --triggers -uroot -p"$MARIADB_ROOT_PASSWORD" "$MARIADB_DATABASE" | gzip > /backups/retour-arriere.sql.gz'
+sudo gunzip -c backups/retour-arriere.sql.gz | tail -n 1   # doit afficher "-- Dump completed on …"
+sudo gunzip -c backups/retour-arriere.sql.gz | sudo mysql gestion_compte
 ```
 
 Faire de même pour les fichiers envoyés depuis la bascule. Fixer à l'avance un **point de non-retour** (par exemple une semaine sans incident), après lequel l'ancienne installation est désinstallée.

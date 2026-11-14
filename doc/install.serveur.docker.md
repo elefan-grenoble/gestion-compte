@@ -48,6 +48,8 @@ Deux fichiers de configuration, à ne pas confondre :
 ```shell
 sudo cp .env.dist .env && sudo chmod 600 .env
 sudo nano .env
+# Sauvegardes : données personnelles des membres, lisibles par root seulement
+sudo mkdir -m 700 backups
 ```
 
 Renseigner `APP_VERSION` (sans le `v`), `SITE_ADDRESS` (le domaine), `MARIADB_PASSWORD` et `MARIADB_ROOT_PASSWORD`. Pour générer un mot de passe : `openssl rand -hex 24`. Le mot de passe de la base est repris tel quel dans `DATABASE_URL`, qui est une URL : il ne doit contenir ni `/`, ni `+`, ni `=`, ni `@`, ni `:` (c'est le cas d'un mot de passe en hexadécimal, pas d'un mot de passe en base64).
@@ -94,8 +96,8 @@ Avant chaque mise à jour, lire les notes de version, puis :
 ```shell
 cd /opt/gestion-compte
 # 1. Sauvegarde de la base (voir Sauvegardes) : ne pas continuer si elle échoue
-sudo docker compose exec -T database bash -o pipefail -c 'mariadb-dump --single-transaction --routines --triggers -uroot -p"$MARIADB_ROOT_PASSWORD" "$MARIADB_DATABASE" | gzip > /backups/gestion-compte-$(date +%F-%H%M).sql.gz' \
-    && ls -lh backups/
+sudo docker compose exec -T database bash -o pipefail -c 'umask 077; mariadb-dump --single-transaction --routines --triggers -uroot -p"$MARIADB_ROOT_PASSWORD" "$MARIADB_DATABASE" | gzip > /backups/gestion-compte-$(date +%F-%H%M).sql.gz' \
+    && sudo ls -lh backups/
 # 2. Nouvelle version : APP_VERSION dans .env, et compose.yaml de cette version
 sudo nano .env
 sudo curl -fsSLo compose.yaml https://raw.githubusercontent.com/elefan-grenoble/gestion-compte/v<VERSION>/.docker/prod/compose.yaml
@@ -132,23 +134,23 @@ Aucune sauvegarde automatique n'est incluse. La commande de sauvegarde de la bas
 
 ```shell
 cd /opt/gestion-compte
-sudo docker compose exec -T database bash -o pipefail -c 'mariadb-dump --single-transaction --routines --triggers -uroot -p"$MARIADB_ROOT_PASSWORD" "$MARIADB_DATABASE" | gzip > /backups/gestion-compte-$(date +%F-%H%M).sql.gz' \
-    && ls -lh backups/
+sudo docker compose exec -T database bash -o pipefail -c 'umask 077; mariadb-dump --single-transaction --routines --triggers -uroot -p"$MARIADB_ROOT_PASSWORD" "$MARIADB_DATABASE" | gzip > /backups/gestion-compte-$(date +%F-%H%M).sql.gz' \
+    && sudo ls -lh backups/
 ```
 
-Une sauvegarde complète se termine par une ligne `-- Dump completed` : `gunzip -c backups/<fichier> | tail -n 1`.
+Une sauvegarde complète se termine par une ligne `-- Dump completed` : `sudo gunzip -c backups/<fichier> | tail -n 1`. Les fichiers ne sont lisibles que par root (`umask 077`) : ils contiennent les données personnelles des membres et les empreintes de mots de passe.
 
 Pour l'automatiser, la même commande dans la crontab de root (`sudo crontab -e`), en échappant les `%` :
 
 ```
-30 3 * * * cd /opt/gestion-compte && docker compose exec -T database bash -o pipefail -c 'mariadb-dump --single-transaction --routines --triggers -uroot -p"$MARIADB_ROOT_PASSWORD" "$MARIADB_DATABASE" | gzip > /backups/gestion-compte-$(date +\%F).sql.gz' && find backups/ -name '*.sql.gz' -mtime +30 -delete
+30 3 * * * cd /opt/gestion-compte && docker compose exec -T database bash -o pipefail -c 'umask 077; mariadb-dump --single-transaction --routines --triggers -uroot -p"$MARIADB_ROOT_PASSWORD" "$MARIADB_DATABASE" | gzip > /backups/gestion-compte-$(date +\%F).sql.gz' && find backups/ -name '*.sql.gz' -mtime +30 -delete
 ```
 
 Les fichiers envoyés (logos, images d'événements) :
 
 ```shell
 sudo docker run --rm -v gestion-compte_uploads:/uploads:ro -v /opt/gestion-compte/backups:/backups alpine \
-    tar -czf /backups/gestion-compte-uploads-$(date +%F).tar.gz -C /uploads .
+    sh -c 'umask 077; tar -czf /backups/gestion-compte-uploads-$(date +%F).tar.gz -C /uploads .'
 ```
 
 Copier ensuite `backups/` hors du serveur : une sauvegarde sur la même machine ne protège pas d'une panne de disque.
@@ -157,7 +159,7 @@ Copier ensuite `backups/` hors du serveur : une sauvegarde sur la même machine 
 
 ```shell
 cd /opt/gestion-compte
-gunzip -c backups/gestion-compte-<date>.sql.gz \
+sudo gunzip -c backups/gestion-compte-<date>.sql.gz \
     | sudo docker compose exec -T database sh -c 'mariadb -uroot -p"$MARIADB_ROOT_PASSWORD" "$MARIADB_DATABASE"'
 ```
 
