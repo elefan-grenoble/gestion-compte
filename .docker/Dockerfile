@@ -107,7 +107,8 @@ RUN composer install --no-dev --no-scripts --no-autoloader \
 FROM node AS assets
 WORKDIR /app
 COPY package.json package-lock.json ./
-RUN npm ci --no-audit --no-fund
+# No Cypress binary: only Encore runs here
+RUN CYPRESS_INSTALL_BINARY=0 npm ci --no-audit --no-fund
 COPY webpack.config.js ./
 COPY assets ./assets
 RUN npx encore production
