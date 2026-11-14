@@ -11,7 +11,25 @@ on:
 jobs:
   release-please:
     runs-on: ubuntu-slim
+    outputs:
+      release_created: ${{ steps.release.outputs.release_created }}
+      tag_name: ${{ steps.release.outputs.tag_name }}
     steps:
       - uses: googleapis/release-please-action@v4
+        id: release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
+
+  # Tags pushed with GITHUB_TOKEN trigger no workflow: publish the release
+  # images from here instead of relying on docker-images.yml's tag trigger.
+  docker-images:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    permissions:
+      contents: read
+      packages: write
+      id-token: write
+      attestations: write
+    uses: ./.github/workflows/docker-images.yml
+    with:
+      tag: ${{ needs.release-please.outputs.tag_name }}

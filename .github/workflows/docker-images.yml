@@ -3,7 +3,10 @@
 #
 # - pull_request: build + smoke test, nothing is pushed
 # - push to main: images tagged "edge"
-# - release tag vX.Y.Z (release-please): X.Y.Z, X.Y and latest
+# - release vX.Y.Z: X.Y.Z, X.Y and latest. release-please.yml calls this
+#   workflow (its tags, pushed with GITHUB_TOKEN, trigger no workflow); a
+#   tag pushed by hand triggers it directly.
+# - workflow_dispatch: on main or on a release tag only
 #
 # Each architecture is built on a native runner (the PHP recompilation is
 # too slow under QEMU), pushed by digest, then merged into one multi-arch
@@ -20,17 +23,27 @@ on:
     tags:
       - 'v*'
   workflow_dispatch:
+  workflow_call:
+    inputs:
+      tag:
+        description: Release tag to build and publish (vX.Y.Z)
+        type: string
+        required: true
 
 permissions: {}
 
 concurrency:
-  group: docker-images-${{ github.ref }}
+  group: docker-images-${{ inputs.tag || github.ref }}
   cancel-in-progress: ${{ github.event_name == 'pull_request' }}
 
 env:
   APP_IMAGE: ghcr.io/elefan-grenoble/gestion-compte
   WEB_IMAGE: ghcr.io/elefan-grenoble/gestion-compte-web
   PHP_BASE_IMAGE: php:7.4-fpm@sha256:3ac7c8c74b2b047c7cb273469d74fc0d59b857aa44043e6ea6a0084372811d5b
+  # Ref built: the release tag when called by release-please.yml
+  SOURCE_REF: ${{ inputs.tag || github.ref }}
+  # Images are only published from main and release tags
+  PUBLISH: ${{ github.event_name != 'pull_request' && ((inputs.tag || '') != '' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) }}
 
 jobs:
   build:
@@ -48,10 +61,15 @@ jobs:
       packages: write
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          ref: ${{ env.SOURCE_REF }}
+          # The build runs repository code: keep the token out of .git/config
+          persist-credentials: false
 
       - uses: docker/setup-buildx-action@f87e5991a6d7451dcb8d9637bfbc97413f497069 # v4.4.1
 
-      # Build once into the local image store, test, then push the same layers
+      # Build into the local image store and test; the push steps below rebuild
+      # from this job's builder cache, so they normally push the tested layers
       - name: Build prod image
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
@@ -83,7 +101,7 @@ jobs:
         run: tests/docker/prod-stack-smoke.sh
 
       - name: Log in to GHCR
-        if: github.event_name != 'pull_request'
+        if: env.PUBLISH == 'true'
         uses: docker/login-action@8aa5831fb8d48d8f76594c7ddde61ae58019f550 # v4.8.0
         with:
           registry: ghcr.io
@@ -92,7 +110,7 @@ jobs:
 
       - name: Push prod image by digest
         id: push-app
-        if: github.event_name != 'pull_request'
+        if: env.PUBLISH == 'true'
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
@@ -105,7 +123,7 @@ jobs:
 
       - name: Push web image by digest
         id: push-web
-        if: github.event_name != 'pull_request'
+        if: env.PUBLISH == 'true'
         uses: docker/build-push-action@c3c9e263c25d99ce0380d002d59b67737d91b0dc # v7.4.0
         with:
           context: .
@@ -117,7 +135,7 @@ jobs:
           cache-from: type=gha,scope=images-${{ matrix.arch }}
 
       - name: Export digests
-        if: github.event_name != 'pull_request'
+        if: env.PUBLISH == 'true'
         env:
           APP_DIGEST: ${{ steps.push-app.outputs.digest }}
           WEB_DIGEST: ${{ steps.push-web.outputs.digest }}
@@ -126,7 +144,7 @@ jobs:
           touch "digests/app/${APP_DIGEST#sha256:}" "digests/web/${WEB_DIGEST#sha256:}"
 
       - name: Upload digests
-        if: github.event_name != 'pull_request'
+        if: env.PUBLISH == 'true'
         uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7
         with:
           name: digests-${{ matrix.arch }}
@@ -136,7 +154,8 @@ jobs:
 
   publish:
     needs: build
-    if: github.event_name != 'pull_request'
+    # Same condition as env.PUBLISH (the env context is not available here)
+    if: github.event_name != 'pull_request' && ((inputs.tag || '') != '' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v'))
     runs-on: ubuntu-24.04
     permissions:
       contents: read
@@ -175,10 +194,13 @@ jobs:
         uses: docker/metadata-action@dc802804100637a589fabce1cb79ff13a1411302 # v6.2.0
         with:
           images: ${{ steps.name.outputs.image }}
+          # latest is explicit below: a workflow_call runs on a branch ref
+          flavor: latest=false
           tags: |
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
-            type=edge,branch=main
+            type=raw,value=latest,enable=${{ (inputs.tag || '') != '' || startsWith(github.ref, 'refs/tags/v') }}
+            type=semver,pattern={{version}},value=${{ inputs.tag }}
+            type=semver,pattern={{major}}.{{minor}},value=${{ inputs.tag }}
+            type=edge,branch=main,enable=${{ (inputs.tag || '') == '' }}
 
       - name: Create the multi-arch manifest
         id: manifest
