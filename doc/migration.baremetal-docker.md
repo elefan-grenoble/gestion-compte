@@ -28,12 +28,13 @@ Deux cas, signalés au fil du texte :
 
    | Variable | Nouvelle valeur |
    |---|---|
-   | `APP_ENV` | `prod` |
    | `DATABASE_URL` | `mysql://gestion_compte:<MARIADB_PASSWORD>@database:3306/gestion_compte?serverVersion=mariadb-10.11.19&charset=utf8mb4` |
    | `MAILER_DSN` | un `smtp://…` (ni `sendmail://`, ni `localhost`, qui désigne désormais le conteneur) |
    | `TRUSTED_PROXIES` | vide, sauf [derrière un proxy existant](install.serveur.docker.md#derrière-un-proxy-existant) |
 
-   Garder `APP_SECRET` à l'identique : il sert notamment à chiffrer certains liens envoyés par e-mail.
+   Garder `APP_SECRET` à l'identique : il sert notamment à chiffrer certains liens envoyés par e-mail. `APP_ENV` peut rester tel quel : l'image impose `prod`.
+
+   **Pour la répétition**, mettre provisoirement `MAILER_DSN=null://null` : la nouvelle stack travaille sur une copie des vraies données, elle ne doit envoyer aucun e-mail aux membres. Remettre le vrai `MAILER_DSN` juste avant la bascule.
 4. **Même serveur uniquement** : les ports 80 et 443 sont occupés par nginx jusqu'à la bascule. Pour la répétition, démarrer la stack sur d'autres ports en ajoutant temporairement dans `.env` :
 
    ```ini
@@ -46,21 +47,35 @@ Deux cas, signalés au fil du texte :
 
 Le but est de valider l'import, les migrations et la configuration sur une copie, sans couper la production.
 
-1. Démarrer la base seule et y importer une copie de la base de production :
+1. **Exporter** la base de production dans un fichier, sur l'ancien serveur. `--single-transaction` réalise une copie cohérente sans bloquer l'application :
+
+   ```shell
+   sudo mkdir -p /opt/gestion-compte/backups
+   sudo sh -c 'mysqldump --single-transaction --routines --triggers --default-character-set=utf8mb4 gestion_compte > /opt/gestion-compte/backups/migration.sql'
+   sudo tail -n 1 /opt/gestion-compte/backups/migration.sql   # doit afficher "-- Dump completed on …"
+   ```
+
+   **Ne jamais importer un export qui ne se termine pas par `-- Dump completed`** : un export incomplet ou vide s'importerait sans erreur, et les migrations recréeraient ensuite une base vide qui a l'air saine.
+
+   Sur un nouveau serveur, copier ensuite ce fichier dans `/opt/gestion-compte/backups/` du nouveau serveur (`scp`, `rsync`).
+
+   Depuis MySQL 8 : ajouter `--set-gtid-purged=OFF` à `mysqldump`, puis remplacer la collation par défaut de MySQL 8, inconnue de MariaDB : `sudo sed -i 's/utf8mb4_0900_ai_ci/utf8mb4_unicode_ci/g' /opt/gestion-compte/backups/migration.sql`. Depuis MySQL 5.7 ou MariaDB, rien à faire. Dans tous les cas, c'est la répétition qui valide l'import.
+2. **Importer** dans la nouvelle base, depuis le conteneur (le dossier `backups/` y est monté) :
 
    ```shell
    cd /opt/gestion-compte
    sudo docker compose up -d --wait database
-   sudo mysqldump --single-transaction --routines --triggers --default-character-set=utf8mb4 gestion_compte \
-       | sudo docker compose exec -T database sh -c 'mariadb -uroot -p"$MARIADB_ROOT_PASSWORD" "$MARIADB_DATABASE"'
+   sudo docker compose exec -T database sh -c 'mariadb -uroot -p"$MARIADB_ROOT_PASSWORD" "$MARIADB_DATABASE" < /backups/migration.sql'
    ```
 
-   `mysqldump` tourne sur l'ancien serveur (sur un nouveau serveur, l'exécuter à distance et faire passer le flux par `ssh`). `--single-transaction` réalise une copie cohérente sans bloquer l'application.
+   Si l'import échoue sur une vue avec `DEFINER` (compte inexistant dans la nouvelle base) : `sudo sed -i -E 's/DEFINER=`[^`]+`@`[^`]+`/DEFINER=CURRENT_USER/g' backups/migration.sql`, puis relancer l'import.
 
-   Depuis MySQL 8, la collation par défaut `utf8mb4_0900_ai_ci` n'existe pas dans MariaDB : ajouter `| sed 's/utf8mb4_0900_ai_ci/utf8mb4_unicode_ci/g'` avant l'import. Depuis MySQL 5.7 ou MariaDB, rien à faire.
+   Vérifier que les données sont là, en comparant avec l'ancienne base (`sudo mysql gestion_compte -e '…'`) :
 
-   Si l'import échoue sur une vue avec `DEFINER` (compte inexistant dans la nouvelle base), ajouter `| sed -E 's/DEFINER=`[^`]+`@`[^`]+`/DEFINER=CURRENT_USER/g'` avant l'import.
-2. Copier les fichiers envoyés (logos de services, images d'événements) :
+   ```shell
+   sudo docker compose exec -T database sh -c 'mariadb -uroot -p"$MARIADB_ROOT_PASSWORD" "$MARIADB_DATABASE" -e "SELECT COUNT(*) FROM membership; SELECT COUNT(*) FROM shift; SELECT MAX(id) FROM shift;"'
+   ```
+3. Copier les fichiers envoyés (logos de services, images d'événements) :
 
    ```shell
    sudo tar -C /var/www/gestion-compte/public/uploads -c . \
@@ -68,17 +83,17 @@ Le but est de valider l'import, les migrations et la configuration sur une copie
    ```
 
    L'extraction se fait dans le conteneur, en `www-data` : les droits sont corrects d'office.
-3. Démarrer le reste et jouer les migrations :
+4. Démarrer l'application, **sans le service `cron`** (les tâches planifiées tournent encore sur l'ancienne installation), et jouer les migrations :
 
    ```shell
-   sudo docker compose up -d --wait
+   sudo docker compose up -d --wait web php
    sudo docker compose exec php php bin/console doctrine:migrations:migrate --no-interaction
    sudo docker compose exec php php bin/console doctrine:schema:validate
    ```
 
    Sur une base qui était déjà à jour, il ne doit y avoir aucune migration à jouer.
-4. Tester (voir [Recette](#4-recette)) : depuis le serveur, avec `curl -H 'Host: <domaine>' http://127.0.0.1:8080/login` ; depuis un poste, avec un tunnel SSH (`ssh -L 8080:127.0.0.1:8080 serveur`, puis `http://localhost:8080`). La connexion fonctionne, mais certains liens absolus pointent vers le vrai domaine.
-5. Remettre à zéro avant la vraie bascule : `sudo docker compose down --volumes`. **Attention** : `--volumes` supprime la base et les fichiers de la stack, ce qui est voulu ici, mais ne doit plus jamais être utilisé une fois en production.
+5. Tester (voir [Recette](#4-recette)) : depuis le serveur, avec `curl -H 'Host: <domaine>' http://127.0.0.1:8080/login` ; depuis un poste, avec un tunnel SSH (`ssh -L 8080:127.0.0.1:8080 serveur`, puis `http://localhost:8080`). La connexion fonctionne, mais certains liens absolus pointent vers le vrai domaine.
+6. Remettre à zéro avant la vraie bascule : `sudo docker compose down --volumes` et `sudo rm backups/migration.sql`. **Attention** : `--volumes` supprime la base et les fichiers de la stack, ce qui est voulu ici, mais ne doit plus jamais être utilisé une fois en production.
 
 ## 3. Bascule (fenêtre de maintenance)
 
@@ -88,20 +103,21 @@ Prévenir les membres. Pendant la fenêtre, l'ancienne installation ne doit plus
    * mettre nginx en maintenance (page statique ou `return 503;` dans le `server` du site, puis `sudo systemctl reload nginx`) ;
    * suspendre les tâches planifiées (commenter les lignes de la crontab) ;
    * attendre la fin d'une éventuelle tâche en cours (`ps aux | grep bin/console`).
-2. **Copier les données**, avec les commandes de la répétition (étapes 2.1 et 2.2), sur une stack vide (`docker compose down --volumes` fait en fin de répétition).
-3. **Démarrer et migrer** (étape 2.3).
-4. **Basculer le trafic** :
+2. **Remettre le vrai `MAILER_DSN`** dans `app.env`.
+3. **Copier les données**, avec les commandes de la répétition (étapes 2.1 à 2.3, vérification du `-- Dump completed` et des comptages comprises), sur une stack vide (`docker compose down --volumes` fait en fin de répétition).
+4. **Démarrer et migrer** (étape 2.4), toujours sans `cron`.
+5. **Basculer le trafic** :
    * **même serveur** : retirer `SITE_ADDRESS=:80`, `HTTP_PUBLISH` et `HTTPS_PUBLISH` de `.env` (en remettant le domaine dans `SITE_ADDRESS`), arrêter les anciens services, puis relancer la stack, qui prend les ports 80 et 443 :
 
      ```shell
      sudo systemctl disable --now nginx php7.4-fpm
      sudo systemctl disable --now mysql   # ou mariadb
-     cd /opt/gestion-compte && sudo nano .env && sudo docker compose up -d --wait
+     cd /opt/gestion-compte && sudo nano .env && sudo docker compose up -d --wait web php
      ```
 
      Si nginx sert aussi d'autres sites, le laisser en place et suivre [Derrière un proxy existant](install.serveur.docker.md#derrière-un-proxy-existant) : seul le `server` du site change pour faire `proxy_pass http://127.0.0.1:8080`.
    * **nouveau serveur** : changer l'enregistrement DNS vers la nouvelle adresse. Caddy obtient le certificat dès que le DNS résout vers lui (suivre `sudo docker compose logs -f web`). Pendant la propagation, laisser l'ancienne installation en maintenance.
-5. **Recette** (ci-dessous), puis lever la maintenance en annonçant la fin aux membres.
+6. **Recette** (ci-dessous), puis démarrer les tâches planifiées (`sudo docker compose up -d --wait`, qui ajoute `cron`) et lever la maintenance en annonçant la fin aux membres.
 
 ## 4. Recette
 
@@ -109,13 +125,13 @@ Prévenir les membres. Pendant la fenêtre, l'ancienne installation ne doit plus
 * Planning des créneaux, inscription puis désinscription à un créneau.
 * Fiche d'un membre (historique, badge, QR code `/sw/…/qr.png`).
 * Logo d'un service et image d'un événement (fichiers copiés).
-* Envoi d'un e-mail (mot de passe oublié, par exemple).
-* `sudo docker compose exec cron supercronic -test /etc/supercronic/crontab` répond `crontab is valid` ; le lendemain, vérifier que les tâches ont tourné (`sudo docker compose logs cron`, une ligne `starting` puis `job succeeded` par exécution).
+* Envoi d'un e-mail (mot de passe oublié, sur un compte de test) : pendant la répétition, avec `MAILER_DSN=null://null`, aucun e-mail ne part, c'est voulu.
+* Une fois `cron` démarré : `sudo docker compose exec cron supercronic -test /etc/supercronic/crontab` répond `crontab is valid` ; le lendemain, vérifier que les tâches ont tourné (`sudo docker compose logs cron`, une ligne `starting` puis `job succeeded` par exécution).
 * Si `ENABLE_PLACE_LOCAL_IP_ADDRESS_CHECK` est activé : vérifier depuis le magasin que l'adresse IP est bien reconnue.
 
 ## 5. Retour arrière
 
-**Tant que la maintenance n'est pas levée**, rien n'a été écrit dans la nouvelle base. Le retour arrière ne perd donc aucune donnée :
+**Tant que la maintenance n'est pas levée**, seule la recette a écrit dans la nouvelle base (les tâches planifiées ne sont pas encore démarrées). Le retour arrière ne perd donc aucune donnée de membre :
 
 * **même serveur** :
 
@@ -132,9 +148,10 @@ Puis retirer la maintenance nginx et réactiver la crontab de l'ancienne install
 
 ```shell
 cd /opt/gestion-compte
-sudo docker compose exec -T database sh -c 'mariadb-dump --single-transaction --routines --triggers -uroot -p"$MARIADB_ROOT_PASSWORD" "$MARIADB_DATABASE"' \
-    > /root/retour-arriere.sql
-sudo mysql gestion_compte < /root/retour-arriere.sql
+sudo docker compose stop web php cron
+sudo docker compose exec -T database bash -o pipefail -c 'mariadb-dump --single-transaction --routines --triggers -uroot -p"$MARIADB_ROOT_PASSWORD" "$MARIADB_DATABASE" | gzip > /backups/retour-arriere.sql.gz'
+gunzip -c backups/retour-arriere.sql.gz | tail -n 1   # doit afficher "-- Dump completed on …"
+gunzip -c backups/retour-arriere.sql.gz | sudo mysql gestion_compte
 ```
 
 Faire de même pour les fichiers envoyés depuis la bascule. Fixer à l'avance un **point de non-retour** (par exemple une semaine sans incident), après lequel l'ancienne installation est désinstallée.
