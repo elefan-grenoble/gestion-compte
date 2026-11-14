@@ -9,6 +9,10 @@ parameters:
   beneficiary_flying_icon: '%env(BENEFICIARY_FLYING_ICON)%'
   beneficiary_main_icon: '%env(BENEFICIARY_MAIN_ICON)%'
   beneficiary_new_icon: '%env(BENEFICIARY_NEW_ICON)%'
+  beneficiary_new_min_months: '%env(default:beneficiary_new_min_months_default:int:BENEFICIARY_NEW_MIN_MONTHS)%'
+  beneficiary_new_min_months_default: 3
+  beneficiary_new_min_shifts: '%env(default:beneficiary_new_min_shifts_default:int:BENEFICIARY_NEW_MIN_SHIFTS)%'
+  beneficiary_new_min_shifts_default: 3
   card_reader_shift_validation_advance_minutes: '%env(default:card_reader_shift_validation_advance_minutes_default:int:CARD_READER_SHIFT_VALIDATION_ADVANCE_MINUTES)%'
   card_reader_shift_validation_advance_minutes_default: 15
   code_generation_enabled: '%env(bool:CODE_GENERATION_ENABLED)%'

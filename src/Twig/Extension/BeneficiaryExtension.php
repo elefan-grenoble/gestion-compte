@@ -5,6 +5,7 @@ namespace App\Twig\Extension;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 use Twig\Extension\AbstractExtension;
 use Twig\TwigFilter;
+use Twig\TwigFunction;
 
 class BeneficiaryExtension extends AbstractExtension
 {
@@ -21,6 +22,13 @@ class BeneficiaryExtension extends AbstractExtension
     {
         return [
             new TwigFilter('print_with_number_and_status_icon', [$this->beneficiaryService, 'getDisplayNameWithMemberNumberAndStatusIcon']),
+        ];
+    }
+
+    public function getFunctions()
+    {
+        return [
+            new TwigFunction('is_new_beneficiary', [$this->beneficiaryService, 'isNew']),
         ];
     }
 }

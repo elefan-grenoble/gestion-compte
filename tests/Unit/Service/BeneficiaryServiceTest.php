@@ -53,6 +53,9 @@ class BeneficiaryServiceTest extends TestCase
             'member_flying_icon' => '🦅',
             'member_exempted_icon' => '🏖️',
             'member_registration_missing_icon' => '⚠️',
+            'beneficiary_new_min_months' => 3,
+            'beneficiary_new_min_shifts' => 3,
+            'use_card_reader_to_validate_shifts' => true,
         ];
         $params = array_merge($defaults, $params);
 
@@ -88,6 +91,45 @@ class BeneficiaryServiceTest extends TestCase
         $membership->setMainBeneficiary($beneficiary);
 
         return $beneficiary;
+    }
+
+    // -------------------------------------------------------
+    // isNew()
+    // -------------------------------------------------------
+
+    private function backdate(Beneficiary $beneficiary, string $date): void
+    {
+        $property = new \ReflectionProperty(Beneficiary::class, 'createdAt');
+        $property->setAccessible(true);
+        $property->setValue($beneficiary, new \DateTime($date));
+    }
+
+    private function addShifts(Beneficiary $beneficiary, int $count, bool $carriedOut): void
+    {
+        for ($i = 0; $i < $count; ++$i) {
+            $shift = new Shift();
+            $shift->setWasCarriedOut($carriedOut);
+            $shift->setEnd(new \DateTime('-1 day'));
+            $beneficiary->addShift($shift);
+        }
+    }
+
+    public function testIsNewUsesConfiguredThresholds(): void
+    {
+        $beneficiary = $this->createBeneficiary();
+        $this->backdate($beneficiary, '-4 months');
+        $this->addShifts($beneficiary, 3, true);
+
+        $this->assertTrue($this->createService(['beneficiary_new_min_months' => 6])->isNew($beneficiary));
+    }
+
+    public function testIsNewCountsShiftsAlreadyOverWhenCardReaderIsNotUsed(): void
+    {
+        $beneficiary = $this->createBeneficiary();
+        $this->backdate($beneficiary, '-4 months');
+        $this->addShifts($beneficiary, 3, false);
+
+        $this->assertFalse($this->createService(['use_card_reader_to_validate_shifts' => false])->isNew($beneficiary));
     }
 
     // -------------------------------------------------------

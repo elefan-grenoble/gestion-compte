@@ -19,7 +19,7 @@
     {% if beneficiary.membership.withdrawn %}
         <span class="badge red white-text">{{ member_withdrawn_icon }} fermé</span>
     {% endif %}
-    {% if beneficiary.isNew %}
+    {% if is_new_beneficiary(beneficiary) %}
         <span class="badge red white-text">{{ beneficiary_new_icon }} nouveau</span>
     {% endif %}
     {% if member.isCurrentlyExemptedFromShifts() %}

@@ -38,7 +38,7 @@ id = "modal-bucket"
                             {% if not shift.formation and shift.shifter.formations | length > 0 %}
                                 &nbsp;<strong class="orange-text">({{ shift.shifter.formations | join(', ') }})</strong>
                             {% endif %}
-                            {% if shift.shifter.isNew %}
+                            {% if is_new_beneficiary(shift.shifter) %}
                                 &nbsp;<strong class="red-text" title="Nouveau membre">{{ beneficiary_new_icon }}</strong>
                             {% endif %}
                             {% if shift.isFirstByShifter %}

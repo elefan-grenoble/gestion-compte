@@ -175,38 +175,62 @@ class BeneficiaryTest extends TestCase
 
     // ── isNew ────────────────────────────────────────────────────────
 
-    public function testIsNewTrueWhenFewShifts(): void
+    private function backdate(Beneficiary $b, \DateTime $createdAt): void
     {
-        $b = $this->createBeneficiary();
-
-        // 0 shifts -> new
-        $this->assertTrue($b->isNew());
+        $property = new \ReflectionProperty(Beneficiary::class, 'createdAt');
+        $property->setAccessible(true);
+        $property->setValue($b, $createdAt);
     }
 
-    public function testIsNewTrueWhenExactlyThresholdShifts(): void
+    private function addShifts(Beneficiary $b, int $count, bool $carriedOut, string $end = '-1 day'): void
     {
-        $b = $this->createBeneficiary();
-
-        for ($i = 0; $i < 3; ++$i) {
-            $shift = $this->createMock(Shift::class);
+        for ($i = 0; $i < $count; ++$i) {
+            $shift = new Shift();
+            $shift->setWasCarriedOut($carriedOut);
+            $shift->setEnd(new \DateTime($end));
             $b->addShift($shift);
         }
-
-        // exactly 3 shifts -> still new (<= 3)
-        $this->assertTrue($b->isNew());
     }
 
-    public function testIsNewFalseWhenAboveThreshold(): void
+    public function testIsNewTrueWhenLessThanMinMonthsEvenWithEnoughShifts(): void
     {
         $b = $this->createBeneficiary();
+        $this->backdate($b, new \DateTime('-2 months'));
+        $this->addShifts($b, 10, true);
 
-        for ($i = 0; $i < 4; ++$i) {
-            $shift = $this->createMock(Shift::class);
-            $b->addShift($shift);
-        }
+        $this->assertTrue($b->isNew(3, 3));
+    }
 
-        // 4 shifts -> not new
-        $this->assertFalse($b->isNew());
+    public function testIsNewTrueWhenNotEnoughShiftsDoneEvenWithEnoughSeniority(): void
+    {
+        $b = $this->createBeneficiary();
+        $this->backdate($b, new \DateTime('-6 months'));
+        $this->addShifts($b, 2, true);
+        $this->addShifts($b, 5, false); // booked but not validated: not counted
+
+        $this->assertTrue($b->isNew(3, 3));
+    }
+
+    public function testIsNewFalseWhenBothConditionsAreMet(): void
+    {
+        $b = $this->createBeneficiary();
+        $this->backdate($b, new \DateTime('-6 months'));
+        $this->addShifts($b, 3, true);
+
+        $this->assertFalse($b->isNew(3, 3));
+    }
+
+    public function testIsNewWithoutCardReaderCountsOnlyShiftsAlreadyOver(): void
+    {
+        $b = $this->createBeneficiary();
+        $this->backdate($b, new \DateTime('-6 months'));
+        $this->addShifts($b, 2, false, '-1 day');
+        $this->addShifts($b, 5, false, '+1 day');
+
+        $this->assertTrue($b->isNew(3, 3, false));
+
+        $this->addShifts($b, 1, false, '-2 days');
+        $this->assertFalse($b->isNew(3, 3, false));
     }
 
     // ── Commissions ──────────────────────────────────────────────────

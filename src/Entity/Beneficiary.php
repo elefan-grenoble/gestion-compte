@@ -7,6 +7,7 @@ use Doctrine\ORM\Mapping as ORM;
 use Doctrine\ORM\Mapping\OrderBy;
 use Symfony\Component\Validator\Constraints as Assert;
 use Doctrine\Common\Collections\Collection;
+use Doctrine\Common\Collections\Criteria;
 
 /**
  * Beneficiary.
@@ -730,15 +731,42 @@ class Beneficiary
     }
 
     /**
-     * Simple method to detect new beneficiaires.
-     * TODO: move to Membership? Look at registration data instead?
+     * Detect new beneficiaries: a beneficiary is no longer new once they have BOTH
+     * at least $minMonths months of seniority AND at least $minShifts shifts done.
+     *
+     * Seniority is computed from the creation date of the beneficiary.
+     * A shift is "done" when it was validated (card reader) or, when the card reader
+     * is not used to validate shifts ($onlyCarriedOut = false), when it is already over.
+     *
+     * TODO: look at registration data instead of the creation date?
+     *
+     * @param int                     $minMonths      months of seniority needed
+     * @param int                     $minShifts      number of done shifts needed
+     * @param bool                    $onlyCarriedOut count only validated shifts (otherwise: shifts already over)
+     * @param null|\DateTimeInterface $now            reference date (defaults to now)
      *
      * @return bool
      */
-    public function isNew()
+    public function isNew(int $minMonths, int $minShifts, bool $onlyCarriedOut = true, ?\DateTimeInterface $now = null)
     {
-        $shiftCountThreshold = 3;
+        $now ??= new \DateTime();
 
-        return $this->shifts->count() <= $shiftCountThreshold;
+        $seniorityLimit = (new \DateTime())->setTimestamp($now->getTimestamp())->modify('-' . max(0, $minMonths) . ' months');
+        if ($this->createdAt > $seniorityLimit) {
+            return true;
+        }
+
+        if ($minShifts <= 0) {
+            return false;
+        }
+
+        $criteria = Criteria::create()->setMaxResults($minShifts);
+        if ($onlyCarriedOut) {
+            $criteria->where(Criteria::expr()->eq('wasCarriedOut', true));
+        } else {
+            $criteria->where(Criteria::expr()->lt('end', $now));
+        }
+
+        return $this->shifts->matching($criteria)->count() < $minShifts;
     }
 }

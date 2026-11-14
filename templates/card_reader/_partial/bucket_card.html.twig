@@ -40,7 +40,7 @@
                             </span>
                         {% endif %}
                         {% if shift.shifter %}
-                            {% if shift.shifter.isNew %}
+                            {% if is_new_beneficiary(shift.shifter) %}
                                 <span class="red-text" title="Nouveau membre">{{ beneficiary_new_icon }}</span>
                             {% endif %}
                             {% if shift.isFirstByShifter %}
