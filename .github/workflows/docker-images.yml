@@ -40,8 +40,9 @@ env:
   APP_IMAGE: ghcr.io/elefan-grenoble/gestion-compte
   WEB_IMAGE: ghcr.io/elefan-grenoble/gestion-compte-web
   PHP_BASE_IMAGE: php:7.4-fpm@sha256:3ac7c8c74b2b047c7cb273469d74fc0d59b857aa44043e6ea6a0084372811d5b
-  # Ref built: the release tag when called by release-please.yml
-  SOURCE_REF: ${{ inputs.tag || github.ref }}
+  # Commit built: the release tag when called by release-please.yml, else the
+  # triggering commit (a branch ref could move between the two arch runners)
+  SOURCE_REF: ${{ inputs.tag || github.sha }}
   # Images are only published from main and release tags
   PUBLISH: ${{ github.event_name != 'pull_request' && ((inputs.tag || '') != '' || github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')) }}
 
