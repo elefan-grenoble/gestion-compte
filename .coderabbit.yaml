@@ -1,0 +1,30 @@
+# yaml-language-server: $schema=https://coderabbit.ai/integrations/schema.v2.json
+# CodeRabbit configuration: https://docs.coderabbit.ai/reference/configuration
+
+language: fr-FR
+
+reviews:
+  profile: chill
+  poem: false
+  auto_review:
+    enabled: true
+    drafts: false
+  path_filters:
+    # Generated files
+    - "!composer.lock"
+    - "!package-lock.json"
+    - "!flake.lock"
+    - "!CHANGELOG.md"
+    - "!phpstan-baseline*.neon"
+  path_instructions:
+    - path: "src/Migrations/**"
+      instructions: |
+        Vérifier que la migration est réversible (down()) et sans perte de données
+        sur une base existante en production.
+    - path: "src/Security/**"
+      instructions: |
+        Code sensible (authentification, droits d'accès) : être particulièrement
+        attentif aux failles de sécurité et aux régressions de permissions.
+
+chat:
+  auto_reply: true
