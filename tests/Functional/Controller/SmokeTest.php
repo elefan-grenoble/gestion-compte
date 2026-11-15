@@ -110,6 +110,11 @@ class SmokeTest extends FunctionalTestCase
 
         $this->assertSame(200, $client->getResponse()->getStatusCode());
         $this->assertGreaterThan(0, $crawler->filterXPath('//form')->count(), 'Login page should contain a form.');
+
+        // FOSUserBundle labels are translated in French
+        $this->assertSame('Mot de passe', trim($crawler->filterXPath('//label[@for="password"]')->text()));
+        $this->assertSame('Se souvenir de moi', trim($crawler->filterXPath('//input[@id="remember_me"]/following-sibling::span')->text()));
+        $this->assertSame('Connexion', trim($crawler->filterXPath('//button[@id="_submit"]')->text()));
     }
 
     public function testLoginWithValidCredentials(): void
@@ -141,7 +146,7 @@ class SmokeTest extends FunctionalTestCase
         // ... which tells the user the credentials were refused
         $error = $crawler->filterXPath("//div[contains(concat(' ', normalize-space(@class), ' '), ' card-panel ') and contains(concat(' ', normalize-space(@class), ' '), ' error ')]");
         $this->assertCount(1, $error, 'The login page should display an error.');
-        $this->assertMatchesRegularExpression('/^(Identifiants invalides|Invalid credentials)\.$/', trim($error->text()));
+        $this->assertSame('Identifiants invalides.', trim($error->text()));
     }
 
     // -------------------------------------------------------
