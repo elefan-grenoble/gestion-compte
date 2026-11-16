@@ -29,9 +29,25 @@ class EmailLogControllerTest extends FunctionalTestCase
         $this->assertSame(200, $client->getResponse()->getStatusCode());
         $text = $crawler->filterXPath('//tbody')->text();
         $this->assertStringContainsString('Older mail', $text);
+        $this->assertStringContainsString('Newer mail', $text);
         $this->assertLessThan(strpos($text, 'Older mail'), strpos($text, 'Newer mail'));
         $this->assertStringContainsString('Échec', $text);
         $this->assertStringContainsString('Envoyé', $text);
+    }
+
+    public function testAnInvalidDateOfTheFilterIsReportedToTheUser(): void
+    {
+        $client = $this->loginAs('admin');
+
+        $crawler = $client->request('GET', '/admin/mails/historique/');
+        $crawler = $client->submit($crawler->selectButton('Filtrer')->form(['form[from]' => 'not-a-date']));
+
+        $this->assertSame(200, $client->getResponse()->getStatusCode());
+        $this->assertGreaterThan(
+            0,
+            $crawler->filterXPath('//div[contains(@class, "errors")][normalize-space() != ""]')->count(),
+            'The invalid date must be explained, not silently ignored.'
+        );
     }
 
     public function testTheListCanBeFilteredByStatus(): void

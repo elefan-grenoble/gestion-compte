@@ -19,18 +19,21 @@
             </div>
             <div class="collapsible-body">
                 {{ form_start(filter_form) }}
+                <div class="errors red-text">{{ form_errors(filter_form) }}</div>
                 <div class="row">
                     <div class="col s6 m3 l2">
                         <div class="input-field">
                             {{ form_widget(filter_form.from) }}
                             {# Label kept above the field, like the lists: Materialize would put it back inside the empty field #}
                             {{ form_label(filter_form.from, null, { label_attr: { style: 'transform: translateY(-14px) scale(0.8); transform-origin: 0 0;' } }) }}
+                            <div class="errors red-text">{{ form_errors(filter_form.from) }}</div>
                         </div>
                     </div>
                     <div class="col s6 m3 l2">
                         <div class="input-field">
                             {{ form_widget(filter_form.to) }}
                             {{ form_label(filter_form.to, null, { label_attr: { style: 'transform: translateY(-14px) scale(0.8); transform-origin: 0 0;' } }) }}
+                            <div class="errors red-text">{{ form_errors(filter_form.to) }}</div>
                         </div>
                     </div>
                     <div class="col s12 m6 l4">
