@@ -22,27 +22,23 @@
                     {% if (shiftercount < 4) %}
                         {% if (shift.shifter) %}{# is booked #}
                             <li id="main-shift-{{ shift.id }}">
-                                {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %}
                                 {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
                                     <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
                                 {% endif %}
+                                {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %}
                                 {{ shift.shifter.publicDisplayName }}
                                 {% if shift.formation %}</b>{% endif %}
-                                {% if not shift.formation and shift.shifter.formations | length > 0 %}
-                                    &nbsp;<strong class="orange-text">(q)</strong>
-                                {% endif %}
                                 {% if shift.shifter.isNew %}
-                                    &nbsp;<strong class="red-text" title="Nouveau membre">{{ beneficiary_new_icon }}</strong>
+                                    &nbsp;<strong class="purple-text" title="Nouveau membre">{{ beneficiary_new_icon }}</strong>
                                 {% endif %}
                             </li>
                         {% else %}
                             <li id="main-shift-{{ shift.id }}">
-                                <b>
-                                    {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
-                                        <span class="red-text">&#9673;</span>&nbsp;
-                                    {% endif %}
-                                    <i>libre</i>
-                                </b>
+                                {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
+                                    <span class="grey-text">&#9673;</span>&nbsp;
+                                {% endif %}
+                                {# gras = avec formation, italique = libre #}
+                                {% if shift.formation %}<b data-formation="{{ shift.formation.name }}">{% endif %}<i>libre</i>{% if shift.formation %}</b>{% endif %}
                             </li>
                         {% endif %}
                     {% elseif shiftercount == 4 %}
