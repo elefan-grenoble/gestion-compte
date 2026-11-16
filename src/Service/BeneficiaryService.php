@@ -55,6 +55,19 @@ class BeneficiaryService
         return $counter;
     }
 
+    /**
+     * A beneficiary is new until they have both BENEFICIARY_NEW_MIN_MONTHS months of seniority
+     * and BENEFICIARY_NEW_MIN_SHIFTS shifts done.
+     */
+    public function isNew(Beneficiary $beneficiary): bool
+    {
+        return $beneficiary->isNew(
+            (int) $this->container->getParameter('beneficiary_new_min_months'),
+            (int) $this->container->getParameter('beneficiary_new_min_shifts'),
+            (bool) $this->container->getParameter('use_card_reader_to_validate_shifts')
+        );
+    }
+
     public function getDisplayNameWithMemberNumberAndStatusIcon(Beneficiary $beneficiary): string
     {
         $label = '#' . $beneficiary->getMemberNumber();
