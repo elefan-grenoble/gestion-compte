@@ -68,7 +68,7 @@
         </li>
     </ul>
 
-    {% include 'admin/mail/history/_table.html.twig' with {sent_emails: sent_emails, batches: batches} only %}
+    {% include 'admin/mail/history/_table.html.twig' with {email_logs: email_logs, batches: batches} only %}
 
     <ul class="pagination">
         <li class="{% if current_page == 1 %}disabled{% else %}waves-effect{% endif %}">

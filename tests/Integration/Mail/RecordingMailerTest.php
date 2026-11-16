@@ -2,7 +2,7 @@
 
 namespace App\Tests\Integration\Mail;
 
-use App\Entity\SentEmail;
+use App\Entity\EmailLog;
 use App\Mail\MailMetadata;
 use App\Mail\RecordingMailer;
 use Doctrine\DBAL\Connection;
@@ -39,8 +39,8 @@ class RecordingMailerTest extends KernelTestCase
             ->html('<p>Body</p>'));
 
         $row = $this->lastRow();
-        $this->assertSame(SentEmail::STATUS_SENT, $row['status']);
-        $this->assertSame(SentEmail::SOURCE_AUTO, $row['source']);
+        $this->assertSame(EmailLog::STATUS_SENT, $row['status']);
+        $this->assertSame(EmailLog::SOURCE_AUTO, $row['source']);
         $this->assertSame('sender@example.org', $row['from_address']);
         $this->assertSame('first@example.org, second@example.org', $row['recipients']);
         $this->assertSame('2', (string) $row['recipient_count']);
@@ -69,7 +69,7 @@ class RecordingMailerTest extends KernelTestCase
         static::$container->get('mailer.mailer')->send($email);
 
         $row = $this->lastRow();
-        $this->assertSame(SentEmail::SOURCE_MANUAL, $row['source']);
+        $this->assertSame(EmailLog::SOURCE_MANUAL, $row['source']);
         $this->assertSame('<p>Dear member</p>', $row['body']);
     }
 
@@ -82,12 +82,12 @@ class RecordingMailerTest extends KernelTestCase
         }
         $mailer->send(MailMetadata::written((new Email())->from('sender@example.org')->to('d@example.org')->subject('Other')->html('x'), null, 'group-2'));
 
-        $rows = $this->connection()->fetchAllAssociative("SELECT * FROM sent_email WHERE batch_id = 'group-1' ORDER BY id");
+        $rows = $this->connection()->fetchAllAssociative("SELECT * FROM email_log WHERE batch_id = 'group-1' ORDER BY id");
         $this->assertCount(3, $rows);
         $this->assertSame(['a@example.org', 'b@example.org', 'c@example.org'], array_column($rows, 'recipients'));
         $this->assertSame('<p>Dear b@example.org</p>', $rows[1]['body']);
         $this->assertCount(3, array_unique(array_column($rows, 'message_id')), 'Each mail keeps its own Message-ID.');
-        $this->assertSame([SentEmail::STATUS_SENT], array_unique(array_column($rows, 'status')));
+        $this->assertSame([EmailLog::STATUS_SENT], array_unique(array_column($rows, 'status')));
     }
 
     public function testTheInternalHeadersNeverLeave(): void
@@ -122,7 +122,7 @@ class RecordingMailerTest extends KernelTestCase
         }
 
         $row = $this->lastRow();
-        $this->assertSame(SentEmail::STATUS_FAILED, $row['status']);
+        $this->assertSame(EmailLog::STATUS_FAILED, $row['status']);
         $this->assertSame('550 Mailbox unavailable', $row['error']);
     }
 
@@ -149,7 +149,7 @@ class RecordingMailerTest extends KernelTestCase
      */
     private function lastRow(): array
     {
-        $row = $this->connection()->fetchAssociative('SELECT * FROM sent_email ORDER BY id DESC LIMIT 1');
+        $row = $this->connection()->fetchAssociative('SELECT * FROM email_log ORDER BY id DESC LIMIT 1');
         $this->assertIsArray($row, 'The mail was not recorded.');
 
         return $row;

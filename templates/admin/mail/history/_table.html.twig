@@ -1,4 +1,4 @@
-{# Table of mails. Variables: sent_emails, batches (figures by batch id, to fold the mails sent together into one line) #}
+{# Table of mails. Variables: email_logs, batches (figures by batch id, to fold the mails sent together into one line) #}
 <table class="striped responsive-table">
     <thead>
         <tr>
@@ -11,7 +11,7 @@
         </tr>
     </thead>
     <tbody>
-        {% for mail in sent_emails %}
+        {% for mail in email_logs %}
             {% set batch = mail.batchId ? (batches[mail.batchId] ?? null) : null %}
             {% set group = batch and batch.total > 1 %}
             {% if group %}
@@ -64,9 +64,9 @@
                 </td>
                 <td>
                     {% if group %}
-                        <a href="{{ path('admin_sent_email_batch', {batchId: mail.batchId}) }}" class="btn-flat" title="Voir les {{ batch.total }} mails de cet envoi"><i class="material-icons">list</i></a>
+                        <a href="{{ path('admin_email_log_batch', {batchId: mail.batchId}) }}" class="btn-flat" title="Voir les {{ batch.total }} mails de cet envoi"><i class="material-icons">list</i></a>
                     {% else %}
-                        <a href="{{ path('admin_sent_email_show', {id: mail.id}) }}" class="btn-flat"><i class="material-icons">visibility</i></a>
+                        <a href="{{ path('admin_email_log_show', {id: mail.id}) }}" class="btn-flat"><i class="material-icons">visibility</i></a>
                     {% endif %}
                 </td>
             </tr>

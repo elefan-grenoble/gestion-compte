@@ -85,7 +85,7 @@ tables:
       Pending invitations, holding e-mail addresses of people who are
       not even members yet.
 
-  sent_email:
+  email_log:
     strategy: truncate
     reason: >-
       History of the sent mails: recipient addresses, and the body of

@@ -2,7 +2,7 @@
 
 namespace App\Controller;
 
-use App\Entity\SentEmail;
+use App\Entity\EmailLog;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -21,14 +21,14 @@ use Symfony\Component\Routing\Annotation\Route;
  *
  * @Route("admin/mails/historique")
  */
-class SentEmailController extends AbstractController
+class EmailLogController extends AbstractController
 {
     private const LIMIT_PER_PAGE = 25;
 
     /**
      * Lists the sent mails, newest first.
      *
-     * @Route("/", name="admin_sent_email_index", methods={"GET","POST"})
+     * @Route("/", name="admin_email_log_index", methods={"GET","POST"})
      *
      * @Security("is_granted('ROLE_USER_MANAGER')")
      */
@@ -46,7 +46,7 @@ class SentEmailController extends AbstractController
             $page = (int) $form->get('page')->getData();
         }
 
-        $repository = $this->getDoctrine()->getRepository(SentEmail::class);
+        $repository = $this->getDoctrine()->getRepository(EmailLog::class);
         $qb = $repository->createFilteredQueryBuilder($criteria);
 
         $paginator = new Paginator($qb, false);
@@ -56,14 +56,14 @@ class SentEmailController extends AbstractController
 
         $qb->setFirstResult(($currentPage - 1) * self::LIMIT_PER_PAGE)->setMaxResults(self::LIMIT_PER_PAGE);
 
-        $sentEmails = iterator_to_array(new Paginator($qb, false));
+        $emailLogs = iterator_to_array(new Paginator($qb, false));
 
         return $this->render('admin/mail/history/index.html.twig', [
             'filter_form' => $form->createView(),
-            'sent_emails' => $sentEmails,
-            'batches' => $repository->batchSummaries(array_map(function (SentEmail $mail) {
+            'email_logs' => $emailLogs,
+            'batches' => $repository->batchSummaries(array_map(function (EmailLog $mail) {
                 return $mail->getBatchId();
-            }, $sentEmails)),
+            }, $emailLogs)),
             'result_count' => $resultCount,
             'current_page' => $currentPage,
             'page_count' => $pageCount,
@@ -73,13 +73,13 @@ class SentEmailController extends AbstractController
     /**
      * The mails sent together (one per recipient of a group).
      *
-     * @Route("/groupe/{batchId}", name="admin_sent_email_batch", methods={"GET"})
+     * @Route("/groupe/{batchId}", name="admin_email_log_batch", methods={"GET"})
      *
      * @Security("is_granted('ROLE_USER_MANAGER')")
      */
     public function batchAction(Request $request, string $batchId): Response
     {
-        $repository = $this->getDoctrine()->getRepository(SentEmail::class);
+        $repository = $this->getDoctrine()->getRepository(EmailLog::class);
         $summary = $repository->batchSummaries([$batchId])[$batchId] ?? null;
         if (null === $summary) {
             throw $this->createNotFoundException();
@@ -92,12 +92,12 @@ class SentEmailController extends AbstractController
             ->setFirstResult(($currentPage - 1) * self::LIMIT_PER_PAGE)
             ->setMaxResults(self::LIMIT_PER_PAGE)
         ;
-        $sentEmails = iterator_to_array(new Paginator($qb, false));
+        $emailLogs = iterator_to_array(new Paginator($qb, false));
 
         return $this->render('admin/mail/history/batch.html.twig', [
             'batch_id' => $batchId,
             'summary' => $summary,
-            'sent_emails' => $sentEmails,
+            'email_logs' => $emailLogs,
             'current_page' => $currentPage,
             'page_count' => $pageCount,
         ]);
@@ -106,17 +106,17 @@ class SentEmailController extends AbstractController
     /**
      * Details of a sent mail.
      *
-     * @Route("/{id}", name="admin_sent_email_show", methods={"GET"}, requirements={"id"="\d+"})
+     * @Route("/{id}", name="admin_email_log_show", methods={"GET"}, requirements={"id"="\d+"})
      *
      * @Security("is_granted('ROLE_USER_MANAGER')")
      */
-    public function showAction(SentEmail $sentEmail): Response
+    public function showAction(EmailLog $emailLog): Response
     {
-        $batchId = $sentEmail->getBatchId();
+        $batchId = $emailLog->getBatchId();
 
         return $this->render('admin/mail/history/show.html.twig', [
-            'sent_email' => $sentEmail,
-            'batch_summary' => $batchId ? ($this->getDoctrine()->getRepository(SentEmail::class)->batchSummaries([$batchId])[$batchId] ?? null) : null,
+            'email_log' => $emailLog,
+            'batch_summary' => $batchId ? ($this->getDoctrine()->getRepository(EmailLog::class)->batchSummaries([$batchId])[$batchId] ?? null) : null,
         ]);
     }
 
@@ -126,7 +126,7 @@ class SentEmailController extends AbstractController
     private function createFilterForm(): FormInterface
     {
         return $this->createFormBuilder()
-            ->setAction($this->generateUrl('admin_sent_email_index'))
+            ->setAction($this->generateUrl('admin_email_log_index'))
             ->add('from', DateType::class, [
                 'widget' => 'single_text',
                 'html5' => false,
@@ -153,13 +153,13 @@ class SentEmailController extends AbstractController
                 'label' => 'Type',
                 'required' => false,
                 'placeholder' => 'Tous',
-                'choices' => SentEmail::SOURCES,
+                'choices' => EmailLog::SOURCES,
             ])
             ->add('status', ChoiceType::class, [
                 'label' => 'État',
                 'required' => false,
                 'placeholder' => 'Tous',
-                'choices' => SentEmail::STATUSES,
+                'choices' => EmailLog::STATUSES,
             ])
             ->add('page', HiddenType::class, [
                 'data' => '1',

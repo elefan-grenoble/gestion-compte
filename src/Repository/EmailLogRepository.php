@@ -2,14 +2,14 @@
 
 namespace App\Repository;
 
-use App\Entity\SentEmail;
+use App\Entity\EmailLog;
 use Doctrine\ORM\EntityRepository;
 use Doctrine\ORM\QueryBuilder;
 
 /**
- * @extends EntityRepository<SentEmail>
+ * @extends EntityRepository<EmailLog>
  */
-class SentEmailRepository extends EntityRepository
+class EmailLogRepository extends EntityRepository
 {
     /**
      * Query of the history, newest first, narrowed by the given criteria.

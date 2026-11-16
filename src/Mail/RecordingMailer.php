@@ -2,7 +2,7 @@
 
 namespace App\Mail;
 
-use App\Entity\SentEmail;
+use App\Entity\EmailLog;
 use Doctrine\DBAL\Connection;
 use Psr\Log\LoggerInterface;
 use Symfony\Component\Mailer\Envelope;
@@ -12,7 +12,7 @@ use Symfony\Component\Mime\RawMessage;
 
 /**
  * Wraps the mailer of the application to write every mail in the history
- * (sent_email table): automatic mails (reminders, account mails...) and mails written by admins.
+ * (email_log table): automatic mails (reminders, account mails...) and mails written by admins.
  *
  * The status only reflects what the SMTP server answered: "sent" means that
  * the server accepted the mail, "failed" that it (or the connection) refused.
@@ -52,12 +52,12 @@ class RecordingMailer implements MailerInterface
         try {
             $this->inner->send($message, $envelope);
         } catch (\Throwable $e) {
-            $this->close($id, SentEmail::STATUS_FAILED, $e->getMessage());
+            $this->close($id, EmailLog::STATUS_FAILED, $e->getMessage());
 
             throw $e;
         }
 
-        $this->close($id, SentEmail::STATUS_SENT, null);
+        $this->close($id, EmailLog::STATUS_SENT, null);
     }
 
     /**
@@ -68,7 +68,7 @@ class RecordingMailer implements MailerInterface
     private function open(Email $message, ?Envelope $envelope): ?int
     {
         $headers = $message->getHeaders();
-        $source = $headers->has(MailMetadata::HEADER_SOURCE) ? $headers->get(MailMetadata::HEADER_SOURCE)->getBodyAsString() : SentEmail::SOURCE_AUTO;
+        $source = $headers->has(MailMetadata::HEADER_SOURCE) ? $headers->get(MailMetadata::HEADER_SOURCE)->getBodyAsString() : EmailLog::SOURCE_AUTO;
         $storeBody = $headers->has(MailMetadata::HEADER_STORE_BODY);
         $sentBy = $headers->has(MailMetadata::HEADER_SENT_BY) ? (int) $headers->get(MailMetadata::HEADER_SENT_BY)->getBodyAsString() : null;
         $batchId = $headers->has(MailMetadata::HEADER_BATCH) ? $headers->get(MailMetadata::HEADER_BATCH)->getBodyAsString() : null;
@@ -105,7 +105,7 @@ class RecordingMailer implements MailerInterface
         }
 
         try {
-            $this->connection->insert('sent_email', [
+            $this->connection->insert('email_log', [
                 'created_at' => (new \DateTime())->format('Y-m-d H:i:s'),
                 'source' => $source,
                 'from_address' => mb_substr($fromAddress, 0, 255),
@@ -113,7 +113,7 @@ class RecordingMailer implements MailerInterface
                 'recipient_count' => count($recipients),
                 'subject' => mb_substr((string) $message->getSubject(), 0, 255),
                 'body' => $body,
-                'status' => SentEmail::STATUS_PENDING,
+                'status' => EmailLog::STATUS_PENDING,
                 'error' => null,
                 'message_id' => $messageId,
                 'sent_by_id' => $sentBy,
@@ -135,7 +135,7 @@ class RecordingMailer implements MailerInterface
         }
 
         try {
-            $this->connection->update('sent_email', [
+            $this->connection->update('email_log', [
                 'status' => $status,
                 'error' => $error,
             ], ['id' => $id]);

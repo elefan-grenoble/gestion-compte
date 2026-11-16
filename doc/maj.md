@@ -67,7 +67,7 @@ php bin/console cache:clear --env=prod
 
 ### Novembre 2026 : historique des mails
 
-Tous les mails envoyés par l'application sont maintenant enregistrés (table `sent_email`, migration à jouer) et visibles dans **Administration > Mails > Historique**. Seul le contenu des mails écrits par un administrateur est conservé.
+Tous les mails envoyés par l'application sont maintenant enregistrés (table `email_log`, migration à jouer) et visibles dans **Administration > Mails > Historique**. Seul le contenu des mails écrits par un administrateur est conservé.
 
 ### Mars 2026
 

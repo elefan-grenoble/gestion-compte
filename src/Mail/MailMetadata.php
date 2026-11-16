@@ -2,7 +2,7 @@
 
 namespace App\Mail;
 
-use App\Entity\SentEmail;
+use App\Entity\EmailLog;
 use App\Entity\User;
 use Symfony\Component\Mime\Email;
 
@@ -36,7 +36,7 @@ final class MailMetadata
     public static function written(Email $email, ?User $sentBy = null, ?string $batchId = null): Email
     {
         $headers = $email->getHeaders();
-        $headers->addTextHeader(self::HEADER_SOURCE, SentEmail::SOURCE_MANUAL);
+        $headers->addTextHeader(self::HEADER_SOURCE, EmailLog::SOURCE_MANUAL);
         $headers->addTextHeader(self::HEADER_STORE_BODY, '1');
         if ($batchId) {
             $headers->addTextHeader(self::HEADER_BATCH, $batchId);

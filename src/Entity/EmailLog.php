@@ -11,19 +11,19 @@ use Doctrine\ORM\Mapping as ORM;
  * server accepted the message, not that it reached the mailbox.
  *
  * @ORM\Table(
- *     name="sent_email",
+ *     name="email_log",
  *     indexes={
  *
- *         @ORM\Index(name="sent_email_created_at_idx", columns={"created_at"}),
- *         @ORM\Index(name="sent_email_status_idx", columns={"status"}),
- *         @ORM\Index(name="sent_email_message_id_idx", columns={"message_id"}),
- *         @ORM\Index(name="sent_email_batch_id_idx", columns={"batch_id"})
+ *         @ORM\Index(name="email_log_created_at_idx", columns={"created_at"}),
+ *         @ORM\Index(name="email_log_status_idx", columns={"status"}),
+ *         @ORM\Index(name="email_log_message_id_idx", columns={"message_id"}),
+ *         @ORM\Index(name="email_log_batch_id_idx", columns={"batch_id"})
  *     }
  * )
  *
- * @ORM\Entity(repositoryClass="App\Repository\SentEmailRepository")
+ * @ORM\Entity(repositoryClass="App\Repository\EmailLogRepository")
  */
-class SentEmail
+class EmailLog
 {
     /** Sent by the application itself, without anyone writing it (reminders, account mails...). */
     public const SOURCE_AUTO = 'auto';

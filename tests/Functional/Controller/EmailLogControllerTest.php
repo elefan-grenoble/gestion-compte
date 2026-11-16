@@ -2,7 +2,7 @@
 
 namespace App\Tests\Functional\Controller;
 
-use App\Entity\SentEmail;
+use App\Entity\EmailLog;
 use App\Tests\Functional\FunctionalTestCase;
 
 /**
@@ -10,7 +10,7 @@ use App\Tests\Functional\FunctionalTestCase;
  *
  * @internal
  */
-class SentEmailControllerTest extends FunctionalTestCase
+class EmailLogControllerTest extends FunctionalTestCase
 {
     public static function setUpBeforeClass(): void
     {
@@ -21,8 +21,8 @@ class SentEmailControllerTest extends FunctionalTestCase
     public function testTheListShowsTheMailsNewestFirstWithTheirState(): void
     {
         $client = $this->loginAs('admin');
-        $this->aMail('Older mail', 'old@example.org', SentEmail::STATUS_SENT, '-2 days');
-        $this->aMail('Newer mail', 'new@example.org', SentEmail::STATUS_FAILED, '-1 hour');
+        $this->aMail('Older mail', 'old@example.org', EmailLog::STATUS_SENT, '-2 days');
+        $this->aMail('Newer mail', 'new@example.org', EmailLog::STATUS_FAILED, '-1 hour');
 
         $crawler = $client->request('GET', '/admin/mails/historique/');
 
@@ -37,11 +37,11 @@ class SentEmailControllerTest extends FunctionalTestCase
     public function testTheListCanBeFilteredByStatus(): void
     {
         $client = $this->loginAs('admin');
-        $this->aMail('Delivered mail', 'ok@example.org', SentEmail::STATUS_SENT, '-1 hour');
-        $this->aMail('Refused mail', 'ko@example.org', SentEmail::STATUS_FAILED, '-1 hour');
+        $this->aMail('Delivered mail', 'ok@example.org', EmailLog::STATUS_SENT, '-1 hour');
+        $this->aMail('Refused mail', 'ko@example.org', EmailLog::STATUS_FAILED, '-1 hour');
 
         $crawler = $client->request('GET', '/admin/mails/historique/');
-        $crawler = $client->submit($crawler->selectButton('Filtrer')->form(['form[status]' => SentEmail::STATUS_FAILED]));
+        $crawler = $client->submit($crawler->selectButton('Filtrer')->form(['form[status]' => EmailLog::STATUS_FAILED]));
 
         $text = $crawler->filterXPath('//tbody')->text();
         $this->assertStringContainsString('Refused mail', $text);
@@ -51,13 +51,13 @@ class SentEmailControllerTest extends FunctionalTestCase
     public function testAMailBeingHandedOverIsShownAsWaiting(): void
     {
         $client = $this->loginAs('admin');
-        $this->aMail('Handed over mail', 'p@example.org', SentEmail::STATUS_PENDING, '-1 hour');
-        $this->aMail('Delivered waiting test', 'ok@example.org', SentEmail::STATUS_SENT, '-1 hour');
+        $this->aMail('Handed over mail', 'p@example.org', EmailLog::STATUS_PENDING, '-1 hour');
+        $this->aMail('Delivered waiting test', 'ok@example.org', EmailLog::STATUS_SENT, '-1 hour');
 
         $crawler = $client->request('GET', '/admin/mails/historique/');
         $this->assertStringContainsString('En attente', $crawler->filterXPath('//tbody')->text());
 
-        $crawler = $client->submit($crawler->selectButton('Filtrer')->form(['form[status]' => SentEmail::STATUS_PENDING]));
+        $crawler = $client->submit($crawler->selectButton('Filtrer')->form(['form[status]' => EmailLog::STATUS_PENDING]));
         $text = $crawler->filterXPath('//tbody')->text();
         $this->assertStringContainsString('Handed over mail', $text);
         $this->assertStringNotContainsString('Delivered waiting test', $text);
@@ -68,10 +68,10 @@ class SentEmailControllerTest extends FunctionalTestCase
         $client = $this->loginAs('admin');
         $batch = bin2hex(random_bytes(16));
         foreach (['ann@example.org', 'bob@example.org', 'cat@example.org'] as $i => $to) {
-            $mail = $this->aMail('Group news', $to, 0 === $i ? SentEmail::STATUS_FAILED : SentEmail::STATUS_SENT, '-1 hour', SentEmail::SOURCE_MANUAL);
+            $mail = $this->aMail('Group news', $to, 0 === $i ? EmailLog::STATUS_FAILED : EmailLog::STATUS_SENT, '-1 hour', EmailLog::SOURCE_MANUAL);
             static::persist($mail->setBatchId($batch));
         }
-        $this->aMail('Lonely mail', 'solo@example.org', SentEmail::STATUS_SENT, '-2 hours', SentEmail::SOURCE_MANUAL);
+        $this->aMail('Lonely mail', 'solo@example.org', EmailLog::STATUS_SENT, '-2 hours', EmailLog::SOURCE_MANUAL);
 
         $crawler = $client->request('GET', '/admin/mails/historique/');
 
@@ -94,7 +94,7 @@ class SentEmailControllerTest extends FunctionalTestCase
     public function testTheDetailShowsTheErrorAndTheBodyOfAWrittenMail(): void
     {
         $client = $this->loginAs('admin');
-        $mail = $this->aMail('Written mail', 'ko@example.org', SentEmail::STATUS_FAILED, '-1 hour', SentEmail::SOURCE_MANUAL);
+        $mail = $this->aMail('Written mail', 'ko@example.org', EmailLog::STATUS_FAILED, '-1 hour', EmailLog::SOURCE_MANUAL);
         $mail->setError('550 Mailbox unavailable')->setBody('<p>Dear member</p>');
         static::persist($mail);
 
@@ -105,9 +105,9 @@ class SentEmailControllerTest extends FunctionalTestCase
         $this->assertStringContainsString('Dear member', $crawler->filterXPath('//iframe')->attr('srcdoc'));
     }
 
-    private function aMail(string $subject, string $recipient, string $status, string $when, string $source = SentEmail::SOURCE_AUTO): SentEmail
+    private function aMail(string $subject, string $recipient, string $status, string $when, string $source = EmailLog::SOURCE_AUTO): EmailLog
     {
-        $mail = (new SentEmail())
+        $mail = (new EmailLog())
             ->setSubject($subject)
             ->setFromAddress('membres@yourcoop.local')
             ->setRecipients($recipient)
