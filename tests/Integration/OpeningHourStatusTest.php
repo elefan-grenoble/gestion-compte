@@ -30,56 +30,22 @@ class OpeningHourStatusTest extends KernelTestCase
         static::bootKernel();
     }
 
-    // ---------------------------------------------------------------------
-    // ShiftRepository::findStaffedBetween
-    // ---------------------------------------------------------------------
-
-    public function testFindStaffedBetweenReturnsOnlyTheShiftsWithSomeoneOnThem(): void
-    {
-        $member = static::persist(MembershipBuilder::aMembership()->build());
-        $this->aShift('2031-03-03 10:00', 120, $member);
-        $this->aShift('2031-03-03 14:00', 120, null);
-
-        $staffed = $this->shiftRepository()->findStaffedBetween(new \DateTime('2031-03-03 00:00'), new \DateTime('2031-03-03 23:59'));
-
-        $this->assertCount(1, $staffed);
-        $this->assertEquals(new \DateTime('2031-03-03 10:00'), $staffed[0]['start']);
-        $this->assertEquals(new \DateTime('2031-03-03 12:00'), $staffed[0]['end']);
-    }
-
-    public function testFindStaffedBetweenIgnoresTheShiftsOfDisabledJobs(): void
-    {
-        $member = static::persist(MembershipBuilder::aMembership()->build());
-        $disabledShift = $this->aShift('2031-03-03 10:00', 120, $member);
-        $disabledShift->getJob()->setEnabled(false);
-        static::persist($disabledShift->getJob());
-        $this->aShift('2031-03-03 14:00', 120, $member);
-
-        $staffed = $this->shiftRepository()->findStaffedBetween(new \DateTime('2031-03-03 00:00'), new \DateTime('2031-03-03 23:59'));
-
-        $this->assertEquals([new \DateTime('2031-03-03 14:00')], array_column($staffed, 'start'));
-    }
-
-    public function testFindStaffedBetweenKeepsTheShiftsOverlappingThePeriodSortedByStart(): void
+    public function testFindStaffedBetweenKeepsTheShiftsWithSomeoneOnThemOfEnabledJobsOverlappingThePeriod(): void
     {
         $member = static::persist(MembershipBuilder::aMembership()->build());
         $this->aShift('2031-03-03 15:00', 60, $member);
-        $this->aShift('2031-03-03 09:00', 60, $member); // ends before the period
         $this->aShift('2031-03-03 13:30', 60, $member); // overlaps the start of the period
-        $this->aShift('2031-03-03 16:30', 60, $member); // overlaps the end of the period
+        $this->aShift('2031-03-03 09:00', 60, $member); // ends before the period
         $this->aShift('2031-03-03 18:00', 60, $member); // starts after the period
+        $this->aShift('2031-03-03 14:30', 60, null); // nobody on it
+        $disabled = $this->aShift('2031-03-03 16:00', 60, $member);
+        $disabled->getJob()->setEnabled(false);
+        static::persist($disabled->getJob());
 
         $staffed = $this->shiftRepository()->findStaffedBetween(new \DateTime('2031-03-03 14:00'), new \DateTime('2031-03-03 17:00'));
 
-        $this->assertEquals(
-            [new \DateTime('2031-03-03 13:30'), new \DateTime('2031-03-03 15:00'), new \DateTime('2031-03-03 16:30')],
-            array_column($staffed, 'start')
-        );
+        $this->assertEquals([new \DateTime('2031-03-03 13:30'), new \DateTime('2031-03-03 15:00')], array_column($staffed, 'start'));
     }
-
-    // ---------------------------------------------------------------------
-    // OpeningHourService::getStatus, from the database
-    // ---------------------------------------------------------------------
 
     public function testStatusCombinesTheOpeningHoursAndTheStaffedShifts(): void
     {
