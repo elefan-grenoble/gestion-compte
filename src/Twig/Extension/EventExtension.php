@@ -52,7 +52,7 @@ class EventExtension extends AbstractExtension
         /** @var User $user */
         $user = $this->tokenStorage->getToken()->getUser();
         if (!$user) {
-            return null;
+            return [];
         }
 
         return $this->eventService->getReceivedProxiesOfBeneficiaryForAnEvent($event, $user->getBeneficiary());

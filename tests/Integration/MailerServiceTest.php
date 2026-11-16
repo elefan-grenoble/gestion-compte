@@ -45,8 +45,6 @@ class MailerServiceTest extends KernelTestCase
      */
     public function testConfirmationEmailSurvivesAMissingWelcomeContent(): void
     {
-        $this->markTestIncomplete('I-BUG-4 open: MailerService::sendConfirmationEmailMessage() reads WELCOME_EMAIL with findOneByCode()->getContent() and no null guard (Error on null).');
-
         $this->setWelcomeContent(null);
         $user = $this->aUser('confirm-token-123');
 

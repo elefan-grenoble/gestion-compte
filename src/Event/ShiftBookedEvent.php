@@ -15,6 +15,7 @@ class ShiftBookedEvent extends Event
     public function __construct(Shift $shift, bool $fromAdmin)
     {
         $this->shift = $shift;
+        $this->fromAdmin = $fromAdmin;
     }
 
     public function getShift()

@@ -48,8 +48,9 @@ class OpenFindingsTraceabilityTest extends TestCase
             }
         }
 
-        // A scanner that silently finds nothing would make the check pass for ever.
-        $this->assertGreaterThan(20, $cited, 'The scan found almost no incomplete test: is the tests/ directory read correctly?');
+        // A scanner that silently finds nothing would make the check pass for ever. The floor
+        // goes down as findings are fixed (16 citations after lot 8): lower it then, not before.
+        $this->assertGreaterThan(10, $cited, 'The scan found almost no incomplete test: is the tests/ directory read correctly?');
         $this->assertSame([], $problems, "Untraceable open findings:\n" . implode("\n", $problems));
     }
 

@@ -24,5 +24,6 @@ class AuthenticationSuccessHandler implements AuthenticationSuccessHandlerInterf
             return new RedirectResponse($target);
         }
 
+        return new RedirectResponse('/');
     }
 }

@@ -63,7 +63,7 @@ class MembershipRepository extends EntityRepository
         ;
     }
 
-    public function findWithNewCycleStarting($date, $cycle_type)
+    public function findWithNewCycleStarting($date, $cycle_type, int $cycle_days = 28)
     {
         $qb = $this->createQueryBuilder('u')
             ->where('u.withdrawn = 0')
@@ -78,7 +78,9 @@ class MembershipRepository extends EntityRepository
                 return [];
             }
         } else {
-            $qb = $qb->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), 28) = 0');
+            $qb = $qb->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), :cycle_days) = 0')
+                ->setParameter('cycle_days', $cycle_days)
+            ;
         }
 
         return $qb
@@ -88,7 +90,7 @@ class MembershipRepository extends EntityRepository
         ;
     }
 
-    public function findWithHalfCyclePast($date, $cycle_type)
+    public function findWithHalfCyclePast($date, $cycle_type, int $cycle_days = 28)
     {
         $qb = $this->createQueryBuilder('u')
             ->where('u.withdrawn = 0')
@@ -103,8 +105,10 @@ class MembershipRepository extends EntityRepository
                 return [];
             }
         } else {
-            $qb = $qb->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), 14) = 0')
-                ->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), 28) != 0')
+            // One midpoint per cycle: the elapsed days within the current cycle equal half its length.
+            $qb = $qb->andWhere('MOD(DATE_DIFF(:now, u.firstShiftDate), :cycle_days) = :half_cycle_days')
+                ->setParameter('half_cycle_days', intdiv($cycle_days, 2))
+                ->setParameter('cycle_days', $cycle_days)
                 ->setParameter('now', $date)
             ;
         }

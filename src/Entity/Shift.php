@@ -329,9 +329,9 @@ class Shift
     }
 
     /**
-     * Get shifter.
+     * Get shifter: none while the shift is free.
      *
-     * @return Beneficiary
+     * @return null|Beneficiary
      */
     public function getShifter()
     {
@@ -365,7 +365,7 @@ class Shift
     /**
      * Get formation.
      *
-     * @return Formation
+     * @return null|Formation
      */
     public function getFormation()
     {
@@ -493,7 +493,7 @@ class Shift
     /**
      * Get lastShifter.
      *
-     * @return Beneficiary
+     * @return null|Beneficiary
      */
     public function getLastShifter()
     {

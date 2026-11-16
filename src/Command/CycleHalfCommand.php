@@ -67,7 +67,7 @@ class CycleHalfCommand extends Command
 
         $cycle_type = $this->params->get('cycle_type');
 
-        $members_with_half_cycle = $this->em->getRepository(Membership::class)->findWithHalfCyclePast($date, $cycle_type);
+        $members_with_half_cycle = $this->em->getRepository(Membership::class)->findWithHalfCyclePast($date, $cycle_type, $cycle_type === 'abcd' ? 28 : MembershipService::durationInDays($this->params->get('cycle_duration')));
         $count = 0;
         foreach ($members_with_half_cycle as $member) {
             $current_cycle_start = $this->membership_service->getStartOfCycle($member, 0);

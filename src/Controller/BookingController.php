@@ -103,7 +103,7 @@ class BookingController extends AbstractController
             return $this->redirectToRoute('booking_admin');
         }
         if (!$membership_service->isUptodate($this->getUser()->getBeneficiary()->getMembership())) {
-            +               $remainder = $membership_service->getRemainder($this->getUser()->getBeneficiary()->getMembership());
+            $remainder = $membership_service->getRemainder($this->getUser()->getBeneficiary()->getMembership());
             $this->addFlash('warning', 'Oups, ton adhésion a expiré il y a ' . $remainder->format('%a jours') . '... n\'oublie pas de ré-adhérer pour effectuer ton bénévolat !');
 
             return $this->redirectToRoute('homepage');

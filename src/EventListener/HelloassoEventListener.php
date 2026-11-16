@@ -6,6 +6,7 @@ use App\Entity\HelloassoPayment;
 use App\Entity\Registration;
 use App\Entity\User;
 use App\Event\HelloassoEvent;
+use App\Helper\SwipeCard;
 use Doctrine\ORM\EntityManager;
 use Symfony\Component\DependencyInjection\Container;
 use Symfony\Component\Mailer\MailerInterface;
@@ -19,9 +20,11 @@ class HelloassoEventListener
     protected $container;
     protected $mailer;
     protected $member_email;
+    private SwipeCard $swipeCardHelper;
 
-    public function __construct(EntityManager $entityManager, Container $container, MailerInterface $mailer)
+    public function __construct(EntityManager $entityManager, Container $container, MailerInterface $mailer, SwipeCard $swipeCardHelper)
     {
+        $this->swipeCardHelper = $swipeCardHelper;
         $this->em = $entityManager;
         $this->container = $container;
         $this->mailer = $mailer;
@@ -37,7 +40,7 @@ class HelloassoEventListener
         } else {
             $url = $this->container->get('router')->generate('helloasso_resolve_orphan', [
                 'id' => $payment->getId(),
-                'code' => urlencode($this->container->get('App\Helper\SwipeCard')->vigenereEncode($payment->getEmail())),
+                'code' => urlencode($this->swipeCardHelper->vigenereEncode($payment->getEmail())),
             ], UrlGeneratorInterface::ABSOLUTE_URL);
 
             $needInfo = (new Email())

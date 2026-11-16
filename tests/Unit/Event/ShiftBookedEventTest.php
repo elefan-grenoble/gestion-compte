@@ -23,8 +23,6 @@ class ShiftBookedEventTest extends TestCase
      */
     public function testTellsWhetherTheBookingCameFromAnAdmin(bool $fromAdmin): void
     {
-        $this->markTestIncomplete('I-BUG-5 open: ShiftBookedEvent::$fromAdmin is never assigned by the constructor, isFromAdmin() always returns null.');
-
         $this->assertSame($fromAdmin, (new ShiftBookedEvent(new Shift(), $fromAdmin))->isFromAdmin());
     }
 

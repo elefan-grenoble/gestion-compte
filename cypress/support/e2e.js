@@ -27,16 +27,9 @@ import './commands'
 // states why, so that it gets removed once the application is fixed. A new
 // front-end error must be fixed, or documented here on purpose.
 // ---------------------------------------------------------------------------
-const KNOWN_APPLICATION_ERRORS = [
-    {
-        // templates/member/show.html.twig calls initCollapsible(), declared
-        // in assets/js/app.js but, unlike myCookieInit(), not exposed on
-        // `global`: the webpack bundle keeps it module-scoped. The only
-        // effect is that the open/closed state of the collapsibles of the
-        // member page is not remembered in the "frontend" cookie.
-        message: 'initCollapsible is not defined',
-    },
-]
+// Each entry: { message: '<part of the error message>' } with a comment that
+// says why it is tolerated. None at the moment (JS-INIT-COLLAPSIBLE fixed).
+const KNOWN_APPLICATION_ERRORS = []
 
 Cypress.on('uncaught:exception', (err) => {
     const known = KNOWN_APPLICATION_ERRORS.some((knownError) => err.message.includes(knownError.message))
