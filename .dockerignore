@@ -1,1 +1,44 @@
+# Local database data (dev compose)
 mysql
+
+# VCS, local tooling and caches
+.git
+.github
+.idea
+.claude
+.direnv
+.devenv
+.envrc
+claude.local.md
+*.cache
+.php-cs-fixer.cache
+.phpunit.result.cache
+
+# Dependencies and build outputs: rebuilt inside the image
+vendor
+node_modules
+var
+public/build
+public/bundles
+public/media
+public/uploads/*
+!public/uploads/.htaccess
+
+# Configuration files that may hold secrets, at any depth (e.g. an
+# instance's .env / app.env next to .docker/prod/compose.yaml): only the
+# templates ship
+**/.env
+**/.env.*
+**/*.env
+!.env.dist
+!.docker/prod/.env.dist
+
+# Not needed at runtime
+cypress
+tests
+audit
+mysql
+.docker/keycloak/data
+compose.yaml
+docker-compose.yml
+docker-compose.*.yml*

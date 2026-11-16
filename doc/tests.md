@@ -41,6 +41,11 @@ make cs-fixer-fix       # applique le style
 make test-e2e           # Cypress (login, shift, membership) ; test-e2e-oidc pour Keycloak
 ```
 
+Le test de fumée des images de production (`.docker/prod/`, voir
+[install.serveur.docker.md](install.serveur.docker.md)) construit les images, démarre la
+stack complète sous un nom de projet jetable et la supprime à la fin, volumes compris :
+`tests/docker/prod-stack-smoke.sh` (10 à 15 minutes au premier build, PHP est recompilé).
+
 Un seul fichier ou test : `docker compose exec -T php vendor/bin/phpunit tests/Unit/Service/ShiftServiceUnitTest.php --filter testXxx`
 (ou `vendor/bin/phpunit …` en CI/hôte).
 
@@ -223,10 +228,17 @@ de `TODO-PRIORISEE.md`. Ajouter l'entrée au TODO fait partie du même commit qu
 | `setup` | `composer install`, `npm ci`, build des assets ; artefacts réutilisés par les autres jobs. |
 | `fast-tests` | `make test-unit` sur PHP **7.4 et 8.1** (matrice, `fail-fast: false`), tests de l'export anonymisé. |
 | `phpstan` | `make lint` (PHPStan + php-cs-fixer check), PHP 7.4. |
-| `symfony-tests` | `make test-integration` et `make test-func` sur PHP 7.4 et 8.1 (MariaDB 10.4). La branche 8.1 exécute **toutes les suites sous pcov** (`make test-coverage`). |
+| `symfony-tests` | `make test-integration` et `make test-func` sur PHP 7.4 et 8.1 (MariaDB 10.11, comme la stack de production). La branche 8.1 exécute **toutes les suites sous pcov** (`make test-coverage`). |
 | `composer-audit` | `composer audit --locked`, **non bloquant** : la liste des avis est publiée dans le résumé du job. |
 | `cypress-tests` | Specs E2E hors OIDC, avec un mailcatcher pour les emails. |
 | `cypress-tests-oidc` | Specs OIDC avec Keycloak. |
+
+**Images de production** (`.github/workflows/docker-images.yml`). Sur chaque pull
+request, les images `prod` et `web` sont construites pour amd64 et arm64 (runners
+natifs), puis `tests/docker/prod-stack-smoke.sh` les teste ; rien n'est publié. Sur
+`main` (tag `edge`) et sur les tags de release `vX.Y.Z` (tags `X.Y.Z`, `X.Y`, `latest`),
+les images testées sont publiées sur `ghcr.io/elefan-grenoble/gestion-compte{,-web}`
+avec une attestation de provenance.
 
 **Couverture.** La branche 8.1 publie la couverture par namespace dans le résumé du job
 et l'artefact `coverage-report` (HTML, Clover, Cobertura, texte). La couverture globale
