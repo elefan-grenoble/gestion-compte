@@ -152,6 +152,8 @@ class OpeningHourService
     /**
      * Opening slots (of the enabled kinds, closed days excluded) as [start, end]
      * times of day ('H:i:s'), by day of week (0 = Monday), sorted by start.
+     *
+     * @return array<int, array<int, array{0: string, 1: string}>>
      */
     private function getSlotsByDayOfWeek(): array
     {
