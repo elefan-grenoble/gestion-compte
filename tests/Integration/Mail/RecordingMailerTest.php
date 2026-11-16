@@ -49,6 +49,18 @@ class RecordingMailerTest extends KernelTestCase
         $this->assertNotEmpty($row['message_id']);
     }
 
+    public function testAnEmojiInTheSubjectAndTheBodyIsRecorded(): void
+    {
+        $email = (new Email())->from('sender@example.org')->to('a@example.org')->subject('🎉 Fête de la coop')->html('<p>À bientôt 🥕</p>');
+        MailMetadata::written($email);
+
+        static::$container->get('mailer.mailer')->send($email);
+
+        $row = $this->lastRow();
+        $this->assertSame('🎉 Fête de la coop', $row['subject']);
+        $this->assertSame('<p>À bientôt 🥕</p>', $row['body']);
+    }
+
     public function testAMailWrittenByAPersonKeepsItsBody(): void
     {
         $email = (new Email())->from('sender@example.org')->to('a@example.org')->subject('Written')->html('<p>Dear member</p>');
