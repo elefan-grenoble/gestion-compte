@@ -336,7 +336,7 @@ class OpeningHourServiceTest extends TestCase
     {
         $this->givenWeek([]);
 
-        $this->assertSame(['open' => false, 'next' => null, 'nextDay' => null], $this->service->getStatus(new \DateTime('2030-03-04 10:00')));
+        $this->assertSame(['open' => false, 'next' => null, 'nextDay' => null, 'closesEarly' => false], $this->service->getStatus(new \DateTime('2030-03-04 10:00')));
     }
 
     public function testDefaultsToNow(): void

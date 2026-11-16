@@ -9,6 +9,7 @@
                 <span class="opening-hour-header__next">
                     {{- '→ ' }}{% if shop.open %}ferme{% else %}ouvre{% endif %} à {{ shop.next|time_short|trim -}}
                     {%- if shop.nextDay == 'tomorrow' %} demain{% elseif shop.nextDay == 'week' %} {{ constant('App\\Entity\\Period::DAYS_OF_WEEK')[shop.next|date('N') - 1]|lower }}{% elseif shop.nextDay == 'later' %} le {{ shop.next|date('d/m') }}{% endif -%}
+                    {%- if shop.closesEarly %} (créneau vide){% endif -%}
                 </span>
             {% endif %}
         </div>
