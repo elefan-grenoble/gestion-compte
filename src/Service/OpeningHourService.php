@@ -191,6 +191,8 @@ class OpeningHourService
      * That period is the right one whatever the window: the periods are sorted and the
      * window starts at $date, and a period never goes beyond the day it starts (nor do the
      * opening hours), so the window does not cut it.
+     *
+     * @return array{open: bool, next: ?\DateTime, nextDay: ?string, closesEarly: bool}
      */
     private function getStatusFromShifts(\DateTime $date): array
     {
