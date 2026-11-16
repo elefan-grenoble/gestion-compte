@@ -17,8 +17,6 @@
             {% if group %}
                 {% set failed = batch.failed %}
                 {% set status = batch.pending > 0 ? 'queued' : (failed == batch.total ? 'failed' : (failed > 0 ? 'partial' : 'sent')) %}
-            {% elseif mail.status == 'sent' and mail.error %}
-                {% set status = 'partial' %}
             {% else %}
                 {% set status = mail.status == 'pending' ? 'queued' : mail.status %}
             {% endif %}
@@ -40,7 +38,7 @@
                             <i class="material-icons tiny">error</i> Échec
                         </span>
                     {% else %}
-                        <span class="orange-text tooltipped" data-position="top" data-tooltip="{{ group ? "Ces mails n'ont pas tous été remis au serveur d'envoi : ils partent en arrière-plan, par petits paquets (ou l'envoi a été interrompu)." : "Ce mail n'a pas encore été remis au serveur d'envoi : il part en arrière-plan dans les minutes qui suivent (ou l'envoi a été interrompu)." }}">
+                        <span class="orange-text tooltipped" data-position="top" data-tooltip="Pas encore remis au serveur d'envoi.">
                             <i class="material-icons tiny">schedule</i> En attente{% if group %} ({{ batch.sent + batch.failed }}/{{ batch.total }}){% endif %}
                         </span>
                     {% endif %}

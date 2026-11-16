@@ -21,10 +21,7 @@
             <tr>
                 <td>État</td>
                 <td>
-                    {% if email_log.status == 'sent' and email_log.error %}
-                        <span class="orange-text"><i class="material-icons tiny">warning</i> Envoyé, avec des échecs</span>
-                        (le serveur d'envoi a refusé certains destinataires, voir l'erreur ci-dessous)
-                    {% elseif email_log.status == 'sent' %}
+                    {% if email_log.status == 'sent' %}
                         <span class="green-text"><i class="material-icons tiny">check_circle</i> Envoyé</span>
                         (accepté par le serveur d'envoi ; l'arrivée dans la boîte du destinataire n'est pas vérifiée)
                     {% elseif email_log.status == 'failed' %}
