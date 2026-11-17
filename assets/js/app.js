@@ -12,6 +12,7 @@ global.$ = global.jQuery = $;
 require('materialize-css/dist/js/materialize');
 require('materialize-css/dist/css/materialize.css');
 require('materialize-css/')
+require('./autocomplete.js');
 
 
 require('./barcode.js');
