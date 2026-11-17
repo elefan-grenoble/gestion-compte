@@ -31,13 +31,17 @@ final class MailMetadata
      * Mail written by a person: its body is kept in the history.
      *
      * The mails given the same $batchId (one mail per recipient of a group)
-     * are shown as one line of the history.
+     * are shown as one line of the history. They usually share the same text:
+     * to keep it only once, give $keepBody to the first mail of the group only
+     * (the history then shows it for the whole group).
      */
-    public static function written(Email $email, ?User $sentBy = null, ?string $batchId = null): Email
+    public static function written(Email $email, ?User $sentBy = null, ?string $batchId = null, bool $keepBody = true): Email
     {
         $headers = $email->getHeaders();
         $headers->addTextHeader(self::HEADER_SOURCE, EmailLog::SOURCE_MANUAL);
-        $headers->addTextHeader(self::HEADER_STORE_BODY, '1');
+        if ($keepBody) {
+            $headers->addTextHeader(self::HEADER_STORE_BODY, '1');
+        }
         if ($batchId) {
             $headers->addTextHeader(self::HEADER_BATCH, $batchId);
         }

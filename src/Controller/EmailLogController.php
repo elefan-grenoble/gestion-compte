@@ -114,8 +114,15 @@ class EmailLogController extends AbstractController
     {
         $batchId = $emailLog->getBatchId();
 
+        // The text of a group of mails is kept once, with its first mail.
+        $body = $emailLog->getBody();
+        if (null === $body && $batchId) {
+            $body = $this->getDoctrine()->getRepository(EmailLog::class)->batchBody($batchId);
+        }
+
         return $this->render('admin/mail/history/show.html.twig', [
             'email_log' => $emailLog,
+            'body' => $body,
             'batch_summary' => $batchId ? ($this->getDoctrine()->getRepository(EmailLog::class)->batchSummaries([$batchId])[$batchId] ?? null) : null,
         ]);
     }

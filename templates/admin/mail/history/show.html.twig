@@ -75,8 +75,11 @@
     </table>
 
     <h5>Contenu</h5>
-    {% if email_log.body %}
-        <iframe sandbox srcdoc="{{ email_log.body | e('html_attr') }}" style="width: 100%; height: 400px; border: 1px solid #ccc;"></iframe>
+    {% if body %}
+        {% if batch_summary and batch_summary.total > 1 %}
+            <p class="grey-text">Texte commun à l'envoi, avant personnalisation.</p>
+        {% endif %}
+        <iframe sandbox srcdoc="{{ body | e('html_attr') }}" style="width: 100%; height: 400px; border: 1px solid #ccc;"></iframe>
     {% else %}
         <p class="grey-text">Le contenu des mails automatiques n'est pas conservé.</p>
     {% endif %}

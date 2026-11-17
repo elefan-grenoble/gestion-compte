@@ -93,6 +93,39 @@ class EmailLogRepository extends EntityRepository
     }
 
     /**
+     * Text kept for a group of mails: the one of its first mail that has one.
+     */
+    public function batchBody(string $batchId): ?string
+    {
+        $rows = $this->createQueryBuilder('e')
+            ->select('e.body')
+            ->andWhere('e.batchId = :batch')
+            ->andWhere('e.body IS NOT NULL')
+            ->setParameter('batch', $batchId)
+            ->orderBy('e.id', 'ASC')
+            ->setMaxResults(1)
+            ->getQuery()
+            ->getArrayResult()
+        ;
+
+        return $rows ? $rows[0]['body'] : null;
+    }
+
+    /**
+     * Keeps the text of a group of mails with the first of them.
+     *
+     * Goes through the DBAL connection, not the entity manager, so that nothing
+     * else waiting in the unit of work is written with it.
+     */
+    public function keepBatchBody(string $batchId, string $body): void
+    {
+        $this->getEntityManager()->getConnection()->executeStatement(
+            'UPDATE ' . $this->getClassMetadata()->getTableName() . ' SET body = :body WHERE batch_id = :batch ORDER BY id ASC LIMIT 1',
+            ['body' => $body, 'batch' => $batchId]
+        );
+    }
+
+    /**
      * DQL conditions of the criteria on the given alias (the parameters are
      * set on the query).
      *

@@ -121,6 +121,22 @@ class EmailLogControllerTest extends FunctionalTestCase
         $this->assertStringContainsString('Dear member', $crawler->filterXPath('//iframe')->attr('srcdoc'));
     }
 
+    public function testTheDetailOfAMailOfAGroupShowsTheTextKeptForTheGroup(): void
+    {
+        $client = $this->loginAs('admin');
+        $batch = bin2hex(random_bytes(16));
+        $first = $this->aMail('Group news', 'ann@example.org', EmailLog::STATUS_SENT, '-1 hour', EmailLog::SOURCE_MANUAL);
+        static::persist($first->setBatchId($batch)->setBody('<p>Dear Ann</p>'));
+        $second = $this->aMail('Group news', 'bob@example.org', EmailLog::STATUS_SENT, '-1 hour', EmailLog::SOURCE_MANUAL);
+        static::persist($second->setBatchId($batch));
+
+        $crawler = $client->request('GET', '/admin/mails/historique/' . $second->getId());
+
+        $this->assertSame(200, $client->getResponse()->getStatusCode());
+        $this->assertStringContainsString('Dear Ann', $crawler->filterXPath('//iframe')->attr('srcdoc'));
+        $this->assertStringContainsString('avant personnalisation', $crawler->text());
+    }
+
     private function aMail(string $subject, string $recipient, string $status, string $when, string $source = EmailLog::SOURCE_AUTO): EmailLog
     {
         $mail = (new EmailLog())

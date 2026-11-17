@@ -77,17 +77,33 @@ class RecordingMailerTest extends KernelTestCase
     {
         $mailer = static::$container->get('mailer.mailer');
 
-        foreach (['a@example.org', 'b@example.org', 'c@example.org'] as $to) {
-            $mailer->send(MailMetadata::written((new Email())->from('sender@example.org')->to($to)->subject('Hello all')->html('<p>Dear ' . $to . '</p>'), null, 'group-1'));
+        foreach (['a@example.org', 'b@example.org', 'c@example.org'] as $i => $to) {
+            $mailer->send(MailMetadata::written((new Email())->from('sender@example.org')->to($to)->subject('Hello all')->html('<p>Dear ' . $to . '</p>'), null, 'group-1', 0 === $i));
         }
         $mailer->send(MailMetadata::written((new Email())->from('sender@example.org')->to('d@example.org')->subject('Other')->html('x'), null, 'group-2'));
 
         $rows = $this->connection()->fetchAllAssociative("SELECT * FROM email_log WHERE batch_id = 'group-1' ORDER BY id");
         $this->assertCount(3, $rows);
         $this->assertSame(['a@example.org', 'b@example.org', 'c@example.org'], array_column($rows, 'recipients'));
-        $this->assertSame('<p>Dear b@example.org</p>', $rows[1]['body']);
+        $this->assertSame('<p>Dear a@example.org</p>', $rows[0]['body'], 'The text of the group is kept with its first mail.');
+        $this->assertNull($rows[1]['body'], 'The other mails of the group do not repeat it.');
+        $this->assertNull($rows[2]['body']);
         $this->assertCount(3, array_unique(array_column($rows, 'message_id')), 'Each mail keeps its own Message-ID.');
         $this->assertSame([EmailLog::STATUS_SENT], array_unique(array_column($rows, 'status')));
+    }
+
+    public function testTheTextOfAGroupCanBeKeptWithItsFirstMail(): void
+    {
+        $mailer = static::$container->get('mailer.mailer');
+        foreach (['a@example.org', 'b@example.org'] as $to) {
+            $mailer->send(MailMetadata::written((new Email())->from('sender@example.org')->to($to)->subject('Hello all')->html('<p>Dear ' . $to . '</p>'), null, 'group-2', false));
+        }
+
+        static::$container->get('doctrine')->getRepository(EmailLog::class)->keepBatchBody('group-2', '<p>Dear {{ beneficiary.firstname }}</p>');
+
+        $rows = $this->connection()->fetchAllAssociative("SELECT * FROM email_log WHERE batch_id = 'group-2' ORDER BY id");
+        $this->assertSame('<p>Dear {{ beneficiary.firstname }}</p>', $rows[0]['body']);
+        $this->assertNull($rows[1]['body']);
     }
 
     public function testTheInternalHeadersNeverLeave(): void
