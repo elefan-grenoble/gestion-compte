@@ -26,7 +26,7 @@ Fix : remplacer le tag CDN par `require('canvas-gauges')` dans `app.js` (package
 
 Package installé mais **jamais importé** dans les JS ou LESS. Les icônes Material Design sont servies via des polices locales dans `assets/fonts/iconfont/`, déclarées dans `assets/less/material-icons.less` (importé via `custom.less`). Le package npm est un doublon inutile. Supprimable de `package.json`.
 
-**4. `materialize-css` ^1.0.0** — Utilisé ✅ (importé dans `app.js`).
+**4. `@materializecss/materialize` 1.1.0** — Utilisé ✅ (importé dans `app.js`).
 
 **5. `simplemde` ^1.11.2** — Utilisé. Vulnérable/abandonné, déjà documenté en DEP.1.
 

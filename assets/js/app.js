@@ -9,9 +9,9 @@ const $ = require('jquery');
 // create global $ and jQuery variables
 global.$ = global.jQuery = $;
 
-require('materialize-css/dist/js/materialize');
-require('materialize-css/dist/css/materialize.css');
-require('materialize-css/')
+require('@materializecss/materialize/dist/js/materialize');
+require('@materializecss/materialize/dist/css/materialize.css');
+require('@materializecss/materialize/')
 
 
 require('./barcode.js');

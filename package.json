@@ -8,10 +8,10 @@
         "test": "tests"
     },
     "dependencies": {
+        "@materializecss/materialize": "1.1.0",
         "canvas-gauges": "^2.1.5-radial",
         "jquery": "^3.4.1",
         "material-icons-css": "^1.0.1",
-        "materialize-css": "^1.0.0",
         "simplemde": "^1.11.2"
     },
     "devDependencies": {
