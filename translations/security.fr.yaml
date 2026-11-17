@@ -1,0 +1,5 @@
+# Overrides of the Symfony security messages (vendor/symfony/security-core/Resources/translations)
+
+# The login page was shown again from the browser cache, with the CSRF token
+# of a session that no longer exists: the user only has to log in again.
+'Invalid CSRF token.': 'La page de connexion a expiré, merci de te reconnecter.'

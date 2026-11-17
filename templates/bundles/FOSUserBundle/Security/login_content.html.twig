@@ -51,6 +51,14 @@
 </div>
 
 <script>
+    // Page restored from the back/forward cache: its CSRF token may belong to
+    // a session that no longer exists, reload it to get a fresh one.
+    window.addEventListener('pageshow', function (event) {
+        if (event.persisted) {
+            window.location.reload();
+        }
+    });
+
     (function () {
         var input = document.getElementById('password');
         var button = document.getElementById('togglePassword');
