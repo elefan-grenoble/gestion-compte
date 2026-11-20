@@ -59,6 +59,7 @@ class RoleMatrixTest extends FunctionalTestCase
         'job_list' => 'ROLE_ADMIN',
         'job_widget_generator' => 'ROLE_PROCESS_MANAGER',
         'mail_edit' => 'ROLE_USER_MANAGER',
+        'admin_email_log_index' => 'ROLE_USER_MANAGER',
         'admin_socialnetwork_list' => 'ROLE_ADMIN',
 
         // Elsewhere: the annotation alone.

@@ -1,0 +1,77 @@
+{# Table of mails. Variables: email_logs, batches (figures by batch id, to fold the mails sent together into one line) #}
+<table class="striped responsive-table">
+    <thead>
+        <tr>
+            <th>Date</th>
+            <th>État</th>
+            <th>Destinataire(s)</th>
+            <th>Sujet</th>
+            <th>Type</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for mail in email_logs %}
+            {% set batch = mail.batchId ? (batches[mail.batchId] ?? null) : null %}
+            {% set group = batch and batch.total > 1 %}
+            {% if group %}
+                {% set failed = batch.failed %}
+                {% set status = batch.pending > 0 ? 'queued' : (failed == batch.total ? 'failed' : (failed > 0 ? 'partial' : 'sent')) %}
+            {% else %}
+                {% set status = mail.status == 'pending' ? 'queued' : mail.status %}
+            {% endif %}
+            <tr>
+                <td>{{ mail.createdAt | date('d/m/Y H:i') }}</td>
+                <td>
+                    {% set the_mail = group ? 'les mails' : 'le mail' %}
+                    {% set its = group ? 'leur' : 'son' %}
+                    {% if status == 'sent' %}
+                        <span class="green-text tooltipped" data-position="top" data-tooltip="Le serveur d'envoi a accepté {{ the_mail }}. Cela ne garantit pas {{ its }} arrivée dans la boîte du destinataire (adresse inexistante, boîte pleine, anti-spam…).">
+                            <i class="material-icons tiny">check_circle</i> Envoyé
+                        </span>
+                    {% elseif status == 'partial' %}
+                        <span class="orange-text tooltipped" data-position="top" data-tooltip="Le serveur d'envoi a refusé certains mails de cet envoi. Les erreurs sont visibles dans le détail.">
+                            <i class="material-icons tiny">warning</i> Envoyé, avec des échecs{% if group %} ({{ batch.failed }}){% endif %}
+                        </span>
+                    {% elseif status == 'failed' %}
+                        <span class="red-text tooltipped" data-position="top" data-tooltip="Le serveur d'envoi a refusé {{ the_mail }}. L'erreur est visible dans le détail.">
+                            <i class="material-icons tiny">error</i> Échec
+                        </span>
+                    {% else %}
+                        <span class="orange-text tooltipped" data-position="top" data-tooltip="Pas encore remis au serveur d'envoi.">
+                            <i class="material-icons tiny">schedule</i> En attente{% if group %} ({{ batch.sent + batch.failed }}/{{ batch.total }}){% endif %}
+                        </span>
+                    {% endif %}
+                </td>
+                <td>
+                    {% if group %}
+                        <strong>{{ batch.total }} destinataires</strong>
+                    {% elseif mail.recipientCount > 1 %}
+                        {{ mail.recipientCount }} destinataires
+                    {% else %}
+                        {{ mail.recipients }}
+                    {% endif %}
+                </td>
+                <td>{{ mail.subject }}</td>
+                <td>
+                    {% if mail.source == 'auto' %}
+                        Automatique
+                    {% elseif mail.source == 'manual' %}
+                        Manuel{% if mail.sentBy %} ({{ mail.sentBy.username }}){% endif %}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if group %}
+                        <a href="{{ path('admin_email_log_batch', {batchId: mail.batchId}) }}" class="btn-flat" title="Voir les {{ batch.total }} mails de cet envoi"><i class="material-icons">list</i></a>
+                    {% else %}
+                        <a href="{{ path('admin_email_log_show', {id: mail.id}) }}" class="btn-flat"><i class="material-icons">visibility</i></a>
+                    {% endif %}
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="6" class="center grey-text">Aucun mail.</td>
+            </tr>
+        {% endfor %}
+    </tbody>
+</table>

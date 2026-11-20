@@ -3,13 +3,16 @@
 namespace App\Controller;
 
 use App\Entity\Beneficiary;
+use App\Entity\EmailLog;
 use App\Entity\Shift;
 use App\Entity\User;
 use App\Form\AutocompleteBeneficiaryCollectionType;
 use App\Form\MarkdownEditorType;
+use App\Mail\MailMetadata;
 use App\Service\MailerService;
 use App\Service\SearchUserFormHelper;
 use Michelf\Markdown;
+use Psr\Log\LoggerInterface;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
@@ -108,7 +111,7 @@ class MailController extends AbstractController
      *
      * @Route("/send", name="mail_send", methods={"POST"})
      */
-    public function sendAction(Request $request, MailerInterface $mailer, MailerService $mailer_service)
+    public function sendAction(Request $request, MailerInterface $mailer, MailerService $mailer_service, LoggerInterface $logger)
     {
         $mailform = $this->getMailForm($mailer_service);
         $mailform->handleRequest($request);
@@ -135,6 +138,9 @@ class MailController extends AbstractController
 
             $nb = 0;
             $errored = [];
+            // The mails of one sending are one line of the mail history.
+            $sentBy = $this->getUser() instanceof User ? $this->getUser() : null;
+            $batchId = bin2hex(random_bytes(16));
 
             $from_email = $mailform->get('from')->getData();
             if (in_array($from_email, $mailer_service->getAllowedEmails())) {
@@ -157,6 +163,9 @@ class MailController extends AbstractController
             }
 
             $template = $this->get('twig')->createTemplate($content);
+            // A group keeps its text once, before the personalisation (see below). A single mail keeps its own.
+            $grouped = count($beneficiaries) > 1;
+            $groupTextToKeep = $grouped;
             foreach ($beneficiaries as $beneficiary) {
                 $body = $this->get('twig')->render($template, ['beneficiary' => $beneficiary]);
 
@@ -167,10 +176,22 @@ class MailController extends AbstractController
                         ->to(new Address($beneficiary->getEmail(), $beneficiary->getFirstname() . ' ' . $beneficiary->getLastname()))
                         ->html($body)
                     ;
+                    MailMetadata::written($message, $sentBy, $batchId, !$grouped);
                     $mailer->send($message);
                     ++$nb;
                 } catch (TransportExceptionInterface $exception) {
                     $errored[] = $beneficiary->getEmail();
+                }
+
+                // The first mail of the group is in the history now: it keeps the text with its Twig tags.
+                if ($groupTextToKeep) {
+                    $groupTextToKeep = false;
+
+                    try {
+                        $em->getRepository(EmailLog::class)->keepBatchBody($batchId, $content);
+                    } catch (\Throwable $e) {
+                        $logger->warning('Mail history: the text of the group could not be recorded: ' . $e->getMessage());
+                    }
                 }
             }
             if ($nb > 1) {
