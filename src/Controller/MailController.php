@@ -186,6 +186,7 @@ class MailController extends AbstractController
                 // The first mail of the group is in the history now: it keeps the text with its Twig tags.
                 if ($groupTextToKeep) {
                     $groupTextToKeep = false;
+
                     try {
                         $em->getRepository(EmailLog::class)->keepBatchBody($batchId, $content);
                     } catch (\Throwable $e) {
