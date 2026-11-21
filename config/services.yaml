@@ -115,6 +115,7 @@ parameters:
   new_users_start_as_beginner: '%env(bool:NEW_USERS_START_AS_BEGINNER)%'
   opening_hour_open_closed_header_closed_message: '%env(OPENING_HOUR_OPEN_CLOSED_HEADER_CLOSED_MESSAGE)%'
   opening_hour_open_closed_header_open_message: '%env(OPENING_HOUR_OPEN_CLOSED_HEADER_OPEN_MESSAGE)%'
+  opening_hour_use_shifts_in_open_closed_header: '%env(bool:OPENING_HOUR_USE_SHIFTS_IN_OPEN_CLOSED_HEADER)%'
   oidc_enable: '%env(bool:OIDC_ENABLE)%'
   oidc_user_attributes_map:
     firstname: "%env(OIDC_USER_ATTRIBUTE_FIRSTNAME)%"
@@ -524,6 +525,8 @@ services:
   opening_hour_service:
     class: App\Service\OpeningHourService
     public: true
+    arguments:
+      $useShifts: '%opening_hour_use_shifts_in_open_closed_header%'
   opening_hour_kind_service:
     class: App\Service\OpeningHourKindService
     public: true

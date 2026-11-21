@@ -1,5 +1,5 @@
 {% if opening_hour_kind_service.hasEnabled %}
-    {% if opening_hour_service.isOpen %}
+    {% if opening_hour_service.status.open %}
         <span class="badge green white-text" style="font-family:'Raleway',sans-serif;float:unset;">{{ opening_hour_open_closed_header_open_message }}</span>
     {% else %}
         <span class="badge red white-text" style="font-family:'Raleway',sans-serif;float:unset;">{{ opening_hour_open_closed_header_closed_message }}</span>

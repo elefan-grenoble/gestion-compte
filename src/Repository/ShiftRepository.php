@@ -113,6 +113,29 @@ class ShiftRepository extends EntityRepository
         ;
     }
 
+    /**
+     * Start and end of the shifts with someone on them (empty shifts are ignored),
+     * among the shifts of enabled jobs overlapping the period, sorted by start.
+     *
+     * @return array<int, array{start: \DateTime, end: \DateTime}>
+     */
+    public function findStaffedBetween(\DateTime $from, \DateTime $until): array
+    {
+        return $this->createQueryBuilder('s')
+            ->select('s.start', 's.end')
+            ->innerJoin('s.job', 'j')
+            ->where('s.shifter IS NOT NULL')
+            ->andWhere('j.enabled = 1')
+            ->andWhere('s.end >= :from')
+            ->andWhere('s.start <= :until')
+            ->setParameter('from', $from)
+            ->setParameter('until', $until)
+            ->orderBy('s.start', 'ASC')
+            ->getQuery()
+            ->getArrayResult()
+        ;
+    }
+
     public function findFutures(?\DateTime $max = null, ?Job $job = null, $withShifters = null)
     {
         $now = new \DateTime('now');
