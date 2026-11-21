@@ -297,7 +297,7 @@ class OpeningHourServiceTest extends TestCase
         // Monday and Tuesday mornings, Friday all day; closed on Tuesday 2030-03-12 and Friday 2030-03-15
         $this->givenWeek(
             [0 => [['09:00', '12:00'], ['14:00', '18:00']], 1 => [['09:00', '12:00']], 4 => [['09:00', '12:00']]],
-            ['2030-03-12', '2030-03-15']
+            ['2030-03-12', '2030-03-15', '2030-03-18']
         );
 
         $status = $this->service->getStatus(new \DateTime($now));
@@ -314,8 +314,8 @@ class OpeningHourServiceTest extends TestCase
             'closed, reopens today' => ['2030-03-04 13:00', false, '2030-03-04 14:00', 'today'],
             'closed, reopens tomorrow' => ['2030-03-04 19:00', false, '2030-03-05 09:00', 'tomorrow'],
             'closed before opening, opens today' => ['2030-03-05 07:00', false, '2030-03-05 09:00', 'today'],
-            'closed for the weekend, reopens later' => ['2030-03-08 13:00', false, '2030-03-11 09:00', 'later'],
-            'closed by exception, reopens later' => ['2030-03-12 10:00', false, '2030-03-18 09:00', 'later'],
+            'closed for the weekend, reopens within the week' => ['2030-03-08 13:00', false, '2030-03-11 09:00', 'week'],
+            'closed by exception, reopens in 7 days' => ['2030-03-12 10:00', false, '2030-03-19 09:00', 'later'],
             'tomorrow across a month end' => ['2030-02-28 13:00', false, '2030-03-01 09:00', 'tomorrow'],
         ];
     }

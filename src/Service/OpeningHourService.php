@@ -59,7 +59,8 @@ class OpeningHourService
      *
      * - open:    whether the shop is open
      * - next:    when it closes (if open) or reopens (if closed); null if it does not reopen soon
-     * - nextDay: 'today', 'tomorrow' or 'later' (relative to $date); null when there is no next change
+     * - nextDay: 'today', 'tomorrow', 'week' (within the next 7 days) or 'later' (relative to $date);
+     *            null when there is no next change
      *
      * @return array{open: bool, next: ?\DateTime, nextDay: ?string}
      */
@@ -78,6 +79,8 @@ class OpeningHourService
                 $nextDay = 'today';
             } elseif ($next->format('Y-m-d') === (clone $date)->modify('+1 day')->format('Y-m-d')) {
                 $nextDay = 'tomorrow';
+            } elseif ($next->format('Y-m-d') < (clone $date)->modify('+7 day')->format('Y-m-d')) {
+                $nextDay = 'week';
             } else {
                 $nextDay = 'later';
             }
