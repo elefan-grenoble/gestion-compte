@@ -320,6 +320,18 @@ class OpeningHourServiceTest extends TestCase
         ];
     }
 
+    public function testStatusIsComputedFromTheSameDataAsTheNextChange(): void
+    {
+        // isOpen() reads the opening hours of the day: the status must not depend on it
+        $this->openingHours->expects($this->never())->method('findByDay');
+        $this->givenWeek([0 => [['09:00', '12:00']]]);
+
+        $status = $this->service->getStatus(new \DateTime('2030-03-04 10:00'));
+
+        $this->assertTrue($status['open']);
+        $this->assertEquals(new \DateTime('2030-03-04 12:00'), $status['next']);
+    }
+
     public function testStatusWithoutOpeningHourHasNoNextChange(): void
     {
         $this->givenWeek([]);

@@ -67,8 +67,10 @@ class OpeningHourService
     {
         $date = $date ? clone $date : new \DateTime('now');
 
-        $open = $this->isOpen($date);
-        $next = $open ? $this->getNextClosing($date) : $this->getNextOpening($date);
+        // open and next come from the same data: there is a next closing only when the shop is open
+        $closing = $this->getNextClosing($date);
+        $open = null !== $closing;
+        $next = $open ? $closing : $this->getNextOpening($date);
 
         $nextDay = null;
         if ($next) {
