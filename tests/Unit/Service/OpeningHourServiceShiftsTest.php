@@ -119,7 +119,6 @@ class OpeningHourServiceShiftsTest extends TestCase
         $slot = (new OpeningHour())->setDayOfWeek(0)->setClosed(false);
         $slot->setStart(new \DateTime('09:00'));
         $slot->setEnd(new \DateTime('19:00'));
-        $openingHours->method('findByDay')->willReturn([$slot]);
         $openingHours->method('findOngoing')->willReturn([$slot]);
         $closingExceptions = $this->createMock(ClosingExceptionRepository::class);
         $this->em->method('getRepository')->willReturnMap([[OpeningHour::class, $openingHours], [ClosingException::class, $closingExceptions]]);
