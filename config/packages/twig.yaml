@@ -6,7 +6,6 @@ twig:
         - "form/fields.html.twig"
     globals:
         site_name: "%site_name%"
-        main_color: "%main_color%"
         project_name: "%project_name%"
         project_url: "%project_url%"
         project_url_display: "%project_url_display%"
@@ -28,7 +27,6 @@ twig:
         use_fly_and_fixed: '%use_fly_and_fixed%'
         max_event_proxy_per_member: '%max_event_proxy_per_member%'
         use_time_log_saving: '%use_time_log_saving%'
-        display_gauge: '%display_gauge%'
         max_nb_of_past_cycles_to_display: '%max_nb_of_past_cycles_to_display%'
         profile_display_task_list: '%profile_display_task_list%'
         profile_display_time_log: '%profile_display_time_log%'

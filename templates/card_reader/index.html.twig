@@ -1,7 +1,7 @@
 {% extends 'layoutlight.html.twig' %}
 
 {% block beforecontainer %}
-    <nav class="main-navigation" role="navigation" style="background-color: {{ main_color }}">
+    <nav class="main-navigation" role="navigation" style="background-color: {{ setting('main_color') }}">
         <div class="nav-wrapper">
             <a id="logo-container" class="brand-logo hide-on-med-and-down" style="margin-left: 10px">Lecteur carte membre</a>
             <ul class="right" style="margin-right:10px;">

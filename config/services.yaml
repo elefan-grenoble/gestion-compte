@@ -18,7 +18,6 @@ parameters:
   display_address_field_default: false
   display_freeze_account: '%env(bool:DISPLAY_FREEZE_ACCOUNT)%'
   display_freeze_account_false_message: '%env(DISPLAY_FREEZE_ACCOUNT_FALSE_MESSAGE)%'
-  display_gauge: '%env(bool:DISPLAY_GAUGE)%'
   display_keys_shop: '%env(bool:DISPLAY_KEYS_SHOP)%'
   display_name_shifters: '%env(bool:DISPLAY_NAME_SHIFTERS)%'
   display_opening_hour_open_closed_header: '%env(bool:DISPLAY_OPENING_HOUR_OPEN_CLOSED_HEADER)%'
@@ -91,7 +90,6 @@ parameters:
   logging.mattermost.url: '%env(LOGGING_MATTERMOST_URL)%'
   logging.stdout.enabled: '%env(bool:LOGGING_STDOUT_ENABLED)%'
   logging.stdout.level: '%env(LOGGING_STDOUT_LEVEL)%'
-  main_color: '%env(MAIN_COLOR)%'
   max_event_proxy_per_member: '%env(MAX_EVENT_PROXY_PER_MEMBER)%'
   max_nb_of_past_cycles_to_display: '%env(MAX_NB_OF_PAST_CYCLES_TO_DISPLAY)%'
   max_time_at_end_of_shift: '%env(MAX_TIME_AT_END_OF_SHIFT)%'

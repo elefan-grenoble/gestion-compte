@@ -22,7 +22,7 @@
         </div>
     {% endif %}
     {% include "admin/openinghour/_partial/open_closed_surheader.html.twig" %}
-    <nav class="main-navigation" role="navigation" style="background-color: {{ main_color }}">
+    <nav class="main-navigation" role="navigation" style="background-color: {{ setting('main_color') }}">
         <div class="nav-wrapper container">
             <a id="logo-container" href="{{ path('homepage') }}" class="brand-logo hide-on-med-and-down">
                 {{ site_name }}
