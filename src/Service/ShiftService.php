@@ -492,11 +492,12 @@ class ShiftService
      * - buckets of the same job may overlap on their line (hand-over between two shifters): they are
      *   then staggered, each one on a "level" (the display shifts it a bit down) so the overlap is visible;
      * - at a given time, a bucket goes preferably on a line whose last bucket has the same job
-     *   (the closest one if there are several), otherwise on the first line where it fits.
+     *   (the closest one if there are several), otherwise on the first line where it fits;
+     * - periods inside the day without any bucket are returned as pauses.
      *
      * @param array<int|string, array<int|string, ShiftBucket>> $bucketsByJob [jobId => [interval => ShiftBucket]]
      *
-     * @return array{lines: int, levels: array<int, int>, items: array<int, array{bucket: ShiftBucket, line: int, level: int}>}
+     * @return array{lines: int, levels: array<int, int>, items: array<int, array{bucket: ShiftBucket, line: int, level: int}>, pauses: array<int, array{start: \DateTime, end: \DateTime}>}
      */
     public function layoutBucketsInLines(array $bucketsByJob): array
     {
@@ -600,12 +601,25 @@ class ShiftService
             }
         }
 
+        // pauses: time inside the day covered by no bucket at all
+        $pauses = [];
+        $coveredUntil = null;
+        foreach ($buckets as $bucket) {
+            if (null !== $coveredUntil && $bucket->getStart()->getTimestamp() > $coveredUntil->getTimestamp()) {
+                $pauses[] = ['start' => clone $coveredUntil, 'end' => clone $bucket->getStart()];
+            }
+            if (null === $coveredUntil || $bucket->getEnd()->getTimestamp() > $coveredUntil->getTimestamp()) {
+                $coveredUntil = $bucket->getEnd();
+            }
+        }
+
         return [
             'lines' => count($lines),
             'levels' => array_map(static function (array $line) {
                 return max(array_column($line, 'level'));
             }, $lines),
             'items' => $items,
+            'pauses' => $pauses,
         ];
     }
 

@@ -744,7 +744,7 @@ class ShiftServiceUnitTest extends TestCase
     /**
      * Lay out buckets given as [job name, 'HH:MM' start, 'HH:MM' end].
      *
-     * @return array ['lines' => number of lines, 'at' => "<job><start>" => line, 'level' => "<job><start>" => level]
+     * @return array ['lines' => number of lines, 'at' => "<job><start>" => line, 'level' => "<job><start>" => level, 'pauses' => ['HH:MM-HH:MM', ...]]
      */
     private function layoutOf(array $specs): array
     {
@@ -767,11 +767,14 @@ class ShiftServiceUnitTest extends TestCase
         }
 
         $layout = $this->createService()->layoutBucketsInLines($bucketsByJob);
-        $result = ['lines' => $layout['lines'], 'at' => [], 'level' => []];
+        $result = ['lines' => $layout['lines'], 'at' => [], 'level' => [], 'pauses' => []];
         foreach ($layout['items'] as $item) {
             $label = $labels[spl_object_id($item['bucket'])];
             $result['at'][$label] = $item['line'];
             $result['level'][$label] = $item['level'];
+        }
+        foreach ($layout['pauses'] as $pause) {
+            $result['pauses'][] = $pause['start']->format('H:i') . '-' . $pause['end']->format('H:i');
         }
 
         return $result;
@@ -812,6 +815,16 @@ class ShiftServiceUnitTest extends TestCase
         $this->assertSame(2, $layout['lines']);
         $this->assertEquals(['A09:00' => 0, 'A11:45' => 0, 'A14:45' => 0, 'B09:00' => 1, 'B11:45' => 1], $layout['at']);
         $this->assertEquals(['A09:00' => 0, 'A11:45' => 1, 'A14:45' => 0, 'B09:00' => 0, 'B11:45' => 1], $layout['level']);
+    }
+
+    public function testLayoutReturnsThePausesInsideTheDay(): void
+    {
+        // closed from 12:00 to 14:00 and from 15:00 to 16:00; touching or overlapping buckets leave no pause
+        $layout = $this->layoutOf([
+            ['A', '09:00', '12:00'], ['B', '10:00', '12:00'], ['A', '14:00', '15:00'], ['A', '16:00', '18:00'], ['A', '17:45', '19:00'],
+        ]);
+
+        $this->assertSame(['12:00-14:00', '15:00-16:00'], $layout['pauses']);
     }
 
     // -------------------------------------------------------

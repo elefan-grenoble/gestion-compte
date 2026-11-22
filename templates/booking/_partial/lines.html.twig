@@ -7,7 +7,8 @@
    - card: template of one bucket. It receives bucket, start, end, margin_left (% of the grid, from the end of the previous
            card of the line, negative when they overlap) and top (px, stagger of overlapping buckets of the same job),
            plus the variables of card_context
-   - card_context: (optional) other variables for card #}
+   - card_context: (optional) other variables for card
+   - show_pauses: (optional, default true) draw the periods without any bucket as a grey "Pause" over every line #}
 {% set layout = shift_service.layoutBucketsInLines(bucketsByJob) %}
 {% set unit = 100 / ((end - start + 1) * 60) %}{# % of the grid per minute #}
 <div style="position: relative;">
@@ -22,4 +23,9 @@
             {% endfor %}
         </div>
     {% endfor %}
+    {% if show_pauses is not defined or show_pauses %}
+        {% for pause in layout.pauses %}
+            {% include "booking/_partial/pause.html.twig" with { from: pause.start, to: pause.end, start: start, unit: unit } %}
+        {% endfor %}
+    {% endif %}
 </div>

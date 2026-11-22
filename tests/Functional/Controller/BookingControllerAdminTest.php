@@ -68,6 +68,44 @@ class BookingControllerAdminTest extends FunctionalTestCase
         $this->assertSame(1, substr_count($content, 'data-source="/booking/admin/bucket/'), 'Only the bucket of the chosen job is listed.');
     }
 
+    public function testThePlanningShowsAPauseWhenNoShiftIsOpenDuringTheDay(): void
+    {
+        $client = static::createClient();
+        static::aBookableShift(new \DateTime('+2 days 09:00'));
+        static::aBookableShift(new \DateTime('+2 days 14:00'));
+        static::entityManager()->clear();
+        static::logIn($client, $this->aMemberWithRoles('ROLE_SHIFT_MANAGER'));
+
+        $client->request('GET', '/booking/admin');
+
+        $this->assertStringContainsString('title="Pause de ', $client->getResponse()->getContent());
+    }
+
+    public function testThePlanningHidesThePauseWhenFilteredByJob(): void
+    {
+        $client = static::createClient();
+        $first = static::aBookableShift(new \DateTime('+2 days 09:00'));
+        static::aBookableShift(new \DateTime('+2 days 14:00'), 180, $first->getJob());
+        static::entityManager()->clear();
+        static::logIn($client, $this->aMemberWithRoles('ROLE_SHIFT_MANAGER'));
+
+        $client->request('POST', '/booking/admin', ['form' => [
+            'type' => 'date',
+            'from' => (new \DateTime('today'))->format('Y-m-d'),
+            'to' => '',
+            'year' => (new \DateTime())->format('Y'),
+            'week' => (new \DateTime())->format('W'),
+            'job' => $first->getJob()->getId(),
+            'filling' => '',
+            'filter' => '',
+            '_token' => static::csrfToken($client, 'form'),
+        ]]);
+
+        $content = $client->getResponse()->getContent();
+        $this->assertSame(2, substr_count($content, 'data-source="/booking/admin/bucket/'), 'Both buckets of the job are listed.');
+        $this->assertStringNotContainsString('title="Pause de ', $content, 'A filtered planning does not tell when the shop is closed.');
+    }
+
     public function testTheBucketModalShowsTheFormsToManageEachShift(): void
     {
         $client = static::createClient();
