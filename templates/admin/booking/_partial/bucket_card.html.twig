@@ -3,7 +3,7 @@
 {% set nbBookedShifts = nbShifts - nbBookableShifts %}
 
 <div id="main-bucket-{{ bucket.id }}" data-offset="{{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60) }}" data-length="{{ (100/(end-start+1)) }}"
-    style="padding: 0 1px;width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;position: absolute;left: {{ (((bucket.start|date('G')-start)*60 + bucket.start|date('i'))/60)*(100/(end-start+1)) }}%;top: {{ line*10 }}px;">
+    style="padding: 0 1px;position: relative;flex: none;width:{{ (bucket.duration / 60) * (100/(end-start+1)) }}%;margin-left:{{ margin_left | default(0) }}%;top: {{ top | default(0) }}px;">
     <a href="#modal-bucket" data-source="{{ path('admin_bucket_show', { 'id': bucket.id }) }}" class="modal-trigger tooltipped" data-tooltip="{{ bucket.first.job.name }}">
         <div class="z-depth-1 {% if bucket.first.locked %}blue-grey white-text{% else %}{{ bucket.first.job.color }} lighten-5 black-text{% endif %}" style="position: relative;height: 70px;">
             <div style="height:2px; width: 100%; position: absolute;">
@@ -16,7 +16,7 @@
             <div style="position: absolute;width:60px;height: 70px;top: 0;left: 4px;transform: rotate(-90deg);text-align: center;font-size: 9px;">
                 {{ bucket.start|date('G\\hi') }}&nbsp;{{ bucket.end|date('G\\hi') }}
             </div>
-            <ul style="font-size: 9px; padding-left: 15px;">
+            <ul style="font-size: 9px; padding-left: 15px; margin-top: 0;">
                 {% set shiftercount = 0 %}
                 {% for shift in bucket.sortedShifts() %}
                     {% if (shiftercount < 4) %}

@@ -512,7 +512,6 @@ class BookingController extends AbstractController
                     'bucket' => $bucket,
                     'start' => 6,
                     'end' => 22,
-                    'line' => 0,
                 ]);
                 $modal = $this->forward('App\Controller\BookingController::showBucketForAdminAction', [
                     'bucket' => $bucket->getShiftWithMinId(),
