@@ -62,25 +62,28 @@
     </li>
 </ul>
 {{ form_end(filterForm) }}
+{% endblock %}
 
-{# Calendar hour line --------- #}
-<div class="row">
-    <div class="col m2 hide-on-small-only">
-    </div>
-    <div class="col s12 m10">
-        <div style="display: flex;">
-            {% for i in range(6, 22) %}
-                <div style="flex: 1">
-                    <div style="text-align: center;width: 100%;margin-left: -50%;">
-                        {{ i }}h
+{# The planning takes the whole page width, like /schedule (see booking/_partial/list.html.twig) #}
+{% block aftercontainer %}
+<div id="weeks" style="padding: 5px;">
+    {# Calendar hour line --------- #}
+    <div class="row" style="margin-bottom: 0;">
+        <div class="col s12">
+            <div style="display: flex;">
+                {% for i in range(6, 22) %}
+                    <div style="flex: 1">
+                        <div style="text-align: center;width: 100%;margin-left: -50%;">
+                            {{ i }}h
+                        </div>
                     </div>
-                </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
         </div>
     </div>
-</div>
 
-{% include "admin/booking/_partial/bucket_calendar.html.twig" with { bucketsByDay: bucketsByDay } %}
+    {% include "admin/booking/_partial/bucket_calendar.html.twig" with { bucketsByDay: bucketsByDay } %}
+</div>
 
 <div id="modal-bucket" class="modal">
     <div id="modal-bucket-content" class="modal-content">
