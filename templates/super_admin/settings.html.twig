@@ -1,0 +1,39 @@
+{% extends 'layout.html.twig' %}
+
+{% block title %}Configuration - {{ site_name }}{% endblock %}
+
+{% block breadcrumbs %}
+    <a href="{{ path('homepage') }}"><i class="material-icons">home</i></a><i class="material-icons">chevron_right</i>
+    <a href="{{ path('admin') }}"><i class="material-icons">build</i>&nbsp;Administration</a><i class="material-icons">chevron_right</i>
+    <i class="material-icons">settings</i>&nbsp;Configuration
+{% endblock %}
+
+{% block content %}
+    <div class="section no-pad-bot" id="index-banner">
+        <div class="container">
+            <h4>
+                <i class="material-icons left">settings</i>Configuration
+            </h4>
+
+            {{ form_start(form) }}
+
+            <div class="row">
+                {{ form_errors(form.display_gauge) }}
+                <label>
+                    {{ form_widget(form.display_gauge) }}
+                    <span>{{ form.display_gauge.vars.label }}</span>
+                </label>
+            </div>
+
+            <div class="row">
+                {{ form_row(form.main_color) }}
+            </div>
+
+            <button type="submit" class="btn waves-effect waves-light">
+                <i class="material-icons left">save</i>Enregistrer
+            </button>
+
+            {{ form_end(form) }}
+        </div>
+    </div>
+{% endblock %}

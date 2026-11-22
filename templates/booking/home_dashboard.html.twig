@@ -6,7 +6,7 @@
     {% set end_current_cycle = membership_service.endOfCycle(member) %}
 
     {% if not member.frozen %}
-        {% if display_gauge %}
+        {% if setting('display_gauge') %}
             <div class="gauge_container">
                 <canvas id="gauge"
                         data-type="radial-gauge"
