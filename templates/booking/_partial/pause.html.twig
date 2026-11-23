@@ -1,0 +1,9 @@
+{# Period of the day without any shift (shop closed): grey block over every line of the day, not clickable. #}
+{% set from_minutes = (from | date('G') - start) * 60 + from | date('i') %}
+<div title="Pause de {{ from | date('G\\hi') }} à {{ to | date('G\\hi') }}"
+     style="position: absolute; top: 0; bottom: 0; padding: 0 1px; left: {{ from_minutes * unit }}%; width: {{ (to.timestamp - from.timestamp) / 60 * unit }}%;">
+    <div class="grey lighten-3 grey-text text-darken-1" style="height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; overflow: hidden; font-size: 12px; text-align: center;">
+        <span>Pause</span>
+        <span style="font-size: 10px;">{{ from | date('G\\hi') }} - {{ to | date('G\\hi') }}</span>
+    </div>
+</div>

@@ -1,0 +1,31 @@
+{# Lay out the buckets of one day on lines. Used by every planning: public (/booking, /schedule, home) and admin.
+   A line is a flex row: cards flow one after the other, so a line is as high as its tallest card.
+
+   Parameters:
+   - bucketsByJob: the buckets of the day, as given by ShiftService::generateShiftBucketsByDayAndJob()
+   - start, end: first and last hour of the time grid
+   - card: template of one bucket. It receives bucket, start, end, margin_left (% of the grid, from the end of the previous
+           card of the line, negative when they overlap) and top (px, stagger of overlapping buckets of the same job),
+           plus the variables of card_context
+   - card_context: (optional) other variables for card
+   - show_pauses: (optional, default true) draw the periods without any bucket as a grey "Pause" over every line #}
+{% set layout = shift_service.layoutBucketsInLines(bucketsByJob) %}
+{% set unit = 100 / ((end - start + 1) * 60) %}{# % of the grid per minute #}
+<div style="position: relative;">
+    {% for index in 0..(layout.lines - 1) if layout.lines > 0 %}
+        {# the padding keeps room for the stagger of the overlapping buckets of the same job #}
+        <div style="display: flex; align-items: flex-start; margin-bottom: 4px; padding-bottom: {{ layout.levels[index] * 10 }}px;">
+            {% set cursor = 0 %}
+            {% for item in layout.items if item.line == index %}
+                {% set from = (item.bucket.start | date('G') - start) * 60 + item.bucket.start | date('i') %}
+                {% include card with (card_context | default({})) | merge({ bucket: item.bucket, start: start, end: end, margin_left: (from - cursor) * unit, top: item.level * 10 }) %}
+                {% set cursor = from + item.bucket.duration %}
+            {% endfor %}
+        </div>
+    {% endfor %}
+    {% if show_pauses is not defined or show_pauses %}
+        {% for pause in layout.pauses %}
+            {% include "booking/_partial/pause.html.twig" with { from: pause.start, to: pause.end, start: start, unit: unit } %}
+        {% endfor %}
+    {% endif %}
+</div>

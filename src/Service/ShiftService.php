@@ -485,6 +485,145 @@ class ShiftService
     }
 
     /**
+     * Place the buckets of one day on lines, for every planning (public and admin).
+     *
+     * - one single line as long as nothing happens in parallel, whatever the job;
+     * - a new line is opened only when buckets of different jobs overlap;
+     * - buckets of the same job may overlap on their line (hand-over between two shifters): they are
+     *   then staggered, each one on a "level" (the display shifts it a bit down) so the overlap is visible;
+     * - at a given time, a bucket goes preferably on a line whose last bucket has the same job
+     *   (the closest one if there are several), otherwise on the first line where it fits;
+     * - periods inside the day without any bucket are returned as pauses.
+     *
+     * @param array<int|string, array<int|string, ShiftBucket>> $bucketsByJob [jobId => [interval => ShiftBucket]]
+     *
+     * @return array{lines: int, levels: array<int, int>, items: array<int, array{bucket: ShiftBucket, line: int, level: int}>, pauses: array<int, array{start: \DateTime, end: \DateTime}>}
+     */
+    public function layoutBucketsInLines(array $bucketsByJob): array
+    {
+        $buckets = [];
+        foreach ($bucketsByJob as $bucketsByInterval) {
+            foreach ($bucketsByInterval as $bucket) {
+                $buckets[] = $bucket;
+            }
+        }
+        usort($buckets, static function (ShiftBucket $a, ShiftBucket $b) {
+            return [$a->getStart()->getTimestamp(), $a->getEnd()->getTimestamp()] <=> [$b->getStart()->getTimestamp(), $b->getEnd()->getTimestamp()];
+        });
+
+        // Doctrine hands out a single instance per job, so the instance identifies the job
+        $jobKeyOf = static function (ShiftBucket $bucket): string {
+            return 'job' . spl_object_id($bucket->getJob());
+        };
+        // each line holds its placed buckets: ['start', 'end', 'job', 'level']
+        $lines = [];
+        $items = [];
+        $overlapping = static function (array $line, int $start, int $end): array {
+            return array_filter($line, static function (array $placed) use ($start, $end) {
+                return $placed['start'] < $end && $start < $placed['end'];
+            });
+        };
+        // a bucket fits on a line if it only overlaps buckets of its own job
+        $fits = static function (array $line, int $start, int $end, string $jobKey) use ($overlapping): bool {
+            foreach ($overlapping($line, $start, $end) as $placed) {
+                if ($placed['job'] !== $jobKey) {
+                    return false;
+                }
+            }
+
+            return true;
+        };
+        $place = static function (ShiftBucket $bucket, string $jobKey, int $index) use (&$lines, &$items, $overlapping) {
+            $start = $bucket->getStart()->getTimestamp();
+            $end = $bucket->getEnd()->getTimestamp();
+            $usedLevels = array_column($overlapping($lines[$index] ?? [], $start, $end), 'level');
+            $level = 0;
+            while (in_array($level, $usedLevels, true)) {
+                ++$level;
+            }
+            $lines[$index][] = ['start' => $start, 'end' => $end, 'job' => $jobKey, 'level' => $level];
+            $items[] = ['bucket' => $bucket, 'line' => $index, 'level' => $level];
+        };
+        // job and end of the bucket that ends last on a line
+        $lastOf = static function (array $line): array {
+            $last = $line[0];
+            foreach ($line as $placed) {
+                if ($placed['end'] >= $last['end']) {
+                    $last = $placed;
+                }
+            }
+
+            return $last;
+        };
+
+        $i = 0;
+        $count = count($buckets);
+        while ($i < $count) {
+            // buckets starting at the same time are placed together, those that can join their job first
+            $start = $buckets[$i]->getStart()->getTimestamp();
+            $group = [];
+            while ($i < $count && $buckets[$i]->getStart()->getTimestamp() === $start) {
+                $group[] = $buckets[$i++];
+            }
+
+            $others = [];
+            foreach ($group as $bucket) {
+                $jobKey = $jobKeyOf($bucket);
+                $end = $bucket->getEnd()->getTimestamp();
+                $best = null;
+                $bestEnd = 0;
+                foreach ($lines as $index => $line) {
+                    $last = $lastOf($line);
+                    if ($last['job'] === $jobKey && $fits($line, $start, $end, $jobKey) && (null === $best || $last['end'] > $bestEnd)) {
+                        $best = $index;
+                        $bestEnd = $last['end'];
+                    }
+                }
+                if (null === $best) {
+                    $others[] = $bucket;
+                } else {
+                    $place($bucket, $jobKey, $best);
+                }
+            }
+
+            foreach ($others as $bucket) {
+                $jobKey = $jobKeyOf($bucket);
+                $end = $bucket->getEnd()->getTimestamp();
+                $target = count($lines);
+                foreach ($lines as $index => $line) {
+                    if ($fits($line, $start, $end, $jobKey)) {
+                        $target = $index;
+
+                        break;
+                    }
+                }
+                $place($bucket, $jobKey, $target);
+            }
+        }
+
+        // pauses: time inside the day covered by no bucket at all
+        $pauses = [];
+        $coveredUntil = null;
+        foreach ($buckets as $bucket) {
+            if (null !== $coveredUntil && $bucket->getStart()->getTimestamp() > $coveredUntil->getTimestamp()) {
+                $pauses[] = ['start' => clone $coveredUntil, 'end' => clone $bucket->getStart()];
+            }
+            if (null === $coveredUntil || $bucket->getEnd()->getTimestamp() > $coveredUntil->getTimestamp()) {
+                $coveredUntil = $bucket->getEnd();
+            }
+        }
+
+        return [
+            'lines' => count($lines),
+            'levels' => array_map(static function (array $line) {
+                return max(array_column($line, 'level'));
+            }, $lines),
+            'items' => $items,
+            'pauses' => $pauses,
+        ];
+    }
+
+    /**
      * Filter bucketsByDay by filling (empty / partial / full).
      *
      * @param mixed $bucketsByDay

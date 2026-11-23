@@ -3,9 +3,11 @@
 namespace App\Tests\Unit\Service;
 
 use App\Entity\Beneficiary;
+use App\Entity\Job;
 use App\Entity\Membership;
 use App\Entity\Registration;
 use App\Entity\Shift;
+use App\Entity\ShiftBucket;
 use App\Entity\TimeLog;
 use App\Entity\User;
 use App\Service\BeneficiaryService;
@@ -733,6 +735,96 @@ class ShiftServiceUnitTest extends TestCase
         }
 
         $this->assertFalse($this->createService()->hasPreviousValidShifts($beneficiary));
+    }
+
+    // -------------------------------------------------------
+    // layoutBucketsInLines()
+    // -------------------------------------------------------
+
+    /**
+     * Lay out buckets given as [job name, 'HH:MM' start, 'HH:MM' end].
+     *
+     * @return array ['lines' => number of lines, 'at' => "<job><start>" => line, 'level' => "<job><start>" => level, 'pauses' => ['HH:MM-HH:MM', ...]]
+     */
+    private function layoutOf(array $specs): array
+    {
+        $jobs = [];
+        $bucketsByJob = [];
+        $labels = [];
+        foreach ($specs as [$name, $from, $to]) {
+            $jobs[$name] ??= new Job();
+            $start = new \DateTime('2026-11-25 ' . $from);
+            $shift = ShiftBuilder::aShift()
+                ->forJob($jobs[$name])
+                ->startingAt($start)
+                ->lasting((int) (((new \DateTime('2026-11-25 ' . $to))->getTimestamp() - $start->getTimestamp()) / 60))
+                ->build()
+            ;
+            $bucket = new ShiftBucket();
+            $bucket->addShift($shift);
+            $bucketsByJob[$name][$from] = $bucket;
+            $labels[spl_object_id($bucket)] = $name . $from;
+        }
+
+        $layout = $this->createService()->layoutBucketsInLines($bucketsByJob);
+        $result = ['lines' => $layout['lines'], 'at' => [], 'level' => [], 'pauses' => []];
+        foreach ($layout['items'] as $item) {
+            $label = $labels[spl_object_id($item['bucket'])];
+            $result['at'][$label] = $item['line'];
+            $result['level'][$label] = $item['level'];
+        }
+        foreach ($layout['pauses'] as $pause) {
+            $result['pauses'][] = $pause['start']->format('H:i') . '-' . $pause['end']->format('H:i');
+        }
+
+        return $result;
+    }
+
+    public function testLayoutKeepsBucketsOfDifferentJobsOnOneLineWhenNothingIsParallel(): void
+    {
+        $layout = $this->layoutOf([['A', '09:00', '12:00'], ['B', '12:00', '15:00'], ['C', '15:00', '18:00']]);
+
+        $this->assertSame(1, $layout['lines']);
+        $this->assertEquals(['A09:00' => 0, 'B12:00' => 0, 'C15:00' => 0], $layout['at']);
+    }
+
+    public function testLayoutFillsTheFreeLineWhenAJobCannotStayOnItsLine(): void
+    {
+        // A A C C
+        // B B B A
+        $layout = $this->layoutOf([
+            ['A', '09:00', '11:00'], ['B', '09:00', '11:00'], ['A', '11:00', '13:00'], ['B', '11:00', '13:00'],
+            ['C', '13:00', '15:00'], ['B', '13:00', '15:00'], ['C', '15:00', '17:00'], ['A', '15:00', '17:00'],
+        ]);
+
+        $this->assertSame(2, $layout['lines']);
+        $this->assertEquals(
+            ['A09:00' => 0, 'B09:00' => 1, 'A11:00' => 0, 'B11:00' => 1, 'C13:00' => 0, 'B13:00' => 1, 'C15:00' => 0, 'A15:00' => 1],
+            $layout['at']
+        );
+    }
+
+    public function testLayoutStaggersOverlappingBucketsOfTheSameJobOnTheirLine(): void
+    {
+        // hand-over: the next shifters arrive 15 minutes before the previous ones leave
+        $layout = $this->layoutOf([
+            ['A', '09:00', '12:00'], ['A', '11:45', '15:00'], ['A', '14:45', '18:00'],
+            ['B', '09:00', '12:00'], ['B', '11:45', '15:00'],
+        ]);
+
+        $this->assertSame(2, $layout['lines']);
+        $this->assertEquals(['A09:00' => 0, 'A11:45' => 0, 'A14:45' => 0, 'B09:00' => 1, 'B11:45' => 1], $layout['at']);
+        $this->assertEquals(['A09:00' => 0, 'A11:45' => 1, 'A14:45' => 0, 'B09:00' => 0, 'B11:45' => 1], $layout['level']);
+    }
+
+    public function testLayoutReturnsThePausesInsideTheDay(): void
+    {
+        // closed from 12:00 to 14:00 and from 15:00 to 16:00; touching or overlapping buckets leave no pause
+        $layout = $this->layoutOf([
+            ['A', '09:00', '12:00'], ['B', '10:00', '12:00'], ['A', '14:00', '15:00'], ['A', '16:00', '18:00'], ['A', '17:45', '19:00'],
+        ]);
+
+        $this->assertSame(['12:00-14:00', '15:00-16:00'], $layout['pauses']);
     }
 
     // -------------------------------------------------------

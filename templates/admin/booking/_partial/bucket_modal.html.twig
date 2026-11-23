@@ -39,7 +39,7 @@ id = "modal-bucket"
                                 &nbsp;<strong class="orange-text">({{ shift.shifter.formations | join(', ') }})</strong>
                             {% endif %}
                             {% if shift.shifter.isNew %}
-                                &nbsp;<strong class="red-text" title="Nouveau membre">{{ beneficiary_new_icon }}</strong>
+                                &nbsp;<strong class="purple-text" title="Nouveau membre">{{ beneficiary_new_icon }}</strong>
                             {% endif %}
                             {% if shift.isFirstByShifter %}
                                 &nbsp;<strong class="red-text">(Premier créneau)</strong>
@@ -102,18 +102,11 @@ id = "modal-bucket"
                 <div class="collapsible-header" style="display: block;">
                     <div class="row" style="margin-bottom: 0px;">
                         <div class="col s12">
-                            <b>
-                                <span style="font-style: italic">
-                                    {% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayNameWithMemberNumber }}
-                                    {% else %}libre
-                                    {% endif %}
-                                </span>
-                            </b>
-                            {% if shift.formation %}
-                                </b>&nbsp;({{ shift.formation.name }})
-                            {% else %}
-                                </b>&nbsp;(sans formation particulière)
+                            {% if use_card_reader_to_validate_shifts and shift.isPastOrCurrent %}
+                                <span class="grey-text">&#9673;</span>&nbsp;
                             {% endif %}
+                            {# gras = avec formation, italique = libre #}
+                            {% if shift.formation %}<b>{% endif %}<i>{% if shift.lastShifter %}réservé à {{ shift.lastShifter.displayNameWithMemberNumber }}{% else %}libre{% endif %}</i>{% if shift.formation %}</b>&nbsp;({{ shift.formation.name }}){% else %}&nbsp;(sans formation particulière){% endif %}
                         </div>
                     </div>
                 </div>
