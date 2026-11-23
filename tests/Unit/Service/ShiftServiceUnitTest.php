@@ -744,7 +744,7 @@ class ShiftServiceUnitTest extends TestCase
     /**
      * Lay out buckets given as [job name, 'HH:MM' start, 'HH:MM' end].
      *
-     * @return array ['lines' => number of lines, 'at' => "<job><start>" => line, 'level' => "<job><start>" => level, 'pauses' => ['HH:MM-HH:MM', ...]]
+     * @return array ['lines' => number of lines, 'at' => "<job><start>" => line, 'level' => "<job><start>" => level, 'continues' => "<job><start>" => bool, 'pauses' => ['HH:MM-HH:MM', ...]]
      */
     private function layoutOf(array $specs): array
     {
@@ -767,11 +767,12 @@ class ShiftServiceUnitTest extends TestCase
         }
 
         $layout = $this->createService()->layoutBucketsInLines($bucketsByJob);
-        $result = ['lines' => $layout['lines'], 'at' => [], 'level' => [], 'pauses' => []];
+        $result = ['lines' => $layout['lines'], 'at' => [], 'level' => [], 'continues' => [], 'pauses' => []];
         foreach ($layout['items'] as $item) {
             $label = $labels[spl_object_id($item['bucket'])];
             $result['at'][$label] = $item['line'];
             $result['level'][$label] = $item['level'];
+            $result['continues'][$label] = $item['continues'];
         }
         foreach ($layout['pauses'] as $pause) {
             $result['pauses'][] = $pause['start']->format('H:i') . '-' . $pause['end']->format('H:i');
@@ -825,6 +826,36 @@ class ShiftServiceUnitTest extends TestCase
         ]);
 
         $this->assertSame(['12:00-14:00', '15:00-16:00'], $layout['pauses']);
+    }
+
+    public function testLayoutOfTheTypicalMondayOfTheStore(): void
+    {
+        // the periods of a Monday, as defined in production
+        $layout = $this->layoutOf([
+            ['Opérations internes', '08:00', '09:30'],
+            ['Epicerie/Livraison', '09:30', '12:30'],
+            ['Nouvelleau', '09:30', '12:30'],
+            ['Vrac', '10:00', '11:30'],
+            ['Epicerie', '12:15', '13:45'],
+            ['Bureau des membres', '12:15', '13:45'],
+            ['Vrac', '12:15', '13:45'],
+            ['Nouvelleau', '12:15', '13:45'],
+            ['Bricolage', '13:30', '16:30'],
+            ['Epicerie', '17:00', '18:30'],
+            ['Nouvelleau', '17:00', '18:30'],
+            ['Poste d\'accueil', '17:30', '19:00'],
+            ['Bureau des membres', '18:00', '19:30'],
+            ['Réunion d\'intégration', '18:00', '19:30'],
+            ['Epicerie', '18:15', '19:45'],
+            ['Nouvelleau', '18:15', '19:45'],
+        ]);
+
+        $this->assertSame(5, $layout['lines']);
+        // the hand-overs continue the previous bucket of their job: no need to write the name again
+        $continuing = array_keys(array_filter($layout['continues']));
+        sort($continuing);
+        $this->assertSame(['Epicerie18:15', 'Nouvelleau12:15', 'Nouvelleau18:15'], $continuing);
+        $this->assertSame(['16:30-17:00'], $layout['pauses']);
     }
 
     // -------------------------------------------------------

@@ -493,11 +493,12 @@ class ShiftService
      *   then staggered, each one on a "level" (the display shifts it a bit down) so the overlap is visible;
      * - at a given time, a bucket goes preferably on a line whose last bucket has the same job
      *   (the closest one if there are several), otherwise on the first line where it fits;
+     * - a bucket that continues one of the same job on its line (hand-over) is flagged, the display need not repeat the job name;
      * - periods inside the day without any bucket are returned as pauses.
      *
      * @param array<int|string, array<int|string, ShiftBucket>> $bucketsByJob [jobId => [interval => ShiftBucket]]
      *
-     * @return array{lines: int, levels: array<int, int>, items: array<int, array{bucket: ShiftBucket, line: int, level: int}>, pauses: array<int, array{start: \DateTime, end: \DateTime}>}
+     * @return array{lines: int, levels: array<int, int>, items: array<int, array{bucket: ShiftBucket, line: int, level: int, continues: bool}>, pauses: array<int, array{start: \DateTime, end: \DateTime}>}
      */
     public function layoutBucketsInLines(array $bucketsByJob): array
     {
@@ -541,8 +542,12 @@ class ShiftService
             while (in_array($level, $usedLevels, true)) {
                 ++$level;
             }
+            // a bucket of the same job that is still going on, or ends right when this one starts: this one continues it
+            $continues = [] !== array_filter($lines[$index] ?? [], static function (array $placed) use ($start, $jobKey) {
+                return $placed['job'] === $jobKey && $placed['end'] >= $start;
+            });
             $lines[$index][] = ['start' => $start, 'end' => $end, 'job' => $jobKey, 'level' => $level];
-            $items[] = ['bucket' => $bucket, 'line' => $index, 'level' => $level];
+            $items[] = ['bucket' => $bucket, 'line' => $index, 'level' => $level, 'continues' => $continues];
         };
         // job and end of the bucket that ends last on a line
         $lastOf = static function (array $line): array {
