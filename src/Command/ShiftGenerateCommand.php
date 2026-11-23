@@ -124,6 +124,7 @@ class ShiftGenerateCommand extends Command
                             $current_shift = clone $shift;
                             $current_shift->setJob($period->getJob());
                             $current_shift->setFormation($position->getFormation());
+                            $current_shift->setNewBeneficiaryOnly($position->isNewBeneficiaryOnly());
                             $current_shift->setPosition($position);
                             // si c'est un créneau fixe + membre non exempté
                             if ($use_fly_and_fixed && $position->getShifter() != null && !$position->getShifter()->getMembership()->isCurrentlyExemptedFromShifts($current_shift->getStart())) {

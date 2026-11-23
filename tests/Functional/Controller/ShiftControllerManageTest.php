@@ -87,6 +87,40 @@ class ShiftControllerManageTest extends FunctionalTestCase
         $this->assertNull(static::reloaded($shift)->getShifter());
     }
 
+    public function testAShiftManagerBooksANewMemberOnAShiftReservedToNewOnes(): void
+    {
+        $client = static::createClient();
+        // just registered: still new
+        $member = $this->aMemberWithAnAddress();
+        $shift = static::aBookableShift();
+        $shift->setNewBeneficiaryOnly(true);
+        static::persist($shift);
+        static::logIn($client, $this->aMemberWithRoles('ROLE_SHIFT_MANAGER'));
+
+        $this->postBookAdmin($client, $shift, $member->getMainBeneficiary());
+
+        $this->assertSame([], static::flashes($client)['error'] ?? []);
+        $this->assertSame($member->getMainBeneficiary()->getId(), static::reloaded($shift)->getShifter()->getId());
+    }
+
+    public function testAShiftManagerCannotBookAMemberWhoIsNotNewOnAShiftReservedToNewOnes(): void
+    {
+        // no seniority nor shift needed to stop being new: nobody is new
+        static::withEnv(['BENEFICIARY_NEW_MIN_MONTHS' => '0', 'BENEFICIARY_NEW_MIN_SHIFTS' => '0'], function () {
+            $client = static::createClient();
+            $member = $this->aMemberWithAnAddress();
+            $shift = static::aBookableShift();
+            $shift->setNewBeneficiaryOnly(true);
+            static::persist($shift);
+            static::logIn($client, $this->aMemberWithRoles('ROLE_SHIFT_MANAGER'));
+
+            $this->postBookAdmin($client, $shift, $member->getMainBeneficiary());
+
+            $this->assertSame(["Désolé, ce créneau est réservé aux nouveaux membres et ce bénévole n'est plus nouveau"], static::flashes($client)['error'] ?? []);
+            $this->assertNull(static::reloaded($shift)->getShifter());
+        });
+    }
+
     public function testAShiftManagerCannotBookTheirOwnShiftWhenTheConfigurationForbidsIt(): void
     {
         static::withEnv(['FORBID_OWN_SHIFT_BOOK_ADMIN' => 'true'], function () {

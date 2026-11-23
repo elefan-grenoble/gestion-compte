@@ -10,5 +10,8 @@
     {% if shift.formation != null %}
         <br />
         Formation : <b>{{ shift.formation }}</b>
+    {% elseif shift.newBeneficiaryOnly %}
+        <br />
+        Réservé aux nouveaux : <b>{{ beneficiary_new_icon }}</b>
     {% endif %}
 </p>

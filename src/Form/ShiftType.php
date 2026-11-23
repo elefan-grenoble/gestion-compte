@@ -4,7 +4,6 @@ namespace App\Form;
 
 use App\Entity\Shift;
 use App\Repository\JobRepository;
-use App\Repository\FormationRepository;
 use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -59,18 +58,7 @@ class ShiftType extends AbstractType
             // checks if the Shift object is "new"
             // If no data is passed to the form, the data is "null".
             if (!$shift || null === $shift->getId() || $options['only_add_formation']) {
-                $form->add('formation', EntityType::class, [
-                    'label' => 'Formation',
-                    'class' => 'App:Formation',
-                    'choice_label' => 'name',
-                    'multiple' => false,
-                    'required' => false,
-                    'query_builder' => function (FormationRepository $repository) {
-                        $qb = $repository->createQueryBuilder('f');
-
-                        return $qb->orderBy('f.name', 'ASC');
-                    },
-                ])
+                $form->add('formation', FormationOrNewType::class)
                     ->add('number', IntegerType::class, [
                         'label' => 'Nombre de postes disponibles',
                         'required' => true,

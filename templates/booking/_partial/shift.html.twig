@@ -51,7 +51,7 @@
                         {% set class = "grey-text text-darken-2" %}
                     {% endif %}
                     <span class="{{ class }}">
-                        {% if not shift.formation %}
+                        {% if not shift.hasRequirement %}
                             <i class="material-icons shifter">{% if shift.shifter or shift.lastShifter %}radio_button_checked{% else %}radio_button_unchecked{% endif %}</i>
                         {% else %}
                             <i class="material-icons shifter">account_circle</i>

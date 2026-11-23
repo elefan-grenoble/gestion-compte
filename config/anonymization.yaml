@@ -455,6 +455,7 @@ tables:
       formation_id: keep
       job_id: keep
       position_id: keep
+      new_beneficiary_only: keep
       created_by_id: keep
       start: keep
       end: keep
@@ -488,6 +489,7 @@ tables:
       created_by_id: keep
       updated_by_id: keep
       week_cycle: keep
+      new_beneficiary_only: keep
       booked_time: keep
       created_at: keep
       updated_at: keep

@@ -24,7 +24,7 @@
             <div class="hide-on-med-and-down">
                 {% for shift in bucket.sortedShifts %}
                     <span class="{% if not shift.lastShifter %}grey-text{% else %}grey-text text-lighten-2{% endif %}">
-                        {% if not shift.formation %}
+                        {% if not shift.hasRequirement %}
                             <i class="material-icons shifter">{% if shift.shifter or shift.lastShifter %}radio_button_checked{% else %}radio_button_unchecked{% endif %}</i>
                         {% else %}
                             <i class="material-icons shifter">{% if shift.shifter or shift.lastShifter %}account_circle{% else %}person_outline{% endif %}</i>

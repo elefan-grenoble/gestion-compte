@@ -445,6 +445,49 @@ class ShiftServiceUnitTest extends TestCase
         return $service->isShiftBookable($shift, $this->createBeneficiaryWithMembership());
     }
 
+    /**
+     * A shift reserved to new beneficiaries ("Nouveau") can be booked by a new beneficiary...
+     */
+    public function testIsShiftBookableWhenReservedToNewBeneficiariesAndBeneficiaryIsNew(): void
+    {
+        $this->assertTrue($this->isNewOnlyShiftBookable(true));
+    }
+
+    /**
+     * ... and not by anyone else.
+     */
+    public function testIsShiftNotBookableWhenReservedToNewBeneficiariesAndBeneficiaryIsNotNew(): void
+    {
+        $this->assertFalse($this->isNewOnlyShiftBookable(false));
+    }
+
+    /**
+     * Whether a beneficiary is new may cost a query: it is only asked for shifts reserved to new ones.
+     */
+    public function testIsShiftBookableDoesNotAskIfTheBeneficiaryIsNewForAnOrdinaryShift(): void
+    {
+        $this->beneficiaryService->expects($this->never())->method('isNew');
+
+        $this->assertTrue($this->isShiftBookable(false, false));
+    }
+
+    private function isNewOnlyShiftBookable(bool $beneficiaryIsNew): bool
+    {
+        $this->beneficiaryService->method('isNew')->willReturn($beneficiaryIsNew);
+
+        $service = $this->createServiceWithStubbedMethods(['isShiftEmpty', 'canBookDuration', 'isBeginner']);
+        $service->method('isShiftEmpty')->willReturn(false);
+        $service->method('canBookDuration')->willReturn(true);
+        $service->method('isBeginner')->willReturn(false);
+
+        $shift = $this->createMock(Shift::class);
+        $shift->method('getStart')->willReturn(new \DateTime());
+        $shift->method('getIsPast')->willReturn(false);
+        $shift->method('isNewBeneficiaryOnly')->willReturn(true);
+
+        return $service->isShiftBookable($shift, $this->createBeneficiaryWithMembership());
+    }
+
     // -------------------------------------------------------
     // canBookShift() — overlap check
     // -------------------------------------------------------

@@ -14,6 +14,9 @@
             {% if period_position.formation != null %}
                 <br />
                 Formation : <b>{{ period_position.formation }}</b>
+            {% elseif period_position.newBeneficiaryOnly %}
+                <br />
+                Réservé aux nouveaux : <b>{{ beneficiary_new_icon }}</b>
             {% endif %}
         </p>
     </div>

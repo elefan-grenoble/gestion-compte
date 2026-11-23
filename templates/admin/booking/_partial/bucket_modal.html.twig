@@ -34,7 +34,7 @@ id = "modal-bucket"
                                 <span class="{% if shift.wasCarriedOut %}green-text{% else %}red-text{% endif %}">&#9673;</span>&nbsp;
                             {% endif %}
                             {{ shift.shifter.displayNameWithMemberNumber }}
-                            {% if shift.formation %}&nbsp;({{ shift.formation.name }}){% endif %}
+                            {% if shift.formation %}&nbsp;({{ shift.formation.name }}){% elseif shift.newBeneficiaryOnly %}&nbsp;(Nouveau {{ beneficiary_new_icon }}){% endif %}
                             {% if not shift.formation and shift.shifter.formations | length > 0 %}
                                 &nbsp;<strong class="orange-text">({{ shift.shifter.formations | join(', ') }})</strong>
                             {% endif %}
@@ -111,6 +111,8 @@ id = "modal-bucket"
                             </b>
                             {% if shift.formation %}
                                 </b>&nbsp;({{ shift.formation.name }})
+                            {% elseif shift.newBeneficiaryOnly %}
+                                </b>&nbsp;(Nouveau {{ beneficiary_new_icon }})
                             {% else %}
                                 </b>&nbsp;(sans formation particulière)
                             {% endif %}

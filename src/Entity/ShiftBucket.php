@@ -198,17 +198,24 @@ class ShiftBucket
      * Return true if the intersection between $formations and
      * the shifts' formations is not empty.
      *
+     * A shift reserved to new beneficiaries counts as a match for a new beneficiary.
+     *
      * @param mixed $shifts
      * @param mixed $formations
+     * @param bool  $newBeneficiary whether the beneficiary is new ("nouveau" status)
      */
-    public static function shiftIntersectFormations($shifts, $formations)
+    public static function shiftIntersectFormations($shifts, $formations, bool $newBeneficiary = false)
     {
         $formationsIds = [];
         foreach ($formations as $formation) {
             $formationsIds[] = $formation->getId();
         }
 
-        $formationInFormationIdsCallback = function ($key, Shift $shift) use ($formationsIds) {
+        $formationInFormationIdsCallback = function ($key, Shift $shift) use ($formationsIds, $newBeneficiary) {
+            if ($newBeneficiary && $shift->isNewBeneficiaryOnly()) {
+                return true;
+            }
+
             $formation = $shift->getFormation();
 
             return !$formation ? false : in_array($formation->getId(), $formationsIds);
@@ -225,12 +232,16 @@ class ShiftBucket
      *
      * Sinon, on renvoie seulement les shifts qui n'ont pas de formation.
      *
+     * Un shift réservé aux nouveaux ("Nouveau") compte comme un shift avec formation :
+     * pour un nouveau bénéficiaire ($newBeneficiary), il passe en priorité.
+     *
      * @param mixed $shifts
      * @param mixed $formations
+     * @param bool  $newBeneficiary whether the beneficiary is new ("nouveau" status)
      */
-    public static function filterByFormations($shifts, $formations)
+    public static function filterByFormations($shifts, $formations, bool $newBeneficiary = false)
     {
-        $intersectionNotEmpty = ShiftBucket::shiftIntersectFormations($shifts, $formations);
+        $intersectionNotEmpty = ShiftBucket::shiftIntersectFormations($shifts, $formations, $newBeneficiary);
         $filterCallback = ShiftBucket::createShiftFilterCallback($intersectionNotEmpty);
 
         return $shifts->filter($filterCallback);
@@ -238,10 +249,10 @@ class ShiftBucket
 
     /**
      * If $withFormations, return a callback which returns true if the
-     * shift has a formation.
+     * shift has a formation (or is reserved to new beneficiaries).
      *
      * Else, return a callback which return true if the shift
-     * doesn't have a formation.
+     * doesn't have a formation (nor is reserved to new beneficiaries).
      *
      * @param mixed $withFormations
      */
@@ -249,13 +260,13 @@ class ShiftBucket
     {
         if ($withFormations) {
             return function (Shift $shift) {
-                if ($shift->getFormation()) {
+                if ($shift->hasRequirement()) {
                     return true;
                 }
             };
         } else {
             return function (Shift $shift) {
-                if (!$shift->getFormation()) {
+                if (!$shift->hasRequirement()) {
                     return true;
                 }
             };

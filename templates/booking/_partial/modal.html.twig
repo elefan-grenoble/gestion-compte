@@ -48,6 +48,8 @@
                             {{ shift.shifter.firstname }}&nbsp;{{ shift.shifter.lastname|first|upper }}.
                             {% if shift.formation %}
                                 ({{ shift.formation.name }})
+                            {% elseif shift.newBeneficiaryOnly %}
+                                (Nouveau {{ beneficiary_new_icon }})
                             {% endif %}
                         </i>
                     {% endif %}
@@ -63,6 +65,8 @@
                 <input type="radio" id="{{ bookableShift.id }}" class="checkedFormation" name="formation" value="{{ bookableShift.id }}" />
                 {% if bookableShift.formation %}
                     <span>{{ bookableShift.formation.name }}</span>
+                {% elseif bookableShift.newBeneficiaryOnly %}
+                    <span>Nouveau {{ beneficiary_new_icon }}</span>
                 {% else %}
                     <span>sans formation particulière</span>
                 {% endif %}

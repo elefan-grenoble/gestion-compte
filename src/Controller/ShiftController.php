@@ -18,6 +18,7 @@ use App\Form\RadioChoiceType;
 use App\Form\ShiftType;
 use App\Security\MembershipVoter;
 use App\Security\ShiftVoter;
+use App\Service\BeneficiaryService;
 use App\Service\ShiftService;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
@@ -203,7 +204,7 @@ class ShiftController extends AbstractController
      *
      * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
-    public function bookShiftAdminAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher)
+    public function bookShiftAdminAction(Request $request, Shift $shift, ShiftService $shift_service, EventDispatcherInterface $event_dispatcher, BeneficiaryService $beneficiary_service)
     {
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
@@ -222,6 +223,9 @@ class ShiftController extends AbstractController
             } elseif ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
                 $success = false;
                 $message = "Désolé, ce bénévole n'a pas la qualification necessaire (" . $shift->getFormation()->getName() . ')';
+            } elseif ($shift->isNewBeneficiaryOnly() && !$beneficiary_service->isNew($beneficiary)) {
+                $success = false;
+                $message = "Désolé, ce créneau est réservé aux nouveaux membres et ce bénévole n'est plus nouveau";
             } elseif ($beneficiary->getMembership()->isCurrentlyExemptedFromShifts($shift->getStart())) {
                 $success = false;
                 $message = 'Désolé, ce bénévole est exempté de créneau sur cette période';

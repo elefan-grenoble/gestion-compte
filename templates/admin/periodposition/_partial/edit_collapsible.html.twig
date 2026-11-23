@@ -5,9 +5,9 @@
             <div class="col s12">
                 {% if use_fly_and_fixed %}
                     {% if position.shifter %}
-                        {% if position.formation %}<b data-formation="{{ position.formation.name }}">{% endif %}
+                        {% if position.formation %}<b data-formation="{{ position.formation.name }}">{% elseif position.newBeneficiaryOnly %}<b data-formation="Nouveau">{% endif %}
                         {{ position.shifter.displayNameWithMemberNumber }}
-                        {% if position.formation %}</b>&nbsp;({{ position.formation.name }}){% endif %}
+                        {% if position.formation %}</b>&nbsp;({{ position.formation.name }}){% elseif position.newBeneficiaryOnly %}</b>&nbsp;(Nouveau {{ beneficiary_new_icon }}){% endif %}
                         {% if not position.formation and position.shifter.formations | length > 0 %}
                             &nbsp;<b class="orange-text">({{ position.shifter.formations | join(', ') }})</b>
                         {% endif %}
@@ -18,6 +18,8 @@
                         <strong style="font-style:italic">libre</strong>
                         {% if position.formation %}
                             &nbsp;({{ position.formation.name }})
+                        {% elseif position.newBeneficiaryOnly %}
+                            &nbsp;(Nouveau {{ beneficiary_new_icon }})
                         {% else %}
                             &nbsp;(sans formation particulière)
                         {% endif %}

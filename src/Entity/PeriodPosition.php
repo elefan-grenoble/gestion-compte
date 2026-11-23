@@ -37,6 +37,16 @@ class PeriodPosition
     private $formation;
 
     /**
+     * The position is reserved to new beneficiaries ("nouveau" status).
+     * Not a formation: it is chosen in the same dropdown, so it excludes a formation.
+     *
+     * @var bool
+     *
+     * @ORM\Column(name="new_beneficiary_only", type="boolean", options={"default" : 0}, nullable=false)
+     */
+    private $newBeneficiaryOnly = false;
+
+    /**
      * @ORM\ManyToOne(targetEntity="Period", inversedBy="positions", fetch="EAGER")
      *
      * @ORM\JoinColumn(name="period_id", referencedColumnName="id", onDelete="CASCADE")
@@ -125,6 +135,8 @@ class PeriodPosition
         }
         if ($this->getFormation()) {
             $name .= ' (' . $this->getFormation()->getName() . ')';
+        } elseif ($this->isNewBeneficiaryOnly()) {
+            $name .= ' (Nouveau)';
         }
 
         return $name;
@@ -202,6 +214,21 @@ class PeriodPosition
     public function getFormation()
     {
         return $this->formation;
+    }
+
+    public function setNewBeneficiaryOnly(bool $newBeneficiaryOnly): self
+    {
+        $this->newBeneficiaryOnly = $newBeneficiaryOnly;
+
+        return $this;
+    }
+
+    /**
+     * True when only new beneficiaries can take this position.
+     */
+    public function isNewBeneficiaryOnly(): bool
+    {
+        return $this->newBeneficiaryOnly;
     }
 
     /**

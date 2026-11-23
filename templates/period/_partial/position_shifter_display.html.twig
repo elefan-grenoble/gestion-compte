@@ -5,8 +5,14 @@
 
 {% set anonymized = anonymized ?? true %}
 {% set shifter = position.shifter %}
-{% set icon = position.formation ? "account_circle" : "person" %}
-{% set tooltip_formation = position.formation ? "Formation : " ~ position.formation : "Sans formation" %}
+{% set icon = (position.formation or position.newBeneficiaryOnly) ? "account_circle" : "person" %}
+{% if position.formation %}
+    {% set tooltip_formation = "Formation : " ~ position.formation %}
+{% elseif position.newBeneficiaryOnly %}
+    {% set tooltip_formation = "Réservé aux nouveaux " ~ beneficiary_new_icon %}
+{% else %}
+    {% set tooltip_formation = "Sans formation" %}
+{% endif %}
 
 {% if shifter %} {# sombody is registered for this PeriodPosition #}
     {% if anonymized %}

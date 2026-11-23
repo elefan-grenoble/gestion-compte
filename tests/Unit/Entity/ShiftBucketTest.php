@@ -414,6 +414,77 @@ class ShiftBucketTest extends TestCase
         $this->assertTrue($result->contains($shiftWithout));
     }
 
+    // ── shifts reserved to new beneficiaries ("Nouveau") ─────────────
+
+    private function createNewOnlyShift(): Shift
+    {
+        return $this->createShift()->setNewBeneficiaryOnly(true);
+    }
+
+    public function testShiftIntersectFormationsTrueForANewBeneficiaryWhenAShiftIsReservedToNewOnes(): void
+    {
+        $shifts = new ArrayCollection([$this->createShift(), $this->createNewOnlyShift()]);
+
+        $this->assertTrue(ShiftBucket::shiftIntersectFormations($shifts, [], true));
+    }
+
+    public function testShiftIntersectFormationsFalseForANotNewBeneficiary(): void
+    {
+        $shifts = new ArrayCollection([$this->createShift(), $this->createNewOnlyShift()]);
+
+        $this->assertFalse(ShiftBucket::shiftIntersectFormations($shifts, []));
+        $this->assertFalse(ShiftBucket::shiftIntersectFormations($shifts, [], false));
+    }
+
+    public function testFilterByFormationsReturnsTheShiftsReservedToNewOnesFirstForANewBeneficiary(): void
+    {
+        $generic = $this->createShift();
+        $newOnly = $this->createNewOnlyShift();
+        $shifts = new ArrayCollection([$generic, $newOnly]);
+
+        $result = ShiftBucket::filterByFormations($shifts, [], true);
+
+        $this->assertCount(1, $result);
+        $this->assertTrue($result->contains($newOnly));
+    }
+
+    public function testFilterByFormationsNeverReturnsTheShiftsReservedToNewOnesWithoutAnIntersection(): void
+    {
+        $generic = $this->createShift();
+        $newOnly = $this->createNewOnlyShift();
+        $shifts = new ArrayCollection([$generic, $newOnly]);
+
+        $result = ShiftBucket::filterByFormations($shifts, []);
+
+        $this->assertCount(1, $result);
+        $this->assertTrue($result->contains($generic));
+    }
+
+    public function testFilterByFormationsKeepsTheFormationShiftsAndTheNewOnesForANewQualifiedBeneficiary(): void
+    {
+        $formation = $this->createMock(Formation::class);
+        $formation->method('getId')->willReturn(1);
+
+        $withFormation = $this->createShift(null, null, null, $formation);
+        $newOnly = $this->createNewOnlyShift();
+        $generic = $this->createShift();
+        $shifts = new ArrayCollection([$withFormation, $newOnly, $generic]);
+
+        $result = ShiftBucket::filterByFormations($shifts, [$formation], true);
+
+        $this->assertCount(2, $result);
+        $this->assertTrue($result->contains($withFormation));
+        $this->assertTrue($result->contains($newOnly));
+    }
+
+    public function testCreateShiftFilterCallbackTreatsAShiftReservedToNewOnesAsRestricted(): void
+    {
+        $newOnly = $this->createNewOnlyShift();
+
+        $this->assertTrue(ShiftBucket::createShiftFilterCallback(true)($newOnly));
+        $this->assertNull(ShiftBucket::createShiftFilterCallback(false)($newOnly));
+    }
+
     // ── createShiftFilterCallback (static) ───────────────────────────
 
     public function testCreateShiftFilterCallbackWithFormations(): void

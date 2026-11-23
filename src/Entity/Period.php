@@ -432,6 +432,8 @@ class Period
             }
             if ($position->getFormation()) {
                 $formation = $position->getFormation()->getName();
+            } elseif ($position->isNewBeneficiaryOnly()) {
+                $formation = 'Nouveau';
             } else {
                 $formation = 'Membre';
             }

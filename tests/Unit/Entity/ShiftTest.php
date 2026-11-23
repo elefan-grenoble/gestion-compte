@@ -25,6 +25,32 @@ class ShiftTest extends TestCase
         return $shift;
     }
 
+    // ── Reserved to new beneficiaries ("Nouveau") ────────────────────
+
+    public function testNotReservedToNewBeneficiariesByDefault(): void
+    {
+        $shift = $this->createShift();
+
+        $this->assertFalse($shift->isNewBeneficiaryOnly());
+        $this->assertFalse($shift->hasRequirement());
+    }
+
+    public function testReservedToNewBeneficiariesIsARequirement(): void
+    {
+        $shift = $this->createShift()->setNewBeneficiaryOnly(true);
+
+        $this->assertTrue($shift->isNewBeneficiaryOnly());
+        $this->assertTrue($shift->hasRequirement());
+    }
+
+    public function testAFormationIsARequirement(): void
+    {
+        $shift = $this->createShift()->setFormation(new Formation());
+
+        $this->assertFalse($shift->isNewBeneficiaryOnly());
+        $this->assertTrue($shift->hasRequirement());
+    }
+
     // ── Constructor ──────────────────────────────────────────────────
 
     public function testConstructorDefaultsWasCarriedOutToFalse(): void

@@ -10,6 +10,7 @@ use App\Event\PeriodPositionFreedEvent;
 use App\Form\AutocompleteBeneficiaryType;
 use App\Form\PeriodPositionType;
 use App\Form\PeriodType;
+use App\Service\BeneficiaryService;
 use App\Service\PeriodFormHelper;
 use Symfony\Component\EventDispatcher\EventDispatcherInterface;
 use Symfony\Component\Form\FormInterface;
@@ -279,7 +280,7 @@ class AdminPeriodController extends AbstractController
      *
      * @Security("is_granted('ROLE_SHIFT_MANAGER')")
      */
-    public function bookPeriodPositionAction(Request $request, Period $period, PeriodPosition $position): Response
+    public function bookPeriodPositionAction(Request $request, Period $period, PeriodPosition $position, BeneficiaryService $beneficiary_service): Response
     {
         $em = $this->getDoctrine()->getManager();
         $current_user = $this->get('security.token_storage')->getToken()->getUser();
@@ -297,6 +298,11 @@ class AdminPeriodController extends AbstractController
             $beneficiary = $form->get('shifter')->getData();
             if ($position->getFormation() && !$beneficiary->getFormations()->contains($position->getFormation())) {
                 $this->addFlash('error', "Désolé, ce bénévole n'a pas la qualification nécessaire (" . $position->getFormation()->getName() . ')');
+
+                return new Response($this->generateUrl('admin_period_edit', ['id' => $period->getId()]), 205);
+            }
+            if ($position->isNewBeneficiaryOnly() && !$beneficiary_service->isNew($beneficiary)) {
+                $this->addFlash('error', "Désolé, ce créneau est réservé aux nouveaux membres et ce bénévole n'est plus nouveau");
 
                 return new Response($this->generateUrl('admin_period_edit', ['id' => $period->getId()]), 205);
             }

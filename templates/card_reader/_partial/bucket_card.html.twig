@@ -38,6 +38,10 @@
                             <span class="chip" style="margin-left: 5px">
                                 <strong>{{ shift.formation }}</strong>
                             </span>
+                        {% elseif shift.newBeneficiaryOnly %}
+                            <span class="chip" style="margin-left: 5px">
+                                <strong>Nouveau {{ beneficiary_new_icon }}</strong>
+                            </span>
                         {% endif %}
                         {% if shift.shifter %}
                             {% if is_new_beneficiary(shift.shifter) %}

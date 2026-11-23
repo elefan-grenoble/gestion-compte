@@ -554,6 +554,10 @@ services:
       - { name: doctrine.fixtures.purger_factory, alias: default }
 
   # Types
+  App\Form\FormationOrNewType:
+    arguments:
+      $newIcon: '%beneficiary_new_icon%'
+
   App\Form\BeneficiaryType:
     arguments:
       $use_fly_and_fixed: '%use_fly_and_fixed%'

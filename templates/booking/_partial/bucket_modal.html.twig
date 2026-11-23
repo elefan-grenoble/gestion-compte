@@ -35,7 +35,7 @@
                                 {% if display_names %}
                                     {{ shift.shifter.displayNameWithMemberNumber }}
                                 {% endif %}
-                                {% if shift.formation %}&nbsp;({{ shift.formation.name }}){% endif %}
+                                {% if shift.formation %}&nbsp;({{ shift.formation.name }}){% elseif shift.newBeneficiaryOnly %}&nbsp;(Nouveau {{ beneficiary_new_icon }}){% endif %}
                                 {% if not shift.formation and shift.shifter.formations | length > 0 %}
                                     &nbsp;<strong class="orange-text">({{ shift.shifter.formations | join(', ') }})</strong>
                                 {% endif %}
@@ -90,6 +90,8 @@
                             </b>
                             {% if shift.formation %}
                                 </b>&nbsp;({{ shift.formation.name }})
+                            {% elseif shift.newBeneficiaryOnly %}
+                                </b>&nbsp;(Nouveau {{ beneficiary_new_icon }})
                             {% else %}
                                 </b>&nbsp;(sans formation particulière)
                             {% endif %}

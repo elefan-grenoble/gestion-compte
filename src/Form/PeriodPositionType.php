@@ -2,10 +2,8 @@
 
 namespace App\Form;
 
-use App\Entity\Formation;
 use App\Entity\Period;
 use App\Entity\PeriodPosition;
-use Symfony\Bridge\Doctrine\Form\Type\EntityType;
 use Symfony\Component\Form\AbstractType;
 use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\IntegerType;
@@ -33,12 +31,8 @@ class PeriodPositionType extends AbstractType
                 'multiple' => true,
                 // 'data' => ($this->cycle_type == 'abcd') ? null : [Period::WEEK_A]
             ])
-            ->add('formation', EntityType::class, [
+            ->add('formation', FormationOrNewType::class, [
                 'label' => 'Formation necessaire',
-                'choice_label' => 'name',
-                'class' => Formation::class,
-                'multiple' => false,
-                'required' => false,
             ])
         ;
 

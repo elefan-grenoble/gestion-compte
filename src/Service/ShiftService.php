@@ -234,6 +234,10 @@ class ShiftService
         if ($shift->getFormation() && !$beneficiary->getFormations()->contains($shift->getFormation())) {
             return false;
         }
+        // Do not book shift reserved to new beneficiaries if the beneficiary is not new
+        if ($shift->isNewBeneficiaryOnly() && !$this->beneficiaryService->isNew($beneficiary)) {
+            return false;
+        }
         // First shift ever of the beneficiary, check he or she is not the first one to book the bucket
         if ($this->isBeginner($beneficiary) && $this->isShiftEmpty($shift)) {
             return false;
@@ -410,7 +414,7 @@ class ShiftService
     {
         if ($beneficiary && $this->isBucketBookable($bucket, $beneficiary)) {
             $bookableShifts = $this->getBookableShifts($bucket, $beneficiary);
-            $iterator = ShiftBucket::filterByFormations($bookableShifts, $beneficiary->getFormations())->getIterator();
+            $iterator = ShiftBucket::filterByFormations($bookableShifts, $beneficiary->getFormations(), $this->isNewAmong($bookableShifts, $beneficiary))->getIterator();
             $iterator->uasort(function (Shift $a, Shift $b) use ($beneficiary) {
                 return ShiftBucket::compareShifts($a, $b, $beneficiary);
             });
@@ -437,7 +441,24 @@ class ShiftService
             return count($bookableShifts);
         }
 
-        return count(ShiftBucket::filterByFormations($bookableShifts, $beneficiary->getFormations()));
+        return count(ShiftBucket::filterByFormations($bookableShifts, $beneficiary->getFormations(), $this->isNewAmong($bookableShifts, $beneficiary)));
+    }
+
+    /**
+     * Whether the beneficiary is new, when it matters for choosing among the given shifts:
+     * only when one of them is reserved to new beneficiaries (isNew() may query the database).
+     *
+     * @param iterable $shifts
+     */
+    private function isNewAmong($shifts, Beneficiary $beneficiary): bool
+    {
+        foreach ($shifts as $shift) {
+            if ($shift->isNewBeneficiaryOnly()) {
+                return $this->beneficiaryService->isNew($beneficiary);
+            }
+        }
+
+        return false;
     }
 
     public function isBucketBookable(ShiftBucket $bucket, ?Beneficiary $beneficiary = null)
@@ -448,7 +469,7 @@ class ShiftService
     public function getShiftsForBeneficiary(ShiftBucket $bucket, Beneficiary $beneficiary)
     {
         $bookableShifts = $this->getBookableShifts($bucket, $beneficiary);
-        $bookableIntersectFormations = ShiftBucket::shiftIntersectFormations($bookableShifts, $beneficiary->getFormations());
+        $bookableIntersectFormations = ShiftBucket::shiftIntersectFormations($bookableShifts, $beneficiary->getFormations(), $this->isNewAmong($bookableShifts, $beneficiary));
 
         return $bucket->getShifts()->filter(ShiftBucket::createShiftFilterCallback($bookableIntersectFormations));
     }

@@ -86,6 +86,16 @@ class Shift
     private $formation;
 
     /**
+     * The shift is reserved to new beneficiaries ("nouveau" status).
+     * Not a formation: it is chosen in the same dropdown, so it excludes a formation.
+     *
+     * @var bool
+     *
+     * @ORM\Column(name="new_beneficiary_only", type="boolean", options={"default" : 0}, nullable=false)
+     */
+    private $newBeneficiaryOnly = false;
+
+    /**
      * One Shift has One Job.
      *
      * @ORM\ManyToOne(targetEntity="Job", inversedBy="shifts", fetch="EAGER")
@@ -370,6 +380,30 @@ class Shift
     public function getFormation()
     {
         return $this->formation;
+    }
+
+    public function setNewBeneficiaryOnly(bool $newBeneficiaryOnly): self
+    {
+        $this->newBeneficiaryOnly = $newBeneficiaryOnly;
+
+        return $this;
+    }
+
+    /**
+     * True when only new beneficiaries can book this shift.
+     */
+    public function isNewBeneficiaryOnly(): bool
+    {
+        return $this->newBeneficiaryOnly;
+    }
+
+    /**
+     * True when the shift is restricted to some beneficiaries:
+     * those who have its formation, or the new ones.
+     */
+    public function hasRequirement(): bool
+    {
+        return null !== $this->formation || $this->newBeneficiaryOnly;
     }
 
     /**
