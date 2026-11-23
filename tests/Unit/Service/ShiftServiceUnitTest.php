@@ -828,19 +828,15 @@ class ShiftServiceUnitTest extends TestCase
         $this->assertSame(['12:00-14:00', '15:00-16:00'], $layout['pauses']);
     }
 
-    public function testLayoutOfTheTypicalMondayOfTheStore(): void
+    public function testLayoutOfARealMondayOfTheStore(): void
     {
-        // the periods of a Monday, as defined in production
+        // the shifts of Monday 23 November 2026 in production
         $layout = $this->layoutOf([
             ['Opérations internes', '08:00', '09:30'],
             ['Epicerie/Livraison', '09:30', '12:30'],
-            ['Nouvelleau', '09:30', '12:30'],
-            ['Vrac', '10:00', '11:30'],
             ['Epicerie', '12:15', '13:45'],
-            ['Bureau des membres', '12:15', '13:45'],
             ['Vrac', '12:15', '13:45'],
-            ['Nouvelleau', '12:15', '13:45'],
-            ['Bricolage', '13:30', '16:30'],
+            ['Comite Ordre Du Jour', '12:30', '14:00'],
             ['Epicerie', '17:00', '18:30'],
             ['Nouvelleau', '17:00', '18:30'],
             ['Poste d\'accueil', '17:30', '19:00'],
@@ -854,8 +850,8 @@ class ShiftServiceUnitTest extends TestCase
         // the hand-overs continue the previous bucket of their job: no need to write the name again
         $continuing = array_keys(array_filter($layout['continues']));
         sort($continuing);
-        $this->assertSame(['Epicerie18:15', 'Nouvelleau12:15', 'Nouvelleau18:15'], $continuing);
-        $this->assertSame(['16:30-17:00'], $layout['pauses']);
+        $this->assertSame(['Epicerie18:15', 'Nouvelleau18:15'], $continuing);
+        $this->assertSame(['14:00-17:00'], $layout['pauses']);
     }
 
     // -------------------------------------------------------
