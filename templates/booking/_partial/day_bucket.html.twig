@@ -1,0 +1,6 @@
+{# One bucket of the public planning: bookable card, or greyed out when the beneficiary cannot book it #}
+{% if shift_service.isBucketBookable(bucket, beneficiary) or not beneficiary %}
+    {% include "booking/_partial/shift.html.twig" %}
+{% else %}
+    {% include "booking/_partial/disabled_shift.html.twig" %}
+{% endif %}
