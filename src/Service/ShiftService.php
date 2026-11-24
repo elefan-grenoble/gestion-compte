@@ -448,7 +448,7 @@ class ShiftService
      * Whether the beneficiary is new, when it matters for choosing among the given shifts:
      * only when one of them is reserved to new beneficiaries (isNew() may query the database).
      *
-     * @param iterable $shifts
+     * @param iterable<Shift> $shifts
      */
     private function isNewAmong($shifts, Beneficiary $beneficiary): bool
     {

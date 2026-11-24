@@ -4849,12 +4849,6 @@ parameters:
 			path: src/Entity/ShiftAlert.php
 
 		-
-			message: '#^If condition is always true\.$#'
-			identifier: if.alwaysTrue
-			count: 1
-			path: src/Entity/ShiftBucket.php
-
-		-
 			message: '#^Left side of && is always true\.$#'
 			identifier: booleanAnd.leftAlwaysTrue
 			count: 2
@@ -4989,7 +4983,7 @@ parameters:
 		-
 			message: '#^Negated boolean expression is always false\.$#'
 			identifier: booleanNot.alwaysFalse
-			count: 8
+			count: 7
 			path: src/Entity/ShiftBucket.php
 
 		-

@@ -62,7 +62,7 @@ class FormationOrNewTypeTest extends TestCase
     }
 
     /**
-     * @param Shift|PeriodPosition $entity
+     * @param PeriodPosition|Shift $entity
      */
     private function createForm($entity): FormInterface
     {
@@ -73,20 +73,16 @@ class FormationOrNewTypeTest extends TestCase
         ;
     }
 
-    public function entities(): array
-    {
-        return [
-            'shift' => [function () { return new Shift(); }],
-            'period position' => [function () { return new PeriodPosition(); }],
-        ];
-    }
-
     public function testOffersNewFirstThenTheFormationsByName(): void
     {
         $choices = $this->createForm(new Shift())->createView()['formation']->vars['choices'];
 
-        $this->assertSame(['new', '5', '3'], array_map(function ($choice) { return $choice->value; }, $choices));
-        $this->assertSame(['Nouveau ★', 'Cuisine', 'Epicerie'], array_map(function ($choice) { return $choice->label; }, $choices));
+        $this->assertSame(['new', '5', '3'], array_map(function ($choice) {
+            return $choice->value;
+        }, $choices));
+        $this->assertSame(['Nouveau ★', 'Cuisine', 'Epicerie'], array_map(function ($choice) {
+            return $choice->label;
+        }, $choices));
     }
 
     /**
@@ -177,5 +173,17 @@ class FormationOrNewTypeTest extends TestCase
 
         $this->assertFalse($entity->isNewBeneficiaryOnly());
         $this->assertSame($this->cuisine, $entity->getFormation());
+    }
+
+    public function entities(): array
+    {
+        return [
+            'shift' => [function () {
+                return new Shift();
+            }],
+            'period position' => [function () {
+                return new PeriodPosition();
+            }],
+        ];
     }
 }

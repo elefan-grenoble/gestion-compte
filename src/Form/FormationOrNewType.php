@@ -12,6 +12,8 @@ use Symfony\Component\Form\FormEvents;
 use Symfony\Component\Form\FormInterface;
 use Symfony\Component\OptionsResolver\Options;
 use Symfony\Component\OptionsResolver\OptionsResolver;
+use App\Entity\PeriodPosition;
+use App\Entity\Shift;
 
 /**
  * Dropdown to choose who a shift (or a typical week position) is reserved to:
@@ -21,12 +23,17 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  * The field is not mapped: it reads and writes both `formation` and `newBeneficiaryOnly`
  * on the entity of its parent form (Shift or PeriodPosition), so that the two can never be
  * set at the same time.
+ *
+ * @extends AbstractType<mixed>
  */
 class FormationOrNewType extends AbstractType
 {
     public const NEW_CHOICE = 'new';
 
+    /** @var EntityManagerInterface */
     private $em;
+
+    /** @var string */
     private $newIcon;
 
     /** @var null|string[] */
@@ -38,7 +45,7 @@ class FormationOrNewType extends AbstractType
         $this->newIcon = $newIcon;
     }
 
-    public function buildForm(FormBuilderInterface $builder, array $options)
+    public function buildForm(FormBuilderInterface $builder, array $options): void
     {
         $builder->addEventListener(FormEvents::PRE_SET_DATA, function (FormEvent $event): void {
             $entity = self::getReservableEntity($event->getForm());
@@ -71,7 +78,7 @@ class FormationOrNewType extends AbstractType
         });
     }
 
-    public function configureOptions(OptionsResolver $resolver)
+    public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
             'label' => 'Formation',
@@ -118,7 +125,9 @@ class FormationOrNewType extends AbstractType
     /**
      * The Shift or PeriodPosition the field belongs to, if any.
      *
-     * @return null|\App\Entity\PeriodPosition|\App\Entity\Shift
+     * @param FormInterface<mixed> $form
+     *
+     * @return null|PeriodPosition|Shift
      */
     private static function getReservableEntity(FormInterface $form)
     {
