@@ -17,6 +17,7 @@ use Symfony\Component\Mailer\MailerInterface;
 use Symfony\Component\Mime\Email;
 use App\Entity\Membership;
 use App\Entity\User;
+use App\Mail\MailMetadata;
 
 class SendMassMailCommand extends Command
 {
@@ -146,6 +147,7 @@ class SendMassMailCommand extends Command
             $message->to(...$from);
             $message->bcc(...$to);
         }
+        MailMetadata::written($message);
         $this->mailer->send($message);
 
         $output->writeln('<fg=cyan;>>>></><fg=green;> message envoyé à ' . count($to) . ' beneficiaires (' . count($memberships) . ' comptes membre) </>');

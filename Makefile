@@ -96,7 +96,7 @@ compose.yaml:
 	@echo "✔ .env créé depuis .env.dist"
 
 .env.test.local:
-	@echo 'DATABASE_URL="mysql://root:secret@database:3306/symfony?serverVersion=5.7&charset=utf8"' > .env.test.local
+	@echo 'DATABASE_URL="mysql://root:secret@database:3306/symfony?serverVersion=5.7&charset=utf8mb4"' > .env.test.local
 	@echo "✔ .env.test.local créé"
 
 # ------------------------------------------------------------------

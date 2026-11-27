@@ -65,6 +65,12 @@ php bin/console cache:clear --env=prod
 
 ## Rétro-compatibilité et nouveautés
 
+### Novembre 2026 : historique des mails
+
+Tous les mails envoyés par l'application sont maintenant enregistrés (table `email_log`, migration à jouer) et visibles dans **Administration > Mails > Historique**. Seul le contenu des mails écrits par un administrateur est conservé.
+
+**Si votre `.env` vient d'un ancien `.env.dist`**, vérifiez que `DATABASE_URL` finit par `&charset=utf8mb4` (et non `&charset=utf8`). Le paramètre de l'URL l'emporte sur `doctrine.yaml` : avec `utf8`, un mail dont le sujet ou le corps contient un emoji n'est pas enregistré dans l'historique (le mail part quand même).
+
 ### Mars 2026
 
 [Documentation pour mise à jour de la version 1.47.2 à la version 2.0](maj-v2.0.md)
