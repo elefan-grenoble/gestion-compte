@@ -65,9 +65,17 @@ php bin/console cache:clear --env=prod
 
 ## Rétro-compatibilité et nouveautés
 
-### Novembre 2026 : historique des mails
+### Novembre 2026 : historique des mails et envoi en arrière-plan
 
 Tous les mails envoyés par l'application sont maintenant enregistrés (table `sent_email`, migration à jouer) et visibles dans **Administration > Mails > Historique**. Seul le contenu des mails écrits par un administrateur est conservé.
+
+Pour ne plus faire attendre le navigateur lors d'un envoi à beaucoup de membres, les mails écrits depuis la page d'envoi peuvent partir en arrière-plan (migration à jouer). Il suffit d'ajouter une ligne au crontab du serveur (voir [install.serveur.md](install.serveur.md#crontab)) :
+
+```
+* * * * * php /chemin/vers/le/projet/bin/console app:mail:send-pending
+```
+
+Tant que cette ligne n'est pas en place, rien ne change : les mails partent pendant la requête comme avant. `MAIL_QUEUE_ENABLED=0` dans le `.env` désactive l'envoi en arrière-plan même avec la ligne.
 
 ### Mars 2026
 

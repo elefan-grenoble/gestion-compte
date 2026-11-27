@@ -16,7 +16,7 @@
             {% set group = batch and batch.total > 1 %}
             {% if group %}
                 {% set failed = batch.failed %}
-                {% set status = batch.pending > 0 ? 'queued' : (failed == batch.total ? 'failed' : (failed > 0 ? 'partial' : 'sent')) %}
+                {% set status = batch.queued + batch.pending > 0 ? 'queued' : (failed == batch.total ? 'failed' : (failed > 0 ? 'partial' : 'sent')) %}
             {% elseif mail.status == 'sent' and mail.error %}
                 {% set status = 'partial' %}
             {% else %}

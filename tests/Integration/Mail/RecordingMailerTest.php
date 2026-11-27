@@ -4,6 +4,7 @@ namespace App\Tests\Integration\Mail;
 
 use App\Entity\SentEmail;
 use App\Mail\MailMetadata;
+use App\Mail\QueuedMessage;
 use App\Mail\RecordingMailer;
 use Doctrine\DBAL\Connection;
 use Psr\Log\NullLogger;
@@ -125,6 +126,58 @@ class RecordingMailerTest extends KernelTestCase
         ;
 
         $this->assertNotNull($inner->message, 'The mail must be sent whatever happens to the history.');
+    }
+
+    public function testAQueuedMailWaitsInTheHistoryInsteadOfBeingSent(): void
+    {
+        $inner = $this->aMailerThatKeepsTheMessage();
+        $email = MailMetadata::queue(MailMetadata::written(
+            (new Email())->from('sender@example.org')->to('a@example.org')->subject('Later')->html('<p>Dear member</p>'),
+            null,
+            'group-queue'
+        ));
+
+        (new RecordingMailer($inner, $this->connection(), new NullLogger()))->send($email);
+
+        $this->assertNull($inner->message, 'A queued mail is not handed to the mail server at once.');
+        $row = $this->lastRow();
+        $this->assertSame(SentEmail::STATUS_QUEUED, $row['status']);
+        $this->assertSame('a@example.org', $row['recipients']);
+        $this->assertSame('<p>Dear member</p>', $row['body']);
+        $this->assertSame('group-queue', $row['batch_id']);
+        $this->assertNotEmpty($row['message_id']);
+        $queued = QueuedMessage::decode($row['queued_message']);
+        $this->assertSame('Later', $queued->getSubject());
+        $this->assertSame('<' . $row['message_id'] . '>', $queued->getHeaders()->get('Message-ID')->getBodyAsString());
+        foreach (MailMetadata::HEADERS as $name) {
+            $this->assertFalse($queued->getHeaders()->has($name), $name . ' must not be kept in the queue.');
+        }
+    }
+
+    public function testAQueuedMailThatCannotWaitIsSentAtOnce(): void
+    {
+        $inner = $this->aMailerThatKeepsTheMessage();
+        $email = MailMetadata::queue((new Email())->from('sender@example.org')->to('a@example.org')->subject('With file')->html('x')->attach('data', 'file.txt', 'text/plain'));
+
+        (new RecordingMailer($inner, $this->connection(), new NullLogger()))->send($email);
+
+        $this->assertNotNull($inner->message);
+        $row = $this->lastRow();
+        $this->assertSame(SentEmail::STATUS_SENT, $row['status']);
+        $this->assertNull($row['queued_message']);
+    }
+
+    public function testAQueuedMailIsSentAtOnceWhenTheHistoryCannotBeWritten(): void
+    {
+        $inner = $this->aMailerThatKeepsTheMessage();
+        $brokenConnection = $this->createMock(Connection::class);
+        $brokenConnection->method('insert')->willThrowException(new \RuntimeException('no table'));
+
+        (new RecordingMailer($inner, $brokenConnection, new NullLogger()))
+            ->send(MailMetadata::queue((new Email())->from('sender@example.org')->to('a@example.org')->subject('Not lost')->html('x')))
+        ;
+
+        $this->assertNotNull($inner->message, 'A mail must not be lost when it cannot be put in the queue.');
     }
 
     private function connection(): Connection

@@ -58,7 +58,7 @@ class SentEmailRepository extends EntityRepository
      *
      * @param string[] $batchIds
      *
-     * @return array<string, array{total: int, sent: int, failed: int, pending: int}> indexed by batch id
+     * @return array<string, array{total: int, sent: int, failed: int, pending: int, queued: int}> indexed by batch id
      */
     public function batchSummaries(array $batchIds): array
     {
@@ -71,6 +71,7 @@ class SentEmailRepository extends EntityRepository
             ->select('e.batchId AS batchId', 'COUNT(e.id) AS total')
             ->addSelect("SUM(CASE WHEN e.status = 'sent' THEN 1 ELSE 0 END) AS sent")
             ->addSelect("SUM(CASE WHEN e.status = 'failed' THEN 1 ELSE 0 END) AS failed")
+            ->addSelect("SUM(CASE WHEN e.status = 'queued' THEN 1 ELSE 0 END) AS queued")
             ->addSelect("SUM(CASE WHEN e.status = 'pending' THEN 1 ELSE 0 END) AS pending")
             ->where('e.batchId IN (:ids)')
             ->setParameter('ids', $batchIds)
@@ -86,6 +87,7 @@ class SentEmailRepository extends EntityRepository
                 'sent' => (int) $row['sent'],
                 'failed' => (int) $row['failed'],
                 'pending' => (int) $row['pending'],
+                'queued' => (int) $row['queued'],
             ];
         }
 
@@ -126,8 +128,10 @@ class SentEmailRepository extends EntityRepository
             $qb->setParameter('source', $criteria['source']);
         }
         if (!empty($criteria['status'])) {
-            $conditions[] = $alias . '.status = :status';
-            $qb->setParameter('status', $criteria['status']);
+            // "Waiting" covers the queued mails and the ones being handed to the server.
+            $statuses = SentEmail::STATUS_QUEUED === $criteria['status'] ? [SentEmail::STATUS_QUEUED, SentEmail::STATUS_PENDING] : [$criteria['status']];
+            $conditions[] = $alias . '.status IN (:statuses)';
+            $qb->setParameter('statuses', $statuses);
         }
 
         return $conditions;
