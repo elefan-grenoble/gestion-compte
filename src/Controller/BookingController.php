@@ -389,6 +389,8 @@ class BookingController extends AbstractController
         return $this->render('admin/booking/index.html.twig', [
             'filterForm' => $filter['form']->createView(),
             'bucketsByDay' => $bucketsByDay,
+            // a pause only means "shop closed" when no filter hides some of the shifts
+            'show_pauses' => null === $filter['job'] && !$filter['filling'],
         ]);
     }
 
@@ -512,7 +514,6 @@ class BookingController extends AbstractController
                     'bucket' => $bucket,
                     'start' => 6,
                     'end' => 22,
-                    'line' => 0,
                 ]);
                 $modal = $this->forward('App\Controller\BookingController::showBucketForAdminAction', [
                     'bucket' => $bucket->getShiftWithMinId(),
